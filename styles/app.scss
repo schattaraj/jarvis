@@ -1,3 +1,10 @@
 @import './vendors/mdi/css/materialdesignicons.min.css';
 @import './vendors/css/vendor.bundle.base.css';
 @import './style.css';
+i{
+    pointer-events: none;
+}
+.navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-menu{
+    top: 100% !important;
+    margin-top: 0;
+}

@@ -1,6 +1,17 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Link from 'next/link'
 export default function Sidebar() {
+  const collapse = useRef("")
+  const showMenu = (e)=>{
+    if(e.target.getAttribute('aria-expanded') == "false"){
+      e.target.setAttribute('aria-expanded',"true");
+    }
+    else{
+      e.target.setAttribute('aria-expanded',"false");
+    }
+    let elem = collapse.current
+    elem.classList.toggle("show")
+  }
   return (
     <>
          <nav className="sidebar sidebar-offcanvas" id="sidebar">
@@ -29,11 +40,11 @@ export default function Sidebar() {
             <li className="nav-item">
               <div className="d-flex align-items-center justify-content-between">
               <Link href="marketAnalytics" className="nav-link menu-title"><span className="menu-title">Market Analytics</span></Link>
-              <a className="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={showMenu} aria-expanded="false" aria-controls="ui-basic">
                 <i className="menu-arrow"></i> <i className="mdi mdi-contacts menu-icon"></i>
-              </a>
+              </button>
             </div>
-              <div className="collapse" id="ui-basic">
+              <div className="collapse" id="ui-basic" ref={collapse}>
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"><a className="nav-link" href="#">Stocks</a></li>
                   <li className="nav-item"><a className="nav-link" href="#">Bonds</a></li>
@@ -60,7 +71,7 @@ export default function Sidebar() {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
+              <a className="btn nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
                 <span className="menu-title">Newsletter</span>
                 <i className="menu-arrow"></i>
                 <i className="mdi mdi-medical-bag menu-icon"></i>

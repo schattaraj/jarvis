@@ -1,14 +1,18 @@
-import React from 'react'
-
+import React, { useState } from 'react'
+import Dropdown from 'react-bootstrap/Dropdown';
 export default function Navigation() {
+    const [sidebar,setSidebar] = useState(false)
+    const toggleSidebar = ()=>{
+        document.body.classList.toggle('sidebar-icon-only');
+    }
   return (<>
           <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-          <a className="navbar-brand brand-logo" href="/"><img src="/images/logo-black.png" alt="logo" /></a>
-          <a className="navbar-brand brand-logo-mini" href="/"><img src="/images/logo-mini.svg" alt="logo" /></a>
+          <a className="navbar-brand brand-logo" href="/"><img src="assets/images/logo-black.png" alt="logo" /></a>
+          <a className="navbar-brand brand-logo-mini" href="/"><img src="assets/images/logo-mini.svg" alt="logo" /></a>
         </div>
         <div className="navbar-menu-wrapper d-flex align-items-stretch">
-          <button className="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+          <button className="navbar-toggler navbar-toggler align-self-center" onClick={toggleSidebar} type="button" data-toggle="minimize">
             <span className="mdi mdi-menu"></span>
           </button>
           
@@ -71,7 +75,7 @@ export default function Navigation() {
                 <div className="dropdown-divider"></div>
                 <a className="dropdown-item preview-item">
                   <div className="preview-thumbnail">
-                    <img src="../..//images/faces/face4.jpg" alt="image" className="profile-pic"/>
+                    <img src="../../images/faces/face4.jpg" alt="image" className="profile-pic"/>
                   </div>
                   <div className="preview-item-content d-flex align-items-start flex-column justify-content-center">
                     <h6 className="preview-subject ellipsis mb-1 font-weight-normal">Mark send you a message</h6>
@@ -81,7 +85,7 @@ export default function Navigation() {
                 <div className="dropdown-divider"></div>
                 <a className="dropdown-item preview-item">
                   <div className="preview-thumbnail">
-                    <img src="../..//images/faces/face2.jpg" alt="image" className="profile-pic"/>
+                    <img src="../../images/faces/face2.jpg" alt="image" className="profile-pic"/>
                   </div>
                   <div className="preview-item-content d-flex align-items-start flex-column justify-content-center">
                     <h6 className="preview-subject ellipsis mb-1 font-weight-normal">Cregh send you a message</h6>
@@ -91,7 +95,7 @@ export default function Navigation() {
                 <div className="dropdown-divider"></div>
                 <a className="dropdown-item preview-item">
                   <div className="preview-thumbnail">
-                    <img src="../..//images/faces/face3.jpg" alt="image" className="profile-pic"/>
+                    <img src="../../images/faces/face3.jpg" alt="image" className="profile-pic"/>
                   </div>
                   <div className="preview-item-content d-flex align-items-start flex-column justify-content-center">
                     <h6 className="preview-subject ellipsis mb-1 font-weight-normal">Profile picture updated</h6>
@@ -103,22 +107,39 @@ export default function Navigation() {
               </div>
             </li>
             <li className="nav-item nav-profile dropdown">
-              <a className="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <div className="nav-profile-img">
+            <Dropdown>
+      <Dropdown.Toggle variant="" className='nav-link' id="dropdown-basic">
+      <div className="nav-profile-img">
                   <img src="./images/team-1.jpg" alt="image"/>
                   <span className="availability-status online"></span>
                 </div>
                 <div className="nav-profile-text">
                   <p className="mb-1 text-black">Noland</p>
                 </div>
-              </a>
-              <div className="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
-            
-                <div className="dropdown-divider"></div>
-                <a className="dropdown-item" href="#">
-                  <i className="mdi mdi-logout me-2 text-primary"></i> Signout </a>
-              </div>
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu>
+        <Dropdown.Item href="#/action-1"><i className="mdi mdi-logout me-2 text-primary"></i> Signout </Dropdown.Item>
+      </Dropdown.Menu>
+    </Dropdown>
             </li>
+              {/* <li className="nav-item nav-profile dropdown">
+                <a className="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                  <div className="nav-profile-img">
+                    <img src="./images/team-1.jpg" alt="image"/>
+                    <span className="availability-status online"></span>
+                  </div>
+                  <div className="nav-profile-text">
+                    <p className="mb-1 text-black">Noland</p>
+                  </div>
+                </a>
+                <div className="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+              
+                  <div className="dropdown-divider"></div>
+                  <a className="dropdown-item" href="#">
+                    <i className="mdi mdi-logout me-2 text-primary"></i> Signout </a>
+                </div>
+              </li> */}
             
            
           </ul>
