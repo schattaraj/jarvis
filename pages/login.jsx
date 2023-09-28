@@ -31,7 +31,7 @@ export default function Login() {
                     <Link href="#" className="auth-link text-black">Forgot password?</Link>
                   </div>
                 
-                  <div className="text-center mt-4 font-weight-light"> Don't have an account? <a href="#" className="text-primary">Create</a>
+                  <div className="text-center mt-4 font-weight-light"> Don't have an account? <Link href="/register" className="text-primary">Create</Link>
                   </div>
                 </form>
               </div>
