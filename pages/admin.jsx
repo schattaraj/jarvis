@@ -3,6 +3,7 @@ import Head from 'next/head';
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Footer from '../components/footer';
+import Link from 'next/link'
 export default function Admin() {
     return (
         <>
@@ -29,6 +30,7 @@ export default function Admin() {
                             <div className="row">
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-gradient-danger card-img-holder text-white">
+                                        <Link href={"marketAnalytics"}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 
@@ -36,6 +38,7 @@ export default function Admin() {
                                             <h3 className="mb-5">(Stocks,Bonds,ETFs and more)</h3>
 
                                         </div>
+                                        </Link>
                                     </div>
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
