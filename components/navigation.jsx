@@ -119,7 +119,7 @@ export default function Navigation() {
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
-        <Dropdown.Item href="#/action-1"><i className="mdi mdi-logout me-2 text-primary"></i> Signout </Dropdown.Item>
+        <Dropdown.Item href="login"><i className="mdi mdi-logout me-2 text-primary"></i> Signout </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
             </li>
