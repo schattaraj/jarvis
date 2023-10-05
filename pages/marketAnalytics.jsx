@@ -2,6 +2,7 @@ import React from 'react'
 import Footer from '../components/footer';
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
+import Link from 'next/link'
 export default function MarketAnalytics() {
   return (
     <>
@@ -28,12 +29,14 @@ export default function MarketAnalytics() {
             <div className="row">
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-danger card-img-holder text-white">
+                  <Link href="/stocks">
                   <div className="card-body">
                     <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
                     <h2 className="mb-5">Stock</h2>
                     
                   </div>
+                  </Link>
                 </div>
               </div>
               <div className="col-md-4 stretch-card grid-margin">

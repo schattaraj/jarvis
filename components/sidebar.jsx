@@ -46,7 +46,7 @@ export default function Sidebar() {
             </div>
               <div className="collapse" id="ui-basic" ref={collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><a className="nav-link" href="#">Stocks</a></li>
+                  <li className="nav-item"><Link className="nav-link" href="stocks">Stocks</Link></li>
                   <li className="nav-item"><a className="nav-link" href="#">Bonds</a></li>
                   <li className="nav-item"><a className="nav-link" href="#">ETFs</a></li>
                 </ul> 
