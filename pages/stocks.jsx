@@ -390,19 +390,292 @@ export default function Stocks() {
       </table>
       </Tab>
       <Tab eventKey="performance" title="Performance">
-        Tab content for Contact
+          <div className="table-responsive">
+      <table id="example" className="table table-striped" style={{width:'100%'}}>
+                  <thead>
+                      <tr>
+                          <th>Symbol</th>
+                          <th>Company Name</th>
+                          <th>Market Cap</th>
+                          <th>Stock Price</th>
+                          <th>% Change</th>
+                          <th>Change 1W</th>
+                          <th>Change 1M</th>
+                          <th>Change 6M</th>
+                          <th>Change YTM</th>
+                          <th>Change 1Y</th>
+                          <th>Change 3Y</th>
+                          <th>Change 5Y</th>
+                      </tr>
+                  </thead>
+      <tbody>
+                     <tr>
+                         <td>AAPL</td>
+                         <td>Apple Inc.</td>
+                         <td>2715.75B</td>
+                         <td>173.72</td>
+                         <td style={{color:"#15803d"}}>0.03%</td>
+                         <td style={{color:"#15803d"}}>1.80%</td>
+                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>33.74%</td>
+                         <td style={{color:"#15803d"}}>18.70%</td>
+                         <td style={{color:"#15803d"}}>49.16%</td>
+                         <td style={{color:"#15803d"}}>209.90%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     </tbody>
+        </table>
+        </div>
       </Tab>
       <Tab eventKey="analysts" title="Analysts">
-        Tab content for Contact
+      <div className="table-responsive">
+      <table id="example" className="table table-striped" style={{width:'100%'}}>
+                  <thead>
+                      <tr>
+                          <th>Symbol</th>
+                          <th>Company Name</th>
+                          <th>Market Cap</th>
+                          <th>Stock Price</th>
+                          <th>% Change</th>
+                          <th>Change 1W</th>
+                          <th>Change 1M</th>
+                          <th>Change 6M</th>
+                          <th>Change YTM</th>
+                          <th>Change 1Y</th>
+                          <th>Change 3Y</th>
+                          <th>Change 5Y</th>
+                      </tr>
+                  </thead>
+      <tbody>
+                     <tr>
+                         <td>AAPL</td>
+                         <td>Apple Inc.</td>
+                         <td>2715.75B</td>
+                         <td>173.72</td>
+                         <td style={{color:"#15803d"}}>0.03%</td>
+                         <td style={{color:"#15803d"}}>1.80%</td>
+                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>33.74%</td>
+                         <td style={{color:"#15803d"}}>18.70%</td>
+                         <td style={{color:"#15803d"}}>49.16%</td>
+                         <td style={{color:"#15803d"}}>209.90%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     </tbody>
+        </table>
+        </div>
       </Tab>
       <Tab eventKey="dividends" title="Dividends">
-        Tab content for Contact
+        T <div className="table-responsive">
+      <table id="example" className="table table-striped" style={{width:'100%'}}>
+                  <thead>
+                      <tr>
+                          <th>Symbol</th>
+                          <th>Company Name</th>
+                          <th>Market Cap</th>
+                          <th>Stock Price</th>
+                          <th>% Change</th>
+                          <th>Change 1W</th>
+                          <th>Change 1M</th>
+                          <th>Change 6M</th>
+                          <th>Change YTM</th>
+                          <th>Change 1Y</th>
+                          <th>Change 3Y</th>
+                          <th>Change 5Y</th>
+                      </tr>
+                  </thead>
+      <tbody>
+                     <tr>
+                         <td>AAPL</td>
+                         <td>Apple Inc.</td>
+                         <td>2715.75B</td>
+                         <td>173.72</td>
+                         <td style={{color:"#15803d"}}>0.03%</td>
+                         <td style={{color:"#15803d"}}>1.80%</td>
+                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>33.74%</td>
+                         <td style={{color:"#15803d"}}>18.70%</td>
+                         <td style={{color:"#15803d"}}>49.16%</td>
+                         <td style={{color:"#15803d"}}>209.90%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     </tbody>
+        </table>
+        </div>
       </Tab>
       <Tab eventKey="financials" title="Financials">
-        Tab content for Contact
+      <div className="table-responsive">
+      <table id="example" className="table table-striped" style={{width:'100%'}}>
+                  <thead>
+                      <tr>
+                          <th>Symbol</th>
+                          <th>Company Name</th>
+                          <th>Market Cap</th>
+                          <th>Stock Price</th>
+                          <th>% Change</th>
+                          <th>Change 1W</th>
+                          <th>Change 1M</th>
+                          <th>Change 6M</th>
+                          <th>Change YTM</th>
+                          <th>Change 1Y</th>
+                          <th>Change 3Y</th>
+                          <th>Change 5Y</th>
+                      </tr>
+                  </thead>
+      <tbody>
+                     <tr>
+                         <td>AAPL</td>
+                         <td>Apple Inc.</td>
+                         <td>2715.75B</td>
+                         <td>173.72</td>
+                         <td style={{color:"#15803d"}}>0.03%</td>
+                         <td style={{color:"#15803d"}}>1.80%</td>
+                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>33.74%</td>
+                         <td style={{color:"#15803d"}}>18.70%</td>
+                         <td style={{color:"#15803d"}}>49.16%</td>
+                         <td style={{color:"#15803d"}}>209.90%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     </tbody>
+        </table>
+        </div>
       </Tab>
       <Tab eventKey="valuation" title="Valuation">
-        Tab content for Contact
+      <div className="table-responsive">
+      <table id="example" className="table table-striped" style={{width:'100%'}}>
+                  <thead>
+                      <tr>
+                          <th>Symbol</th>
+                          <th>Company Name</th>
+                          <th>Market Cap</th>
+                          <th>Stock Price</th>
+                          <th>% Change</th>
+                          <th>Change 1W</th>
+                          <th>Change 1M</th>
+                          <th>Change 6M</th>
+                          <th>Change YTM</th>
+                          <th>Change 1Y</th>
+                          <th>Change 3Y</th>
+                          <th>Change 5Y</th>
+                      </tr>
+                  </thead>
+      <tbody>
+                     <tr>
+                         <td>AAPL</td>
+                         <td>Apple Inc.</td>
+                         <td>2715.75B</td>
+                         <td>173.72</td>
+                         <td style={{color:"#15803d"}}>0.03%</td>
+                         <td style={{color:"#15803d"}}>1.80%</td>
+                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>33.74%</td>
+                         <td style={{color:"#15803d"}}>18.70%</td>
+                         <td style={{color:"#15803d"}}>49.16%</td>
+                         <td style={{color:"#15803d"}}>209.90%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     </tbody>
+        </table>
+        </div>
       </Tab>
     </Tabs>
             {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
