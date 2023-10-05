@@ -90,9 +90,7 @@ export default function Home() {
                                  <div className="tp-hero-content p-relative">
                                     <div className="tp-hero-title-wrapper">
                                        <span className="tp-hero-subtitle">Be Invest</span>
-                                       <h2 className="tp-hero-title">Where your
-                                          financial dreams
-                                          become reality</h2>
+                                       <h2 className="tp-hero-title">Where your financial dreams become reality</h2>
                                        <p>And In Order To Make A Business, Brand Advertising And Marketing Plays An Important <br/> In Making Cultivation Business A Brand, Good Slogans Are Necessary.</p>
                                     </div>
                                     <div className="tp-hero-button-wrapper d-flex flex-wrap align-items-center">
