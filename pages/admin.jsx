@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Head from 'next/head';
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Footer from '../components/footer';
 import Link from 'next/link'
+import { Context } from '../contexts/Context';
 export default function Admin() {
+    const context = useContext(Context)
     return (
         <>
             <Head>
@@ -30,7 +32,7 @@ export default function Admin() {
                             <div className="row">
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-gradient-danger card-img-holder text-white">
-                                        <Link href={"marketAnalytics"}>
+                                        <Link href={"marketAnalytics"} onClick={()=>{context.setMarketAnalytics(true)}}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 

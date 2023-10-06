@@ -1,17 +1,22 @@
-import React, { useRef } from 'react'
+import React, { useRef,useContext } from 'react'
 import Link from 'next/link'
+import { Context } from '../contexts/Context'
 export default function Sidebar() {
-  const collapse = useRef("")
-  const showMenu = (e)=>{
-    if(e.target.getAttribute('aria-expanded') == "false"){
-      e.target.setAttribute('aria-expanded',"true");
-    }
-    else{
-      e.target.setAttribute('aria-expanded',"false");
-    }
-    let elem = collapse.current
-    elem.classList.toggle("show")
-  }
+  const context = useContext(Context)
+  // const collapse = useRef("")
+  // const showMenu = (e)=>{
+  //   let elem = context.collapse.current
+  //   if(e.target.getAttribute('aria-expanded') == "false"){
+  //     e.target.setAttribute('aria-expanded',"true");
+  //     elem.classList.add("show")
+  //   }
+  //   else{
+  //     e.target.setAttribute('aria-expanded',"false");
+  //     elem.classList.remove("show")
+  //   }
+    
+    
+  // }
   return (
     <>
          <nav className="sidebar sidebar-offcanvas" id="sidebar">
@@ -40,13 +45,30 @@ export default function Sidebar() {
             <li className="nav-item">
               <div className="d-flex align-items-center justify-content-between">
               <Link href="marketAnalytics" className="nav-link menu-title"><span className="menu-title">Market Analytics</span></Link>
-              <button className="btn nav-link" data-bs-toggle="collapse" onClick={showMenu} aria-expanded="false" aria-controls="ui-basic">
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleMarketAnalytics()}} aria-expanded={context.marketAnalytics ? "true" :"false"} aria-controls="ui-basic">
                 <i className="menu-arrow"></i> <i className="mdi mdi-contacts menu-icon"></i>
               </button>
             </div>
-              <div className="collapse" id="ui-basic" ref={collapse}>
+              <div className={context.marketAnalytics ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className="nav-link" href="stocks">Stocks</Link></li>
+                  <li className="nav-item"><Link className="nav-link" href="stocks" onClick={context.toggleStockMenu}>Stocks</Link>
+                  <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
+                <ul className="nav flex-column sub-menu ps-3">
+                <li className='nav-item'>
+                  <Link className='nav-link' href="/stocks">Screener</Link>
+                </li>
+                <li className='nav-item'>
+                  <Link className='nav-link' href="/byIndustry">By Industry</Link>
+                </li>
+                <li className='nav-item'>
+                  <Link className='nav-link' href="/watchList">Watch List</Link>
+                </li>
+                <li className='nav-item'>
+                  <Link className='nav-link' href="/topStocks">Top Stocks</Link>
+                </li>
+                </ul>
+                </div>
+                  </li>
                   <li className="nav-item"><a className="nav-link" href="#">Bonds</a></li>
                   <li className="nav-item"><a className="nav-link" href="#">ETFs</a></li>
                 </ul> 

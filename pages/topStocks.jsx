@@ -4,7 +4,7 @@ import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-export default function Stocks() {
+export default function WatchList() {
   return (
     <>
       <div className="container-scroller">
@@ -17,7 +17,7 @@ export default function Stocks() {
               <h3 className="page-title">
                 <span className="page-title-icon bg-gradient-primary text-white me-2">
                   <i className="mdi mdi-home"></i>
-                </span>Screener
+                </span>Top Stocks
               </h3>
               
             </div>

@@ -6,6 +6,9 @@
 // import "../styles/css/swiper-bundle.css"
 // import "../styles/css/main.css"
 import "../styles/app.scss"
+import { ContextProvider } from '../contexts/Context';
 export default function App({ Component, pageProps }) {
-  return   <Component {...pageProps} />
+  return   <ContextProvider>
+    <Component {...pageProps} />
+    </ContextProvider>
 }
