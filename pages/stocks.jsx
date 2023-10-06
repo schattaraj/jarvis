@@ -416,7 +416,7 @@ export default function Stocks() {
                          <td>173.72</td>
                          <td style={{color:"#15803d"}}>0.03%</td>
                          <td style={{color:"#15803d"}}>1.80%</td>
-                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#dc2626"}}>-8.40%</td>
                          <td style={{color:"#15803d"}}>6.11%</td>
                          <td style={{color:"#15803d"}}>33.74%</td>
                          <td style={{color:"#15803d"}}>18.70%</td>
@@ -428,9 +428,23 @@ export default function Stocks() {
                          <td>Microsoft Corporation</td>
                          <td>2360.21B</td>
                          <td>317.81</td>
-                         <td style={{color:"#15803d"}}>-0.36%</td>
+                         <td style={{color:"#dc2626"}}>-0.36%</td>
                          <td style={{color:"#15803d"}}>1.46%</td>
-                         <td style={{color:"#15803d"}}>-4.60%</td>
+                         <td style={{color:"#dc2626"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     <tr>
+                         <td>MSFT</td>
+                         <td>Microsoft Corporation</td>
+                         <td>2360.21B</td>
+                         <td>317.81</td>
+                         <td style={{color:"#dc2626"}}>-0.36%</td>
+                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td style={{color:"#dc2626"}}>-4.60%</td>
                          <td style={{color:"#15803d"}}>6.11%</td>
                          <td style={{color:"#15803d"}}>32.74%</td>
                          <td style={{color:"#15803d"}}>27.70%</td>
@@ -468,7 +482,7 @@ export default function Stocks() {
                          <td>173.72</td>
                          <td style={{color:"#15803d"}}>0.03%</td>
                          <td style={{color:"#15803d"}}>1.80%</td>
-                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#dc2626"}}>-8.40%</td>
                          <td style={{color:"#15803d"}}>6.11%</td>
                          <td style={{color:"#15803d"}}>33.74%</td>
                          <td style={{color:"#15803d"}}>18.70%</td>
@@ -476,12 +490,26 @@ export default function Stocks() {
                          <td style={{color:"#15803d"}}>209.90%</td>
                      </tr>
                      <tr>
-                         <td>MSFT</td>
-                         <td>Microsoft Corporation</td>
-                         <td>2360.21B</td>
-                         <td>317.81</td>
-                         <td style={{color:"#15803d"}}>-0.36%</td>
-                         <td style={{color:"#15803d"}}>1.46%</td>
+                         <td>GOOG</td>
+                         <td>Alphabet Inc.</td>
+                         <td>1698.86B</td>
+                         <td>135.25</td>
+                         <td style={{color:"#dc2626"}}>-0.75%</td>
+                         <td style={{color:"#15803d"}}>2.15%</td>
+                         <td style={{color:"#dc2626"}}>-4.60%</td>
+                         <td style={{color:"#15803d"}}>6.11%</td>
+                         <td style={{color:"#15803d"}}>32.74%</td>
+                         <td style={{color:"#15803d"}}>27.70%</td>
+                         <td style={{color:"#15803d"}}>51.16%</td>
+                         <td style={{color:"#15803d"}}>183.79%</td>
+                     </tr>
+                     <tr>
+                         <td>GOOG</td>
+                         <td>Alphabet Inc.</td>
+                         <td>1698.86B</td>
+                         <td>135.25</td>
+                         <td style={{color:"#15803d"}}>-0.75%</td>
+                         <td style={{color:"#15803d"}}>2.15%</td>
                          <td style={{color:"#15803d"}}>-4.60%</td>
                          <td style={{color:"#15803d"}}>6.11%</td>
                          <td style={{color:"#15803d"}}>32.74%</td>
@@ -572,7 +600,7 @@ export default function Stocks() {
                          <td>173.72</td>
                          <td style={{color:"#15803d"}}>0.03%</td>
                          <td style={{color:"#15803d"}}>1.80%</td>
-                         <td style={{color:"#15803d"}}>-8.40%</td>
+                         <td style={{color:"#dc2626"}}>-8.40%</td>
                          <td style={{color:"#15803d"}}>6.11%</td>
                          <td style={{color:"#15803d"}}>33.74%</td>
                          <td style={{color:"#15803d"}}>18.70%</td>
