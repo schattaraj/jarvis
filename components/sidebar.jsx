@@ -24,7 +24,7 @@ export default function Sidebar() {
             <li className="nav-item nav-profile">
               <Link href="/" className="nav-link">
                 <div className="nav-profile-image">
-                  <img src="./images/team-1.jpg" alt="profile"/>
+                  <img src="/images/team-1.jpg" alt="profile"/>
                   <span className="login-status online"></span>
                   
                 </div>

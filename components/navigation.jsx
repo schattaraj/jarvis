@@ -8,8 +8,8 @@ export default function Navigation() {
   return (<>
           <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-          <a className="navbar-brand brand-logo" href="/"><img src="assets/images/logo-black.png" alt="logo" /></a>
-          <a className="navbar-brand brand-logo-mini" href="/"><img src="assets/images/logo-mini.svg" alt="logo" /></a>
+          <a className="navbar-brand brand-logo" href="/"><img src="/assets/images/logo-black.png" alt="logo" /></a>
+          <a className="navbar-brand brand-logo-mini" href="/"><img src="/assets/images/logo-mini.svg" alt="logo" /></a>
         </div>
         <div className="navbar-menu-wrapper d-flex align-items-stretch">
           <button className="navbar-toggler navbar-toggler align-self-center" onClick={toggleSidebar} type="button" data-toggle="minimize">
@@ -110,7 +110,7 @@ export default function Navigation() {
             <Dropdown>
       <Dropdown.Toggle variant="" className='nav-link' id="dropdown-basic">
       <div className="nav-profile-img">
-                  <img src="./images/team-1.jpg" alt="image"/>
+                  <img src="/images/team-1.jpg" alt="image"/>
                   <span className="availability-status online"></span>
                 </div>
                 <div className="nav-profile-text">

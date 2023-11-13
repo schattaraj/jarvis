@@ -1,9 +1,9 @@
 import React from 'react'
-import Footer from '../components/footer';
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
+import Footer from '../../components/footer';
+import Navigation from '../../components/navigation';
+import Sidebar from '../../components/sidebar';
 import Link from 'next/link'
-export default function MarketAnalytics() {
+export default function InsightsHome() {
   return (
     <>
      <div className="container-scroller">
@@ -29,9 +29,9 @@ export default function MarketAnalytics() {
             <div className="row">
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-danger card-img-holder text-white">
-                  <Link href="/stocks">
+                  <Link href="/insights/videoes">
                   <div className="card-body">
-                    <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
                     <h2 className="mb-5">Videos</h2>
                     
@@ -42,7 +42,7 @@ export default function MarketAnalytics() {
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-info card-img-holder text-white">
                   <div className="card-body">
-                    <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
                     <h2 className="mb-5">Broadcast</h2>
                     
@@ -52,7 +52,7 @@ export default function MarketAnalytics() {
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-success card-img-holder text-white">
                   <div className="card-body">
-                    <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     <h2 className="mb-5">Reports</h2>
                   </div>
                 </div>
