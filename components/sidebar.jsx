@@ -87,10 +87,10 @@ export default function Sidebar() {
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">
+            <Link className="nav-link" href="/insights">
                 <span className="menu-title">Insights</span>
                 <i className="mdi mdi-table-large menu-icon"></i>
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
               <a className="btn nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
