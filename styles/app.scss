@@ -73,3 +73,35 @@ border: 1px solid rgba(gray, 0.3);
     }
 }
 }
+.stretch-card .report{
+    padding: 24px;
+    background-color: #f0f5ef;
+    .image{
+        width: 100%;
+    }
+    h5.card-title {
+        margin-top: 16px;
+        color: #357920;
+        text-transform: uppercase;
+        font-weight: 500;
+        font-size: 21px;
+    }
+    .btn-success{
+        background-color: #66bf33;
+        border-color:#66bf33;
+        &:active:focus{
+box-shadow: 0 0 0 0.25rem rgba(#66bf33,0.5);
+        }
+    }
+}
+.modal-dialog{
+max-width: 800px;
+margin: 30px auto;
+height: 100%;
+.modal-content{
+    height: 100%;
+}
+iframe{
+    height: 100%;
+}
+}

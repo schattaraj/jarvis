@@ -41,6 +41,7 @@ export default function InsightsHome() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-info card-img-holder text-white">
+               
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
@@ -51,10 +52,12 @@ export default function InsightsHome() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-success card-img-holder text-white">
+                <Link href="/insights/reports">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     <h2 className="mb-5">Reports</h2>
                   </div>
+                  </Link>
                 </div>
               </div>
             
