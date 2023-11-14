@@ -28,12 +28,13 @@ export default function Stocks() {
     >
       <Tab eventKey="general" title="General">
           <div className="row">
-              <div className="col-md-4 offset-8">
+              <div className="col-md-4 offset-md-8">
                   <div className="d-flex align-items-center mb-3">
                   <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example"/>
                   </div>
               </div>
           </div>
+          <div className="table-responsive">
       <table id="example" className="table table-striped" style={{width:'100%'}}>
                   <thead>
                       <tr>
@@ -388,6 +389,7 @@ export default function Stocks() {
                       </tr>
                   </tfoot> */}
       </table>
+      </div>
       </Tab>
       <Tab eventKey="performance" title="Performance">
       <div className="row">

@@ -75,10 +75,20 @@ export default function Sidebar() {
                 </div>
             </li>
             <li className="nav-item">
+            <div className="d-flex align-items-center justify-content-between">
               <Link className="nav-link" href="compareStocks">
                 <span className="menu-title">Compare Stocks</span>
-                <i className="mdi mdi-format-list-bulleted menu-icon"></i>
               </Link>
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleCompareStock()}} aria-expanded={context.compareStocks ? "true" :"false"} aria-controls="ui-basic">
+                <i className="menu-arrow"></i> <i className="mdi mdi-format-list-bulleted menu-icon"></i>
+              </button>
+              </div>
+              <div className={context.compareStocks ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
+                <ul className="nav flex-column sub-menu">
+                  <li className="nav-item"><Link className="nav-link" href="/compareStocks/stocksPair">Pair of stocks</Link></li>
+                  <li className="nav-item"><Link className="nav-link" href="/compareStocks/myStocks">My stocks</Link></li>
+                </ul> 
+                </div>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#">
