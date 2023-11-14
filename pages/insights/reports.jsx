@@ -18,6 +18,7 @@ export default function Reports() {
             const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&_=1699874262000")
             const response = await apiCall.json()
             setReports(response)
+            setCurrentPdf(response[0])
             console.log(response)
         }
         catch(e){
@@ -29,7 +30,7 @@ export default function Reports() {
 
     const handleClose = () => setShow(false);
     const handleShow = (path) =>{
-        setShow(true);
+        // setShow(true);
         setCurrentPdf(path)
         console.log("path",path)
     }
@@ -58,7 +59,50 @@ export default function Reports() {
     </ul>
   </nav>
 </div>
-<div className="row">{
+{/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
+<p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
+<div className="row">
+  <div className="col-md-7">
+    <div className="left">
+      <h5 className='card-title'>{currentPdf?.tickerName}</h5>
+      <p className ="card-text">{currentPdf?.companyName}</p>
+  <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
+  </div>
+  </div>
+  <div className="col-md-5">
+    <div className="horizontal">
+    <h3 className='mb-3'>Recent Posts</h3>
+    <div className="d-flex">
+      {
+         reports.length > 0 && reports.map((item,index)=>{
+          return  (
+              <div className="report" key={index}>
+              <img src="/images/ReportsTN.png" alt="" className='image'/>
+              <h5 className='card-title'>{item.tickerName}</h5>
+              <p className ="card-text">{item.companyName}</p>
+              <button className='btn btn-success' onClick={()=>{handleShow(item)}}>View</button>
+              </div>)
+      })
+      }
+      </div>
+    </div>
+    <div className="vertical">
+      <h3 className='mb-3'>Latest Reports</h3>
+      {
+         reports.length > 0 && reports.map((item,index)=>{
+          return  (
+              <div className="report" key={index}>
+              <img src="/images/ReportsTN.png" alt="" className='image'/>
+              <h5 className='card-title'>{item.tickerName}</h5>
+              <p className ="card-text">{item.companyName}</p>
+              <button className='btn btn-success' onClick={()=>{handleShow(item)}}>View</button>
+              </div>)
+      })
+      }
+    </div>
+  </div>
+</div>
+{/* <div className="row">{
     loader ?
 <>
     <div className="col-md-4 stretch-card grid-margin">
@@ -105,7 +149,7 @@ export default function Reports() {
     </div>
     </>
     :
-        reports.map((item,index)=>{
+       reports.length > 0 && reports.map((item,index)=>{
             return  <div className="col-md-4 stretch-card grid-margin" key={index}>
                 <div className="report">
                 <img src="/images/ReportsTN.png" alt="" className='image'/>
@@ -116,7 +160,7 @@ export default function Reports() {
             </div>
         })
 }
-</div>
+</div> */}
 
 </div>
 <Modal show={show} onHide={handleClose}>
@@ -124,7 +168,7 @@ export default function Reports() {
           <Modal.Title>Report</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
+        <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
         </Modal.Body>
       </Modal>
 <Footer/>

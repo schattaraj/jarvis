@@ -5,6 +5,7 @@ export const Context = createContext()
 
 export const ContextProvider = ({ children }) =>{
   const [marketAnalytics,setMarketAnalytics] = useState(false)
+  const [compareStocks,setCompareStocks] = useState(false)
   const [stockMenu,setStockMenu] = useState(false)
   const collapse = useRef("")
   const toggleMarketAnalytics = ()=>{
@@ -23,6 +24,14 @@ export const ContextProvider = ({ children }) =>{
       setStockMenu(true)
     }
   }
+  const toggleCompareStock = ()=>{
+    if(compareStocks){
+      setCompareStocks(false)
+    }
+    else{
+      setCompareStocks(true)
+    }
+  }
   // const showMenu = (e)=>{
   //   if(e.target.getAttribute('aria-expanded') == "false"){
   //     e.target.setAttribute('aria-expanded',"true");
@@ -34,7 +43,7 @@ export const ContextProvider = ({ children }) =>{
   //   elem.classList.toggle("show")
   // }
     return (
-        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu}}>
+        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock}}>
           {children}
         </Context.Provider>
       )

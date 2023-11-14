@@ -46,10 +46,10 @@ export default function videoes() {
         videoes.map((item,index)=>{
             return  <div className="col-md-4 stretch-card grid-margin" key={index}>
                 <div className="video">
-                <div className="overlay">
+                {/* <div className="overlay">
                 <img src="/images/VideoTN.png" className='image'/>
                 <button className='play-btn'><img src="/icons/play.svg" alt="" /></button>
-                </div>
+                </div> */}
                 <video src={"https://jharvis.com/JarvisV2/playVideo?fileName="+item?.anaylstVideoDetails} controls style={{width:"100%"}}></video>
                 </div>
             </div>

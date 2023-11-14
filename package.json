@@ -7,6 +7,9 @@
   },
   "dependencies": {
     "bootstrap": "^5.3.2",
+    "dompurify": "^3.0.6",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.7.1",
     "next": "latest",
     "react": "18.2.0",
     "react-bootstrap": "^2.8.0",

@@ -45,11 +45,13 @@ export default function Admin() {
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-gradient-info card-img-holder text-white">
+                                        <Link href={"/compareStocks"}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 
                                             <h2 className="mb-5">Compare Stocks, ETFs</h2>
                                         </div>
+                                        </Link>
                                     </div>
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">

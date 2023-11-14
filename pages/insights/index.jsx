@@ -45,7 +45,7 @@ export default function InsightsHome() {
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
-                    <h2 className="mb-5">Broadcast</h2>
+                    <h2 className="mb-5">Podcast</h2>
                     
                   </div>
                 </div>
