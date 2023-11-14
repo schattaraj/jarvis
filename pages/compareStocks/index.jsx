@@ -2,6 +2,7 @@ import React from 'react'
 import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
+import Link from 'next/link';
 export default function CompareStocs() {
   return (
     <>
