@@ -232,3 +232,14 @@ margin-right: 16px;
         white-space: nowrap;
     }
 }
+.content-wrapper{
+    .card{
+        a{
+            height: 100%;
+        }
+    }
+}
+//swiper navigation
+.swiper-button-prev::after, .swiper-button-next::after {
+    color: #719a57;
+}
