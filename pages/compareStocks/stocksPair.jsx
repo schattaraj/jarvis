@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
+import Loader from '../../components/loader';
+import { Context } from '../../contexts/Context';
 export default function StocksPair() {
     const [stocks,setStocks] = useState([])
     const [inputData,setInputData] = useState({
@@ -15,7 +17,9 @@ export default function StocksPair() {
         endDate:""
     })
     const [tableData,setTableData] = useState([])
+    const context = useContext(Context)
     const fecthStocks = async()=>{
+        context.setLoaderState(true)
         try{
             const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllStocks?_=1699957833250")
             const stocksRes = await stocksApi.json()
@@ -24,12 +28,14 @@ export default function StocksPair() {
         catch(e){
             console.log("error",e)
         }
+        context.setLoaderState(false)
     }
     const handleInput = (e)=>{
         setInputData({...inputData,[e.target.name]:e.target.value})
         console.log("data",inputData)
     }
     const submitData = async()=>{
+        context.setLoaderState(true)
         try{
             const dataApi = await fetch("https://jharvis.com/JarvisV2/getHistoricalDataByStockAndDate?stockA="+inputData?.stockA+"&stockB="+inputData?.stockB+"&stockC="+inputData?.stockC+"&stockD="+inputData?.stockD+"&startDate="+inputData?.startDate+"&endDate="+inputData?.endDate+"&_=1699957833253")
             const dataRes = await dataApi.json()
@@ -38,6 +44,7 @@ export default function StocksPair() {
         catch(e){
             console.log("error",e)
         }
+        context.setLoaderState(false)
     }
     const reset = ()=>{
         setInputData({
@@ -138,13 +145,17 @@ export default function StocksPair() {
                             </div>
                             </div>
                             </div>
+                            {tableData.length > 0 && 
                             <div className='d-flex justify-content-between'>
-                            <div className="dt-buttons mb-3"> <button className="dt-button buttons-pdf buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button" title="PDF" onClick={exportPdf}><span class="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button> <button className="dt-button buttons-excel buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button"><span class="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> </div>
+                            <div className="dt-buttons mb-3"> 
+                            <button className="dt-button buttons-pdf buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button" title="PDF" onClick={exportPdf}><span class="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button> <button className="dt-button buttons-excel buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button"><span class="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> 
+                            </div>
                                 <div className="form-group d-flex align-items-center"><label htmlFor=""style={{textWrap:"nowrap"}} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control'/></div>
-                                </div>
+                            </div>
+                            }
                                 {tableData.length > 0 && 
                             <div className="table-responsive">
-                            <table id="my-table" className="table border display no-footer dataTable" style={{width: "1606.57px", marginLeft:"0px"}} role="grid" aria-describedby="exampleStocksPair_info"><thead>
+                            <table id="my-table" className="table border display no-footer dataTable" style={{width: "", marginLeft:"0px"}} role="grid" aria-describedby="exampleStocksPair_info"><thead>
                                 <tr id="headerRow" role="row">
                                     <th className="sorting_desc" tabindex="0" aria-controls="exampleStocksPair" rowspan="1" colspan="1" aria-label="Date: activate to sort column ascending" aria-sort="descending">Date</th>
                                     <th className="sorting" tabindex="0" aria-controls="exampleStocksPair" rowspan="1" colspan="1"   aria-label="AAL: activate to sort column ascending">{inputData?.stockA}</th>
@@ -178,6 +189,7 @@ export default function StocksPair() {
                         <Footer />
                     </div>
                 </div>
+                <Loader/>
             </div>
         </>
     )

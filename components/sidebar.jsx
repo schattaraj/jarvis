@@ -51,7 +51,7 @@ export default function Sidebar() {
             </div>
               <div className={context.marketAnalytics ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className="nav-link" href="stocks" onClick={context.toggleStockMenu}>Stocks</Link>
+                  <li className="nav-item"><Link className="nav-link" href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
                   <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
                 <ul className="nav flex-column sub-menu ps-3">
                 <li className='nav-item'>
@@ -76,7 +76,7 @@ export default function Sidebar() {
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-              <Link className="nav-link" href="compareStocks">
+              <Link className="nav-link" href="/compareStocks">
                 <span className="menu-title">Compare Stocks</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleCompareStock()}} aria-expanded={context.compareStocks ? "true" :"false"} aria-controls="ui-basic">

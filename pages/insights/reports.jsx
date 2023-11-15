@@ -7,6 +7,8 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css'
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
 export default function Reports() {
     const [reports,setReports] = useState([])
     const [show, setShow] = useState(false);
@@ -64,6 +66,7 @@ export default function Reports() {
 <div className="row">
   <div className="col-md-7">
     <div className="left">
+      <h3>Latest Post</h3>
       <h5 className='card-title'>{currentPdf?.tickerName}</h5>
       <p className ="card-text">{currentPdf?.companyName}</p>
   <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
@@ -72,7 +75,30 @@ export default function Reports() {
   <div className="col-md-5">
     <div className="horizontal">
     <h3 className='mb-3'>Recent Posts</h3>
-    <div className="d-flex">
+    <Swiper
+      spaceBetween={50}
+      slidesPerView={1}
+      onSlideChange={() => console.log('slide change')}
+      onSwiper={(swiper) => console.log(swiper)}
+    >
+      {
+         reports.length > 0 && reports.map((item,index)=>{
+          return  (
+            <SwiperSlide  key={index}>
+              <div className="report">
+            <img src="/images/ReportsTN.png" alt="" className='image'/>
+            <h5 className='card-title'>{item.tickerName}</h5>
+            <p className ="card-text">{item.companyName}</p>
+            <button className='btn btn-success' onClick={()=>{handleShow(item)}}>View</button>
+            </div>
+            </SwiperSlide>
+              )
+      })
+      }  
+      
+
+    </Swiper>
+    {/* <div className="d-flex">
       {
          reports.length > 0 && reports.map((item,index)=>{
           return  (
@@ -84,10 +110,10 @@ export default function Reports() {
               </div>)
       })
       }
-      </div>
+      </div> */}
     </div>
     <div className="vertical">
-      <h3 className='mb-3'>Latest Reports</h3>
+      <h3 className='mb-3'>Archive</h3>
       {
          reports.length > 0 && reports.map((item,index)=>{
           return  (

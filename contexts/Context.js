@@ -7,6 +7,7 @@ export const ContextProvider = ({ children }) =>{
   const [marketAnalytics,setMarketAnalytics] = useState(false)
   const [compareStocks,setCompareStocks] = useState(false)
   const [stockMenu,setStockMenu] = useState(false)
+  const [loaderState,setLoaderState] = useState(false)
   const collapse = useRef("")
   const toggleMarketAnalytics = ()=>{
     if(marketAnalytics){
@@ -43,7 +44,7 @@ export const ContextProvider = ({ children }) =>{
   //   elem.classList.toggle("show")
   // }
     return (
-        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock}}>
+        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState}}>
           {children}
         </Context.Provider>
       )

@@ -3,27 +3,55 @@ import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 export default function MyStocks() {
-    const [stocks, setStocks] = useState([])
+    const [favStocks, setFavStocks] = useState([])
     const [inputData, setInputData] = useState({
-        stockA: "",
-        stockB: "",
-        stockC: "",
-        stockD: "",
         startDate: "",
         endDate: ""
     })
+    const [selectedStocks,setSelectedStocks] = useState([
+        "&myArray[]=XOP","&myArray[]=XME","&myArray[]=XLY","&myArray[]=XLV","&myArray[]=XLU","&myArray[]=XLP","&myArray[]=XLK","&myArray[]=XLI","&myArray[]=XLF","&myArray[]=XLE","&myArray[]=XLB","&myArray[]=XHB","&myArray[]=XES","&myArray[]=XBI","&myArray[]=VWO","&myArray[]=UUP","&myArray[]=USO","&myArray[]=TLT","&myArray[]=TAN","&myArray[]=SPY","&myArray[]=SMH","&myArray[]=RYT","&myArray[]=RYH","&myArray[]=RWO","&myArray[]=RSX","&myArray[]=RSP","&myArray[]=RHS","&myArray[]=QQQ","&myArray[]=PWV","&myArray[]=PNQI","&myArray[]=PIN","&myArray[]=PFF","&myArray[]=PBE","&myArray[]=OIL","&myArray[]=MUB","&myArray[]=MJ","&myArray[]=MDY","&myArray[]=IYT","&myArray[]=IYR","&myArray[]=IWO","&myArray[]=IWM","&myArray[]=IVV","&myArray[]=ITB","&myArray[]=IJR","&myArray[]=IHY","&myArray[]=IGV","&myArray[]=IBB","&myArray[]=HYG","&myArray[]=HYEM","&myArray[]=HYD","&myArray[]=HEFA","&myArray[]=HEDJ","&myArray[]=HACK","&myArray[]=GDX","&myArray[]=FXI","&myArray[]=FDN","&myArray[]=EWZ","&myArray[]=EWJ","&myArray[]=EMCB","&myArray[]=EFA","&myArray[]=EEM","&myArray[]=CWB","&myArray[]=BKLN","&myArray[]=AMLP","&myArray[]=AGG" 
+    ])
+    const [tableData,setTableData] = useState([])
     const fecthStocks = async () => {
         try {
-            const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllStocks?_=1699957833250")
+            const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllFavStocks")
             const stocksRes = await stocksApi.json()
-            setStocks(stocksRes)
+            setFavStocks(stocksRes)
         }
         catch (e) {
             console.log("error", e)
         }
     }
-    const handleInput = () => {
-
+    const handleInput = (e) => {
+        setInputData({...inputData,[e.target.name]:e.target.value})
+    }
+    const stockSlections = ()=>{
+        setSelectedStocks(cuurentArr => [...cuurentArr,"&myArray[]=ZX"])
+        // if(favStocks.length>0){
+        //     favStocks.map((item,index)=>{ 
+        //         setSelectedStocks(cuurentArr => [...cuurentArr,"&myArr[]="+item?.stockName])
+        //     })
+        // }
+    }
+    const fetchStockByDate = async()=>{
+        let str = ""
+        selectedStocks.map((item,index)=>{str += item})
+        console.log("selceddata"+str)
+        if(selectedStocks.length > 0){
+        try {
+            // const stockByDataApi = await fetch("https://jharvis.com/JarvisV2/findHistoricalStockDataByDateWithPercentageChange?startDate="+inputData?.startDate+"&endDate="+inputData?.endDate
+            // +str
+            // )
+            const stockByDataApi = await fetch("https://jharvis.com/JarvisV2/findHistoricalStockDataByDateWithPercentageChange?startDate=10/01/2023&endDate=11/15/2023&myArray[]=ZX&myArray[]=ZUO&myArray[]=XOP&myArray[]=XME&myArray[]=XLY&myArray[]=XLV&myArray[]=XLU&myArray[]=XLP&myArray[]=XLK&myArray[]=XLI&myArray[]=XLF&myArray[]=XLE&myArray[]=XLB&myArray[]=XHB&myArray[]=XES&myArray[]=XBI&myArray[]=VWO&myArray[]=UUP&myArray[]=USO&myArray[]=TLT&myArray[]=TAN&myArray[]=SPY&myArray[]=SMH&myArray[]=RYT&myArray[]=RYH&myArray[]=RWO&myArray[]=RSX&myArray[]=RSP&myArray[]=RHS&myArray[]=QQQ&myArray[]=PWV&myArray[]=PNQI&myArray[]=PIN&myArray[]=PFF&myArray[]=PBE&myArray[]=OIL&myArray[]=MUB&myArray[]=MJ&myArray[]=MDY&myArray[]=IYT&myArray[]=IYR&myArray[]=IWO&myArray[]=IWM&myArray[]=IVV&myArray[]=ITB&myArray[]=IJR&myArray[]=IHY&myArray[]=IGV&myArray[]=IBB&myArray[]=HYG&myArray[]=HYEM&myArray[]=HYD&myArray[]=HEFA&myArray[]=HEDJ&myArray[]=HACK&myArray[]=GDX&myArray[]=FXI&myArray[]=FDN&myArray[]=EWZ&myArray[]=EWJ&myArray[]=EMCB&myArray[]=EFA&myArray[]=EEM&myArray[]=CWB&myArray[]=BKLN&myArray[]=AMLP&myArray[]=AGG&_=1700026935546")
+            const stockByDateRes = await stockByDataApi.json()
+        console.log("Data",stockByDateRes)
+        setTableData(stockByDateRes)
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+        }
+        
     }
     useEffect(() => {
         fecthStocks()
@@ -46,7 +74,7 @@ export default function MyStocks() {
                             <div className="selection-area mb-3">
                                 <div className="row">
                                     <div className="col-md-12">
-                                    <button className='btn btn-primary mb-3'>All Stocks</button>
+                                    <button className='btn btn-primary mb-3' onClick={stockSlections}>All Stocks</button>
 
                                     </div>
                                     <div className="col-md-4">
@@ -65,7 +93,7 @@ export default function MyStocks() {
                                     </div>
                                     <div className="col-md-4">
                                     <div className="actions">
-                                <button className='btn btn-primary'>GO</button>
+                                <button className='btn btn-primary' onClick={fetchStockByDate}>GO</button>
                                 <button className='btn btn-primary'>RESET</button>
                                 </div>
                                     </div>
@@ -79,7 +107,7 @@ export default function MyStocks() {
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' /></div>
                             </div>
                             <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" style={{ width: "1606.57px", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info"><thead>
+                                <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info"><thead>
                                     <tr>
                                         <th>Symbol</th>
                                         <th>Week 1</th>
