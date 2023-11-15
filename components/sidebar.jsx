@@ -91,10 +91,10 @@ export default function Sidebar() {
                 </div>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <Link className="nav-link" href="/portfolio">
                 <span className="menu-title">Portfolios</span>
                 <i className="mdi mdi-chart-bar menu-icon"></i>
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
             <Link className="nav-link" href="/insights">

@@ -199,6 +199,10 @@ margin-right: 16px;
             &:last-child{
                 border-right: 0;
             }
+            a{
+                text-decoration: none;
+                color:#719B5F;
+            }
         }
     }
 }
@@ -241,5 +245,5 @@ margin-right: 16px;
 }
 //swiper navigation
 .swiper-button-prev::after, .swiper-button-next::after {
-    color: #719a57;
+    color: #0b0b0b;
 }
