@@ -247,3 +247,27 @@ margin-right: 16px;
 .swiper-button-prev::after, .swiper-button-next::after {
     color: #0b0b0b;
 }
+//portfolio
+.portfolio-modal{
+    .modal-dialog{
+        height: auto;
+        max-width: 1000px;
+    }
+}
+.report-modal{
+        .modal-dialog{
+            height:auto;
+            max-width: 1000px;
+        }
+}
+.report-table{
+.btn{
+    img{
+        height:20px;
+        width: auto;
+    }
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #719B5F;
+}
+}
