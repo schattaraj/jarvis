@@ -56,12 +56,14 @@ export default function Admin() {
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-orange-gradient card-img-holder text-white">
+                                        <Link href={"/portfolio"}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 
                                             <h2 className="mb-5">Portfolios</h2>
 
                                         </div>
+                                        </Link>
                                     </div>
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
