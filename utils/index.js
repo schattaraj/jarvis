@@ -1,5 +1,4 @@
 export const calculateAverage = (tableData, columnName) => {
-    console.log(tableData)
     const columnValues = tableData.map((row) => row[columnName]);
 
     const numericValues = columnValues.filter((value) => !isNaN(parseFloat(value)));

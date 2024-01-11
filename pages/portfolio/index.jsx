@@ -243,8 +243,7 @@ export default function Portfolio() {
                                         <tr>
                                             {
 
-                                                columnNames.map((item, index) => {
-                                                    console.log(item)
+                                                filterData.length ? columnNames.map((item, index) => {
                                                     if (item.elementInternalName === 'element3') {
                                                         return <td key={index}>
                                                             {calculateAverage(filterData, 'element3')} <br />
@@ -257,7 +256,7 @@ export default function Portfolio() {
                                                         return <td key={index}></td>
                                                     }
 
-                                                })
+                                                }) : null
                                             }
                                         </tr>
                                         {/* <td ></td>
