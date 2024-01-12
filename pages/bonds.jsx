@@ -6,6 +6,7 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { calculateAverage, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
+import BondsHistoryModal from '../components/BondHstoryModal';
 
 
 const extraColumns = [
@@ -62,6 +63,16 @@ export default function Bonds() {
     const [allStocks, setAllStocks] = useState([])
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
+    const [openModal, setOpenModal] = useState(false);
+
+    const handleOpenModal = () => {
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
+
     const options = {
         replace: (elememt) => {
             if (elememt.name === 'a') {
@@ -163,10 +174,12 @@ export default function Bonds() {
     return (
         <>
             <div className="container-scroller">
-                {console.log(columnNames)}
                 <Navigation />
                 <div className="container-fluid page-body-wrapper">
                     <Sidebar />
+                    <div>
+                        <BondsHistoryModal open={openModal} handleClose={handleCloseModal} />
+                    </div>
                     <div className="main-panel">
                         <div className="content-wrapper">
                             <div className="page-header">
@@ -181,6 +194,7 @@ export default function Bonds() {
                                 </div>
                             </div>
                             <div className='d-flex justify-content-between'>
+                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                                 <div className="dt-buttons mb-3">
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
@@ -224,33 +238,40 @@ export default function Bonds() {
                                     </thead>
                                     <tbody>
                                         {filterData.map((rowData, rowIndex) => (
-                                            <tr key={rowIndex} style={{ whiteSpace: 'pre' }}>
-                                                {columnNames.map((columnName, colIndex) => (
-                                                    <td key={colIndex}>
-                                                        {columnName.elementInternalName === 'element3'
-                                                            ? (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2)
-                                                            : rowData[columnName.elementInternalName]}
-                                                    </td>
-                                                ))}
+                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                {
+                                                    columnNames.map((columnName, colIndex) => {
+                                                        let content;
+
+                                                        if (columnName.elementInternalName === 'element3') {
+                                                            content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                        } else {
+                                                            content = rowData[columnName.elementInternalName];
+                                                        }
+
+                                                        return <td key={colIndex}>{content}</td>;
+                                                    })
+                                                }
                                             </tr>
                                         ))}
                                     </tbody>
                                     <thead>
                                         <tr>
-                                            {
-
-                                                filterData.length ? columnNames.map((item, index) => {
-                                                    {
-                                                        if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
-                                                            return <th>
-                                                                {calculateAverage(filterData, item.elementInternalName)} % <br />
-                                                                ({calculateAverage(tableData, item.elementInternalName)}) %
-                                                            </th>
-                                                        } else {
-                                                            return <th key={index}></th>
-                                                        }
+                                            {filterData.length ? columnNames.map((item, index) => {
+                                                {
+                                                    if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
+                                                        return <th>
+                                                            {calculateAverage(filterData, item.elementInternalName)} % <br />
+                                                            ({calculateAverage(tableData, item.elementInternalName)}) %
+                                                        </th>
+                                                    } else {
+                                                        return <th key={index}></th>
                                                     }
-                                                }) : null
+                                                }
+                                            }) : null
                                             }
                                         </tr>
                                     </thead>

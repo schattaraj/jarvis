@@ -242,30 +242,29 @@ export default function Portfolio() {
                                                 </tr>
                                             })
                                         }
+
+                                    </tbody>
+                                    <thead>
                                         <tr>
                                             {
 
                                                 filterData.length ? columnNames.map((item, index) => {
                                                     if (item.elementInternalName === 'element3') {
-                                                        return <tr key={index}>
+                                                        return <th key={index}>
                                                             {calculateAverage(filterData, 'element3')} % <br />
                                                             ({calculateAverage(tableData, 'element3')}) %
-                                                        </tr>
+                                                        </th>
 
 
 
                                                     } else {
-                                                        return <tr key={index}></tr>
+                                                        return <th key={index}></th>
                                                     }
 
                                                 }) : null
                                             }
                                         </tr>
-                                        {/* <td ></td>
-                                        <td ></td>
-                                        <td >{calculateAverage(filterData, 'element3')}</td> */}
-
-                                    </tbody>
+                                    </thead>
 
                                 </table>
                             </div>
