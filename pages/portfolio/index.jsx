@@ -8,7 +8,7 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
-import { calculateAverage, searchTable } from '../../utils';
+import { calculateAverage, searchTable } from '../../utils/utils';
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -66,6 +66,7 @@ export default function Portfolio() {
             const portfolioApi = await fetch("https://www.jharvis.com/JarvisV2/getAllPortFolioTicker?userId=2")
             const portfolioApiRes = await portfolioApi.json()
             setPortfolioNames(portfolioApiRes)
+            setPortfolioId(29)
         }
         catch (e) {
             console.log("error", e)
@@ -85,6 +86,7 @@ export default function Portfolio() {
         }
     }
     const handleChange = (e) => {
+        console.log(e.target.value)
         setPortfolioId(e.target.value)
     }
     const exportPdf = () => {
@@ -245,15 +247,15 @@ export default function Portfolio() {
 
                                                 filterData.length ? columnNames.map((item, index) => {
                                                     if (item.elementInternalName === 'element3') {
-                                                        return <td key={index}>
-                                                            {calculateAverage(filterData, 'element3')} <br />
-                                                            ({calculateAverage(tableData, 'element3')})
-                                                        </td>
+                                                        return <tr key={index}>
+                                                            {calculateAverage(filterData, 'element3')} % <br />
+                                                            ({calculateAverage(tableData, 'element3')}) %
+                                                        </tr>
 
 
 
                                                     } else {
-                                                        return <td key={index}></td>
+                                                        return <tr key={index}></tr>
                                                     }
 
                                                 }) : null
