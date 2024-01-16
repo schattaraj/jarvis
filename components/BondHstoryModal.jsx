@@ -1,14 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Table, TableContainer, TableHead, TableBody, TableCell, TableRow, Paper, IconButton, Typography, Box, Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material';
+import {
+    Modal,
+    Table,
+    TableContainer,
+    TableHead,
+    TableBody,
+    TableCell,
+    TableRow,
+    Paper,
+    IconButton,
+    Typography,
+    Box,
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    TablePagination,
+    Button,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
-
 
 const BondsHistoryModal = ({ open, handleClose }) => {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
 
     const fetchData = async () => {
         try {
@@ -53,7 +72,6 @@ const BondsHistoryModal = ({ open, handleClose }) => {
             alert('Unknown Error');
             console.error('Error deleting item:', error);
         }
-
     };
 
     const cancelDelete = () => {
@@ -61,6 +79,14 @@ const BondsHistoryModal = ({ open, handleClose }) => {
         setDeleteConfirmationOpen(false);
     };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     return (
         <Modal open={open} onClose={handleClose}>
@@ -71,20 +97,19 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
                     width: '80%',
-                    maxHeight: '80vh',
-                    overflowY: 'auto',
+                    maxHeight: '90vh',
                     bgcolor: 'background.paper',
                     boxShadow: 24,
                     p: 3,
                 }}
             >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 2 }}>
                     <Typography variant="h6">Bonds History</Typography>
                     <IconButton onClick={handleClose}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -95,7 +120,7 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {data.map((row) => (
+                            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml)}</TableCell>
                                     <TableCell>{row.importDate}</TableCell>
@@ -110,12 +135,29 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                    <TablePagination
+                        rowsPerPageOptions={[20, 50, 100]}
+                        component="div"
+                        count={data.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                    <DialogActions>
+                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
+                        <div className="dt-buttons mb-3"></div>
+                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="delete" onClick={() => console.log('Compare clicked')}><span>Compare</span></button>
+                        <div className="dt-buttons mb-3"></div>
+                    </DialogActions>
+                </Box>
                 <Dialog open={deleteConfirmationOpen} onClose={cancelDelete}>
                     <DialogTitle>Confirm Delete</DialogTitle>
                     <DialogContent>
                         Are you sure you want to delete the item with ID <b>{deleteItemId}</b>?
                     </DialogContent>
-                    <DialogActions>
+                    <DialogActions style={{ padding: 4 }}>
                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="delete" onClick={confirmedDelete}><span>Delete</span></button>
