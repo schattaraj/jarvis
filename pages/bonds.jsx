@@ -64,6 +64,24 @@ export default function Bonds() {
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
     const [openModal, setOpenModal] = useState(false);
+    const [selectedOption, setSelectedOption] = useState('');
+
+    const handleChange = (event) => {
+        setSelectedOption(event.target.value);
+    };
+
+    const option = [
+        'Select an Option',
+        'History',
+        'PDF',
+        'Bond Home',
+        'Ranking',
+        'Calculate',
+        'Grid View',
+        'Chart View',
+        'Reset Bond Details',
+    ];
+
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -72,6 +90,13 @@ export default function Bonds() {
     const handleCloseModal = () => {
         setOpenModal(false);
     };
+
+    const handleSelectClick = () => {
+        if (selectedOption === 'History') {
+            handleOpenModal()
+        }
+    }
+
 
     const options = {
         replace: (elememt) => {
@@ -119,21 +144,6 @@ export default function Bonds() {
     const filter = (e) => {
         console.log('search', e.target.value)
         const value = e.target.value;
-        // const filtered = tableData.filter(elememt => elememt.element4.toLowerCase().includes(value.toLowerCase()))
-        //   const filtered = tableData.map(elememt => {
-        //    return elememt['element4'].toLowerCase().includes(value.toLowerCase())
-        // columnNames.map((item,index)=>{
-        //     // (elememt.element+(index+1)).toLowerCase().includes(value.toLowerCase())
-        //     console.log(elememt['element4'].includes(value))
-        //      if(elememt['element4'] == value){
-        //    return elememt
-        //     }
-
-        // }) 
-        // });
-        // console.log('searchdata', filtered)
-        // console.log('tableData', tableData)
-        // setFilterData(filtered)
         setFilterData(searchTable(tableData, value))
     }
     const exportPdf = () => {
@@ -171,6 +181,9 @@ export default function Bonds() {
         fetchColumnNames()
         fetchData()
     }, [])
+
+
+
     return (
         <>
             <div className="container-scroller">
@@ -191,10 +204,27 @@ export default function Bonds() {
                             </div>
                             <div className="selection-area mb-3">
                                 <div className="row">
+                                    <div className="col-md-4">
+                                        <div className="form-group">
+                                            <label htmlFor="">Options</label>
+                                            <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                                {option.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-8">
+                                        <div className="actions">
+                                            <button className='btn btn-primary' onClick={handleSelectClick}>GO</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div className='d-flex justify-content-between'>
-                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                                 <div className="dt-buttons mb-3">
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
@@ -202,32 +232,6 @@ export default function Bonds() {
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
-                                {/* <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            {
-                                                columnNames.length > 0 && columnNames.map((item, index) => {
-                                                    return <th key={index}>{item?.elementName}</th>
-                                                })
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            filterData.map((item, index) => {
-                                                return <tr key={"tr" + index}>
-                                                    {
-
-                                                        columnNames.map((inner, keyid) => {
-                                                            return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
-                                                        })
-                                                    }
-                                                </tr>
-                                            })
-                                        }
-                                    </tbody>
-
-                                </table> */}
                                 <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
