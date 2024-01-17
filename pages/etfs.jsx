@@ -7,6 +7,7 @@ import parse from 'html-react-parser';
 import { calculateAverage, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
+import EtfHistoryModal from '../components/EtfHistoryModal';
 
 
 const extraColumns = [
@@ -153,7 +154,7 @@ export default function Etfs() {
                 <div className="container-fluid page-body-wrapper">
                     <Sidebar />
                     <div>
-                        <BondsHistoryModal open={openModal} handleClose={handleCloseModal} />
+                        <EtfHistoryModal open={openModal} handleClose={handleCloseModal} />
                     </div>
                     <div className="main-panel">
                         <div className="content-wrapper">
