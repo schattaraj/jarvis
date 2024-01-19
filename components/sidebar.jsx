@@ -71,6 +71,7 @@ export default function Sidebar() {
                   </li>
                   <li className="nav-item"><Link className="nav-link" href="/bonds">Bonds</Link></li>
                   <li className="nav-item"><Link className="nav-link" href="/etfs">ETFs</Link></li>
+                  <li className="nav-item"><Link className="nav-link" href="/bond-reports">Bond Reports</Link></li>
                 </ul> 
                 </div>
             </li>
