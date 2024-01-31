@@ -98,10 +98,21 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
+            <div className="d-flex align-items-center justify-content-between">
             <Link className="nav-link" href="/insights">
                 <span className="menu-title">Insights</span>
-                <i className="mdi mdi-table-large menu-icon"></i>
               </Link>
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleInsights()}} aria-expanded={context.insights ? "true" :"false"} aria-controls="ui-basic">
+                <i className="menu-arrow"></i> <i className="mdi mdi-table-large menu-icon"></i>
+              </button>
+              </div>
+              <div className={context.insights ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
+                <ul className="nav flex-column sub-menu">
+                <li className="nav-item"><Link className="nav-link" href="/insights/videoes">Videoes</Link></li>
+                <li className="nav-item"><Link className="nav-link" href="/insights/podcast">Podcast</Link></li>
+                <li className="nav-item"><Link className="nav-link" href="/insights/reports">Reports</Link></li>
+                </ul>
+              </div>
             </li>
             <li className="nav-item">
               <a className="btn nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
