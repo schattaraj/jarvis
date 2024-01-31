@@ -1,8 +1,10 @@
 import React, { useRef,useContext } from 'react'
 import Link from 'next/link'
 import { Context } from '../contexts/Context'
+import { useRouter } from 'next/router';
 export default function Sidebar() {
   const context = useContext(Context)
+  const router = useRouter();
   // const collapse = useRef("")
   // const showMenu = (e)=>{
   //   let elem = context.collapse.current
@@ -22,7 +24,7 @@ export default function Sidebar() {
          <nav className="sidebar sidebar-offcanvas" id="sidebar">
           <ul className="nav">
             <li className="nav-item nav-profile">
-              <Link href="/" className="nav-link">
+              <Link href="/" className={router.pathname === '/' ? 'nav-link active' : 'nav-link'}>
                 <div className="nav-profile-image">
                   <img src="/images/team-1.jpg" alt="profile"/>
                   <span className="login-status online"></span>
@@ -36,7 +38,7 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" href="/admin">
+              <Link className={router.pathname === '/admin' ? 'nav-link active' : 'nav-link'} href="/admin">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>
               </Link>
@@ -44,40 +46,42 @@ export default function Sidebar() {
            
             <li className="nav-item">
               <div className="d-flex align-items-center justify-content-between">
-              <Link href="marketAnalytics" className="nav-link menu-title"><span className="menu-title">Market Analytics</span></Link>
+              <Link href="/marketAnalytics" className={router.pathname === '/marketAnalytics' ? 'nav-link menu-title active ' : "nav-link menu-title"}><span className="menu-title">Market Analytics</span></Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleMarketAnalytics()}} aria-expanded={context.marketAnalytics ? "true" :"false"} aria-controls="ui-basic">
                 <i className="menu-arrow"></i> <i className="mdi mdi-contacts menu-icon"></i>
               </button>
             </div>
               <div className={context.marketAnalytics ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className="nav-link" href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
+                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link active' : 'nav-link'} href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
                   <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
                 <ul className="nav flex-column sub-menu ps-3">
                 <li className='nav-item'>
-                  <Link className='nav-link' href="/stocks">Screener</Link>
+                  <Link className={router.pathname === '/stocks' ? 'nav-link active' : 'nav-link'} href="/stocks">Screener</Link>
                 </li>
                 <li className='nav-item'>
-                  <Link className='nav-link' href="/byIndustry">By Industry</Link>
+                  <Link className={router.pathname === '/byIndustry' ? 'nav-link active' : 'nav-link'} href="/byIndustry">By Industry</Link>
                 </li>
                 <li className='nav-item'>
-                  <Link className='nav-link' href="/watchList">Watch List</Link>
+                  <Link className={router.pathname === '/watchList' ? 'nav-link active' : 'nav-link'} href="/watchList">Watch List</Link>
                 </li>
                 <li className='nav-item'>
-                  <Link className='nav-link' href="/topStocks">Top Stocks</Link>
+                  <Link className={router.pathname === '/topStocks' ? 'nav-link active' : 'nav-link'} href="/topStocks">Top Stocks</Link>
                 </li>
                 </ul>
                 </div>
                   </li>
-                  <li className="nav-item"><Link className="nav-link" href="/bonds">Bonds</Link></li>
-                  <li className="nav-item"><Link className="nav-link" href="/etfs">ETFs</Link></li>
-                  <li className="nav-item"><Link className="nav-link" href="/bond-reports">Bond Reports</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/bonds' ? 'nav-link active' : 'nav-link'} href="/bonds">Bonds</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/etfs' ? 'nav-link active' : 'nav-link'} href="/etfs">ETFs</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/bond-reports' ? 'nav-link active' : 'nav-link'} href="/bond-reports">Bond Reports</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/pem-details' ? 'nav-link active' : 'nav-link'} href="/pem-details">PEM Details</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/pem-rule' ? 'nav-link active' : 'nav-link'} href="/pem-rule">PEM Rule</Link></li>
                 </ul> 
                 </div>
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-              <Link className="nav-link" href="/compareStocks">
+              <Link className={router.pathname === '/compareStocks' ? 'nav-link active' : 'nav-link'} href="/compareStocks">
                 <span className="menu-title">Compare Stocks</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleCompareStock()}} aria-expanded={context.compareStocks ? "true" :"false"} aria-controls="ui-basic">
@@ -86,20 +90,20 @@ export default function Sidebar() {
               </div>
               <div className={context.compareStocks ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className="nav-link" href="/compareStocks/stocksPair">Pair of stocks</Link></li>
-                  <li className="nav-item"><Link className="nav-link" href="/compareStocks/myStocks">My stocks</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/compareStocks/stocksPair' ? 'nav-link active' : 'nav-link'} href="/compareStocks/stocksPair">Pair of stocks</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/compareStocks/myStocks' ? 'nav-link active' : 'nav-link'} href="/compareStocks/myStocks">My stocks</Link></li>
                 </ul> 
                 </div>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" href="/portfolio">
+              <Link className={router.pathname === '/portfolio' ? 'nav-link active' : 'nav-link'} href="/portfolio">
                 <span className="menu-title">Portfolios</span>
                 <i className="mdi mdi-chart-bar menu-icon"></i>
               </Link>
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-            <Link className="nav-link" href="/insights">
+            <Link className={router.pathname === '/insights' ? 'nav-link active' : 'nav-link'} href="/insights">
                 <span className="menu-title">Insights</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleInsights()}} aria-expanded={context.insights ? "true" :"false"} aria-controls="ui-basic">
@@ -108,9 +112,9 @@ export default function Sidebar() {
               </div>
               <div className={context.insights ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                <li className="nav-item"><Link className="nav-link" href="/insights/videoes">Videoes</Link></li>
-                <li className="nav-item"><Link className="nav-link" href="/insights/podcast">Podcast</Link></li>
-                <li className="nav-item"><Link className="nav-link" href="/insights/reports">Reports</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/videoes' ? 'nav-link active' : 'nav-link'} href="/insights/videoes">Videoes</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/podcast' ? 'nav-link active' : 'nav-link'} href="/insights/podcast">Podcast</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/reports">Reports</Link></li>
                 </ul>
               </div>
             </li>
