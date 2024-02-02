@@ -8,6 +8,7 @@ import { calculateAverage, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
+import BondChart from '../components/charts';
 
 
 const extraColumns = [
@@ -68,6 +69,8 @@ export default function Bonds() {
     const [selectedOption, setSelectedOption] = useState('');
     const [stocks, setStocks] = useState([]);
     const [selectedStock, setSelectedStock] = useState([])
+    const [chartData, setChartData] = useState()
+    const [callChart, setCallChart] = useState(false)
 
 
     const handleChange = (event) => {
@@ -103,7 +106,7 @@ export default function Bonds() {
             handleOpenModal()
         }
         if (selectedOption === 'Chart View') {
-            handleChartView()
+            setCallChart()
         }
     }
 
@@ -194,10 +197,29 @@ export default function Bonds() {
         }
 
     }
+
+    const getTickerCartDtata = async () => {
+        try {
+            const tickerName = selectedStock.map(item => item.element1)
+            const apiUrl = `https://www.jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(tickerName)}&year=2023&year2=2023`;
+
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            setChartData(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     useEffect(() => {
         fetchColumnNames()
         fetchData()
+        getTickerCartDtata()
     }, [])
+
+    // useEffect(() => {
+    //     selectedStock.length && getTickerCartDtata()
+    // }, [callChart])
 
 
 
@@ -259,7 +281,14 @@ export default function Bonds() {
 
                                     <div className="col-md-3">
                                         <div className="actions">
-                                            <button className='btn btn-primary' onClick={handleSelectClick}>GO</button>
+                                            <button className='btn btn-primary' onClick={() => {
+                                                if (selectedStock.length && selectedOption === 'Chart View') {
+                                                    getTickerCartDtata()
+                                                } else {
+
+                                                    handleSelectClick()
+                                                }
+                                            }}>GO</button>
                                         </div>
                                     </div>
                                 </div>
@@ -271,61 +300,63 @@ export default function Bonds() {
                                 </div>
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
-                            <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            {columnNames.map((columnName, index) => (
-                                                <th key={index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
+                            {selectedOption === 'Chart View' ? <BondChart bondData={chartData} /> :
+                                (<div className="table-responsive">
+                                    <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                        <thead>
+                                            <tr>
+                                                {columnNames.map((columnName, index) => (
+                                                    <th key={index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {console.log(filterData)}
+                                            {filterData.map((rowData, rowIndex) => (
+                                                <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                    {
+                                                        columnNames.map((columnName, colIndex) => {
+                                                            let content;
+
+                                                            if (columnName.elementInternalName === 'element3') {
+                                                                content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                            } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                                content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                            } else {
+                                                                content = rowData[columnName.elementInternalName];
+                                                            }
+
+                                                            if (typeof (content) == 'string') {
+                                                                content = parse(content)
+                                                            }
+                                                            return <td key={colIndex}>{content}</td>;
+                                                        })
+                                                    }
+                                                </tr>
                                             ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {console.log(filterData)}
-                                        {filterData.map((rowData, rowIndex) => (
-                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                {
-                                                    columnNames.map((columnName, colIndex) => {
-                                                        let content;
-
-                                                        if (columnName.elementInternalName === 'element3') {
-                                                            content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
-                                                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                        </tbody>
+                                        <thead>
+                                            <tr>
+                                                {filterData.length ? columnNames.map((item, index) => {
+                                                    {
+                                                        if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
+                                                            return <th>
+                                                                {calculateAverage(filterData, item.elementInternalName)} % <br />
+                                                                ({calculateAverage(tableData, item.elementInternalName)}) %
+                                                            </th>
                                                         } else {
-                                                            content = rowData[columnName.elementInternalName];
+                                                            return <th key={index}></th>
                                                         }
-
-                                                        if(typeof(content) == 'string'){
-                                                            content = parse(content)
-                                                        }
-                                                        return <td key={colIndex}>{content}</td>;
-                                                    })
+                                                    }
+                                                }) : null
                                                 }
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                    <thead>
-                                        <tr>
-                                            {filterData.length ? columnNames.map((item, index) => {
-                                                {
-                                                    if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
-                                                        return <th>
-                                                            {calculateAverage(filterData, item.elementInternalName)} % <br />
-                                                            ({calculateAverage(tableData, item.elementInternalName)}) %
-                                                        </th>
-                                                    } else {
-                                                        return <th key={index}></th>
-                                                    }
-                                                }
-                                            }) : null
-                                            }
-                                        </tr>
-                                    </thead>
-                                </table>
+                                        </thead>
+                                    </table>
 
-                            </div>
+                                </div>)
+                            }
                         </div>
                     </div>
                 </div>
