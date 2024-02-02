@@ -25,32 +25,43 @@ ChartJS.register(
 
 const BondChart = ({ bondData }) => {
     console.log('bondData', bondData)
+    const labels = bondData.map(item => new Date(item.lastUpdatedAt).toLocaleDateString())
+    const data$ = bondData.map(item => parseFloat(item.element9))
     const data = {
-        labels: ['Max', 'Mean', 'Min'],
+        labels,
         datasets: [
             {
-                label: 'Bond Values',
-                data: [
-                    parseFloat(bondData.maxValue),
-                    parseFloat(bondData.meanValue),
-                    parseFloat(bondData.minValue),
-                ],
-                backgroundColor: 'rgba(75,192,192,0.4)',
-                borderColor: 'rgba(75,192,192,1)',
+                label: 'Bond Value',
+                data: data$,
+                backgroundColor: 'rgb(53, 162, 235)',
+                borderColor: 'rgba(53, 162, 235, 0.5)',
                 borderWidth: 2,
                 fill: true,
             },
         ],
     };
 
+    // const options = {
+    //     scales: {
+    //         x: {
+    //             type: 'category',
+    //             labels: ['Max', 'Mean', 'Min'],
+    //         },
+    //         y: {
+    //             beginAtZero: true,
+    //         },
+    //     },
+    // };
+
     const options = {
-        scales: {
-            x: {
-                type: 'category',
-                labels: ['Max', 'Mean', 'Min'],
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
             },
-            y: {
-                beginAtZero: true,
+            title: {
+                display: true,
+                text: 'Chart.js Line Chart',
             },
         },
     };
