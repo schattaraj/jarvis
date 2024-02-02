@@ -82,8 +82,10 @@ export default function Calls() {
     const [selectedOption, setSelectedOption] = useState('');
     const [expirationDate, setExpiration] = useState();
     const [addToDate, setAddToDate] = useState();
-    const [meanCalls,setMeanCalls] = useState({})
+    const [meanCalls,setMeanCalls] = useState(false)
     const [selectedTicker,setSelectedTicker] = useState('A')
+    const [selectedDate,setSelectedDate] = useState('2023-10-10')
+    const [tableData,setTableData] = useState([])
     const fetchTickersFunc = async()=>{
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
@@ -112,13 +114,35 @@ export default function Calls() {
         catch(e){
         }
     }
+    const fetchByDateFunc = async ()=>{
+        try{
+            const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date="+selectedDate)
+            const fetchByDateRes = await fetchByDate.json()
+            setTableData(fetchByDateRes)
+        }
+        catch(e){
+        }
+    }
     const handleChange = (e)=>{
         console.log("Ticker",e.target.value)
         setSelectedTicker(e.target.value)
     }
-    const handleSelectClick = () => {
-        if (selectedOption === 'History') {
-            handleOpenModal()
+    const changeDate = (e)=>{
+        setSelectedDate(e.target.value)
+    }
+   const handleClick = ()=>{
+
+   }
+    const options = {
+        replace: (elememt) => {
+            if (elememt.name === 'a') {
+                // console.log("replace",JSON.stringify(parse(elememt.children.join(''))))
+                return (
+                    <a onClick={() => { handleClick(elememt.children[0].data) }} href='#'>
+                        {parse(elememt.children[0].data)}
+                    </a>
+                );
+            }
         }
     }
     useEffect(()=>{
@@ -163,7 +187,7 @@ export default function Calls() {
                                     <div className="col-md-4">
                                         <div className="form-group">
                                             <label htmlFor="">Select Date</label>
-                                            <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                            <select name="portfolio_name" className='form-select' onChange={changeDate}>
                                                 {dates.map((option, index) => (
                                                     <option key={index} value={option}>
                                                         {option}
@@ -174,7 +198,7 @@ export default function Calls() {
                                     </div>
                                     <div className="col-md-2">
                                         <div className="actions">
-                                            <button className='btn btn-primary' onClick={handleSelectClick}>GO</button>
+                                            <button className='btn btn-primary' onClick={fetchByDateFunc}>GO</button>
                                         </div>
                                     </div>
                                 </div>
@@ -200,7 +224,9 @@ export default function Calls() {
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>View All Rule</span></button>
                                 </div> */}
                             </div>
-                            <div className="table-responsive mt-4">
+                            {
+                                meanCalls &&
+<div className="table-responsive mt-4">
                                 <table className="table">
                                     <thead>
                                         <tr>
@@ -220,6 +246,8 @@ export default function Calls() {
                                     </tbody>
                                 </table>
                             </div>
+                            }
+                            
                             <div className="table-responsive mt-4">
                             <table id="example" className="table display">
 				<thead>
@@ -244,7 +272,35 @@ export default function Calls() {
 					</tr>
 				</thead>
 				<tbody>
-
+                    {
+                        tableData.map((item,index)=>{
+                            return (
+                                <tr key={index+'tr'}>
+                            <td>{
+                            typeof(item?.stockNameTicker) == 'string' ?
+                            parse(item?.stockNameTicker,options)
+                            :
+                            ""
+                            }</td>
+                            <td>{item?.stockPrice}</td>
+                            <td>{item?.strikePrice}</td>
+                            <td>{item?.callPrice}</td>
+                            <td>{item?.expirationDate}</td>
+                            <td>{item?.daysExpiration}</td>
+                            <td>{item?.reqIncrease}</td>
+                            <td>{item?.breakEven}</td>
+                            <td>{item?.percentage}</td>
+                            <td>{item?.leverageRatio}</td>
+                            <td>{item?.costofTenCalls}</td>
+                            <td>{item?.incomePerDay}</td>
+                            <td>{item?.annualPremium}</td>
+                            <td>{item?.rank}</td>
+                            <td>{selectedDate}</td>
+                            <td><button className='btn btn-danger'><i className="mdi mdi-delete"></i></button></td>
+                            </tr>
+                            )
+                        })
+                    }
 				</tbody>
 			</table>
                             </div>                          

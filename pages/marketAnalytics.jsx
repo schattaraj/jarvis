@@ -41,20 +41,24 @@ export default function MarketAnalytics() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-info card-img-holder text-white">
+                <Link href={"/bonds"}>
                   <div className="card-body">
                     <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
                     <h2 className="mb-5">Bonds</h2>
                     
                   </div>
+                  </Link>
                 </div>
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-success card-img-holder text-white">
+                <Link href={"/etfs"}>
                   <div className="card-body">
                     <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     <h2 className="mb-5">ETFs</h2>
                   </div>
+                  </Link>
                 </div>
               </div>
               <div className="col-md-4 stretch-card grid-margin">

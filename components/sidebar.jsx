@@ -117,15 +117,16 @@ export default function Sidebar() {
                 <li className="nav-item"><Link className={router.pathname === '/insights/videoes' ? 'nav-link active' : 'nav-link'} href="/insights/videoes">Videos</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/podcast' ? 'nav-link active' : 'nav-link'} href="/insights/podcast">Podcast</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/reports">Reports</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/onePageReport">One Page Report</Link></li>
                 </ul>
               </div>
             </li>
             <li className="nav-item">
-              <a className="btn nav-link" data-bs-toggle="collapse" href="#general-pages" aria-expanded="false" aria-controls="general-pages">
+              <Link className="btn nav-link" data-bs-toggle="collapse" href="/newsletter" aria-expanded="false" aria-controls="general-pages">
                 <span className="menu-title">Newsletter</span>
-                <i className="menu-arrow"></i>
-                <i className="mdi mdi-medical-bag menu-icon"></i>
-              </a>
+                {/* <i className="menu-arrow"></i> */}
+                <i className="mdi mdi-pen menu-icon"></i>
+              </Link>
               
             </li>
          
