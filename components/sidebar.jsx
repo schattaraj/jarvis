@@ -76,6 +76,7 @@ export default function Sidebar() {
                   <li className="nav-item"><Link className={router.pathname === '/bond-reports' ? 'nav-link active' : 'nav-link'} href="/bond-reports">Bond Reports</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/pem-details' ? 'nav-link active' : 'nav-link'} href="/pem-details">PEM Details</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/pem-rule' ? 'nav-link active' : 'nav-link'} href="/pem-rule">PEM Rule</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/Calls' ? 'nav-link active' : 'nav-link'} href="/Calls">Calls</Link></li>
                 </ul> 
                 </div>
             </li>

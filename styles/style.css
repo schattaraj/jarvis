@@ -11815,7 +11815,7 @@ code {
     flex-direction: column;
     -webkit-box-align: end;
     -ms-flex-align: end;
-    align-items: end; }
+    align-items: flex-end; }
 
 .sales-mini-tabs {
   border-bottom: none; }
