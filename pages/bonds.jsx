@@ -7,6 +7,7 @@ import parse from 'html-react-parser';
 import { calculateAverage, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
+import { Autocomplete, TextField } from '@mui/material';
 
 
 const extraColumns = [
@@ -65,9 +66,15 @@ export default function Bonds() {
     const [reportModal, setReportModal] = useState(false)
     const [openModal, setOpenModal] = useState(false);
     const [selectedOption, setSelectedOption] = useState('');
+    const [stocks, setStocks] = useState([]);
+    const [selectedStock, setSelectedStock] = useState([])
+
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
+    };
+    const handleStockChange = (event) => {
+        setSelectedStock(event.target.value);
     };
 
     const option = [
@@ -95,7 +102,14 @@ export default function Bonds() {
         if (selectedOption === 'History') {
             handleOpenModal()
         }
+        if (selectedOption === 'Chart View') {
+            handleChartView()
+        }
     }
+
+    const handleChartView = () => [
+
+    ]
 
 
     const options = {
@@ -129,12 +143,15 @@ export default function Bonds() {
     const fetchData = async () => {
         try {
 
-            // const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
-            // const getBondsRes = await getBonds.json()
-            setTimeout(() => {
-                setTableData(getImportsData)
-                setFilterData(getImportsData)
-            }, 1500)
+            const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
+            setStocks(getBondsRes)
+            // setTimeout(() => {
+            //     setTableData(getImportsData)
+            //     setFilterData(getImportsData)
+            // }, 1500)
 
         }
         catch (e) {
@@ -216,8 +233,32 @@ export default function Bonds() {
                                             </select>
                                         </div>
                                     </div>
+                                    {(<div className="col-md-4">
+                                        <div className="form-group">
+                                            <label htmlFor="">Filter Bonds</label>
+                                            {console.log(selectedStock)}
+                                            <Autocomplete
+                                                multiple
+                                                id="tags-standard"
+                                                value={selectedStock}
+                                                onChange={(event, newValue) => {
+                                                    setSelectedStock(newValue);
+                                                }}
+                                                options={stocks}
+                                                getOptionLabel={(option) => option.element98}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        variant="outlined"
+                                                        label="Select Stocks"
+                                                        placeholder="Favorites"
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+                                    </div>)}
 
-                                    <div className="col-md-8">
+                                    <div className="col-md-4">
                                         <div className="actions">
                                             <button className='btn btn-primary' onClick={handleSelectClick}>GO</button>
                                         </div>
@@ -236,11 +277,12 @@ export default function Bonds() {
                                     <thead>
                                         <tr>
                                             {columnNames.map((columnName, index) => (
-                                                <th key={index}>{columnName.elementDisplayName}</th>
+                                                <th key={index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
                                             ))}
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {console.log(filterData)}
                                         {filterData.map((rowData, rowIndex) => (
                                             <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                 {
@@ -256,7 +298,7 @@ export default function Bonds() {
                                                             content = rowData[columnName.elementInternalName];
                                                         }
 
-                                                        return <td key={colIndex}>{content}</td>;
+                                                        return <td key={colIndex} >{content}</td>;
                                                     })
                                                 }
                                             </tr>
