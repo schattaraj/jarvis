@@ -77,6 +77,7 @@ export default function Sidebar() {
                   <li className="nav-item"><Link className={router.pathname === '/pem-details' ? 'nav-link active' : 'nav-link'} href="/pem-details">PEM Details</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/pem-rule' ? 'nav-link active' : 'nav-link'} href="/pem-rule">PEM Rule</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/Calls' ? 'nav-link active' : 'nav-link'} href="/Calls">Calls</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/puts' ? 'nav-link active' : 'nav-link'} href="/puts">PUTS</Link></li>
                 </ul> 
                 </div>
             </li>
@@ -113,7 +114,7 @@ export default function Sidebar() {
               </div>
               <div className={context.insights ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                <li className="nav-item"><Link className={router.pathname === '/insights/videoes' ? 'nav-link active' : 'nav-link'} href="/insights/videoes">Videoes</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/videoes' ? 'nav-link active' : 'nav-link'} href="/insights/videoes">Videos</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/podcast' ? 'nav-link active' : 'nav-link'} href="/insights/podcast">Podcast</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/reports">Reports</Link></li>
                 </ul>

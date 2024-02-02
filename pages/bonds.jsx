@@ -129,12 +129,10 @@ export default function Bonds() {
     const fetchData = async () => {
         try {
 
-            // const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
-            // const getBondsRes = await getBonds.json()
-            setTimeout(() => {
-                setTableData(getImportsData)
-                setFilterData(getImportsData)
-            }, 1500)
+            const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
 
         }
         catch (e) {
@@ -255,7 +253,9 @@ export default function Bonds() {
                                                         } else {
                                                             content = rowData[columnName.elementInternalName];
                                                         }
-
+                                                        if(typeof(content) == 'string'){
+                                                            content = parse(content)
+                                                        }
                                                         return <td key={colIndex}>{content}</td>;
                                                     })
                                                 }

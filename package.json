@@ -21,6 +21,7 @@
     "primereact": "^10.0.9",
     "react": "18.2.0",
     "react-bootstrap": "^2.8.0",
+    "react-datepicker": "^6.0.0",
     "react-dom": "18.2.0",
     "react-loading-skeleton": "^3.3.1",
     "react-player": "^2.13.0",
