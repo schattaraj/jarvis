@@ -82,7 +82,8 @@ export default function Calls() {
     const [selectedOption, setSelectedOption] = useState('');
     const [expirationDate, setExpiration] = useState();
     const [addToDate, setAddToDate] = useState();
-    const [meanCalls,setMeanCalls] = useState([])
+    const [meanCalls,setMeanCalls] = useState({})
+    const [selectedTicker,setSelectedTicker] = useState('A')
     const fetchTickersFunc = async()=>{
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
@@ -104,15 +105,16 @@ export default function Calls() {
     }
     const fetchHistoryFuc = async()=>{
         try{
-            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCallsByTickerName?tickername")
-            const fetchHistoryRes = await fetchDates.json()
+            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCallsByTickerName?tickername="+selectedTicker)
+            const fetchHistoryRes = await fetchHistory.json()
             setMeanCalls(fetchHistoryRes)
         }
         catch(e){
         }
     }
-    const handleChange = ()=>{
-
+    const handleChange = (e)=>{
+        console.log("Ticker",e.target.value)
+        setSelectedTicker(e.target.value)
     }
     const handleSelectClick = () => {
         if (selectedOption === 'History') {
@@ -155,7 +157,7 @@ export default function Calls() {
 
                                     <div className="col-md-2">
                                         <div className="actions">
-                                            <button className='btn btn-primary' onClick={handleSelectClick}>History</button>
+                                            <button className='btn btn-primary' onClick={fetchHistoryFuc}>History</button>
                                         </div>
                                     </div>
                                     <div className="col-md-4">
@@ -197,6 +199,26 @@ export default function Calls() {
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button"><span>Create New Rule</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>View All Rule</span></button>
                                 </div> */}
+                            </div>
+                            <div className="table-responsive mt-4">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Maximum Value</th>
+                                            <th>Mean Value</th>
+                                            <th>Minimum Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{meanCalls?.tickerName}</td>
+                                            <td>{meanCalls?.maxValue}</td>
+                                            <td>{meanCalls?.minValue}</td>
+                                            <td>{meanCalls?.meanValue}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                             <div className="table-responsive mt-4">
                             <table id="example" className="table display">

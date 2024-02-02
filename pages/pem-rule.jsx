@@ -67,10 +67,10 @@ export default function PemRule() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><input className="inputValue" style={{textAlign:"center",padding :"6px",width:"200px"}} type="text" name="txtMessage" id="txtMessage" readonly=""/></td>
+                                    <td><input className="form-control" style={{textAlign:"center",padding :"6px",width:"200px"}} type="text" name="txtMessage" id="txtMessage" readonly=""/></td>
                                     <td>
-                                        <select className="inputValue" style={{textAlign:"center",padding :"6px"}}>
-											    <option value="-1">--Select--</option>
+                                        <select className="form-select" style={{padding :"6px"}}>
+											    <option value="-1">Select</option>
 												<option value="=">=</option>
 												<option value="<">&lt;</option>
 												<option value=">">&gt;</option>
@@ -79,10 +79,10 @@ export default function PemRule() {
 											</select>
                                     </td>
                                     <td>
-                                    <input className="inputValue" style={{textAlign:"center", padding:"6px",width:"50px"}} type="text" name="txtVal" id="txtVal"/>
+                                    <input className="form-control" style={{textAlign:"center", padding:"6px"}} type="text" name="txtVal" id="txtVal"/>
                                     </td>
                                     <td>
-                                    <select className="inputValue" style={{textAlign:"center",padding :"6px"}}>
+                                    <select className="form-select" style={{textAlign:"center",padding :"6px"}}>
 												<option value="-1">--Select--</option>
 												<option value="and">AND</option>																					
 											</select>

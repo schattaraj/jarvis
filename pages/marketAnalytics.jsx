@@ -69,6 +69,54 @@ export default function MarketAnalytics() {
                                         </Link>
                                     </div>
                                 </div>
+                                <div className="col-md-4 stretch-card grid-margin">
+                                    <div className="card bg-gradient-primary card-img-holder text-white">
+                                        <Link href={"/pem-details"}>
+                                        <div className="card-body">
+                                            <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+ 
+                                            <h3 className="mb-5">PEM Details</h3>
+
+                                        </div>
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="col-md-4 stretch-card grid-margin">
+                                    <div className="card bg-gradient-dark card-img-holder text-white">
+                                        <Link href={"/pem-rule"}>
+                                        <div className="card-body">
+                                            <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+ 
+                                            <h3 className="mb-5">PEM Rule</h3>
+
+                                        </div>
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="col-md-4 stretch-card grid-margin">
+                                    <div className="card bg-gradient-success card-img-holder text-white">
+                                        <Link href={"/Calls"}>
+                                        <div className="card-body">
+                                            <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+ 
+                                            <h3 className="mb-5">CALLS</h3>
+
+                                        </div>
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className="col-md-4 stretch-card grid-margin">
+                                    <div className="card bg-gradient-warning card-img-holder text-white">
+                                        <Link href={"/puts"}>
+                                        <div className="card-body">
+                                            <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+ 
+                                            <h3 className="mb-5">PUTS</h3>
+
+                                        </div>
+                                        </Link>
+                                    </div>
+                                </div>
             </div>
           
           </div>
