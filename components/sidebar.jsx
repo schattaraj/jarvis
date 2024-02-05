@@ -19,6 +19,18 @@ export default function Sidebar() {
     
     
   // }
+  const navItems = [
+    { label: 'Compare Stocks', route: '/compareStocks', children: [{label:'Pair of stocks',route:'/compareStocks/stocksPair'}, {label:'My stocks',route:'/compareStocks/myStocks'}] }
+  ];
+   // Function to determine if a route is active
+   const isActive = (route) => {
+    return router.pathname === route;
+  };
+
+  // Function to determine if a child route is active
+  const isChildActive = (child) => {
+    return router.pathname === child;
+  };
   return (
     <>
          <nav className="sidebar sidebar-offcanvas" id="sidebar">
@@ -38,7 +50,7 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className={router.pathname === '/admin' ? 'nav-link active' : 'nav-link'} href="/admin">
+              <Link className={router.pathname === '/admin' ? 'nav-link btn active' : 'nav-link'} href="/admin">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>
               </Link>
@@ -46,14 +58,14 @@ export default function Sidebar() {
            
             <li className="nav-item">
               <div className="d-flex align-items-center justify-content-between">
-              <Link href="/marketAnalytics" className={router.pathname === '/marketAnalytics' ? 'nav-link menu-title active ' : "nav-link menu-title"}><span className="menu-title">Market Analytics</span></Link>
+              <Link href="/marketAnalytics" className={router.pathname === '/marketAnalytics' ? 'nav-link menu-title btn active ' : "nav-link menu-title"}><span className="menu-title">Market Analytics</span></Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleMarketAnalytics()}} aria-expanded={context.marketAnalytics ? "true" :"false"} aria-controls="ui-basic">
                 <i className="menu-arrow"></i> <i className="mdi mdi-contacts menu-icon"></i>
               </button>
             </div>
               <div className={context.marketAnalytics ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link active' : 'nav-link'} href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
+                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link btn active' : 'nav-link'} href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
                   <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
                 <ul className="nav flex-column sub-menu ps-3">
                 <li className='nav-item'>
@@ -83,7 +95,7 @@ export default function Sidebar() {
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-              <Link className={router.pathname === '/compareStocks' ? 'nav-link active' : 'nav-link'} href="/compareStocks">
+              <Link className={router.pathname === '/compareStocks' ? 'nav-link btn active' : 'nav-link'} href="/compareStocks">
                 <span className="menu-title">Compare Stocks</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleCompareStock()}} aria-expanded={context.compareStocks ? "true" :"false"} aria-controls="ui-basic">
@@ -97,15 +109,34 @@ export default function Sidebar() {
                 </ul> 
                 </div>
             </li>
+            {/* {navItems.map((item, index)=>(
+               <li className="nav-item" key={index+'item'}>
+               <div className="d-flex align-items-center justify-content-between">
+                 <Link className={router.pathname === '/compareStocks' ? 'nav-link btn active' : 'nav-link'} href={item.route}>
+                   <span className="menu-title">{item.label}</span>
+                 </Link>
+                 <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleCompareStock()}} aria-expanded={context.compareStocks ? "true" :"false"} aria-controls="ui-basic">
+                   <i className="menu-arrow"></i> <i className="mdi mdi-format-list-bulleted menu-icon"></i>
+                 </button>
+                 </div>
+                 <div className={context.compareStocks ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
+                   <ul className="nav flex-column sub-menu">
+                    {item.children.map((child, index) => (
+                     <li className="nav-item"><Link className={router.pathname === '/compareStocks/stocksPair' ? 'nav-link active' : 'nav-link'} href={child.route}>{child.label}</Link></li>
+                    ))}
+                   </ul> 
+                   </div>
+               </li>
+            ))} */}
             <li className="nav-item">
-              <Link className={router.pathname === '/portfolio' ? 'nav-link active' : 'nav-link'} href="/portfolio">
+              <Link className={router.pathname === '/portfolio' ? 'nav-link btn active' : 'nav-link'} href="/portfolio">
                 <span className="menu-title">Portfolios</span>
                 <i className="mdi mdi-chart-bar menu-icon"></i>
               </Link>
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-            <Link className={router.pathname === '/insights' ? 'nav-link active' : 'nav-link'} href="/insights">
+            <Link className={router.pathname === '/insights' ? 'nav-link btn active' : 'nav-link'} href="/insights">
                 <span className="menu-title">Insights</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleInsights()}} aria-expanded={context.insights ? "true" :"false"} aria-controls="ui-basic">
@@ -122,7 +153,7 @@ export default function Sidebar() {
               </div>
             </li>
             <li className="nav-item">
-              <Link className="btn nav-link" data-bs-toggle="collapse" href="/newsletter" aria-expanded="false" aria-controls="general-pages">
+              <Link className={router.pathname === '/newsletter' ? "btn nav-link" : 'nav-link'} data-bs-toggle="collapse" href="/newsletter" aria-expanded="false" aria-controls="general-pages">
                 <span className="menu-title">Newsletter</span>
                 {/* <i className="menu-arrow"></i> */}
                 <i className="mdi mdi-pen menu-icon"></i>

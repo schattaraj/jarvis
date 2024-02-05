@@ -281,3 +281,126 @@ margin-right: 16px;
      margin-right: 8px;
 }
 }}
+//audio player css
+.component {
+    background-color: white;
+    width: 25%;
+    max-width: 600px;
+    margin: 1em auto;
+    padding-bottom: 2em;
+    border: 0.1px solid black;
+    border-radius: 10px;
+  }
+  
+  .musicCover {
+    border-radius: 10%;
+  }
+  
+  .playButton {
+    background: none;
+    border: none;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .subTitle {
+    margin-top: -1em;
+    color: #4f4f4f;
+  }
+  
+  .time {
+    margin: 0 auto;
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    color: #828282;
+    font-size: smaller;
+  }
+  
+  .timeline {
+    width: 80%;
+    background-color: #27ae60;
+  }
+  
+  input[type="range"] {
+    background-color: #27ae60;
+  }
+  
+  @media (max-width: 900px) {
+    .component {
+      width: 50%;
+    }
+  }
+  .audio-player{
+    .musicCover{
+        width: 100%;
+    }
+  }
+  //podcast
+  .podcast-area{
+    .card{
+        margin-bottom: 24px;
+        .play-btn{
+            width: 60px;
+            height: 60px; 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            border-radius: 50%;
+            border:none;
+        }
+    }
+  }
+.fixed-audio-player{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background-color: #fff;
+    padding-top: 16px;
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.2);
+    .rhap_container{
+        box-shadow: none;
+    }
+}
+
+//loader css
+.loader {
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    position: relative;
+    animation: rotate 1s linear infinite;
+    border:none;
+  }
+  .loader::before , .loader::after {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    border: 5px solid #FFF;
+    animation: prixClipFix 2s linear infinite ;
+  }
+  .loader::after{
+    border-color: #719a57;
+    animation: prixClipFix 2s linear infinite , rotate 0.5s linear infinite reverse;
+    inset: 6px;
+  }
+
+  @keyframes rotate {
+    0%   {transform: rotate(0deg)}
+    100%   {transform: rotate(360deg)}
+  }
+
+  @keyframes prixClipFix {
+      0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
+      25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
+      50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
+      75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
+      100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
+  }
+  //loader css ends.................

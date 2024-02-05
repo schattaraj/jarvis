@@ -81,6 +81,7 @@ export default function Admin() {
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-red-gradient  card-img-holder text-white">
+                                    <Link href={"/newsletter"}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 
@@ -88,6 +89,7 @@ export default function Admin() {
                                             <h2 className="mb-5">Newsletter</h2>
 
                                         </div>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
