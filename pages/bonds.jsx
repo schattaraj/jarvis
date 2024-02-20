@@ -9,7 +9,8 @@ import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
 import BondChart from '../components/charts';
-
+import { Pagination } from '../components/Pagination';
+import SliceData from '../components/SliceData';
 
 const extraColumns = [
     {
@@ -71,7 +72,8 @@ export default function Bonds() {
     const [selectedStock, setSelectedStock] = useState([])
     const [chartData, setChartData] = useState()
     const [callChart, setCallChart] = useState(false)
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -210,6 +212,32 @@ export default function Bonds() {
             console.error('Error fetching data:', error);
         }
     };
+    
+    const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                // console.log("tableData",tableData)
+                const items = await SliceData(currentPage, limit, tableData);
+                // console.log("items",items)
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])
 
     useEffect(() => {
         fetchColumnNames()
@@ -258,7 +286,6 @@ export default function Bonds() {
                                     {(<div className="col-md-6">
                                         <div className="form-group">
                                             <label htmlFor="">Filter Bonds</label>
-                                            {console.log(selectedStock)}
                                             <Autocomplete
                                                 multiple
                                                 id="tags-standard"
@@ -302,18 +329,17 @@ export default function Bonds() {
                             </div>
                             {selectedOption === 'Chart View' ? <BondChart bondData={chartData} /> :
                                 (<div className="table-responsive">
-                                    <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <table className="table border display no-footer dataTable"  role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                         <thead>
                                             <tr>
                                                 {columnNames.map((columnName, index) => (
-                                                    <th key={index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
+                                                    <th key={'column'+index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
                                                 ))}
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {console.log(filterData)}
                                             {filterData.map((rowData, rowIndex) => (
-                                                <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                <tr key={'rowIndex'+rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                     {
                                                         columnNames.map((columnName, colIndex) => {
                                                             let content;
@@ -357,6 +383,7 @@ export default function Bonds() {
 
                                 </div>)
                             }
+                           {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                     </div>
                 </div>

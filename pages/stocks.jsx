@@ -4,7 +4,10 @@ import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import { useContext, useEffect, useState } from 'react'
 export default function Stocks() {
+    const [tableData, setTableData] = useState([])
+    const [filterData, setFilterData] = useState([])
   return (
     <>
       <div className="container-scroller">

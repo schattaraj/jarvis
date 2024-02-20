@@ -4,6 +4,8 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader'; 
 import { Context } from '../contexts/Context'; 
 import parse from 'html-react-parser';
+import { Pagination } from '../components/Pagination';
+import SliceData from '../components/SliceData';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -11,6 +13,8 @@ export default function PemDetails() {
     const [selectedPortfolioId, setPortfolioId] = useState(false)
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
 
     const fetchColumnNames = async () => {
         try {
@@ -59,6 +63,39 @@ export default function PemDetails() {
             }
         }
     }
+
+    const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      const filter = (e) => {
+        console.log('search', e.target.value)
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
+
+      useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                // console.log("tableData",tableData)
+                const items = await SliceData(currentPage, limit, tableData);
+                // console.log("items",items)
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])
+
     useEffect(() => {
         fetchColumnNames()
         fetchData()
@@ -120,6 +157,13 @@ export default function PemDetails() {
                                     </span>PEM Details
                                 </h3>
                             </div>
+                            <div className='d-flex justify-content-between'>
+                                <div className="dt-buttons mb-3">
+                                    {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                            </div>
                             <div className="table-responsive">
                                 <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
@@ -169,6 +213,7 @@ export default function PemDetails() {
                                 </table>
 
                             </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> }
                         </div>
                     </div>
                 </div>

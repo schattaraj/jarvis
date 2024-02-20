@@ -9,6 +9,9 @@ import Modal from 'react-bootstrap/Modal';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
 import { calculateAverage, searchTable } from '../../utils/utils';
+import SliceData from '../../components/SliceData';
+import * as Icon from "react-icons/fa";
+import { Pagination } from '../../components/Pagination';
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -27,6 +30,13 @@ export default function Portfolio() {
         purchaseDate: "",
         purchasePrice: ""
     })
+    const [countApiCall,setCountApiCall] = useState(0)
+    //pagination
+    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const [limit,setLimit] = useState(25)
+
     const options = {
         replace: (elememt) => {
             if (elememt.name === 'a') {
@@ -66,7 +76,8 @@ export default function Portfolio() {
             const portfolioApi = await fetch("https://www.jharvis.com/JarvisV2/getAllPortFolioTicker?userId=2")
             const portfolioApiRes = await portfolioApi.json()
             setPortfolioNames(portfolioApiRes)
-            setPortfolioId(29)
+            setPortfolioId(portfolioApiRes[0]?.idPortfolio)
+            setCountApiCall(countApiCall+1)
         }
         catch (e) {
             console.log("error", e)
@@ -78,7 +89,12 @@ export default function Portfolio() {
                 const getPortfolio = await fetch("https://www.jharvis.com/JarvisV2/getPortFolioStockSet?idPortfolio=" + selectedPortfolioId)
                 const getPortfolioRes = await getPortfolio.json()
                 setTableData(getPortfolioRes)
-                setFilterData(getPortfolioRes)
+                setFilterData(getPortfolioRes) 
+                const totalItems = getPortfolioRes.length
+                setTotalItems(totalItems)
+                const items = await SliceData(1, limit,getPortfolioRes);
+                setFilterData(items) 
+                setTotalPages(Math.ceil(totalItems / limit)); 
             }
         }
         catch (e) {
@@ -86,7 +102,6 @@ export default function Portfolio() {
         }
     }
     const handleChange = (e) => {
-        console.log(e.target.value)
         setPortfolioId(e.target.value)
     }
     const exportPdf = () => {
@@ -161,14 +176,43 @@ export default function Portfolio() {
     const createPortfolio = () => {
         console.log("portfolioPayload", portfolioPayload)
     }
+      const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                // console.log("tableData",tableData)
+                const items = await SliceData(currentPage, limit, tableData);
+                // console.log("items",items)
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage])
+
     useEffect(() => {
         fetchColumnNames()
         fetchPortfolioNames()
         getAllStock()
     }, [])
     useEffect(() => {
+if(countApiCall == 1){
+    fetchData()
+}
+    }, [countApiCall])
 
-    }, [])
     return (
         <>
             <div className="container-scroller">
@@ -196,7 +240,7 @@ export default function Portfolio() {
                                                 <option>Select Portfolio</option>
                                                 {
                                                     portfolioNames.length > 0 && portfolioNames.map((item, index) => {
-                                                        return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
+                                                        return <option value={item?.idPortfolio} key={"name" + index} selected={item?.idPortfolio == selectedPortfolioId && true}>{item?.name}</option>
                                                     })
                                                 }
                                             </select>
@@ -219,7 +263,7 @@ export default function Portfolio() {
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
                                             {
@@ -267,7 +311,8 @@ export default function Portfolio() {
                                     </thead>
 
                                 </table>
-                            </div>
+                            </div> 
+      <Pagination currentPage={currentPage} totalItems={totalItems} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/>
                         </div>
                         <Footer />
                         <Modal show={show} onHide={handleClose} className='portfolio-modal'>

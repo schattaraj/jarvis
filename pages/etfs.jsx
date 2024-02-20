@@ -8,7 +8,8 @@ import { calculateAverage, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
-
+import { Pagination } from '../components/Pagination';
+import SliceData from '../components/SliceData';
 
 const extraColumns = [
     {
@@ -39,6 +40,8 @@ export default function Etfs() {
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
     const [openModal, setOpenModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
 
     const handleOpenModal = () => {
         setOpenModal(true);
@@ -81,19 +84,15 @@ export default function Etfs() {
 
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Everything_List_New&_=1705403290395")
             const getBondsRes = await getBonds.json()
-            console.log("data",getBondsRes)
-            setTimeout(() => {
                 setTableData(getBondsRes)
                 setFilterData(getBondsRes)
-            }, 1500)
 
         }
         catch (e) {
             console.log("error", e)
         }
     }
-    const filter = (e) => {
-        console.log('search', e.target.value)
+    const filter = (e) => { 
         const value = e.target.value;
         // const filtered = tableData.filter(elememt => elememt.element4.toLowerCase().includes(value.toLowerCase()))
         //   const filtered = tableData.map(elememt => {
@@ -143,6 +142,31 @@ export default function Etfs() {
         }
 
     }
+    const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                // console.log("tableData",tableData)
+                const items = await SliceData(currentPage, limit, tableData);
+                // console.log("items",items)
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])    
     useEffect(() => {
         fetchColumnNames()
         fetchData()
@@ -212,6 +236,7 @@ export default function Etfs() {
                                 </table>
 
                             </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                     </div>
                 </div>

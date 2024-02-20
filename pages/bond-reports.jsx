@@ -4,6 +4,9 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader'; 
 import { Context } from '../contexts/Context'; 
 import parse from 'html-react-parser';
+import { Pagination } from '../components/Pagination';
+import SliceData from '../components/SliceData';
+
 const BondReports = () => {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -11,6 +14,8 @@ const BondReports = () => {
     const [selectedPortfolioId, setPortfolioId] = useState(false)
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
 
     const fetchColumnNames = async () => {
         try {
@@ -57,6 +62,31 @@ const BondReports = () => {
             }
         }
     }
+    const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                // console.log("tableData",tableData)
+                const items = await SliceData(currentPage, limit, tableData);
+                // console.log("items",items)
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])    
     useEffect(() => {
         fetchColumnNames()
         fetchData()
@@ -131,6 +161,7 @@ const BondReports = () => {
                                 </table>
 
                             </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                     </div>
                 </div>
