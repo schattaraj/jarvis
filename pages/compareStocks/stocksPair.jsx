@@ -6,6 +6,10 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
+import { Pagination } from '../../components/Pagination';
+import SliceData from '../../components/SliceData';
+import { calculateAverage, searchTable } from '../../utils/utils';
+import Select from 'react-select'
 export default function StocksPair() {
     const [stocks,setStocks] = useState([])
     const [inputData,setInputData] = useState({
@@ -17,6 +21,10 @@ export default function StocksPair() {
         endDate:""
     })
     const [tableData,setTableData] = useState([])
+    const [filterData, setFilterData] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
+
     const context = useContext(Context)
     const fecthStocks = async()=>{
         context.setLoaderState(true)
@@ -24,15 +32,21 @@ export default function StocksPair() {
             const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllStocks?_=1699957833250")
             const stocksRes = await stocksApi.json()
             setStocks(stocksRes)
+            setFilterData(stocksRes)
         }
         catch(e){
             console.log("error",e)
         }
         context.setLoaderState(false)
     }
-    const handleInput = (e)=>{
+    const handleInput = (e,name)=>{
+        if(name){
+            setInputData({...inputData,[name]:e.value})
+        }
+        else{
         setInputData({...inputData,[e.target.name]:e.target.value})
-        console.log("data",inputData)
+        }
+        console.log("input",e,name)
     }
     const submitData = async()=>{
         context.setLoaderState(true)
@@ -65,9 +79,41 @@ export default function StocksPair() {
             doc.save('table.pdf')
         }       
     }
+    const handlePage = async(action) => {
+        switch (action) {
+            case 'prev':
+                    setCurrentPage(currentPage - 1)
+                break;
+                case 'next':
+                    setCurrentPage(currentPage + 1)
+                break;
+            default:
+            setCurrentPage(currentPage)
+                break;
+        }
+      };
+
+      const filter = (e) => {
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
+    const selectOptions = []
+    stocks.map((item,index)=>{
+        selectOptions.push({value:item?.stockName,label:item?.stockName})
+        // return <option value={item?.stockName} key={"stockA"+index}>{item?.stockName}</option>
+    })
     useEffect(()=>{
         fecthStocks()
     },[])
+    useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                const items = await SliceData(currentPage, limit, tableData);
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])   
     return (
         <>
             <div className="container-scroller">
@@ -86,44 +132,48 @@ export default function StocksPair() {
                             <div className="selection-area mb-3">
                                 <div className="row">
                                     <div className="col-md-3">
-                            <select name="stockA" className='form-select' onChange={handleInput} value={inputData.stockA}>
+                            {/* <select name="stockA" className='form-select' onChange={handleInput} value={inputData.stockA}>
                             <option>Select stock</option>
                             {
                                 stocks.map((item,index)=>{
                                     return <option value={item?.stockName} key={"stockA"+index}>{item?.stockName}</option>
                                 })
                             }
-                            </select>
+                            </select> */}
+                             <Select options={selectOptions} name="stockA"  onChange={(e)=>{handleInput(e,'stockA')}} className='mb-3'/>
                             </div>
                             <div className="col-md-3">
-                            <select name="stockB" className='form-select' onChange={handleInput}  value={inputData.stockB}>
+                            <Select options={selectOptions} name="stockB"  onChange={(e)=>{handleInput(e,'stockB')}} className='mb-3'/>
+                            {/* <select name="stockB" className='form-select' onChange={handleInput}  value={inputData.stockB}>
                             <option>Select stock</option>
                             {
                                 stocks.map((item,index)=>{
                                     return <option value={item?.stockName} key={"stockB"+index}>{item?.stockName}</option>
                                 })
                             }
-                            </select>
+                            </select> */}
                             </div>
                             <div className="col-md-3">
-                            <select name="stockC" className='form-select' onChange={handleInput} value={inputData.stockC}>
+                            <Select options={selectOptions} name="stockC"  onChange={(e)=>{handleInput(e,'stockC')}} className='mb-3'/>
+                            {/* <select name="stockC" className='form-select' onChange={handleInput} value={inputData.stockC}>
                             <option>Select stock</option>
                             {
                                 stocks.map((item,index)=>{
                                     return <option value={item?.stockName} key={"stockC"+index}>{item?.stockName}</option>
                                 })
                             }
-                            </select>
+                            </select> */}
                             </div>
                             <div className="col-md-3">
-                            <select name="stockD" className='form-select mb-3' onChange={handleInput} value={inputData.stockD}>
+                            <Select options={selectOptions} name="stockD"  onChange={(e)=>{handleInput(e,'stockD')}} className='mb-3'/>
+                            {/* <select name="stockD" className='form-select mb-3' onChange={handleInput} value={inputData.stockD}>
                             <option>Select stock</option>
                             {
                                 stocks.map((item,index)=>{
                                     return <option value={item?.stockName} key={"stockD"+index}>{item?.stockName}</option>
                                 })
                             }
-                            </select>
+                            </select> */}
                             </div>
                             <div className="col-md-3">
                                 <div className="form-group">
@@ -150,7 +200,7 @@ export default function StocksPair() {
                             <div className="dt-buttons mb-3"> 
                             <button className="dt-button buttons-pdf buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button" title="PDF" onClick={exportPdf}><span class="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button> <button className="dt-button buttons-excel buttons-html5 btn btn-primary" tabindex="0" aria-controls="exampleStocksPair" type="button"><span class="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> 
                             </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor=""style={{textWrap:"nowrap"}} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control'/></div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor=""style={{textWrap:"nowrap"}} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             }
                                 {tableData.length > 0 && 
@@ -169,7 +219,7 @@ export default function StocksPair() {
                             <tbody id="stockPairDropTable">
 	   
 	{/* <tr role="row" className="odd"><td className="sorting_1">2023-11-10</td><td>11.8000</td><td>186.4000</td><td>0.060</td><td></td><td></td><td>0.000</td></tr><tr role="row" className="even"><td className="sorting_1">2023-11-03</td><td>11.9800</td><td>176.6500</td><td>0.070</td><td></td><td></td><td>0.000</td></tr><tr role="row" className="odd"><td className="sorting_1">2023-10-27</td><td>10.9200</td><td>168.2200</td><td>0.060</td><td></td><td></td><td>0.000</td></tr><tr role="row" className="even"><td className="sorting_1">2023-10-20</td><td>11.0800</td><td>172.8800</td><td>0.060</td><td></td><td></td><td>0.000</td></tr><tr role="row" className="odd"><td className="sorting_1">2023-10-13</td><td>11.7200</td><td>178.8500</td><td>0.070</td><td></td><td></td><td>0.000</td></tr><tr role="row" className="even"><td className="sorting_1">2023-10-06</td><td>12.7600</td><td>177.4900</td><td>0.070</td><td></td><td></td><td>0.000</td></tr> */}
-    {tableData.map((item,index)=>{
+    {filterData.map((item,index)=>{
         return (
             <tr key={'tr'+index}>
             <td>{item?.date}</td>
@@ -185,6 +235,7 @@ export default function StocksPair() {
                             </table>
                             </div>
                                 }
+                                 {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                         <Footer />
                     </div>

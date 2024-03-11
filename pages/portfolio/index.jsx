@@ -312,7 +312,7 @@ if(countApiCall == 1){
 
                                 </table>
                             </div> 
-      <Pagination currentPage={currentPage} totalItems={totalItems} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/>
+      <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/>
                         </div>
                         <Footer />
                         <Modal show={show} onHide={handleClose} className='portfolio-modal'>

@@ -7,6 +7,7 @@ import parse from 'html-react-parser';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {tickersData} from '../utils/staticData'
+import Select from 'react-select'
 export default function Calls() {
     const [option,setOption] = useState([]);
     const [tickers,setTickers] = useState(tickersData);

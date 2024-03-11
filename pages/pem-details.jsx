@@ -6,6 +6,7 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
+import { calculateAverage, searchTable } from '../utils/utils';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])

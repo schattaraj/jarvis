@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
+import { Pagination } from '../../components/Pagination';
+import SliceData from '../../components/SliceData';
+import { calculateAverage, searchTable } from '../../utils/utils';
 export default function MyStocks() {
     const [favStocks, setFavStocks] = useState([])
     const [inputData, setInputData] = useState({
@@ -12,6 +15,9 @@ export default function MyStocks() {
         "&myArray[]=XOP","&myArray[]=XME","&myArray[]=XLY","&myArray[]=XLV","&myArray[]=XLU","&myArray[]=XLP","&myArray[]=XLK","&myArray[]=XLI","&myArray[]=XLF","&myArray[]=XLE","&myArray[]=XLB","&myArray[]=XHB","&myArray[]=XES","&myArray[]=XBI","&myArray[]=VWO","&myArray[]=UUP","&myArray[]=USO","&myArray[]=TLT","&myArray[]=TAN","&myArray[]=SPY","&myArray[]=SMH","&myArray[]=RYT","&myArray[]=RYH","&myArray[]=RWO","&myArray[]=RSX","&myArray[]=RSP","&myArray[]=RHS","&myArray[]=QQQ","&myArray[]=PWV","&myArray[]=PNQI","&myArray[]=PIN","&myArray[]=PFF","&myArray[]=PBE","&myArray[]=OIL","&myArray[]=MUB","&myArray[]=MJ","&myArray[]=MDY","&myArray[]=IYT","&myArray[]=IYR","&myArray[]=IWO","&myArray[]=IWM","&myArray[]=IVV","&myArray[]=ITB","&myArray[]=IJR","&myArray[]=IHY","&myArray[]=IGV","&myArray[]=IBB","&myArray[]=HYG","&myArray[]=HYEM","&myArray[]=HYD","&myArray[]=HEFA","&myArray[]=HEDJ","&myArray[]=HACK","&myArray[]=GDX","&myArray[]=FXI","&myArray[]=FDN","&myArray[]=EWZ","&myArray[]=EWJ","&myArray[]=EMCB","&myArray[]=EFA","&myArray[]=EEM","&myArray[]=CWB","&myArray[]=BKLN","&myArray[]=AMLP","&myArray[]=AGG" 
     ])
     const [tableData,setTableData] = useState([])
+    const [filterData, setFilterData] = useState([])
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit,setLimit] = useState(25)
     const fecthStocks = async () => {
         try {
             const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllFavStocks")
@@ -53,6 +59,19 @@ export default function MyStocks() {
         }
         
     }
+    const filter = (e) => {
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
+    useEffect(()=>{
+        async function run(){
+            if(tableData.length > 0){
+                const items = await SliceData(currentPage, limit, tableData);
+                setFilterData(items)
+            }     
+        }
+        run() 
+      },[currentPage,tableData])  
     useEffect(() => {
         fecthStocks()
     }, [])
@@ -104,7 +123,7 @@ export default function MyStocks() {
                                     <button className="dt-button buttons-pdf buttons-html5" tabindex="0" aria-controls="exampleStocksPair" type="button" title="PDF"><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5" tabindex="0" aria-controls="exampleStocksPair" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                 </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' /></div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control'  onChange={filter}/></div>
                             </div>
                             <div className="table-responsive">
                                 <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info"><thead>

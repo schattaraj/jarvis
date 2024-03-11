@@ -6,6 +6,7 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
+import { calculateAverage, searchTable } from '../utils/utils';
 
 const BondReports = () => {
     const context = useContext(Context)
@@ -76,6 +77,10 @@ const BondReports = () => {
         }
       };
 
+      const filter = (e) => {
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
       useEffect(()=>{
         async function run(){
             if(tableData.length > 0){
@@ -121,6 +126,13 @@ const BondReports = () => {
                                         <i className="mdi mdi-home"></i>
                                     </span>Bond Reports
                                 </h3>
+                            </div>
+                            <div className='d-flex justify-content-between'>
+                                <div className="dt-buttons mb-3">
+                                    {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
                                 <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
