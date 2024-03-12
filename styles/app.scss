@@ -186,8 +186,50 @@ margin-right: 16px;
             background-color: #719B5F;
             color: #fff;
             border-right: 1px solid #fff;
+            text-transform: capitalize;
             &:last-child{
                 border-right: 0;
+            }
+            .arrow-icons{
+                display: inline-flex;
+                position: relative;
+                height: 23px;
+                width: 20px;
+                align-items: center;
+                flex-direction: column;
+                margin-left: 4px;
+                svg{
+                    &:first-child{
+                    position: absolute;
+                    top: 4px;
+                    right: 0;
+                }
+                &:nth-child(2){
+                    position: absolute;
+                    top: 10px;
+                    right: 0;
+                }
+            }
+            &.up{
+                svg{
+                    &:first-child{
+                        opacity: 1;
+                    }
+                    &:nth-child(2){
+                    opacity: 0.4;
+                }
+            }
+            }
+            &.down{
+                svg{
+                    &:first-child{
+                        opacity: 0.4;
+                    }
+                    &:nth-child(2){
+                    opacity: 1;
+                }
+            }
+            }
             }
         }
     }

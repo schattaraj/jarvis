@@ -51,6 +51,12 @@ export default function Sidebar() {
             </li>
             <li className="nav-item">
               <Link className={router.pathname === '/admin' ? 'nav-link btn active' : 'nav-link'} href="/admin">
+                <span className="menu-title">Admin</span>
+                <i className="mdi mdi-account menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/dashboard' ? 'nav-link btn active' : 'nav-link'} href="/dashboard">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>
               </Link>
