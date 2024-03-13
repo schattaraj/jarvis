@@ -56,6 +56,25 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
+              {/* <Link className={router.pathname === '/BusinessActivity' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity">
+                <span className="menu-title">Business Activity</span>
+                <i className="mdi mdi-city-variant menu-icon"></i>
+              </Link> */}
+              <div className="d-flex align-items-center justify-content-between">
+              <Link href="/BusinessActivity" className={router.pathname === '/BusinessActivity' ? 'nav-link menu-title btn active ' : "nav-link menu-title"}><span className="menu-title">Business Activity</span></Link>
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleBusinessActivity()}} aria-expanded={context.businessActivity ? "true" :"false"} aria-controls="ui-basic">
+                <i className="menu-arrow"></i> <i className="mdi mdi-city-variant menu-icon"></i>
+              </button>
+            </div>
+            <div className={context.businessActivity ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
+                <ul className="nav flex-column sub-menu">
+                  <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/BusinessPipeline' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/BusinessPipeline">Business Pipeline</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link btn active' : 'nav-link'} href="">Business Tracking</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link btn active' : 'nav-link'} href="">Prospects</Link></li>
+                </ul>
+                </div>
+            </li>
+            <li className="nav-item">
               <Link className={router.pathname === '/dashboard' ? 'nav-link btn active' : 'nav-link'} href="/dashboard">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>

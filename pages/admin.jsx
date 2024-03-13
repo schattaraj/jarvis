@@ -29,7 +29,7 @@ export default function Admin() {
                             <div className="row">
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-gradient-danger card-img-holder text-white">
-                                        <Link href={"/BusinessPipeline"} onClick={()=>{context.setMarketAnalytics(true)}}>
+                                        <Link href={"/BusinessActivity"} onClick={()=>{context.toggleBusinessActivity(true)}}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 

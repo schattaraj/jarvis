@@ -1,20 +1,16 @@
 import { useContext, useEffect, useState } from 'react'
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Loader from '../components/loader';
-import { Context } from '../contexts/Context';
+import Navigation from '../../../components/navigation';
+import Sidebar from '../../../components/sidebar';
+import Loader from '../../../components/loader';
+import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../utils/utils';
-import { getImportsData } from '../utils/staticData';
-import BondsHistoryModal from '../components/BondHstoryModal';
+import { calculateAverage, searchTable } from '../../../utils/utils';
+import { getImportsData } from '../../../utils/staticData';
+import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
-import BondChart from '../components/charts';
-import { Pagination } from '../components/Pagination';
-import SliceData from '../components/SliceData';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import BondChart from '../../../components/charts';
+import { Pagination } from '../../../components/Pagination';
+import SliceData from '../../../components/SliceData';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
@@ -82,8 +78,6 @@ export default function BusinessPipeline() {
 
     const getSortIcon = (columnName) => {
         if (sortConfig && sortConfig.key === columnName) {
-            // return sortConfig.direction === 'asc' ? <i className="mdi mdi-arrow-up"></i> : <i className="mdi mdi-arrow-down"></i>;
-            // return sortConfig.direction === 'asc' ? <ExpandLessIcon/> : <ExpandMoreIcon/>;
             return sortConfig.direction === 'asc' ? <div className="arrow-icons up">
             <ArrowDropUpIcon/>
             <ArrowDropDownIcon/>
@@ -148,38 +142,18 @@ export default function BusinessPipeline() {
                                 <div className="dt-buttons mb-3">
                                     {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                                    <button className="dt-button buttons-html5 btn-primary" type="button"><span>Add Pipeline</span></button> 
                                 </div>
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
                                 <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
-                                    {/* <tr>
-                                            {columnNames.map((columnName, index) => (
-                                                <th key={index}>{columnName.data}</th>
-                                            ))}
-                                        </tr> */}
                                          <tr>
                                             {columnNames.map((columnName, index) => (
                                                 <th key={index} onClick={() => handleSort(columnName.data)}>
                                                     {columnName.data}
                                                     {getSortIcon(columnName.data)}
-                                                    {/* {sortConfig && sortConfig.key === columnName.data ? (
-        <>
-           <div className="arrow-icons active">
-<ArrowDropUpIcon/>
-<ArrowDropDownIcon/>
-</div>
-        </>
-    )
-:
-<>
-<div className="arrow-icons">
-<ArrowDropUpIcon/>
-<ArrowDropDownIcon/>
-</div>
-</>
-} */}
                                                     </th>
                                             ))}
                                         </tr>
