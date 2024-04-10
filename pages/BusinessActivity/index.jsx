@@ -37,7 +37,7 @@ function BusinessActivity() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-orange-gradient card-img-holder text-white">
-                <Link href="">
+                <Link href={"/BusinessActivity/BusinessTracking"}>
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                    
@@ -48,7 +48,7 @@ function BusinessActivity() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-red-gradient card-img-holder text-white">
-                <Link href="">
+                <Link href={"/BusinessActivity/Prospects"}>
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                    

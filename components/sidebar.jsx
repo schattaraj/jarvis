@@ -70,7 +70,7 @@ export default function Sidebar() {
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/BusinessPipeline' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/BusinessPipeline">Business Pipeline</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/BusinessTracking' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/BusinessTracking">Business Tracking</Link></li>
-                  <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link btn active' : 'nav-link'} href="">Prospects</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/Prospects' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/Prospects">Prospects</Link></li>
                 </ul>
                 </div>
             </li>
