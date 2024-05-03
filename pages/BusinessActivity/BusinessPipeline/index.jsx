@@ -15,6 +15,8 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import StringToHTML from '../../../components/StringToHtml.jsx';
+import formatAmount from '../../../components/formatAmount.js';
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name" },
@@ -38,8 +40,13 @@ export default function BusinessPipeline() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [openModal, setOpenModal] = useState(false);
+    const [openAmountModal, setOpenAmountModal] = useState(false);
+    const [allAmounts, setALlAmounts] = useState(false)
+    const [allAmountString, setAllAmountString] = useState(false)
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+//
+const [totalAmount, setTotalAmount] = useState(0);
 
     const filter = (e) => {
         const value = e.target.value;
@@ -104,6 +111,49 @@ export default function BusinessPipeline() {
     const handleOpen = () => {
         setOpenModal(true);
     }
+    const fetchAllAmount = async()=>{
+        try {
+            const getAllAmount = await fetch("https://jharvis.com/JarvisV2/getAmountsByAdvisor?_=1714645928468")
+            const getAllAmountRes = await getAllAmount.json()
+            console.log(getAllAmountRes.msg)
+            setAllAmountString(getAllAmountRes.msg)
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+    }
+    const handleOpenAmount = ()=>{
+        // const result = Object.values(tableData.reduce((acc, curr) => {
+        //     const { advisorName, amounts } = curr;
+        //     if (!acc[advisorName]) {
+        //       acc[advisorName] = { advisorName, totalAmount: 0 };
+        //     }
+        //     acc[advisorName].totalAmount += parseFloat(amounts ? amounts : 0);
+        //     return acc;
+        //   }, {}));
+          
+        // setALlAmounts(result)
+        setOpenAmountModal(true)
+        fetchAllAmount()
+    }
+    const handleCloseAmount = ()=>{
+        setOpenAmountModal(false)
+    }
+    // function formatAmount(amount) {
+    //     // Convert amount to number if it's not already
+    //     amount = parseFloat(amount);
+      
+    //     // Check if the amount is a valid number
+    //     if (isNaN(amount)) {
+    //       return "Invalid Amount";
+    //     }
+      
+    //     // Format the amount with commas and dollar sign
+    //     return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    //   }
+      
+      // Example usage:
+    //const formattedAmount = formatAmount(3700000); // Returns "$3,700,000"
     useEffect(() => {
         fetchData()
     }, [])
@@ -126,6 +176,13 @@ export default function BusinessPipeline() {
                 const endIndex = startIndex + limit;
                 items = items.slice(startIndex, endIndex);
                 setFilterData(items);
+                //
+                  // Calculate total amount
+                  const total = items.reduce((acc, item) => {
+                    return acc + Number(item.amounts);
+                }, 0);
+                  setTotalAmount(total);
+
             }
         }
         run();
@@ -150,6 +207,7 @@ export default function BusinessPipeline() {
                                     {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                                     <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
+                                    <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
                                 </div>
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
@@ -178,6 +236,13 @@ export default function BusinessPipeline() {
                                             </tr>
                                         ))}
                                     </tbody>
+                                    <tfoot className='fixed'>
+                                        <tr>
+                                            <td colSpan={3}>Total Amount</td>
+                                            <td>{formatAmount(totalAmount)}</td>
+                                            <td colSpan={11}></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                             {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
@@ -321,6 +386,38 @@ export default function BusinessPipeline() {
                     </div>
                     </Form>
 
+                </Modal.Body>
+            </Modal>
+            <Modal show={openAmountModal} onHide={handleCloseAmount}>
+                <Modal.Header closeButton>
+                    <Modal.Title>All Amounts</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <div className="table-responsive">
+                <StringToHTML htmlString={allAmountString} />
+                                {/* <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Advisor Name</th>
+                                            <th>Total Amount</th>
+                                            <th>No. of Opportunities</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                              allAmounts &&  allAmounts.map((item)=>{
+                                                    return(
+                                                        <tr>
+                                                            <td>{item.advisorName}</td>
+                                                            <td>{formatAmount(item.totalAmount)}</td>
+                                                            <td></td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                        </table> */}
+                                        </div>
                 </Modal.Body>
             </Modal>
         </>

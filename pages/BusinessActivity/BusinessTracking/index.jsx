@@ -15,6 +15,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import formatAmount from '../../../components/formatAmount.js';
 
 export default function BusinessTracking() {
     const [columnNames, setColumnNames] = useState([
@@ -37,6 +38,8 @@ export default function BusinessTracking() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [openModal, setOpenModal] = useState(false);
+    const [totalAssests, setTotalAssests] = useState(false);
+    const [totalAssestsManagement, setTotalAssestsManagement] = useState(false);
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -125,6 +128,14 @@ export default function BusinessTracking() {
                 const endIndex = startIndex + limit;
                 items = items.slice(startIndex, endIndex);
                 setFilterData(items);
+                const totalAssetBroughtIn = items.reduce((acc, item) => {
+                    return acc + (Number(item.assetBroughtIn) ? Number(item.assetBroughtIn) : 0);
+                }, 0);
+                setTotalAssests(totalAssetBroughtIn)
+                const totalAssetManagement = items.reduce((acc, item) => {
+                    return acc + (Number(item.totalAssetManagement) ? Number(item.totalAssetManagement) : 0);
+                }, 0);
+                setTotalAssestsManagement(totalAssetManagement)
             }
         }
         run();
@@ -184,6 +195,22 @@ export default function BusinessTracking() {
                                             </tr>
                                         ))}
                                     </tbody>
+                                    <tfoot className='fixed'>
+                                        <tr>
+                                            <td colSpan={2}>Total Amount</td>
+                                            <td>{formatAmount(totalAssests)}</td>
+                                            <td></td>
+                                            <td>{formatAmount(totalAssestsManagement)}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                             </div>
                             {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}

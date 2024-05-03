@@ -13,6 +13,7 @@ import { Pagination } from '../../../components/Pagination';
 import SliceData from '../../../components/SliceData';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import formatAmount from '../../../components/formatAmount';
 
 export default function Prospects() {
     const [columnNames, setColumnNames] = useState([
@@ -30,6 +31,7 @@ export default function Prospects() {
     const [filterData, setFilterData] = useState([])
     const [currentPage, setCurrentPage] = useState(1);
     const [limit,setLimit] = useState(25)
+    const [totalAmount,setTotalAmount] = useState(false)
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 
@@ -113,6 +115,13 @@ export default function Prospects() {
                 const endIndex = startIndex + limit;
                 items = items.slice(startIndex, endIndex);
                 setFilterData(items);
+                const total = items.reduce((acc, item) => {
+                    item.amount = item.amount.replace("$","")
+                    item.amount = item.amount.replaceAll(",","")
+                    console.log(item.amount)
+                    return acc + (Number(item.amount) ? Number(item.amount) : 0);
+                }, 0); 
+                  setTotalAmount(total);
             }
         }
         run();
@@ -172,6 +181,13 @@ export default function Prospects() {
                                             </tr>
                                         ))}
                                     </tbody>
+                                    <tfoot className='fixed'>
+                                        <tr>
+                                            <td colSpan={3}>Total Amount</td>
+                                            <td>{formatAmount(totalAmount)}</td>
+                                            <td colSpan={11}></td>
+                                        </tr>
+                                    </tfoot>
                                 </table>
                                 </div>
                                 {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
