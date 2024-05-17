@@ -47,6 +47,8 @@ export default function BusinessPipeline() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
 //
 const [totalAmount, setTotalAmount] = useState(0);
+const [byPersonModal,setByPersonModal] = useState(false)
+const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmount:0})
 
     const filter = (e) => {
         const value = e.target.value;
@@ -123,16 +125,6 @@ const [totalAmount, setTotalAmount] = useState(0);
         }
     }
     const handleOpenAmount = ()=>{
-        // const result = Object.values(tableData.reduce((acc, curr) => {
-        //     const { advisorName, amounts } = curr;
-        //     if (!acc[advisorName]) {
-        //       acc[advisorName] = { advisorName, totalAmount: 0 };
-        //     }
-        //     acc[advisorName].totalAmount += parseFloat(amounts ? amounts : 0);
-        //     return acc;
-        //   }, {}));
-          
-        // setALlAmounts(result)
         setOpenAmountModal(true)
         fetchAllAmount()
     }
@@ -154,6 +146,23 @@ const [totalAmount, setTotalAmount] = useState(0);
       
       // Example usage:
     //const formattedAmount = formatAmount(3700000); // Returns "$3,700,000"
+    const totalAmountByPerson = (person)=>{
+        const result = Object.values(tableData.reduce((acc, curr) => {
+            const { advisorName, amounts } = curr;
+            if (!acc[advisorName]) {
+              acc[advisorName] = { advisorName, totalAmount: 0 };
+            }
+            acc[advisorName].totalAmount += parseFloat(amounts ? amounts : 0);
+            return acc;
+          }, {}));
+        setALlAmounts(result)
+        console.log(result.filter((item)=>item.advisorName == person))
+        setPersonModalData(result.filter((item)=>item.advisorName == person)[0])
+        setByPersonModal(true)
+    }
+    const hideTotalAmountPerson = ()=>{
+        setByPersonModal(false)
+    }
     useEffect(() => {
         fetchData()
     }, [])
@@ -230,6 +239,9 @@ const [totalAmount, setTotalAmount] = useState(0);
                                                     columnNames.map((columnName, colIndex) => {
                                                         let content;
                                                         content = rowData[columnName.data]
+                                                        if(columnName.data == "advisorName"){
+                                                            return <td key={colIndex}><a href="#" onClick={()=>{totalAmountByPerson(content)}}>{content}</a></td>;
+                                                        }
                                                         return <td key={colIndex}>{content}</td>;
                                                     })
                                                 }
@@ -417,6 +429,30 @@ const [totalAmount, setTotalAmount] = useState(0);
                                             }
                                         </tbody>
                                         </table> */}
+                                        </div>
+                </Modal.Body>
+            </Modal>
+            <Modal show={byPersonModal} onHide={hideTotalAmountPerson}>
+            <Modal.Header closeButton>
+                    <Modal.Title>Total Amounts</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <div className="table-responsive">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Advisor Name</th>
+                                            <th>Total Amount</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                       
+                                                        <tr>
+                                                            <td>{personModalData.advisorName}</td>
+                                                            <td>{formatAmount(personModalData.totalAmount)}</td>
+                                                        </tr> 
+                                        </tbody>
+                                        </table>
                                         </div>
                 </Modal.Body>
             </Modal>
