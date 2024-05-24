@@ -30,6 +30,7 @@ export default function Podcast() {
       setShow(true)
     }
     const handleSeeking = (e) => {
+      console.log(e.target)
       const newTime = parseFloat(e.target.value);
       if (!isNaN(newTime) && isFinite(newTime) && audioRef.current) {
         audioRef.current.audio.current.currentTime = newTime;
@@ -76,7 +77,7 @@ export default function Podcast() {
     onPlay={e => console.log("onPlay",currentPodcast)}
     // other props here
     ref={audioRef}
-    onSeeking={handleSeeking}
+    // onSeeking={handleSeeking}
     // onListen={(e) => console.log('current time:', e.target.currentTime)}
   />
   </div>

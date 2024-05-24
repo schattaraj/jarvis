@@ -16,10 +16,12 @@ export default function Reports() {
     const [show, setShow] = useState(false);
     const [currentPdf, setCurrentPdf] = useState(false);
     const [loader,setLoader] = useState(false)
+    const [openModal, setOpenModal] = useState(false);
+    const [openAmountModal, setOpenAmountModal] = useState(false);
     const fetchVideoes = async()=>{
         setLoader(true)
         try{
-            const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&_=1699874262000")
+            const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144")
             const response = await apiCall.json()
             setReports(response)
             setCurrentPdf(response[0])
@@ -39,6 +41,18 @@ export default function Reports() {
         console.log("path",path)
     }
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const handleOpen = () => {
+      setOpenModal(true);
+  }
+  const handleOpenAmount = ()=>{
+
+  }
+  const filter = (e) => {
+
+  }
+  const handleChange = (e)=>{
+    
+  }
     useEffect(()=>{
         fetchVideoes()
     },[])
@@ -66,6 +80,26 @@ export default function Reports() {
 </div>
 {/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
 <p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
+<div className='d-flex justify-content-between'>
+                                <div className="d-flex dt-buttons mb-3">
+                                    {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                                    {/* <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button> */}
+                                    <div className="form-group">
+                                            <label htmlFor="">Options</label>
+                                            <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                                {/* {option.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))} */}
+                                            </select>
+                                        </div>
+                                    <div className="d-flex align-items-center me-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                                    <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpenAmount}><span>Filter</span></button>
+                                </div>
+                                
+                            </div>
 <div className="row">
   <div className="col-md-7">
     <div className="left">

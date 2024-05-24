@@ -55,6 +55,7 @@ export default function Sidebar() {
                 <i className="mdi mdi-account menu-icon"></i>
               </Link>
             </li>
+           
             <li className="nav-item">
               {/* <Link className={router.pathname === '/BusinessActivity' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity">
                 <span className="menu-title">Business Activity</span>
@@ -75,6 +76,42 @@ export default function Sidebar() {
                 </div>
             </li>
             <li className="nav-item">
+              <Link className={router.pathname === '/SavedSecurities' ? 'nav-link btn active' : 'nav-link'} href="/SavedSecurities">
+                <span className="menu-title">Saved Securities</span>
+                <i className="mdi mdi-account-key menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/AddTicker' ? 'nav-link btn active' : 'nav-link'} href="/AddTicker">
+                <span className="menu-title">Add Ticker</span>
+                <i className="mdi mdi-text menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/UploadTickerReports' ? 'nav-link btn active' : 'nav-link'} href="/UploadTickerReports">
+                <span className="menu-title">Upload Ticker Reports</span>
+                <i className="mdi mdi-upload menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/UploadAnalystVideos' ? 'nav-link btn active' : 'nav-link'} href="/UploadAnalystVideos">
+                <span className="menu-title">Upload Analyst Videos</span>
+                <i className="mdi mdi-video menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/UploadPodcast' ? 'nav-link btn active' : 'nav-link'} href="/UploadPodcast">
+                <span className="menu-title">Upload Podcast</span>
+                <i className="mdi mdi-music menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className={router.pathname === '/ChangePassword' ? 'nav-link btn active' : 'nav-link'} href="/ChangePassword">
+                <span className="menu-title">Change Password</span>
+                <i className="mdi mdi-lock menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className={router.pathname === '/dashboard' ? 'nav-link btn active' : 'nav-link'} href="/dashboard">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>
@@ -83,7 +120,7 @@ export default function Sidebar() {
            
             <li className="nav-item">
               <div className="d-flex align-items-center justify-content-between">
-              <Link href="/marketAnalytics" className={router.pathname === '/marketAnalytics' ? 'nav-link menu-title btn active ' : "nav-link menu-title"}><span className="menu-title">Market Analytics</span></Link>
+              <Link href="/marketAnalytics" className={router.pathname === '/marketAnalytics' ? 'nav-link menu-title btn active ' : "nav-link menu-title"} onClick={()=>{context.toggleMarketAnalytics()}}><span className="menu-title">Market Analytics</span></Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleMarketAnalytics()}} aria-expanded={context.marketAnalytics ? "true" :"false"} aria-controls="ui-basic">
                 <i className="menu-arrow"></i> <i className="mdi mdi-contacts menu-icon"></i>
               </button>
@@ -160,8 +197,14 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className={router.pathname === '/bondPortfolio' ? 'nav-link btn active' : 'nav-link'} href="/bondPortfolio">
+                <span className="menu-title">Bond Portfolio</span>
+                <i className="mdi mdi-chart-bar menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
-            <Link className={router.pathname === '/insights' ? 'nav-link btn active' : 'nav-link'} href="/insights">
+            <Link className={router.pathname === '/insights' ? 'nav-link btn active' : 'nav-link'} href="/insights" onClick={()=>{context.toggleInsights()}}>
                 <span className="menu-title">Insights</span>
               </Link>
               <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.toggleInsights()}} aria-expanded={context.insights ? "true" :"false"} aria-controls="ui-basic">

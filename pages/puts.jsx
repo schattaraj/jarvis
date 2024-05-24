@@ -9,6 +9,12 @@ export default function PUTS() {
     const [tickers,setTickers] = useState([]);
     const [dates,setDates] = useState([])
     const [selectedOption, setSelectedOption] = useState('');
+    const [inputData,setInputData] = useState({
+        putStrikePrice:"",
+        putPrice:"",
+        expirationDate:"",
+        addToDate:""
+    })
     const fetchTickersFunc = async()=>{
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
@@ -29,12 +35,26 @@ export default function PUTS() {
         }
     }
     const handleChange = ()=>{
-
+        
     }
     const handleSelectClick = () => {
         if (selectedOption === 'History') {
             handleOpenModal()
         }
+    }
+    const inputDataHandler = (e)=>{
+        setInputData({...inputData, [e.target.name]: e.target.value})
+    }
+    const formReset = ()=>{
+        setInputData({...inputData,putStrikePrice:"",putPrice:"",expirationDate:"",addToDate:""})
+    }
+    const addData = ()=>{
+        // const hasEmptyValue = Object.values(inputData).some(value => value === "");
+        Object.entries(inputData).forEach(([key, value]) => {
+            if (value === "") {
+                alert(`The key "${key}" has an empty value.`);
+            }
+        });
     }
     useEffect(()=>{
         fetchTickersFunc()
@@ -95,13 +115,13 @@ export default function PUTS() {
                                 </div>
                             </div>
                             <div className='d-flex justify-content-between'> 
-                                    <input type="text" className="form-control me-2" placeholder='Call Strike Price'/>
-                                    <input type="text" className="form-control me-2" placeholder='Call Price'/>
-                                    <input type="text" className="form-control me-2" placeholder='Expiration Date'/>
-                                    <input type="text" className="form-control me-2" placeholder='Add To Date'/>
-                                    <button className='btn btn-primary me-2'>Add</button>
+                                    <input type="text" className="form-control me-2" placeholder='Put Strike Price' value={inputData?.putStrikePrice} name="putStrikePrice" onChange={inputDataHandler}/>
+                                    <input type="text" className="form-control me-2" placeholder='Put Price' value={inputData?.putPrice} name="putPrice" onChange={inputDataHandler}/>
+                                    <input type="date" className="form-control me-2" placeholder='Expiration Date' value={inputData?.expirationDate} name="expirationDate" onChange={inputDataHandler}/>
+                                    <input type="date" className="form-control me-2" placeholder='Add To Date' value={inputData?.addToDate} name="addToDate" onChange={inputDataHandler}/>
+                                    <button className='btn btn-primary me-2' onClick={addData}>Add</button>
                                     <button className='btn btn-primary me-2'>Save</button>
-                                    <button className='btn btn-primary me-2'>Reset</button>
+                                    <button className='btn btn-primary me-2' onClick={formReset}>Reset</button>
                                 {/* <div className="dt-buttons mb-3">
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button"><span>Create New Rule</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>View All Rule</span></button>
@@ -113,15 +133,15 @@ export default function PUTS() {
 					<tr>
 						<th>Ticker</th>
 						<th>Current Ticker Price</th>
-						<th>Call Strike Price</th>
-						<th>Call Price</th>
+						<th>Put Strike Price</th>
+						<th>Put Price</th>
 						<th>Expiration Date</th>
-						<th>Days To Expire</th>
+						<th>Date To Expire</th>
 						<th>Required If Exercised</th>
 						<th>Break Even</th>
-						<th>Percentage(%)</th>
+						<th>Downside Protection(%)</th>
 						<th>Leverage Ratio</th>
-						<th>Cost Of 10 Calls</th>
+						<th>Income Potential of 10 Puts($)</th>
 						<th>Income Per Day</th>
 						<th>Annualized premium</th>
 						<th>Rank</th>

@@ -41,13 +41,14 @@ export default function InsightsHome() {
               </div>
               <div className="col-md-4 stretch-card grid-margin">
                 <div className="card bg-gradient-info card-img-holder text-white">
-               
+                <Link href="/insights/podcast">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     
                     <h2 className="mb-5">Podcast</h2>
                     
                   </div>
+                  </Link>
                 </div>
               </div>
               <div className="col-md-4 stretch-card grid-margin">
@@ -60,7 +61,16 @@ export default function InsightsHome() {
                   </Link>
                 </div>
               </div>
-            
+              <div className="col-md-4 stretch-card grid-margin">
+                <div className="card bg-gradient-success card-img-holder text-white">
+                <Link href="/insights/reports">
+                  <div className="card-body">
+                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+                    <h2 className="mb-5">One Page Report</h2>
+                  </div>
+                  </Link>
+                </div>
+              </div>
             </div>
           
           </div>
