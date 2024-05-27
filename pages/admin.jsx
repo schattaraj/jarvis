@@ -117,7 +117,7 @@ export default function Admin() {
                                 </div>
                                 <div className="col-md-4 stretch-card grid-margin">
                                     <div className="card bg-gradient-success  card-img-holder text-white">
-                                    <Link href={""}>
+                                    <Link href={"/MutualFund"}>
                                         <div className="card-body">
                                             <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
 

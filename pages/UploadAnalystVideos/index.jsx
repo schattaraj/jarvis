@@ -2,6 +2,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
+import { formatDate } from '../../utils/utils';
 export default function UploadAnalystVideos() {
     const [tickers,setTickers] = useState([]);
     const [allAnalystData,setAllAnalystData] = useState([])
@@ -69,8 +70,8 @@ export default function UploadAnalystVideos() {
                                             <label htmlFor="">Select Ticker</label>
                                             <select name="portfolio_name" className='form-select' onChange={handleChange}>
                                                 {/* <option></option> */}
-                                                {tickers.map((item, index) => (
-                                                    <option key={index} value={item?.element1}>
+                                                {tickers.map((item, index) => ( 
+                                                <option key={index} value={item?.element1}>
                                                         {item?.element1}
                                                     </option>
                                                 ))}
@@ -137,7 +138,7 @@ export default function UploadAnalystVideos() {
                                             <td>{item?.tickerName}</td>
                                             <td>{item?.companyName}</td>
                                             <td>{item?.description}</td>
-                                            <td>{item?.reportDate}</td>
+                                            <td>{item?.reportDate && formatDate(item?.reportDate)}</td>
                                             <td>
                                             <button className='btn btn-primary me-2' onClick={()=>{handleShow(item?.anaylstVideoDetails)}}><i className="mdi mdi-video menu-icon"></i></button>
                                             <button className='btn btn-danger'><i className="mdi mdi-delete menu-icon"></i></button>
@@ -157,7 +158,7 @@ export default function UploadAnalystVideos() {
           <Modal.Title>Analyst Video</Modal.Title>
         </Modal.Header>
         <Modal.Body className='text-center'>
-        <video id="videoplayer1" playsinline="" autoplay="" muted="" loop="" height="240" controls="true">
+        <video playsInline="" autoPlay="" muted="" loop="" height="240" controls="true">
   		<source id="videoSource" src={"https://jharvis.com/JarvisV2/playVideo?fileName="+analystVideo} type="video/mp4"/> 
   		</video>
         </Modal.Body>

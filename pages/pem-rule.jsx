@@ -67,7 +67,7 @@ export default function PemRule() {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><input className="form-control" style={{textAlign:"center",padding :"6px",width:"200px"}} type="text" name="txtMessage" id="txtMessage" readonly=""/></td>
+                                    <td><input className="form-control" style={{textAlign:"center",padding :"6px",width:"200px"}} type="text" name="txtMessage" id="txtMessage" readOnly=""/></td>
                                     <td>
                                         <select className="form-select" style={{padding :"6px"}}>
 											    <option value="-1">Select</option>

@@ -112,6 +112,12 @@ export default function Sidebar() {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className={router.pathname === '/MutualFund' ? 'nav-link btn active' : 'nav-link'} href="/MutualFund">
+                <span className="menu-title">Mutual Fund</span>
+                <i className="mdi mdi-cash-refund menu-icon"></i>
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className={router.pathname === '/dashboard' ? 'nav-link btn active' : 'nav-link'} href="/dashboard">
                 <span className="menu-title">Dashboard</span>
                 <i className="mdi mdi-home menu-icon"></i>
