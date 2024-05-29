@@ -3,6 +3,7 @@ import Sidebar from '../../components/sidebar';
 import { useState, useEffect, useContext } from 'react';
 import React from 'react'
 import { Pagination } from '../../components/Pagination';
+import { searchTable } from '../../utils/utils';
 
 export default function SaveSecurities() {
     const [metaDataType, setMetaDataType] = useState("")
@@ -25,26 +26,43 @@ export default function SaveSecurities() {
         fetchAllFavoriteBonds()
     }
     const fetchAllStockData = async () => {
-        // const findAllStocks = fetchAllBonds
-        // const findAllStocksRes = await findAllStocks.json()
-        // setStockData(findAllStocksRes)
+        try {
+        const findAllStocks = await fetch("https://jharvis.com/JarvisV2/findAllStocks")
+        const findAllStocksRes = await findAllStocks.json()
+        setStockData(findAllStocksRes)
+        } catch (error) {
+            
+        }
     }
     const fetchAllFavoriteStockData = async () => {
-        const findAllFavoriteStocks = await fetch("https://jharvis.com/JarvisV2/findAllStocks")
-        const findAllFavoriteStocksRes = await findAllStocks.json()
-        setFavoriteStockData(findAllFavoriteStocksRes)
+        try {
+            const findAllFavoriteStocks = await fetch("https://jharvis.com/JarvisV2/findAllFavoriteStocks?userid=2")
+            const findAllFavoriteStocksRes = await findAllFavoriteStocks.json()
+            setFavoriteStockData(findAllFavoriteStocksRes)
+        } catch (error) {
+            
+        }       
     }
     const fetchAllBonds = async () => {
-    const findAllBonds = await fetch("https://jharvis.com/JarvisV2/findAllBonds")
+        try {
+            const findAllBonds = await fetch("https://jharvis.com/JarvisV2/findAllBonds")
     const findAllBondsRes = await findAllBonds.json()
     setAllBonds(findAllBondsRes)
     setAllBondsFiltered(sliceData(findAllBondsRes,bondCurrentPage))
+        } catch (error) {
+            
+        }    
     }
     const fetchAllFavoriteBonds = async () => {
-        const findAllFavoriteBonds = await fetch("https://jharvis.com/JarvisV2/findAllFavoriteBonds?userid=2")
-        const findAllFavoriteBondsRes = await findAllFavoriteBonds.json()
-        setAllFavoriteBonds(findAllFavoriteBondsRes)
-        setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds,favBondCurrentPage))
+        try {
+            const findAllFavoriteBonds = await fetch("https://jharvis.com/JarvisV2/findAllFavoriteBonds?userid=2")
+            const findAllFavoriteBondsRes = await findAllFavoriteBonds.json()
+            setAllFavoriteBonds(findAllFavoriteBondsRes)
+            setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds,favBondCurrentPage))
+        } catch (error) {
+            
+        }
+       
     }
     const handleShow = () => {
 
@@ -106,12 +124,39 @@ export default function SaveSecurities() {
         const endIndex = startIndex + limit;
        return data.slice(startIndex, endIndex);
     }
+    const filter = (e)=>{
+        const name = e.target.name
+        const value = e.target.value
+        switch (name) {
+            case "allStocks":
+                setStockDataFiltered(searchTable(allStockData,value))
+                break;
+            case "allFavStocks":
+                setFavoriteStockDataFiltered(searchTable(allFavoriteStockData,value))
+                break;
+            case "allBonds":
+                setAllBondsFiltered(searchTable(allBonds,value))
+                break;
+                case "allFavBonds":
+                    setAllFavoriteBondsFiltered(searchTable(allFavoriteBonds,value))
+                break;
+            default:
+                break;
+        }
+        
+    }
+    useEffect(()=>{
+        allStockData.length > 0 && setStockDataFiltered(sliceData(allStockData,stockCurrentPage))
+    },[allStockData,stockCurrentPage])
+    useEffect(()=>{
+        allFavoriteStockData.length > 0 && setFavoriteStockDataFiltered(sliceData(allFavoriteStockData,favStockCurrentPage))
+    },[allFavoriteStockData,favStockCurrentPage])
     useEffect(() => {
         allBonds.length > 0 && setAllBondsFiltered(sliceData(allBonds,bondCurrentPage))
-    }, [bondCurrentPage])
+    }, [allBonds,bondCurrentPage])
     useEffect(() => {
         allFavoriteBonds.length > 0 && setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds,bondCurrentPage))
-    }, [favBondCurrentPage])
+    }, [allFavoriteBonds,favBondCurrentPage])
     return (
         <>
             <div className="container-scroller">
@@ -140,11 +185,11 @@ export default function SaveSecurities() {
                                         </div>
                                     </div>
 
-                                    <div className="col-md-8">
+                                    {/* <div className="col-md-8">
                                         <div className="actions">
                                             <button className='btn btn-primary' onClick={() => { }}>Update</button>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                                 {
                                     metaDataType == "Stocks" &&
@@ -155,7 +200,7 @@ export default function SaveSecurities() {
                                                     <h5>All Stocks: </h5>
                                                     <div className="form-group d-flex align-items-center">
                                                         <label htmlFor="" className='me-2'>Search:</label>
-                                                        <input type="text" className='form-control' />
+                                                        <input type="text" className='form-control' name="allStocks"/>
                                                     </div>
                                                 </div>
                                                 <div className="table-responsive">
@@ -172,7 +217,7 @@ export default function SaveSecurities() {
                                                         </thead>
                                                         <tbody>
                                                             {
-                                                                allStockData.map((item,index)=>{
+                                                                allStockDataFiltered.map((item,index)=>{
                                                                     return  <tr key={"stock"+index}>
                                                                         <td>{item?.stockName}</td>
                                                                         <td>{item?.company}</td>
@@ -195,7 +240,7 @@ export default function SaveSecurities() {
                                                     <h5>Favourite Stocks: </h5>
                                                     <div className="form-group d-flex align-items-center">
                                                         <label htmlFor="" className='me-2'>Search:</label>
-                                                        <input type="text" className='form-control' />
+                                                        <input type="text" className='form-control'  name="allFavStocks"/>
                                                     </div>
                                                 </div>
                                                 <div className="table-responsive">
@@ -213,7 +258,7 @@ export default function SaveSecurities() {
                                                         </thead>
                                                         <tbody>
                                                             {
-                                                                allFavoriteStockData.map((item,index)=>{
+                                                                allFavoriteStockDataFiltered.map((item,index)=>{
                                                                     return <tr key={"favStock"+index}>
                                                                         <td>{item?.stockName}</td>
                                                                         <td>{item?.company}</td>
@@ -226,6 +271,7 @@ export default function SaveSecurities() {
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <Pagination currentPage={favStockCurrentPage} totalItems={allFavoriteStockData} limit={limit} setCurrentPage={setFavStockCurrentPage} handlePage={handleFavStockPage}/>
                                             </div>
                                         </div>
                                     </div>
@@ -239,7 +285,7 @@ export default function SaveSecurities() {
                                                     <h5>All Bonds: </h5>
                                                     <div className="form-group d-flex align-items-center">
                                                         <label htmlFor="" className='me-2'>Search:</label>
-                                                        <input type="text" className='form-control' />
+                                                        <input type="text" className='form-control' name='allBonds' onChange={filter}/>
                                                     </div>
                                                 </div>
                                             <div className="table-responsive">
@@ -277,7 +323,7 @@ export default function SaveSecurities() {
                                                     <h5>Favourite Bonds: </h5>
                                                     <div className="form-group d-flex align-items-center">
                                                         <label htmlFor="" className='me-2'>Search:</label>
-                                                        <input type="text" className='form-control' />
+                                                        <input type="text" className='form-control'  name='allFavBonds' onChange={filter}/>
                                                     </div>
                                                 </div>
                                             <div className="table-responsive">

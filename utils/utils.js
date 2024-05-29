@@ -9,7 +9,7 @@ export const calculateAverage = (tableData, columnName) => {
     }
 
     const sum = numericValues.reduce((acc, value) => acc + parseFloat(value), 0);
-    const average = sum / numericValues.length;
+    const average = (sum / numericValues.length);
     return average.toFixed(2);
 };
 

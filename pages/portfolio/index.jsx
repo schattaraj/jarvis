@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
@@ -8,10 +8,12 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
-import { calculateAverage, searchTable } from '../../utils/utils';
+import { calculateAverage, formatDate, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../components/Pagination';
+import html2canvas from 'html2canvas';
+import * as XLSX from 'xlsx'
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -36,7 +38,7 @@ export default function Portfolio() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [limit,setLimit] = useState(25)
-
+    const tableRef = useRef(null);
     const options = {
         replace: (elememt) => {
             if (elememt.name === 'a') {
@@ -113,6 +115,64 @@ export default function Portfolio() {
             doc.save('table.pdf')
         }
     }
+    const generatePDF = () => {
+        const input = document.getElementById('my-table');
+        html2canvas(input).then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF();
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          pdf.save('Jarvis Ticker for '+formatDate(new Date())+'.pdf');
+        });
+      };
+      const exportToExcel = () => {
+        // Get table data and convert to a 2D array
+        const table = tableRef.current;
+        const tableData = [];
+        const rows = table.querySelectorAll('tr');
+    
+        rows.forEach(row => {
+          const rowData = [];
+          const cells = row.querySelectorAll('th, td');
+          cells.forEach(cell => {
+            rowData.push(cell.textContent);
+          });
+          tableData.push(rowData);
+        });
+    
+        // Create a new workbook and a new worksheet
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.aoa_to_sheet(tableData);
+    
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    
+        // Generate a binary string representation of the workbook
+        const workbookBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+    
+        // Convert the binary string to a Blob
+        const blob = new Blob([s2ab(workbookBinary)], { type: 'application/octet-stream' });
+    
+        // Create a link element to trigger the download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'table_data.xlsx';
+        link.click();
+        URL.revokeObjectURL(link.href); // Clean up the URL object
+      };
+    
+      // Helper function to convert a string to an array buffer
+      const s2ab = (s) => {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+          view[i] = s.charCodeAt(i) & 0xFF;
+        }
+        return buf;
+      };
     const getAllStock = async () => {
         context.setLoaderState(true)
         try {
@@ -236,11 +296,11 @@ if(countApiCall == 1){
 
                                         <div className="form-group">
                                             <label htmlFor="">Portfolio Name</label>
-                                            <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                            <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
                                                 <option>Select Portfolio</option>
                                                 {
                                                     portfolioNames.length > 0 && portfolioNames.map((item, index) => {
-                                                        return <option value={item?.idPortfolio} key={"name" + index} selected={item?.idPortfolio == selectedPortfolioId && true}>{item?.name}</option>
+                                                        return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
                                                     })
                                                 }
                                             </select>
@@ -257,13 +317,13 @@ if(countApiCall == 1){
                             </div>
                             <div className='d-flex justify-content-between'>
                                 <div className="dt-buttons mb-3">
-                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                 </div>
                                 <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
                                             {
@@ -280,7 +340,9 @@ if(countApiCall == 1){
                                                     {
 
                                                         columnNames.map((inner, keyid) => {
-                                                            return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
+                                                        return inner['elementInternalName'] == "element31" ? <td key={"keyid" + keyid}>{(parse(item[inner['elementInternalName']], options)*100).toFixed(2)}</td> : <td key={"keyid" + keyid}>{parse(item[inner['elementInternalName']], options)}</td>
+                                                           
+                                                            
                                                         })
                                                     }
                                                 </tr>
@@ -293,15 +355,19 @@ if(countApiCall == 1){
                                             {
 
                                                 filterData.length ? columnNames.map((item, index) => {
-                                                    if (item.elementInternalName === 'element3') {
+                                                    if (item.elementInternalName === 'element31') {
                                                         return <th key={index}>
-                                                            {calculateAverage(filterData, 'element3')} % <br />
-                                                            ({calculateAverage(tableData, 'element3')}) %
+                                                            {calculateAverage(filterData, 'element31')} % <br />
+                                                            ({calculateAverage(tableData, 'element31')}) %
                                                         </th>
-
-
-
-                                                    } else {
+                                                    } 
+                                                    if (item.elementInternalName === 'element33') {
+                                                        return <th key={index}>
+                                                            {calculateAverage(filterData, 'element33')} % <br />
+                                                            ({calculateAverage(tableData, 'element33')}) %
+                                                        </th>
+                                                    } 
+                                                    else {
                                                         return <th key={index}></th>
                                                     }
 

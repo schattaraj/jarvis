@@ -37,13 +37,13 @@ export default function UploadPodcast() {
     const fetchHistoryFuc = () => {
 
     }
-    const fetchAllAnalystVideos = async () => {
+    const fetchAllPodcastVideos = async () => {
         context.setLoaderState(true)
         try {
             const getAllAnalyst = await fetch("https://jharvis.com/JarvisV2/getAllPodCasts?_=1716548464958")
             const getAllAnalystRes = await getAllAnalyst.json()
             setallPodcastData(getAllAnalystRes)
-            setallPodcastDataFiltered(getAllAnalystRes)
+            setallPodcastDataFiltered([...getAllAnalystRes])
         } catch (error) {
             console.log("error", error)
         }
@@ -86,7 +86,8 @@ export default function UploadPodcast() {
             if (response.ok) {
                 const result = await response.json();
                 alert(result.msg)
-                fetchAllAnalystVideos()
+                form.reset()
+                fetchAllPodcastVideos()
             } else {
                 console.error('Error:', response.statusText);
             }
@@ -108,6 +109,8 @@ export default function UploadPodcast() {
         if (podcastDelete.ok) {
             const podcastDeleteRes = await podcastDelete.json()
             alert(podcastDeleteRes.msg)
+            fetchAllPodcastVideos()
+
         }
             } catch (error) {
                 console.log(error)
@@ -127,7 +130,7 @@ export default function UploadPodcast() {
     }, [currentPage, allPodcastData])
     useEffect(() => {
         fetchTickersFunc()
-        fetchAllAnalystVideos()
+        fetchAllPodcastVideos()
     }, [])
     return (
         <>
@@ -152,7 +155,7 @@ export default function UploadPodcast() {
                                         <div className="form-group">
                                             <label htmlFor="">Select Ticker</label>
                                             <select name="tickerName" className='form-select' onChange={handleChange} required>
-                                                {/* <option></option> */}
+                                                <option value={""}>--Select Ticker--</option>
                                                 {tickers.map((item, index) => (
                                                     <option key={index} value={item?.element1}>
                                                         {item?.element1}

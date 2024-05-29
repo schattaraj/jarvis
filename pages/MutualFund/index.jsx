@@ -117,6 +117,7 @@ export default function MutualFund() {
             if (response.ok) {
                 const result = await response.json();
                 alert(result.msg)
+                form.reset()
             } else {
                 console.error('Error:', response.statusText);
             }
