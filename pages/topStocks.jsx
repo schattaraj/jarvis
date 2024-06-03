@@ -5,81 +5,77 @@ import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 export default function WatchList() {
-  return (
-    <>
-      <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
-                    <div className="main-panel">
-                    <div className="content-wrapper">
-            <div className="page-header">
-              <h3 className="page-title">
-                <span className="page-title-icon bg-gradient-primary text-white me-2">
-                  <i className="mdi mdi-home"></i>
-                </span>Top Stocks
-              </h3>
-              
-            </div>
-            <div className="row">
-              <div className="col-md-4 offset-8">
-                  <div className="d-flex align-items-center mb-3">
-                  <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example"/>
-                  </div>
-              </div>
-          </div>
-      <table id="example" className="table table-striped" style={{width:'100%'}}>
-                  <thead>
-                      <tr>
-                          <th>No.</th>
-                          <th>Symbol</th>
-                          <th>Company Name</th>
-                          <th>Top Rating</th>
-                          <th>Analyst Count</th>
-                          <th>Upside (%)</th>
-                          <th>Market Cap</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                     <tr>
-                         <td>50</td>
-                         <td>WIX</td>
-                         <td>Wix.com.Ltd</td>
-                         <td>Strong Buy</td>
-                         <td>6</td>
-                         <td style={{color:"#15803d"}}>28.24%</td>
-                         <td>5.16B</td>
-                     </tr>
-                     <tr>
-                         <td>49</td>
-                         <td>GFX</td>
-                         <td>GLOBALFOUNDRIES Inc.</td>
-                         <td>Strong Buy</td>
-                         <td>7</td>
-                         <td style={{color:"#15803d"}}>28.50%</td>
-                         <td>31.46B</td>
-                     </tr>
-                     <tr>
-                         <td>48</td>
-                         <td>GDDY</td>
-                         <td>GoDaddy Inc.</td>
-                         <td>Strong Buy</td>
-                         <td>6</td>
-                         <td style={{color:"#15803d"}}>28.84%</td>
-                         <td>10.92B</td>
-                     </tr>
-                     <tr>
-                         <td>47</td>
-                         <td>NVDA</td>
-                         <td>NVIDIA Corporation</td>
-                         <td>Strong Buy</td>
-                         <td>27</td>
-                         <td style={{color:"#15803d"}}>28.87%</td>
-                         <td>1130.32B</td>
-                     </tr>
-                     </tbody>
-      </table>
-            {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
+    return (
+        <>
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>Top Stocks
+                        </h3>
+
+                    </div>
+                    <div className="row">
+                        <div className="col-md-4 offset-8">
+                            <div className="d-flex align-items-center mb-3">
+                                <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
+                            </div>
+                        </div>
+                    </div>
+                    <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Symbol</th>
+                                <th>Company Name</th>
+                                <th>Top Rating</th>
+                                <th>Analyst Count</th>
+                                <th>Upside (%)</th>
+                                <th>Market Cap</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>50</td>
+                                <td>WIX</td>
+                                <td>Wix.com.Ltd</td>
+                                <td>Strong Buy</td>
+                                <td>6</td>
+                                <td style={{ color: "#15803d" }}>28.24%</td>
+                                <td>5.16B</td>
+                            </tr>
+                            <tr>
+                                <td>49</td>
+                                <td>GFX</td>
+                                <td>GLOBALFOUNDRIES Inc.</td>
+                                <td>Strong Buy</td>
+                                <td>7</td>
+                                <td style={{ color: "#15803d" }}>28.50%</td>
+                                <td>31.46B</td>
+                            </tr>
+                            <tr>
+                                <td>48</td>
+                                <td>GDDY</td>
+                                <td>GoDaddy Inc.</td>
+                                <td>Strong Buy</td>
+                                <td>6</td>
+                                <td style={{ color: "#15803d" }}>28.84%</td>
+                                <td>10.92B</td>
+                            </tr>
+                            <tr>
+                                <td>47</td>
+                                <td>NVDA</td>
+                                <td>NVIDIA Corporation</td>
+                                <td>Strong Buy</td>
+                                <td>27</td>
+                                <td style={{ color: "#15803d" }}>28.87%</td>
+                                <td>1130.32B</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
               <li className="nav-item" role="presentation">
                 <button className="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
               </li>
@@ -604,11 +600,9 @@ export default function WatchList() {
               tab 7
              </div>
           </div>           */}
-          </div>
-                      <Footer/>
-                    </div>
                 </div>
+                <Footer />
             </div>
-    </>
-  )
+        </>
+    )
 }

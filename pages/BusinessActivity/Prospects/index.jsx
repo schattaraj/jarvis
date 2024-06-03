@@ -128,10 +128,6 @@ export default function Prospects() {
     }, [currentPage, tableData, sortConfig]);
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
                     <div className="main-panel">
                         <div className="content-wrapper">
                             <div className="page-header">
@@ -193,8 +189,6 @@ export default function Prospects() {
                                 {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                     </div>
-                </div>
-            </div>
         </>
     )
 }

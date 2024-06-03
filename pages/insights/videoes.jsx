@@ -7,10 +7,7 @@ import VideoComponent from "../../components/videos";
 export default function videoes() {
 
   return (
-    <div className="container-scroller">
-      <Navigation />
-      <div className="container-fluid page-body-wrapper">
-        <Sidebar />
+    <>
         {/* <div className="main-panel"> */}
         {/* <div className="content-wrapper"> */}
           <VideoComponent />
@@ -76,8 +73,7 @@ export default function videoes() {
         {/* </div> */}
         {/* <Footer /> */}
         {/* </div> */}
-      </div>
-    </div>
+        </>
   );
 }
 

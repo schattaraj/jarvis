@@ -6,10 +6,6 @@ import Link from 'next/link'
 export default function MarketAnalytics() {
   return (
     <>
-     <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
                     <div className="main-panel">
                     <div className="content-wrapper">
             <div className="page-header">
@@ -125,9 +121,7 @@ export default function MarketAnalytics() {
           
           </div>
           <Footer/>
-                    </div>
-                </div>
-            </div>
+                    </div>    
     </>
   )
 }

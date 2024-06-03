@@ -1,3 +1,18 @@
+export const calculateAveragePercentage = (tableData, columnName) => {
+    const columnValues = tableData.map((row) => row[columnName]);
+
+    const numericValues = columnValues.filter((value) => !isNaN(parseFloat(value)));
+
+    if (numericValues.length === 0) {
+        console.log(`No numeric values found in column ${columnName}`);
+        return null;
+    }
+
+    const sum = numericValues.reduce((acc, value) => acc + parseFloat(value), 0);
+    const average = (sum / numericValues.length)*100;
+    return average.toFixed(2);
+};
+
 export const calculateAverage = (tableData, columnName) => {
     const columnValues = tableData.map((row) => row[columnName]);
 

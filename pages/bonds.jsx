@@ -73,7 +73,7 @@ export default function Bonds() {
     const [chartData, setChartData] = useState()
     const [callChart, setCallChart] = useState(false)
     const [currentPage, setCurrentPage] = useState(1);
-    const [limit,setLimit] = useState(25)
+    const [limit, setLimit] = useState(25)
 
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -212,32 +212,32 @@ export default function Bonds() {
             console.error('Error fetching data:', error);
         }
     };
-    
-    const handlePage = async(action) => {
+
+    const handlePage = async (action) => {
         switch (action) {
             case 'prev':
-                    setCurrentPage(currentPage - 1)
+                setCurrentPage(currentPage - 1)
                 break;
-                case 'next':
-                    setCurrentPage(currentPage + 1)
+            case 'next':
+                setCurrentPage(currentPage + 1)
                 break;
             default:
-            setCurrentPage(currentPage)
+                setCurrentPage(currentPage)
                 break;
         }
-      };
+    };
 
-      useEffect(()=>{
-        async function run(){
-            if(tableData.length > 0){
+    useEffect(() => {
+        async function run() {
+            if (tableData.length > 0) {
                 // console.log("tableData",tableData)
                 const items = await SliceData(currentPage, limit, tableData);
                 // console.log("items",items)
                 setFilterData(items)
-            }     
+            }
         }
-        run() 
-      },[currentPage,tableData])
+        run()
+    }, [currentPage, tableData])
 
     useEffect(() => {
         fetchColumnNames()
@@ -253,139 +253,133 @@ export default function Bonds() {
 
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
-                    <div>
-                        <BondsHistoryModal open={openModal} handleClose={handleCloseModal} />
+            <div>
+                <BondsHistoryModal open={openModal} handleClose={handleCloseModal} />
+            </div>
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>Bonds
+                        </h3>
                     </div>
-                    <div className="main-panel">
-                        <div className="content-wrapper">
-                            <div className="page-header">
-                                <h3 className="page-title">
-                                    <span className="page-title-icon bg-gradient-primary text-white me-2">
-                                        <i className="mdi mdi-home"></i>
-                                    </span>Bonds
-                                </h3>
+                    <div className="selection-area mb-3">
+                        <div className="row">
+                            <div className="col-md-3">
+                                <div className="form-group">
+                                    <label htmlFor="">Options</label>
+                                    <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                        {option.map((option, index) => (
+                                            <option key={index} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                            <div className="selection-area mb-3">
-                                <div className="row">
-                                    <div className="col-md-3">
-                                        <div className="form-group">
-                                            <label htmlFor="">Options</label>
-                                            <select name="portfolio_name" className='form-select' onChange={handleChange}>
-                                                {option.map((option, index) => (
-                                                    <option key={index} value={option}>
-                                                        {option}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    {(<div className="col-md-6">
-                                        <div className="form-group">
-                                            <label htmlFor="">Filter Bonds</label>
-                                            <Autocomplete
-                                                multiple
-                                                id="tags-standard"
-                                                value={selectedStock}
-                                                onChange={(event, newValue) => {
-                                                    setSelectedStock(newValue);
-                                                }}
-                                                options={stocks}
-                                                getOptionLabel={(option) => option.element98}
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        variant="outlined"
-                                                        label="Select Stocks"
-                                                    />
-                                                )}
+                            {(<div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="">Filter Bonds</label>
+                                    <Autocomplete
+                                        multiple
+                                        id="tags-standard"
+                                        value={selectedStock}
+                                        onChange={(event, newValue) => {
+                                            setSelectedStock(newValue);
+                                        }}
+                                        options={stocks}
+                                        getOptionLabel={(option) => option.element98}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                label="Select Stocks"
                                             />
-                                        </div>
-                                    </div>)}
+                                        )}
+                                    />
+                                </div>
+                            </div>)}
 
-                                    <div className="col-md-3">
-                                        <div className="actions">
-                                            <button className='btn btn-primary' onClick={() => {
-                                                if (selectedStock.length && selectedOption === 'Chart View') {
-                                                    getTickerCartDtata()
-                                                } else {
+                            <div className="col-md-3">
+                                <div className="actions">
+                                    <button className='btn btn-primary' onClick={() => {
+                                        if (selectedStock.length && selectedOption === 'Chart View') {
+                                            getTickerCartDtata()
+                                        } else {
 
-                                                    handleSelectClick()
-                                                }
-                                            }}>GO</button>
-                                        </div>
-                                    </div>
+                                            handleSelectClick()
+                                        }
+                                    }}>GO</button>
                                 </div>
                             </div>
-                            <div className='d-flex justify-content-between'>
-                                <div className="dt-buttons mb-3">
-                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
-                            </div>
-                            {selectedOption === 'Chart View' ? <BondChart bondData={chartData} /> :
-                                (<div className="table-responsive">
-                                    <table className="table border display no-footer dataTable"  role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                        <thead>
-                                            <tr>
-                                                {columnNames.map((columnName, index) => (
-                                                    <th key={'column'+index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filterData.map((rowData, rowIndex) => (
-                                                <tr key={'rowIndex'+rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                    {
-                                                        columnNames.map((columnName, colIndex) => {
-                                                            let content;
-
-                                                            if (columnName.elementInternalName === 'element3') {
-                                                                content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                            } else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
-                                                                content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                            } else {
-                                                                content = rowData[columnName.elementInternalName];
-                                                            }
-
-                                                            if (typeof (content) == 'string') {
-                                                                content = parse(content)
-                                                            }
-                                                            return <td key={colIndex}>{content}</td>;
-                                                        })
-                                                    }
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                        <thead>
-                                            <tr>
-                                                {filterData.length ? columnNames.map((item, index) => {
-                                                    {
-                                                        if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
-                                                            return <th>
-                                                                {calculateAverage(filterData, item.elementInternalName)} % <br />
-                                                                ({calculateAverage(tableData, item.elementInternalName)}) %
-                                                            </th>
-                                                        } else {
-                                                            return <th key={index}></th>
-                                                        }
-                                                    }
-                                                }) : null
-                                                }
-                                            </tr>
-                                        </thead>
-                                    </table>
-
-                                </div>)
-                            }
-                           {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/> } 
                         </div>
                     </div>
+                    <div className='d-flex justify-content-between'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                    </div>
+                    {selectedOption === 'Chart View' ? <BondChart bondData={chartData} /> :
+                        (<div className="table-responsive">
+                            <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                <thead>
+                                    <tr>
+                                        {columnNames.map((columnName, index) => (
+                                            <th key={'column' + index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filterData.map((rowData, rowIndex) => (
+                                        <tr key={'rowIndex' + rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                            {
+                                                columnNames.map((columnName, colIndex) => {
+                                                    let content;
+
+                                                    if (columnName.elementInternalName === 'element3') {
+                                                        content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                    } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                        content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                    } else {
+                                                        content = rowData[columnName.elementInternalName];
+                                                    }
+
+                                                    if (typeof (content) == 'string') {
+                                                        content = parse(content)
+                                                    }
+                                                    return <td key={colIndex}>{content}</td>;
+                                                })
+                                            }
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <thead>
+                                    <tr>
+                                        {filterData.length ? columnNames.map((item, index) => {
+                                            {
+                                                if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
+                                                    return <th>
+                                                        {calculateAverage(filterData, item.elementInternalName)} % <br />
+                                                        ({calculateAverage(tableData, item.elementInternalName)}) %
+                                                    </th>
+                                                } else {
+                                                    return <th key={index}></th>
+                                                }
+                                            }
+                                        }) : null
+                                        }
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>)
+                    }
+                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
             <Loader />

@@ -8,7 +8,7 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
-import { calculateAverage, formatDate, searchTable } from '../../utils/utils';
+import { calculateAverage, calculateAveragePercentage, formatDate, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../components/Pagination';
@@ -32,12 +32,12 @@ export default function Portfolio() {
         purchaseDate: "",
         purchasePrice: ""
     })
-    const [countApiCall,setCountApiCall] = useState(0)
+    const [countApiCall, setCountApiCall] = useState(0)
     //pagination
     const [totalItems, setTotalItems] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [limit,setLimit] = useState(25)
+    const [limit, setLimit] = useState(25)
     const tableRef = useRef(null);
     const options = {
         replace: (elememt) => {
@@ -79,7 +79,7 @@ export default function Portfolio() {
             const portfolioApiRes = await portfolioApi.json()
             setPortfolioNames(portfolioApiRes)
             setPortfolioId(portfolioApiRes[0]?.idPortfolio)
-            setCountApiCall(countApiCall+1)
+            setCountApiCall(countApiCall + 1)
         }
         catch (e) {
             console.log("error", e)
@@ -91,12 +91,12 @@ export default function Portfolio() {
                 const getPortfolio = await fetch("https://www.jharvis.com/JarvisV2/getPortFolioStockSet?idPortfolio=" + selectedPortfolioId)
                 const getPortfolioRes = await getPortfolio.json()
                 setTableData(getPortfolioRes)
-                setFilterData(getPortfolioRes) 
+                setFilterData(getPortfolioRes)
                 const totalItems = getPortfolioRes.length
                 setTotalItems(totalItems)
-                const items = await SliceData(1, limit,getPortfolioRes);
-                setFilterData(items) 
-                setTotalPages(Math.ceil(totalItems / limit)); 
+                const items = await SliceData(1, limit, getPortfolioRes);
+                setFilterData(items)
+                setTotalPages(Math.ceil(totalItems / limit));
             }
         }
         catch (e) {
@@ -118,61 +118,61 @@ export default function Portfolio() {
     const generatePDF = () => {
         const input = document.getElementById('my-table');
         html2canvas(input).then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF();
-          const imgProps = pdf.getImageProperties(imgData);
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-          pdf.save('Jarvis Ticker for '+formatDate(new Date())+'.pdf');
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save('Jarvis Ticker for ' + formatDate(new Date()) + '.pdf');
         });
-      };
-      const exportToExcel = () => {
+    };
+    const exportToExcel = () => {
         // Get table data and convert to a 2D array
         const table = tableRef.current;
         const tableData = [];
         const rows = table.querySelectorAll('tr');
-    
+
         rows.forEach(row => {
-          const rowData = [];
-          const cells = row.querySelectorAll('th, td');
-          cells.forEach(cell => {
-            rowData.push(cell.textContent);
-          });
-          tableData.push(rowData);
+            const rowData = [];
+            const cells = row.querySelectorAll('th, td');
+            cells.forEach(cell => {
+                rowData.push(cell.textContent);
+            });
+            tableData.push(rowData);
         });
-    
+
         // Create a new workbook and a new worksheet
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.aoa_to_sheet(tableData);
-    
+
         // Append the worksheet to the workbook
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    
+
         // Generate a binary string representation of the workbook
         const workbookBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
-    
+
         // Convert the binary string to a Blob
         const blob = new Blob([s2ab(workbookBinary)], { type: 'application/octet-stream' });
-    
+
         // Create a link element to trigger the download
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = 'table_data.xlsx';
         link.click();
         URL.revokeObjectURL(link.href); // Clean up the URL object
-      };
-    
-      // Helper function to convert a string to an array buffer
-      const s2ab = (s) => {
+    };
+
+    // Helper function to convert a string to an array buffer
+    const s2ab = (s) => {
         const buf = new ArrayBuffer(s.length);
         const view = new Uint8Array(buf);
         for (let i = 0; i < s.length; i++) {
-          view[i] = s.charCodeAt(i) & 0xFF;
+            view[i] = s.charCodeAt(i) & 0xFF;
         }
         return buf;
-      };
+    };
     const getAllStock = async () => {
         context.setLoaderState(true)
         try {
@@ -236,31 +236,31 @@ export default function Portfolio() {
     const createPortfolio = () => {
         console.log("portfolioPayload", portfolioPayload)
     }
-      const handlePage = async(action) => {
+    const handlePage = async (action) => {
         switch (action) {
             case 'prev':
-                    setCurrentPage(currentPage - 1)
+                setCurrentPage(currentPage - 1)
                 break;
-                case 'next':
-                    setCurrentPage(currentPage + 1)
+            case 'next':
+                setCurrentPage(currentPage + 1)
                 break;
             default:
-            setCurrentPage(currentPage)
+                setCurrentPage(currentPage)
                 break;
         }
-      };
+    };
 
-      useEffect(()=>{
-        async function run(){
-            if(tableData.length > 0){
+    useEffect(() => {
+        async function run() {
+            if (tableData.length > 0) {
                 // console.log("tableData",tableData)
                 const items = await SliceData(currentPage, limit, tableData);
                 // console.log("items",items)
                 setFilterData(items)
-            }     
+            }
         }
-        run() 
-      },[currentPage])
+        run()
+    }, [currentPage])
 
     useEffect(() => {
         fetchColumnNames()
@@ -268,197 +268,234 @@ export default function Portfolio() {
         getAllStock()
     }, [])
     useEffect(() => {
-if(countApiCall == 1){
-    fetchData()
-}
+        if (countApiCall == 1) {
+            fetchData()
+        }
     }, [countApiCall])
 
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
-                    <div className="main-panel">
-                        <div className="content-wrapper">
-                            <div className="page-header">
-                                <h3 className="page-title">
-                                    <span className="page-title-icon bg-gradient-primary text-white me-2">
-                                        <i className="mdi mdi-home"></i>
-                                    </span>Portfolio
-                                </h3>
-                            </div>
-                            <div className="selection-area mb-3">
-                                <div className="row">
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>Portfolio
+                        </h3>
+                    </div>
+                    <div className="selection-area mb-3">
+                        <div className="row">
 
-                                    <div className="col-md-4">
+                            <div className="col-md-4">
 
 
-                                        <div className="form-group">
-                                            <label htmlFor="">Portfolio Name</label>
-                                            <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
-                                                <option>Select Portfolio</option>
-                                                {
-                                                    portfolioNames.length > 0 && portfolioNames.map((item, index) => {
-                                                        return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
-                                                    })
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="col-md-8">
-                                        <div className="actions">
-                                            <button className='btn btn-primary' onClick={fetchData}>GO</button>
-                                            <button className='btn btn-primary' onClick={handleShow}>CREATE PORTFOLIO</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='d-flex justify-content-between'>
-                                <div className="dt-buttons mb-3">
-                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
-                            </div>
-                            <div className="table-responsive">
-                                <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            {
-                                                columnNames.length > 0 && columnNames.map((item, index) => {
-                                                    return <th key={index}>{item?.elementName}</th>
-                                                })
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                <div className="form-group">
+                                    <label htmlFor="">Portfolio Name</label>
+                                    <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
+                                        <option>Select Portfolio</option>
                                         {
-                                            filterData.map((item, index) => {
-                                                return <tr key={"tr" + index}>
-                                                    {
-
-                                                        columnNames.map((inner, keyid) => {
-                                                        return inner['elementInternalName'] == "element31" ? <td key={"keyid" + keyid}>{(parse(item[inner['elementInternalName']], options)*100).toFixed(2)}</td> : <td key={"keyid" + keyid}>{parse(item[inner['elementInternalName']], options)}</td>
-                                                           
-                                                            
-                                                        })
-                                                    }
-                                                </tr>
+                                            portfolioNames.length > 0 && portfolioNames.map((item, index) => {
+                                                return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
                                             })
                                         }
+                                    </select>
+                                </div>
+                            </div>
 
-                                    </tbody>
-                                    <thead>
-                                        <tr>
+                            <div className="col-md-8">
+                                <div className="actions">
+                                    <button className='btn btn-primary' onClick={fetchData}>GO</button>
+                                    <button className='btn btn-primary' onClick={handleShow}>CREATE PORTFOLIO</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='d-flex justify-content-between'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                    </div>
+                    <div className="table-responsive">
+                        <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                            <thead>
+                                <tr>
+                                    {
+                                        columnNames.length > 0 && columnNames.map((item, index) => {
+                                            return <th key={index}>{item?.elementDisplayName}</th>
+                                        })
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    filterData.map((item, index) => {
+                                        return <tr key={"tr" + index}>
                                             {
 
-                                                filterData.length ? columnNames.map((item, index) => {
-                                                    if (item.elementInternalName === 'element31') {
-                                                        return <th key={index}>
-                                                            {calculateAverage(filterData, 'element31')} % <br />
-                                                            ({calculateAverage(tableData, 'element31')}) %
-                                                        </th>
-                                                    } 
-                                                    if (item.elementInternalName === 'element33') {
-                                                        return <th key={index}>
-                                                            {calculateAverage(filterData, 'element33')} % <br />
-                                                            ({calculateAverage(tableData, 'element33')}) %
-                                                        </th>
-                                                    } 
+                                                columnNames.map((inner, keyid) => {
+                                                    const percentColumns = ["element31", "element34", "element35", "element7", "element8", "element9", "element11", "element13"]
+                                                    if (percentColumns.includes(inner['elementInternalName'], 0)) {
+                                                        return <td key={"keyid" + keyid}>{(parse(item[inner['elementInternalName']], options) * 100).toFixed(2)}</td>
+                                                    }
                                                     else {
-                                                        return <th key={index}></th>
+                                                        return <td key={"keyid" + keyid}>{parse(item[inner['elementInternalName']], options)}</td>
                                                     }
 
-                                                }) : null
+
+
+                                                })
                                             }
                                         </tr>
-                                    </thead>
+                                    })
+                                }
 
-                                </table>
-                            </div> 
-      <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage}/>
-                        </div>
-                        <Footer />
-                        <Modal show={show} onHide={handleClose} className='portfolio-modal'>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Create Portfolio</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <div className="row">
-                                    <div className="col-md-6">
-                                        <div className="form-group d-flex">
-                                            <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={portfolioInputs} />
-                                            <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
-                                        </div>
-                                    </div>
-                                </div>
+                            </tbody>
+                            <thead>
+                                <tr>
+                                    {
 
-                                <div className="table-responsive">
-                                    <table className='table'>
-                                        <thead>
-                                            <tr>
-                                                <th>Select</th>
-                                                <th>Symbol</th>
-                                                <th>Share</th>
-                                                <th>Purchase Date</th>
-                                                <th>Purchase Price</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                allStocks.length > 0 && allStocks.map((item, index) => {
-                                                    return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
-                                                })
+                                        filterData.length ? columnNames.map((item, index) => {
+                                            if (item.elementInternalName === 'element31') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element31')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element31')}) %
+                                                </th>
                                             }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </Modal.Body>
-                        </Modal>
-                        <Modal className="report-modal" show={reportModal} onHide={() => { setReportModal(false) }}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Report Table</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <div className="table-responsive">
-                                    <table className="table report-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Ticker</th>
-                                                <th>Company</th>
-                                                <th>Description</th>
-                                                <th>Report Type</th>
-                                                <th>Report Date</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                reportData.map((item, index) => {
-                                                    return (<tr key={"report" + index}>
-                                                        <td>{item?.tickerName}</td>
-                                                        <td>{item?.companyName}</td>
-                                                        <td><p style={{ maxWidth: "400px" }} className="text-wrap">{item?.description}</p></td>
-                                                        <td>{item?.catagoryType}</td>
-                                                        <td>{item?.reportDate}</td>
-                                                        <td>
-                                                            <button onClick={() => { downloadReport(item?.reportfileDetails) }} className="btn me-2"><img src="/icons/download.svg" alt="" /></button>
-                                                            <button onClick={() => { deleteReport(item?.idTickerReports) }} className="btn bg-danger"><img src="/icons/trash-2.svg" alt="" /></button>
-                                                        </td>
-                                                    </tr>)
-                                                })
+                                            if (item.elementInternalName === 'element33') {
+                                                return <th key={index}>
+                                                    {calculateAverage(filterData, 'element33')} % <br />
+                                                    ({calculateAverage(tableData, 'element33')}) %
+                                                </th>
                                             }
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <p className="mt-2">Showing {reportData.length} entries</p>
-                            </Modal.Body>
-                        </Modal>
+                                            if (item.elementInternalName === 'element34') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element34')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element34')}) %
+                                                </th>
+                                            }
+                                            if (item.elementInternalName === 'element35') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element35')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element35')}) %
+                                                </th>
+                                            }
+                                            if (item.elementInternalName === 'element9') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element9')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element9')}) %
+                                                </th>
+                                            }
+                                            if (item.elementInternalName === 'element11') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element11')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element11')}) %
+                                                </th>
+                                            }
+                                            if (item.elementInternalName === 'element12') {
+                                                return <th key={index}>
+                                                    {calculateAveragePercentage(filterData, 'element12')} % <br />
+                                                    ({calculateAveragePercentage(tableData, 'element12')}) %
+                                                </th>
+                                            }
+                                            if (item.elementInternalName === 'element22') {
+                                                return <th key={index}>
+                                                    {calculateAverage(filterData, 'element22')} % <br />
+                                                    ({calculateAverage(tableData, 'element22')}) %
+                                                </th>
+                                            }
+                                            else {
+                                                return <th key={index}></th>
+                                            }
+
+                                        }) : null
+                                    }
+                                </tr>
+                            </thead>
+
+                        </table>
                     </div>
+                    <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />
                 </div>
-            </div >
+                <Footer />
+                <Modal show={show} onHide={handleClose} className='portfolio-modal'>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Create Portfolio</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group d-flex">
+                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={portfolioInputs} />
+                                    <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="table-responsive">
+                            <table className='table'>
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Symbol</th>
+                                        <th>Share</th>
+                                        <th>Purchase Date</th>
+                                        <th>Purchase Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        allStocks.length > 0 && allStocks.map((item, index) => {
+                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
+                                        })
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </Modal.Body>
+                </Modal>
+                <Modal className="report-modal" show={reportModal} onHide={() => { setReportModal(false) }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Report Table</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="table-responsive">
+                            <table className="table report-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th>Company</th>
+                                        <th>Description</th>
+                                        <th>Report Type</th>
+                                        <th>Report Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        reportData.map((item, index) => {
+                                            return (<tr key={"report" + index}>
+                                                <td>{item?.tickerName}</td>
+                                                <td>{item?.companyName}</td>
+                                                <td><p style={{ maxWidth: "400px" }} className="text-wrap">{item?.description}</p></td>
+                                                <td>{item?.catagoryType}</td>
+                                                <td>{item?.reportDate}</td>
+                                                <td>
+                                                    <button onClick={() => { downloadReport(item?.reportfileDetails) }} className="btn me-2"><img src="/icons/download.svg" alt="" /></button>
+                                                    <button onClick={() => { deleteReport(item?.idTickerReports) }} className="btn bg-danger"><img src="/icons/trash-2.svg" alt="" /></button>
+                                                </td>
+                                            </tr>)
+                                        })
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="mt-2">Showing {reportData.length} entries</p>
+                    </Modal.Body>
+                </Modal>
+            </div>
             <Loader />
         </>
     )

@@ -62,10 +62,6 @@ export default function PUTS() {
     },[])
   return (
     <>
-    <div className="container-scroller">
-               <Navigation />
-               <div className="container-fluid page-body-wrapper">
-                   <Sidebar />
                    <div className="main-panel">
                         <div className="content-wrapper">
                             <div className="page-header">
@@ -157,8 +153,6 @@ export default function PUTS() {
                             </div>                          
                             </div>
                             </div>
-</div>
-</div>
                    </>
   )
 }

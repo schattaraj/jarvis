@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState, useContext,useRef } from "react";
 import {useRouter} from 'next/router'
+import Layout from "../components/Layout";
 
 export const Context = createContext()
 
@@ -61,9 +62,19 @@ else{
   //   let elem = collapse.current
   //   elem.classList.toggle("show")
   // }
+  const router = useRouter();
+  const noLayoutRoutes = ['/login','/register'];
+  const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
     return (
         <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity}}>
-          {children}
+          {isNoLayoutRoute ?
+          children
+        :  
+        <Layout>
+        {children}
+        </Layout>
+        }
+         
         </Context.Provider>
       )
 }

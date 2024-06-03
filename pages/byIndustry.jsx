@@ -5,56 +5,52 @@ import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 export default function ByIndustry() {
-  return (
-    <>
-      <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
-                    <div className="main-panel">
-                    <div className="content-wrapper">
-            <div className="page-header">
-              <h3 className="page-title">
-                <span className="page-title-icon bg-gradient-primary text-white me-2">
-                  <i className="mdi mdi-home"></i>
-                </span>By Industry
-              </h3>
-              
-            </div>
-            <Tabs
-      defaultActiveKey="overview"
-      id="uncontrolled-tab-example"
-      className="mb-3"
-    >
-      <Tab eventKey="overview" title="Overview">
-          <div className="row">
-              <div className="col-md-4 offset-8">
-                  <div className="d-flex align-items-center mb-3">
-                  <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example"/>
-                  </div>
-              </div>
-          </div>
-      <table className="table table-striped" style={{width:'100%'}}>
-                  <thead>
-                      <tr>
-                          <th>Industry Name</th>
-                          <th>Stocks</th>
-                          <th>Market Cap</th>
-                          <th>Div. Yield</th>
-                          <th>PE Ratio</th>
-                          <th>Profit Margin</th>
-                          <th>1D Change</th>
-                          <th>1Y Change</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                  <tr><td>Internet Content &amp; Information</td><td>66</td><td>2,709.08B</td><td>0.76%</td><td>32.70</td><td>16.15%</td><td><div class="rr">-0.64%</div></td><td><div class="rr">-7.72%</div></td> </tr>
-                  <tr><td>Telecom Services</td><td>58</td><td>1,024.53B</td><td>872.35%</td><td>22.51</td><td>5.01%</td><td><div class="rg">0.63%</div></td><td><div class="rr">-3.69%</div></td> </tr>
-                  <tr><td>Entertainment</td><td>48</td><td>500.07B</td><td>1.03%</td><td>495.96</td><td>0.33%</td><td><div class="rr">-0.11%</div></td><td><div class="rr">-6.10%</div></td> </tr>
-                  <tr><td>Advertising Agencies</td><td>41</td><td>51.36B</td><td>1.92%</td><td>53.77</td><td>1.40%</td><td><div class="rr">-1.99%</div></td><td><div class="rr">-17.67%</div></td> </tr>
-                  <tr><td>Electronic Gaming &amp; Multimedia</td><td>26</td><td>225.86B</td><td>0.57%</td><td>70.85</td><td>6.73%</td><td><div class="rg">2.01%</div></td><td><div class="rg">1.88%</div></td> </tr>
-                  </tbody>
-                  {/* <tfoot>
+    return (
+        <>
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>By Industry
+                        </h3>
+
+                    </div>
+                    <Tabs
+                        defaultActiveKey="overview"
+                        id="uncontrolled-tab-example"
+                        className="mb-3"
+                    >
+                        <Tab eventKey="overview" title="Overview">
+                            <div className="row">
+                                <div className="col-md-4 offset-8">
+                                    <div className="d-flex align-items-center mb-3">
+                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
+                                    </div>
+                                </div>
+                            </div>
+                            <table className="table table-striped" style={{ width: '100%' }}>
+                                <thead>
+                                    <tr>
+                                        <th>Industry Name</th>
+                                        <th>Stocks</th>
+                                        <th>Market Cap</th>
+                                        <th>Div. Yield</th>
+                                        <th>PE Ratio</th>
+                                        <th>Profit Margin</th>
+                                        <th>1D Change</th>
+                                        <th>1Y Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Internet Content &amp; Information</td><td>66</td><td>2,709.08B</td><td>0.76%</td><td>32.70</td><td>16.15%</td><td><div class="rr">-0.64%</div></td><td><div class="rr">-7.72%</div></td> </tr>
+                                    <tr><td>Telecom Services</td><td>58</td><td>1,024.53B</td><td>872.35%</td><td>22.51</td><td>5.01%</td><td><div class="rg">0.63%</div></td><td><div class="rr">-3.69%</div></td> </tr>
+                                    <tr><td>Entertainment</td><td>48</td><td>500.07B</td><td>1.03%</td><td>495.96</td><td>0.33%</td><td><div class="rr">-0.11%</div></td><td><div class="rr">-6.10%</div></td> </tr>
+                                    <tr><td>Advertising Agencies</td><td>41</td><td>51.36B</td><td>1.92%</td><td>53.77</td><td>1.40%</td><td><div class="rr">-1.99%</div></td><td><div class="rr">-17.67%</div></td> </tr>
+                                    <tr><td>Electronic Gaming &amp; Multimedia</td><td>26</td><td>225.86B</td><td>0.57%</td><td>70.85</td><td>6.73%</td><td><div class="rg">2.01%</div></td><td><div class="rg">1.88%</div></td> </tr>
+                                </tbody>
+                                {/* <tfoot>
                       <tr>
                           <th>Name</th>
                           <th>Position</th>
@@ -64,72 +60,72 @@ export default function ByIndustry() {
                           <th>Salary</th>
                       </tr>
                   </tfoot> */}
-      </table>
-      </Tab>
-      <Tab eventKey="sectors" title="Sectors">
-      <div className="row">
-              <div className="col-md-4 offset-8">
-                  <div className="d-flex align-items-center mb-3">
-                  <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example"/>
-                  </div>
-              </div>
-          </div>
-          <div className="table-responsive">
-      <table className="table table-striped" style={{width:'100%'}}>
-                  <thead>
-                      <tr>
-                          <th>Sector Name</th>
-                          <th>Stocks</th>
-                          <th>Market Cap</th>
-                          <th>Div. Yield</th>
-                          <th>PE Ratio</th>
-                          <th>Profit Margin</th>
-                          <th>1D Change</th>
-                          <th>1Y Change</th>
-                      </tr>
-                  </thead>
-      <tbody>
-      <tr><td>Healthcare</td><td>1,254</td><td>7,204.97B</td><td>1.14%</td><td>48.49</td><td>4.13%</td><td><div class="rg">0.40%</div></td><td><div class="rr">-18.18%</div></td> </tr>
-      <tr><td>Financials</td><td>1,098</td><td>7,874.02B</td><td>25.99%</td><td>12.51</td><td>17.76%</td><td><div class="rg">0.38%</div></td><td><div class="rr">-1.16%</div></td> </tr>
-      <tr><td>Technology</td><td>788</td><td>13.79T</td><td>1.18%</td><td>43.56</td><td>10.55%</td><td><div class="rr">-0.85%</div></td><td><div class="rr">-7.14%</div></td></tr>
-      <tr><td>Industrials</td><td>647</td><td>4,527.81B</td><td>3.56%</td><td>20.52</td><td>7.94%</td><td><div class="rr">-0.32%</div></td><td><div class="rg">6.63%</div></td></tr>
-      </tbody>
-        </table>
-        </div>
-      </Tab>
-      <Tab eventKey="industries" title="Industries">
-      <div className="row">
-              <div className="col-md-4 offset-8">
-                  <div className="d-flex align-items-center mb-3">
-                  <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example"/>
-                  </div>
-              </div>
-          </div>
-      <div className="table-responsive">
-      <table className="table table-striped" style={{width:'100%'}}>
-                  <thead>
-                      <tr>
-                          <th>Industry Name</th>
-                          <th>Stocks</th>
-                          <th>Market Cap</th>
-                          <th>Div. Yield</th>
-                          <th>PE Ratio</th>
-                          <th>Profit Margin</th>
-                          <th>1D Change</th>
-                          <th>1Y Change</th>
-                      </tr>
-                  </thead>
-      <tbody>
-      <tr><td>Biotechnology</td><td >711</td><td >1,208.14B</td><td >0.28%</td><td >-</td><td >-29.36%</td><td ><div class="rr">-0.27%</div></td><td ><div class="rr">-16.46%</div></td></tr>
-      <tr><td>Banks - Regional</td><td >359</td><td >1,078.50B</td><td >88.32%</td><td >7.11</td><td >30.23%</td><td ><div class="rr">-0.29%</div></td><td ><div class="rr">-18.47%</div></td></tr>
-      <tr><td>Shell Companies</td><td >333</td><td >66.68B</td><td >0.01%</td><td >57.66</td><td >26.09%</td><td ><div class="rr">-0.05%</div></td><td ><div class="rg">6.68%</div></td></tr>
-      <tr><td>Software - Application</td><td >249</td><td >1,695.77B</td><td >0.64%</td><td >-</td><td >-4.52%</td><td ><div class="rr">-0.46%</div></td><td ><div class="rr">-11.25%</div></td></tr>
-      </tbody>
-        </table>
-        </div>
-      </Tab>
-    </Tabs>
-            {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
+                            </table>
+                        </Tab>
+                        <Tab eventKey="sectors" title="Sectors">
+                            <div className="row">
+                                <div className="col-md-4 offset-8">
+                                    <div className="d-flex align-items-center mb-3">
+                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="table-responsive">
+                                <table className="table table-striped" style={{ width: '100%' }}>
+                                    <thead>
+                                        <tr>
+                                            <th>Sector Name</th>
+                                            <th>Stocks</th>
+                                            <th>Market Cap</th>
+                                            <th>Div. Yield</th>
+                                            <th>PE Ratio</th>
+                                            <th>Profit Margin</th>
+                                            <th>1D Change</th>
+                                            <th>1Y Change</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Healthcare</td><td>1,254</td><td>7,204.97B</td><td>1.14%</td><td>48.49</td><td>4.13%</td><td><div class="rg">0.40%</div></td><td><div class="rr">-18.18%</div></td> </tr>
+                                        <tr><td>Financials</td><td>1,098</td><td>7,874.02B</td><td>25.99%</td><td>12.51</td><td>17.76%</td><td><div class="rg">0.38%</div></td><td><div class="rr">-1.16%</div></td> </tr>
+                                        <tr><td>Technology</td><td>788</td><td>13.79T</td><td>1.18%</td><td>43.56</td><td>10.55%</td><td><div class="rr">-0.85%</div></td><td><div class="rr">-7.14%</div></td></tr>
+                                        <tr><td>Industrials</td><td>647</td><td>4,527.81B</td><td>3.56%</td><td>20.52</td><td>7.94%</td><td><div class="rr">-0.32%</div></td><td><div class="rg">6.63%</div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Tab>
+                        <Tab eventKey="industries" title="Industries">
+                            <div className="row">
+                                <div className="col-md-4 offset-8">
+                                    <div className="d-flex align-items-center mb-3">
+                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="table-responsive">
+                                <table className="table table-striped" style={{ width: '100%' }}>
+                                    <thead>
+                                        <tr>
+                                            <th>Industry Name</th>
+                                            <th>Stocks</th>
+                                            <th>Market Cap</th>
+                                            <th>Div. Yield</th>
+                                            <th>PE Ratio</th>
+                                            <th>Profit Margin</th>
+                                            <th>1D Change</th>
+                                            <th>1Y Change</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Biotechnology</td><td >711</td><td >1,208.14B</td><td >0.28%</td><td >-</td><td >-29.36%</td><td ><div class="rr">-0.27%</div></td><td ><div class="rr">-16.46%</div></td></tr>
+                                        <tr><td>Banks - Regional</td><td >359</td><td >1,078.50B</td><td >88.32%</td><td >7.11</td><td >30.23%</td><td ><div class="rr">-0.29%</div></td><td ><div class="rr">-18.47%</div></td></tr>
+                                        <tr><td>Shell Companies</td><td >333</td><td >66.68B</td><td >0.01%</td><td >57.66</td><td >26.09%</td><td ><div class="rr">-0.05%</div></td><td ><div class="rg">6.68%</div></td></tr>
+                                        <tr><td>Software - Application</td><td >249</td><td >1,695.77B</td><td >0.64%</td><td >-</td><td >-4.52%</td><td ><div class="rr">-0.46%</div></td><td ><div class="rr">-11.25%</div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Tab>
+                    </Tabs>
+                    {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
               <li className="nav-item" role="presentation">
                 <button className="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
               </li>
@@ -654,11 +650,9 @@ export default function ByIndustry() {
               tab 7
              </div>
           </div>           */}
-          </div>
-                      <Footer/>
-                    </div>
                 </div>
+                <Footer />
             </div>
-    </>
-  )
+        </>
+    )
 }

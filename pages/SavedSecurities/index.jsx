@@ -159,10 +159,6 @@ export default function SaveSecurities() {
     }, [allFavoriteBonds,favBondCurrentPage])
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
                     <div className="main-panel">
                         <div className="content-wrapper">
                             <div className="page-header">
@@ -362,9 +358,6 @@ export default function SaveSecurities() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-            </div>
         </>
     )
 }

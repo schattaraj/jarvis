@@ -42,7 +42,7 @@ export default function Register() {
                   <div className="mt-3">
                     <Link className="btn btn-block bg-green-gradient text-white btn-lg font-weight-medium auth-form-btn" href="/login">SIGN UP</Link>
                   </div>
-                  <div className="text-center mt-4 font-weight-light"> Already have an account? <a href="login.html" className="text-primary">Login</a>
+                  <div className="text-center mt-4 font-weight-light"> Already have an account? <Link href="/login" className="text-primary">Login</Link>
                   </div>
                 </form>
               </div>

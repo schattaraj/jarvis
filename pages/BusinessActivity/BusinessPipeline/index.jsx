@@ -198,10 +198,6 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
     }, [currentPage, tableData, sortConfig]);
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
                     <div className="main-panel">
                         <div className="content-wrapper">
                             <div className="page-header">
@@ -260,8 +256,6 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                             {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                         </div>
                     </div>
-                </div>
-            </div>
             <Modal show={openModal} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Pipeline</Modal.Title>

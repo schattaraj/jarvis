@@ -42,6 +42,8 @@ export default function BusinessTracking() {
     const [totalAssestsManagement, setTotalAssestsManagement] = useState(false);
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+    const [editData, setEditData] = useState({})
+    const [editModal, setEditModal] = useState(false)
 
     const filter = (e) => {
         const value = e.target.value;
@@ -106,6 +108,101 @@ export default function BusinessTracking() {
     const handleOpen = () => {
         setOpenModal(true);
     }
+    const addBusinessTracking = async (e) => {
+        e.preventDefault()
+        try {
+            const form = e.target;
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                jsonObject[key] = value;
+            });
+            const response = await fetch('https://jharvis.com/JarvisV2/addBusinessTracking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Set the content type to JSON
+                },
+                body: JSON.stringify(jsonObject)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.msg)
+                handleClose()
+                fetchData()
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        }
+        catch (e) {
+
+        }
+    }
+    const editBusinessTracking = async (id) => {
+        openEditModal()
+        setEditData(tableData.find((x) => x.idBusinessTracking == id));
+    }
+    const deleteBusinessTracking = async (id) => {
+        let text = "Are you sure ?";
+        if (confirm(text) == true) {
+            try {
+                const formData = new FormData();
+                formData.append("idBusinessTracking", id)
+                const rowDelete = await fetch("https://jharvis.com/JarvisV2/deleteBusinessTracking", {
+                    method: 'DELETE',
+                    body: formData
+                })
+                if (rowDelete.ok) {
+                    const rowDeleteRes = await rowDelete.json()
+                    alert(rowDeleteRes.msg)
+                    fetchData()
+
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        }
+    }
+    const openEditModal = () => {
+        setEditModal(true)
+    }
+    const closeEditModal = () => {
+        setEditModal(false)
+    }
+    const updateBusinessTracking = async (e) => {
+        e.preventDefault()
+        try {
+            const form = e.target;
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                jsonObject[key] = value;
+            });
+            const response = await fetch('https://jharvis.com/JarvisV2/editBusinessTracking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonObject)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.msg)
+                closeEditModal()
+                fetchData()
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        }
+        catch (e) {
+
+        }
+    }
+    const handleEditData = (e)=>{
+        setEditData({...editData,[e.target.name]: e.target.value})
+    }
     useEffect(() => {
         fetchData()
     }, [])
@@ -142,80 +239,74 @@ export default function BusinessTracking() {
     }, [currentPage, tableData, sortConfig]);
     return (
         <>
-            <div className="container-scroller">
-                <Navigation />
-                <div className="container-fluid page-body-wrapper">
-                    <Sidebar />
-                    <div className="main-panel">
-                        <div className="content-wrapper">
-                            <div className="page-header">
-                                <h3 className="page-title">
-                                    <span className="page-title-icon bg-gradient-primary text-white me-2">
-                                        <i className="mdi mdi-home"></i>
-                                    </span>Business Tracking
-                                </h3>
-                            </div>
-                            <div className='d-flex justify-content-between'>
-                                <div className="dt-buttons mb-3">
-                                    {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
-                                    <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Business Tracking</span></button>
-                                </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
-                            </div>
-                            <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            {columnNames.map((columnName, index) => (
-                                                <th key={index} onClick={() => handleSort(columnName.data)}>
-                                                    {columnName.column_name}
-                                                    {
-                                                        columnName.data !== "idBusinessTracking" && getSortIcon(columnName.data)
-                                                    }
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filterData.map((rowData, rowIndex) => (
-                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                {
-                                                    columnNames.map((columnName, colIndex) => {
-                                                        let content;
-                                                        content = rowData[columnName.data]
-                                                        if (columnName.data == "idBusinessTracking") {
-                                                            return <td key={colIndex}><button className='px-4 btn btn-primary'><i className="mdi mdi-pen"></i></button>
-                                                                <button className='px-4 ms-2 btn btn-danger'><i className="mdi mdi-delete"></i></button>
-                                                            </td>;
-                                                        }
-                                                        return <td key={colIndex}>{content}</td>;
-                                                    })
-                                                }
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                    <tfoot className='fixed'>
-                                        <tr>
-                                            <td colSpan={2}>Total Amount</td>
-                                            <td>{formatAmount(totalAssests)}</td>
-                                            <td></td>
-                                            <td>{formatAmount(totalAssestsManagement)}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-                        </div>
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>Business Tracking
+                        </h3>
                     </div>
+                    <div className='d-flex justify-content-between'>
+                        <div className="dt-buttons mb-3">
+                            {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                            <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Business Tracking</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                    </div>
+                    <div className="table-responsive">
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                            <thead>
+                                <tr>
+                                    {columnNames.map((columnName, index) => (
+                                        <th key={"table" + index} onClick={() => handleSort(columnName.data)}>
+                                            {columnName.column_name}
+                                            {
+                                                columnName.data !== "idBusinessTracking" && getSortIcon(columnName.data)
+                                            }
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filterData.map((rowData, rowIndex) => (
+                                    <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                        {
+                                            columnNames.map((columnName, colIndex) => {
+                                                let content;
+                                                content = rowData[columnName.data]
+                                                if (columnName.data == "idBusinessTracking") {
+                                                    return <td key={colIndex}><button className='px-4 btn btn-primary' onClick={() => { editBusinessTracking(rowData[columnName.data]) }}><i className="mdi mdi-pen"></i></button>
+                                                        <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteBusinessTracking(rowData[columnName.data]) }}><i className="mdi mdi-delete"></i></button>
+                                                    </td>;
+                                                }
+                                                return <td key={colIndex}>{content}</td>;
+                                            })
+                                        }
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className='fixed'>
+                                <tr>
+                                    <td colSpan={2}>Total Amount</td>
+                                    <td>{formatAmount(totalAssests)}</td>
+                                    <td></td>
+                                    <td>{formatAmount(totalAssestsManagement)}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
             <Modal show={openModal} onHide={handleClose}>
@@ -223,13 +314,13 @@ export default function BusinessTracking() {
                     <Modal.Title>Add Business Tracking</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form onSubmit={addBusinessTracking} autoComplete={"true"} method='POST' encType='multipart/form-data'>
                         <div className="row">
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example">
-                                        <option>--Select--</option>
+                                    <Form.Select aria-label="Default select example" name='advisorName'  onChange={()=>{}} required>
+                                        <option value={""}>--Select--</option>
                                         <option value="Noland">Noland</option>
                                         <option value="Freddy">Freddy</option>
                                         <option value="Brian">Brian</option>
@@ -237,57 +328,146 @@ export default function BusinessTracking() {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date</Form.Label>
-                                    <Form.Control type="date" />
+                                    <Form.Control type="date" name="date"  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Which client was assets brought in from?</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='assetBroughtFrom'  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>No. Of 1st Meetings</Form.Label>
-                                    <Form.Control type="number" />
+                                    <Form.Control type="number" name='firstMeeting'  onChange={()=>{}} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. Of 2nd Meetings</Form.Label>
+                                    <Form.Control type="number" name='secondMeeting'  onChange={()=>{}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>No. of client review meetings</Form.Label>
-                                    <Form.Control type="number" />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. of new clients</Form.Label>
-                                    <Form.Control type="number" />
+                                    <Form.Control type="number" name='clientReview'  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='outBoundId'  onChange={()=>{}} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Assets Brought In ($)</Form.Label>
-                                    <Form.Control type="number" />
+                                    <Form.Control type="number" name='assetBroughtIn'  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Total Assets Under Management ($)</Form.Label>
-                                    <Form.Control type="number" />
+                                    <Form.Control type="number" name='totalAssetManagement'  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>1st meeting with whom</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='firstMeetingWhom'  onChange={()=>{}} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>2nd meeting with whom</Form.Label>
+                                    <Form.Control type="text" name='secondMeetingWhom'  onChange={()=>{}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Review meetings with whom</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='reviewMeetingWhom'  onChange={()=>{}} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of new clients</Form.Label>
+                                    <Form.Control type="number" name='newClientId'  onChange={()=>{}} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>New client name</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='newClientName'  onChange={()=>{}} required />
                                 </Form.Group>
                             </div>
                         </div>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-success me-2'>Submit</button>
+                            <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
+                        </div>
                     </Form>
-                    <div className="d-flex justify-content-end">
-                    <button className='btn btn-success me-2'>Submit</button>
-                    <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
-                    </div>
+                </Modal.Body>
+            </Modal>
+            <Modal show={editModal} onHide={closeEditModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Business Tracking</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={updateBusinessTracking} autoComplete={"true"} method='POST' encType='multipart/form-data'>
+                        <input type="hidden" name="idBusinessTracking" value={editData?.idBusinessTracking} />
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Advisor Name</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='advisorName' defaultValue={editData?.advisorName} required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Noland">Noland</option>
+                                        <option value="Freddy">Freddy</option>
+                                        <option value="Brian">Brian</option>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Date</Form.Label>
+                                    <Form.Control type="date" name="date" value={editData?.date}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Which client was assets brought in from?</Form.Label>
+                                    <Form.Control type="text" name='assetBroughtFrom' value={editData?.assetBroughtFrom}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. Of 1st Meetings</Form.Label>
+                                    <Form.Control type="number" name='firstMeeting' value={editData?.firstMeeting}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. Of 2nd Meetings</Form.Label>
+                                    <Form.Control type="number" name='secondMeeting' value={editData?.secondMeeting}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of client review meetings</Form.Label>
+                                    <Form.Control type="number" name='clientReview' value={editData?.clientReview}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
+                                    <Form.Control type="text" name='outBoundId' value={editData?.outBoundId}  onChange={handleEditData} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Assets Brought In ($)</Form.Label>
+                                    <Form.Control type="number" name='assetBroughtIn' value={editData?.assetBroughtIn}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Total Assets Under Management ($)</Form.Label>
+                                    <Form.Control type="number" name='totalAssetManagement' value={editData?.totalAssetManagement && Number(editData?.totalAssetManagement.replace(/,/g, ''))}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>1st meeting with whom</Form.Label>
+                                    <Form.Control type="text" name='firstMeetingWhom' value={editData?.firstMeetingWhom}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>2nd meeting with whom</Form.Label>
+                                    <Form.Control type="text" name='secondMeetingWhom' value={editData?.secondMeetingWhom}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Review meetings with whom</Form.Label>
+                                    <Form.Control type="text" name='reviewMeetingWhom' value={editData?.reviewMeetingWhom}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of new clients</Form.Label>
+                                    <Form.Control type="number" name='newClientId' value={editData?.newClientId}  onChange={handleEditData} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>New client name</Form.Label>
+                                    <Form.Control type="text" name='newClientName' value={editData?.newClientName}  onChange={handleEditData} required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-success me-2'>Submit</button>
+                            <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
+                        </div>
+                    </Form>
                 </Modal.Body>
             </Modal>
         </>
