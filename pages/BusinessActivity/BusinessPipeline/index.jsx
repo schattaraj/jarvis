@@ -163,6 +163,21 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
     const hideTotalAmountPerson = ()=>{
         setByPersonModal(false)
     }
+    const submitForm = (e)=>{
+        e.preventDefault()
+        try {
+            const form = e.target;
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                jsonObject[key] = value;
+            });
+            console.log("json",jsonObject)
+        } catch (error) {
+            
+        }
+        console.log(e)
+    }
     useEffect(() => {
         fetchData()
     }, [])
@@ -261,12 +276,12 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                     <Modal.Title>Add Pipeline</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form onSubmit={submitForm}>
                         <div className="row">
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Name</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='name'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>How did the opportunity come about?</Form.Label>
