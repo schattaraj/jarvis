@@ -12,6 +12,7 @@ export const ContextProvider = ({ children }) =>{
   const [loaderState,setLoaderState] = useState(false)
   const collapse = useRef("")
   const [businessActivity,setBusinessActivity] = useState(false)
+  const router = useRouter();
   const toggleMarketAnalytics = ()=>{
     if(marketAnalytics){
       setMarketAnalytics(false)
@@ -52,6 +53,20 @@ else{
   setBusinessActivity(true)
 }
   }
+  const checkLoginStatus = ()=>{
+    let token = localStorage.getItem("access_token")
+    if(token){
+      console.log(token);
+    }
+    else{
+      localStorage.setItem("route",router.route)
+      router.push('/login')
+    }
+    console.log("str",localStorage.getItem("access_token"))
+  }
+  useEffect(()=>{
+    checkLoginStatus()
+  },[])
   // const showMenu = (e)=>{
   //   if(e.target.getAttribute('aria-expanded') == "false"){
   //     e.target.setAttribute('aria-expanded',"true");
@@ -62,7 +77,7 @@ else{
   //   let elem = collapse.current
   //   elem.classList.toggle("show")
   // }
-  const router = useRouter();
+
   const noLayoutRoutes = ['/login','/register'];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
     return (

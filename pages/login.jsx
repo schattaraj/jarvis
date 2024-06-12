@@ -1,12 +1,45 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useContext, useEffect, useState } from 'react';
+import { Form } from 'react-bootstrap';
+import Loader from '../components/loader';
+import { Context } from '../contexts/Context';
 export default function Login() {
-  const [loginDetails,setLoginDetails] = useState({username:"",password:""})
+  const [loginDetails,setLoginDetails] = useState({userName:"",password:""})
   const [error,setError] = useState(false)
+  const [errors,setErrors] = useState({})
+  const [validated, setValidated] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter()
+  const context = useContext(Context)
+  const validate = () => {
+    const errors = {};
+
+    if (!loginDetails.userName) {
+      errors.userName = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(loginDetails.userName)) {
+      errors.userName = 'Email address is invalid';
+    }
+
+    if (!loginDetails.password) {
+      errors.password = 'Password is required';
+    } else if (loginDetails.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+
+    return errors;
+  };
   const formSubmit = async(e)=>{
     e.preventDefault()
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    setSubmitted(true); 
+    context.setLoaderState(true)
     try {
-      const loginApi = await fetch("https://jharvis.com/JarvisV2/signin",{
+      const loginApi = await fetch("https://www.jharvis.com/JarvisV2/authenticate",{
         method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -14,17 +47,28 @@ export default function Login() {
                 body: JSON.stringify(loginDetails)
       })
       const loginApiRes = await loginApi.json()
-      alert(loginApiRes)
-      console.log(loginApiRes)
+      localStorage.setItem("access_token",loginApiRes.payload.accessToken)
+      localStorage.setItem("sessionId",loginApiRes.payload.sessionId)
+      router.push(localStorage.getItem('route'))
+      
     } catch (error) {
       console.log(error.message)
     }
+    context.setLoaderState(false) 
   }
   const handleInput = (e)=>{
-    setLoginDetails({...loginDetails,[e.target.name]:e.target.value})
+    const { name, value } = e.target;
+    setLoginDetails({
+      ...loginDetails,
+      [name]: value,
+    });
+    setErrors({
+      ...errors,
+      [name]: '',
+    });
   }
   useEffect(()=>{
-console.log("loginDetails",loginDetails)
+
   },[loginDetails])
   return (
     <>
@@ -40,12 +84,32 @@ console.log("loginDetails",loginDetails)
                 <h4>Hello! let's get started</h4>
                 <h6 className="font-weight-light">Sign in to continue.</h6>
                {error && <div className="alert alert-danger">{error}</div>}
-                <form className="pt-3" onSubmit={formSubmit}>
+                <Form className="pt-3" onSubmit={formSubmit} noValidate>
                   <div className="form-group">
-                    <input type="email" name='username' onChange={handleInput} className="form-control form-control-lg" id="exampleInputEmail1" placeholder="Username"/>
+                    <Form.Control
+            required
+            type="email"
+            placeholder="Username" 
+            name="userName"
+            value={loginDetails.userName}
+            onChange={handleInput}
+            isInvalid={!!errors.userName}
+          />
+             <Form.Control.Feedback type="invalid">
+                {errors.userName}
+              </Form.Control.Feedback>
                   </div>
                   <div className="form-group">
-                    <input type="password" name='password' onChange={handleInput} className="form-control form-control-lg" id="exampleInputPassword1" placeholder="Password"/>
+                    <Form.Control
+                type="password"
+                name="password"
+                value={loginDetails.password}
+                onChange={handleInput}
+                isInvalid={!!errors.password}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.password}
+              </Form.Control.Feedback>
                   </div>
                   <div className="mt-3">
                     <button className="btn btn-block bg-green-gradient text-white btn-lg font-weight-medium auth-form-btn" type='submit'>SIGN IN</button>
@@ -60,13 +124,14 @@ console.log("loginDetails",loginDetails)
                 
                   <div className="text-center mt-4 font-weight-light"> Don't have an account? <Link href="/register" className="text-primary">Create</Link>
                   </div> */}
-                </form>
+                </Form>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <Loader/>
     </>
   )
 }

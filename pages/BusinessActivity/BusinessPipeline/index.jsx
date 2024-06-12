@@ -49,7 +49,24 @@ export default function BusinessPipeline() {
 const [totalAmount, setTotalAmount] = useState(0);
 const [byPersonModal,setByPersonModal] = useState(false)
 const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmount:0})
-
+const [bPInputs,setBPInputs] = useState({
+    "name": "",
+    "opportunity": [],
+    "opportunityComeAbout": [],
+    "amounts": "",
+    "status": "",
+    "mostRecentActivity": "",
+    "dateAdded": "",
+    "lastContact": "",
+    "followUpAction": "",
+    "connections": "",
+    "autoFinding": "",
+    "otherOpportunities": "",
+    "investorLifecycle": "",
+    "accreditedInvestor": "",
+    "advisorName": "",
+    "followUpDate": ""
+})
     const filter = (e) => {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
@@ -285,7 +302,7 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>How did the opportunity come about?</Form.Label>
-                                    <Form.Select aria-label="Default select example"> 
+                                    <Form.Select aria-label="Default select example" name='opportunityComeAbout'> 
                                         <option value="">--Select --</option>
                                         <option value="Seminar">Seminar</option>
                                         <option value="Referral">Referral</option>
@@ -297,7 +314,7 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name='status'>
                                         <option>--Select--</option>
                                         <option value="Business has closed (Complete)">Business has closed (Complete)</option>
 										<option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
@@ -306,8 +323,8 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity</Form.Label>
-                                    <Form.Select aria-label="Default select example">
-                                        <option>--Select--</option>
+                                    <Form.Select aria-label="Default select example" name='mostRecentActivity'>
+                                        <option value={""}>--Select--</option>
                                         <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
 										<option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
 										<option value="Meeting scheduled">Meeting scheduled</option>
@@ -316,11 +333,11 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date Added</Form.Label>
-                                    <Form.Control type="date" />
+                                    <Form.Control type="date" name="dateAdded"/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Action</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name="followUpAction">
                                         <option>--Select--</option>
                                         <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
 										<option value="Closed">Closed</option>
@@ -335,7 +352,7 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Investor Lifecycle</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle">
                                         <option value="">--Select --</option>
                                         <option value="Creating Wealth">Creating Wealth</option>
                                         <option value="Building Wealth">Building Wealth</option>
@@ -344,7 +361,7 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group> 
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name="advisorName">
                                         <option value="">--Select --</option>
                                         <option value="Noland">Noland</option>
                                         <option value="Freddy">Freddy</option>
@@ -355,7 +372,7 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Opportunity</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name="opportunity" multiple>
                                         <option value="">--Select --</option>
                                         <option value="401K_rollover">401K Rollover</option>
                                         <option value="Cash_Bank">Cash Bank</option>
@@ -367,31 +384,31 @@ const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmoun
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
-                                    <Form.Control type="number" />
+                                    <Form.Control type="number" name='amounts'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status Notes</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='statusNotes'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity Notes</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='mostRecentActivity'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Last Contact</Form.Label>
-                                    <Form.Control type="date" />
+                                    <Form.Control type="date" name='lastContact'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Date</Form.Label>
-                                    <Form.Control type="date" />
+                                    <Form.Control type="date" name='followUpDate'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Other Opportunities</Form.Label>
-                                    <Form.Control type="text" />
+                                    <Form.Control type="text" name='otherOpportunities'/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
-                                    <Form.Select aria-label="Default select example">
+                                    <Form.Select aria-label="Default select example" name='connections'>
                                         <option value="">--Select --</option>
                                         <option value="Youtube">Youtube</option>
                                         <option value="Jarvis Letter">Jarvis Letter</option>
