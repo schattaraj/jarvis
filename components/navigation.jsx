@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import Dropdown from 'react-bootstrap/Dropdown';
+import { Context } from '../contexts/Context';
 export default function Navigation() {
     const [sidebar,setSidebar] = useState(false)
     const toggleSidebar = ()=>{
         document.body.classList.toggle('sidebar-icon-only');
     }
+    const context = useContext(Context)
   return (<>
           <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
@@ -119,7 +121,7 @@ export default function Navigation() {
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
-        <Dropdown.Item href="login"><i className="mdi mdi-logout me-2 text-primary"></i> Signout </Dropdown.Item>
+        <Dropdown.Item onClick={context.logOut}><i className="mdi mdi-logout me-2 text-danger"></i> Signout </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
             </li>
