@@ -16,9 +16,9 @@ export default function Login() {
     const errors = {};
 
     if (!loginDetails.userName) {
-      errors.userName = 'Email is required';
+      errors.userName = 'Username is required';
     } else if (!/\S+@\S+\.\S+/.test(loginDetails.userName)) {
-      errors.userName = 'Email address is invalid';
+      errors.userName = 'Username is invalid';
     }
 
     if (!loginDetails.password) {
@@ -49,7 +49,12 @@ export default function Login() {
       const loginApiRes = await loginApi.json()
       localStorage.setItem("access_token",loginApiRes.payload.accessToken)
       localStorage.setItem("sessionId",loginApiRes.payload.sessionId)
-      router.push(localStorage.getItem('route'))
+      if(localStorage.getItem('route') && localStorage.getItem('route') !=="/login"){
+        router.push(localStorage.getItem('route'))
+      }
+      else{
+        router.push("/admin")
+      }
       
     } catch (error) {
       console.log(error.message)
@@ -103,6 +108,7 @@ export default function Login() {
                     <Form.Control
                 type="password"
                 name="password"
+                placeholder="Password"
                 value={loginDetails.password}
                 onChange={handleInput}
                 isInvalid={!!errors.password}
