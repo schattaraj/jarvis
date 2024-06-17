@@ -22,6 +22,30 @@ i{
 .rg{
     color:#15803d;
 }
+.bg-purple{
+    background-color: #7068BD;
+}
+.bg-yellow{
+    background-color: #FAAC3C;
+}
+.bg-gray{
+    background-color: #97A9C7;
+}
+.bg-blue{
+    background-color: #3996D9;
+}
+.bg-red{
+    background-color: #BE468C;
+}
+.bg-green{
+    background-color: #93B376;
+}
+.bg-orange{
+    background-color: #E8675F;
+}
+.bg-seagreen{
+    background-color: #43B2B5;
+}
 .main-panel .dropdown .dropdown-menu .dropdown-item{
 padding: 0.5rem 1.5rem;
 }
@@ -546,5 +570,54 @@ margin-right: 16px;
             white-space: nowrap;
             padding: 0.9375rem;
         }
+    }
+}
+body{
+    background-image: url(../public/images/LITEBkgrd.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+}
+.footer{
+    background-color: transparent;
+}
+.navbar{
+    background-color: rgba(#fff,.4);
+}
+.sidebar{
+    background-color: rgba(#fff,.4);
+}
+.content-wrapper{
+    background: transparent;
+}
+.navbar .navbar-brand-wrapper{
+    background-color: rgba(#fff,.4);
+}
+.main-panel .content-wrapper a{
+    width: 100%;
+    text-decoration: none;
+}
+.main-panel .content-wrapper .row{
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+}
+.main-panel .content-wrapper .d-flex{
+    width: 100%;
+    height: 100px;
+    align-items: center;
+    color: #fff;
+    img{
+        height: 100%;
+        aspect-ratio: 2/2;
+        object-fit: cover;
+    }
+    h3{
+        text-align: center;
+        padding: 24px;
+        font-size: 18px;
+        margin-bottom: 0;
+        width: 100%;
     }
 }

@@ -20,7 +20,13 @@ function BusinessActivity() {
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-green-gradient card-img-holder text-white">
+              <Link href={"/BusinessActivity/BusinessPipeline"}>
+                <div className="d-flex bg-seagreen">
+                  <img src="/icons/Business Pipeline.png" alt="" />
+                  <h3>Business Pipeline</h3>
+                </div>
+              </Link>
+              {/* <div className="card bg-green-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessPipeline"}>
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -29,10 +35,14 @@ function BusinessActivity() {
 
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-orange-gradient card-img-holder text-white">
+            <div className="d-flex bg-blue">
+                  <img src="/icons/Business Tracking.png" alt="" />
+                  <h3>Business Tracking</h3>
+                </div>
+              {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessTracking"}>
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -40,10 +50,14 @@ function BusinessActivity() {
                     <h2 className="mb-5">Business Tracking</h2>
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-red-gradient card-img-holder text-white">
+            <div className="d-flex bg-gray">
+                  <img src="/icons/Prospects.png" alt="" />
+                  <h3>Prospects</h3>
+                </div>
+              {/* <div className="card bg-red-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/Prospects"}>
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -51,7 +65,7 @@ function BusinessActivity() {
                     <h2 className="mb-5">Prospects</h2>
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
 

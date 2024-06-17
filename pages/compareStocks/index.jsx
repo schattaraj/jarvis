@@ -3,6 +3,7 @@ import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Link from 'next/link';
+import Card from '../../components/Card';
 export default function CompareStocs() {
   return (
     <>
@@ -18,7 +19,8 @@ export default function CompareStocs() {
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-green-gradient card-img-holder text-white">
+            <Card route="/compareStocks/stocksPair" bg="bg-seagreen" img="/icons/Pair of Stocks.png" title="Pair of Stocks"/>
+              {/* <div className="card bg-green-gradient card-img-holder text-white">
                 <Link href="/compareStocks/stocksPair">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -27,10 +29,11 @@ export default function CompareStocs() {
 
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-orange-gradient card-img-holder text-white">
+            <Card route="/compareStocks/myStocks" bg="bg-blue" img="/icons/My Stocks.png" title="My Stocks"/>
+              {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href="/compareStocks/myStocks">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -38,7 +41,7 @@ export default function CompareStocs() {
                     <h2 className="mb-5">My Stocks</h2>
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
 
           </div>

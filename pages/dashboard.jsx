@@ -25,9 +25,15 @@ export default function Admin() {
                         </h3>
 
                     </div>
-                    <div className="row">
+                    <div className="row justify-content-center">
                         <div className="col-md-4 stretch-card grid-margin">
-                            <div className="card bg-gradient-danger card-img-holder text-white">
+                        <Link href={"marketAnalytics"} onClick={() => { context.setMarketAnalytics(true) }}>
+                        <div className="d-flex bg-yellow">
+                                    <img src="/icons/Marketing Analytics.png" alt="" />
+                                    <h3>Market Analytics (Stocks,Bonds,ETFs and more)</h3> 
+                                </div>
+                                </Link>
+                            <div className="d-none card bg-gradient-danger card-img-holder text-white">
                                 <Link href={"marketAnalytics"} onClick={() => { context.setMarketAnalytics(true) }}>
                                     <div className="card-body">
                                         <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -40,7 +46,13 @@ export default function Admin() {
                             </div>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                            <div className="card bg-gradient-info card-img-holder text-white">
+                        <Link href={"/compareStocks"}>
+                        <div className="d-flex bg-blue">
+                                    <img src="/icons/Compare Stocks.png" alt="" />
+                                    <h3>Compare Stocks, ETFs</h3> 
+                                </div>
+                                </Link>
+                            <div className="d-none card bg-gradient-info card-img-holder text-white">
                                 <Link href={"/compareStocks"}>
                                     <div className="card-body">
                                         <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -51,7 +63,12 @@ export default function Admin() {
                             </div>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                            <div className="card bg-orange-gradient card-img-holder text-white">
+                        <Link href={"/portfolio"}><div className="d-flex bg-orange">
+                                    <img src="/icons/Portfolio.png" alt="" />
+                                    <h3>Portfolios</h3> 
+                                </div>
+                                </Link>
+                            <div className="d-none card bg-orange-gradient card-img-holder text-white">
                                 <Link href={"/portfolio"}>
                                     <div className="card-body">
                                         <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -63,7 +80,13 @@ export default function Admin() {
                             </div>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                            <div className="card bg-green-gradient card-img-holder text-white">
+                        <Link href={"insights"}>
+                        <div className="d-flex bg-red">
+                                    <img src="/icons/Insights.png" alt="" />
+                                    <h3>Insights (PDF Reports and Videos on investment Research and more)</h3> 
+                                </div>
+                                </Link>
+                            <div className="d-none card bg-green-gradient card-img-holder text-white">
                                 <Link href={"insights"}>
                                     <div className="card-body">
                                         <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -76,7 +99,13 @@ export default function Admin() {
                             </div>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                            <div className="card bg-red-gradient  card-img-holder text-white">
+                        <Link href={"/newsletter"}>
+                        <div className="d-flex bg-green">
+                                    <img src="/icons/Newsletter.png" alt="" />
+                                    <h3>Newsletter</h3> 
+                                </div>
+                                </Link>
+                            <div className="d-none card bg-red-gradient  card-img-holder text-white">
                                 <Link href={"/newsletter"}>
                                     <div className="card-body">
                                         <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
