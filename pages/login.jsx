@@ -77,17 +77,25 @@ export default function Login() {
   },[loginDetails])
   return (
     <>
-    <div className="container-scroller">
+    <div className="deep-background container-scroller">
       <div className="container-fluid page-body-wrapper full-page-wrapper">
         <div className="content-wrapper d-flex align-items-center auth">
-          <div className="row flex-grow">
-            <div className="col-lg-4 mx-auto">
-              <div className="auth-form-light text-left p-5">
-                <div className="brand-logo">
-                  <img src="../../assets/images/logo-black.png"/>
+          <div className="row flex-grow h-100">
+            <div className="col-lg-4 d-none d-lg-block">
+              <div className="d-flex align-items-end h-100">
+              <img className="left-side" src="/images/Hello_Title.png" alt="" />
+              </div>
+            </div>
+            <div className="col-lg-4 mx-auto d-flex align-items-center">
+              <div className="auth-form-light w-100 py-4 px-3 h-100">
+                <div className="top">
+                <div className="background-image">
+                  <img src="/images/J_logo.png" alt="" />
                 </div>
-                <h4>Hello! let's get started</h4>
-                <h6 className="font-weight-light">Sign in to continue.</h6>
+                <div className="text-center">
+              <h3>Sign in</h3>
+               <p>Don't have an account? Create One</p> 
+               </div>
                {error && <div className="alert alert-danger">{error}</div>}
                 <Form className="pt-3" onSubmit={formSubmit} noValidate>
                   <div className="form-group">
@@ -118,7 +126,7 @@ export default function Login() {
               </Form.Control.Feedback>
                   </div>
                   <div className="mt-3">
-                    <button className="btn btn-block bg-green-gradient text-white btn-lg font-weight-medium auth-form-btn" type='submit'>SIGN IN</button>
+                    <button className="btn btn-block text-white btn-lg font-weight-medium" type='submit'>SIGN IN</button>
                   </div>
                   {/* <div className="my-2 d-flex justify-content-between align-items-center">
                     <div className="form-check">
@@ -131,7 +139,15 @@ export default function Login() {
                   <div className="text-center mt-4 font-weight-light"> Don't have an account? <Link href="/register" className="text-primary">Create</Link>
                   </div> */}
                 </Form>
+                </div>
+                <div className="bottom">
+                  <Link href="#">Forgot Username / password ?</Link>
+                  <label htmlFor="">Keep Me Sign in</label>
+                </div>
               </div>
+            </div>
+            <div className="col-lg-4 d-none d-lg-block">
+              <img className="right-side" src="/images/Jarvis_logo.png" alt="" />
             </div>
           </div>
         </div>

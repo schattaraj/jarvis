@@ -5,6 +5,7 @@ import Sidebar from '../../components/sidebar';
 import Footer from '../../components/footer';
 import Link from 'next/link'
 import { Context } from '../../contexts/Context';
+import Card from '../../components/Card';
 function BusinessActivity() {
   return (
     <>
@@ -20,12 +21,8 @@ function BusinessActivity() {
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin">
-              <Link href={"/BusinessActivity/BusinessPipeline"}>
-                <div className="d-flex bg-seagreen">
-                  <img src="/icons/Business Pipeline.png" alt="" />
-                  <h3>Business Pipeline</h3>
-                </div>
-              </Link>
+            <Card route="/BusinessActivity/BusinessPipeline" bg="bg-seagreen" img="/icons/Business Pipeline.png" title="Business Pipeline"/>
+              
               {/* <div className="card bg-green-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessPipeline"}>
                   <div className="card-body">
@@ -38,10 +35,7 @@ function BusinessActivity() {
               </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-            <div className="d-flex bg-blue">
-                  <img src="/icons/Business Tracking.png" alt="" />
-                  <h3>Business Tracking</h3>
-                </div>
+            <Card route="/BusinessActivity/BusinessTracking" bg="bg-blue" img="/icons/Business Tracking.png" title="Business Tracking"/>
               {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessTracking"}>
                   <div className="card-body">
@@ -53,10 +47,7 @@ function BusinessActivity() {
               </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-            <div className="d-flex bg-gray">
-                  <img src="/icons/Prospects.png" alt="" />
-                  <h3>Prospects</h3>
-                </div>
+            <Card route="/BusinessActivity/Prospects" bg="bg-blue" img="/icons/Prospects.png" title="Prospects"/>
               {/* <div className="card bg-red-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/Prospects"}>
                   <div className="card-body">
