@@ -51,7 +51,7 @@ export default function MarketAnalytics() {
                 </div> */}
               </div>
               <div className="col-md-4 stretch-card grid-margin">
-              <Card route="/ETFs" bg="bg-seagreen" img="/icons/ETFs.png" title="ETFs"/>
+              <Card route="/etfs" bg="bg-seagreen" img="/icons/ETFs.png" title="ETFs"/>
                 {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href={"/etfs"}>
                   <div className="card-body">

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Head from 'next/head';
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
@@ -8,6 +8,9 @@ import { Context } from '../contexts/Context';
 import Card from '../components/Card';
 export default function Admin() {
     const context = useContext(Context)
+    useEffect(()=>{
+        context.setBackground(true)
+    },[])
     return (
         <>
             <Head>

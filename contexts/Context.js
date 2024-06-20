@@ -12,6 +12,7 @@ export const ContextProvider = ({ children }) =>{
   const [loaderState,setLoaderState] = useState(false)
   const collapse = useRef("")
   const [businessActivity,setBusinessActivity] = useState(false)
+  const [background,setBackground] = useState(false)
   const router = useRouter();
   const toggleMarketAnalytics = ()=>{
     if(marketAnalytics){
@@ -86,7 +87,7 @@ else{
   const noLayoutRoutes = ['/login','/register'];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
     return (
-        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut}}>
+        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut,background,setBackground}}>
           {isNoLayoutRoute ?
           children
         :  

@@ -4,13 +4,16 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../utils/utils';
+import { calculateAverage, formatDate, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import Select from 'react-select'
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
         "elementId": null,
@@ -28,6 +31,19 @@ const extraColumns = [
 ];
 
 
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Chart.js Line Chart',
+      },
+    },
+  };
 export default function Etfs() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -42,7 +58,10 @@ export default function Etfs() {
     const [openModal, setOpenModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
-
+    const [tickers, setTickers] = useState(false);
+    const [selectedTicker,setSelectedTicker] = useState(false)
+    const [chartView,setChartView] = useState(false)
+    const [chartHistory,setChartHistory] = useState([])
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -155,7 +174,49 @@ export default function Etfs() {
                 break;
         }
     };
+    const handleSelect = (e)=>{
+        setSelectedTicker(e.target.value)
+    }
+    const fetchTickersFunc = async () => {
+        try {
+            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496")
+            const fetchTickersRes = await fetchTickers.json()
+            setTickers(fetchTickersRes)
+        }
+        catch (e) {
 
+        }
+    }
+    const charts = async()=>{
+        if(!selectedTicker){
+            alert("Please Select a ticker")
+            return;
+        }
+        try {
+            const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker="+selectedTicker+"&year=2023&year2=2023&_=1718886601497")
+            const getChartHistroryRes = await getChartHistrory.json()
+            setChartHistory(getChartHistroryRes)
+            setChartView(true)
+        }
+        catch (e) {
+
+        }
+    }
+    const etfHome = ()=>{
+        setChartView(false)
+    }
+    const data = {
+        labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
+        datasets: [
+          {
+            label: 'Year 2023-2024',
+            data: chartHistory.map(item => parseInt(item.element7)),
+            fill: false,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+          },
+        ],
+      };
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -168,6 +229,7 @@ export default function Etfs() {
         run()
     }, [currentPage, tableData])
     useEffect(() => {
+        fetchTickersFunc()
         fetchColumnNames()
         fetchData()
     }, [])
@@ -185,54 +247,73 @@ export default function Etfs() {
                             </span>ETFs
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
-                        <div className="row">
-                        </div>
+                    <div className="selection-area mb-3 d-flex align-items-center"> 
+                    <select name="" className='form-select mb-0 me-2' style={{maxWidth:"300px"}} onChange={handleSelect}>
+                        <option value="">--Select Ticker--</option>
+                        {tickers && tickers.map((item, index) => (
+                                            <option key={index} value={item.element1}>
+                                                {item.element1}
+                                            </option>
+                                        ))}
+                    </select>
+                    <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={charts}><span>Chart View</span></button>
+                    <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={etfHome}><span>ETF Home</span></button>
+                   
+                    {/* <input type="search" placeholder='' className='form-control' onChange={filter} /> */}
                     </div>
                     <div className='d-flex justify-content-between'>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                         <div className="dt-buttons mb-3">
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                     </div>
-                    <div className="table-responsive">
-                        <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                            <thead>
-                                <tr>
-                                    {columnNames.map((columnName, index) => (
-                                        <th key={index}>{columnName.elementDisplayName}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filterData.map((rowData, rowIndex) => (
-                                    <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                        {
-                                            columnNames.map((columnName, colIndex) => {
-                                                let content;
+                    {
+                        chartView ?
+<Line data={data} options={options} />
+:
+<>
+<div className="table-responsive">
+<table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+    <thead>
+        <tr>
+            {columnNames.map((columnName, index) => (
+                <th key={index}>{columnName.elementDisplayName}</th>
+            ))}
+        </tr>
+    </thead>
+    <tbody>
+        {filterData.map((rowData, rowIndex) => (
+            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                {
+                    columnNames.map((columnName, colIndex) => {
+                        let content;
 
-                                                if (columnName.elementInternalName === 'element3') {
-                                                    content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+                        if (columnName.elementInternalName === 'element3') {
+                            content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
-                                                    content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                } else {
-                                                    content = rowData[columnName.elementInternalName];
-                                                }
+                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                        } else {
+                            content = rowData[columnName.elementInternalName];
+                        }
 
-                                                return <td key={colIndex}>{content}</td>;
-                                            })
-                                        }
-                                    </tr>
-                                ))}
-                            </tbody>
+                        return <td key={colIndex}>{content}</td>;
+                    })
+                }
+            </tr>
+        ))}
+    </tbody>
 
-                        </table>
+</table>
 
-                    </div>
-                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+</div>
+{tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+</>
+                    }
+                   
                 </div>
             </div>
             <Loader />

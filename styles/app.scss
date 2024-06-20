@@ -572,12 +572,25 @@ margin-right: 16px;
         }
     }
 }
+.content-wrapper{
+    background-color:#F3F6F3;
+    border-top:1px solid #333333;
+    border-left:1px solid #333333;
+}
 .background{
     background-image: url(../public/images/LITEBkgrd.png);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
+    .content-wrapper{
+        background-color: transparent;
+    }
+    .main-panel .content-wrapper .row{
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+    }
 }
 .deep-background{
     background-image: url(../public/images/DRKBkgrd.png);
@@ -689,12 +702,6 @@ margin-right: 16px;
 .sidebar{
     background-color: rgba(#fff,.4);
 }
-.content-wrapper{
-    // background-color:#F3F6F3;
-    background-color:transparent;
-    border-top:1px solid #333333;
-    border-left:1px solid #333333;
-}
 .navbar .navbar-brand-wrapper{
     background-color: rgba(#fff,.4);
 }
@@ -702,11 +709,7 @@ margin-right: 16px;
     width: 100%;
     text-decoration: none;
 }
-.main-panel .content-wrapper .row{
-    align-items: center;
-    height: 100%;
-    justify-content: center;
-}
+
 .main-panel .content-wrapper .flex{
     display: flex;
     width: 100%;
