@@ -147,7 +147,7 @@ export default function Login() {
               </div>
             </div>
             <div className="col-lg-4 d-none d-lg-block">
-              <img className="right-side" src="/images/Jarvis_logo.png" alt="" />
+              <img className="right-side" src="/images/Jarvis_Logo.png" alt="" />
             </div>
           </div>
         </div>
