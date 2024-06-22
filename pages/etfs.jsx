@@ -32,18 +32,18 @@ const extraColumns = [
 
 
 
-  const options = {
+const options = {
     responsive: true,
     plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Chart.js Line Chart',
-      },
+        legend: {
+            position: 'top',
+        },
+        title: {
+            display: true,
+            text: 'Chart.js Line Chart',
+        },
     },
-  };
+};
 export default function Etfs() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -59,9 +59,9 @@ export default function Etfs() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [tickers, setTickers] = useState(false);
-    const [selectedTicker,setSelectedTicker] = useState(false)
-    const [chartView,setChartView] = useState(false)
-    const [chartHistory,setChartHistory] = useState([])
+    const [selectedTicker, setSelectedTicker] = useState(false)
+    const [chartView, setChartView] = useState(false)
+    const [chartHistory, setChartHistory] = useState([])
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -174,7 +174,7 @@ export default function Etfs() {
                 break;
         }
     };
-    const handleSelect = (e)=>{
+    const handleSelect = (e) => {
         setSelectedTicker(e.target.value)
     }
     const fetchTickersFunc = async () => {
@@ -187,13 +187,13 @@ export default function Etfs() {
 
         }
     }
-    const charts = async()=>{
-        if(!selectedTicker){
+    const charts = async () => {
+        if (!selectedTicker) {
             alert("Please Select a ticker")
             return;
         }
         try {
-            const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker="+selectedTicker+"&year=2023&year2=2023&_=1718886601497")
+            const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + "&year=2023&year2=2023&_=1718886601497")
             const getChartHistroryRes = await getChartHistrory.json()
             setChartHistory(getChartHistroryRes)
             setChartView(true)
@@ -202,21 +202,26 @@ export default function Etfs() {
 
         }
     }
-    const etfHome = ()=>{
+    const etfHome = () => {
         setChartView(false)
     }
     const data = {
         labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
         datasets: [
-          {
-            label: 'Year 2023-2024',
-            data: chartHistory.map(item => parseInt(item.element7)),
-            fill: false,
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-          },
+            {
+                label: 'Price AVG',
+                data: chartHistory.map(item => parseFloat(item.element7)),
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                options: {
+                    interaction: {
+                        mode: 'index',
+                    }
+                }
+            },
         ],
-      };
+    };
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -228,6 +233,9 @@ export default function Etfs() {
         }
         run()
     }, [currentPage, tableData])
+    useEffect(() => {
+        console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
+    }, [chartHistory])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
@@ -247,73 +255,88 @@ export default function Etfs() {
                             </span>ETFs
                         </h3>
                     </div>
-                    <div className="selection-area mb-3 d-flex align-items-center"> 
-                    <select name="" className='form-select mb-0 me-2' style={{maxWidth:"300px"}} onChange={handleSelect}>
-                        <option value="">--Select Ticker--</option>
-                        {tickers && tickers.map((item, index) => (
-                                            <option key={index} value={item.element1}>
-                                                {item.element1}
-                                            </option>
-                                        ))}
-                    </select>
-                    <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={charts}><span>Chart View</span></button>
-                    <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={etfHome}><span>ETF Home</span></button>
-                   
-                    {/* <input type="search" placeholder='' className='form-control' onChange={filter} /> */}
+                    <div className="selection-area mb-3 d-flex align-items-center">
+                        <select name="" className='form-select mb-0 me-2' style={{ maxWidth: "300px" }} onChange={handleSelect}>
+                            <option value="">--Select Ticker--</option>
+                            {tickers && tickers.map((item, index) => (
+                                <option key={index} value={item.element1}>
+                                    {item.element1}
+                                </option>
+                            ))}
+                        </select>
+                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={charts}><span>Chart View</span></button>
+                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={etfHome}><span>ETF Home</span></button>
+
+                        {/* <input type="search" placeholder='' className='form-control' onChange={filter} /> */}
                     </div>
                     <div className='d-flex justify-content-between'>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                         <div className="dt-buttons mb-3">
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                            
+
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                     </div>
                     {
                         chartView ?
-<Line data={data} options={options} />
-:
-<>
-<div className="table-responsive">
-<table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-    <thead>
-        <tr>
-            {columnNames.map((columnName, index) => (
-                <th key={index}>{columnName.elementDisplayName}</th>
-            ))}
-        </tr>
-    </thead>
-    <tbody>
-        {filterData.map((rowData, rowIndex) => (
-            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                {
-                    columnNames.map((columnName, colIndex) => {
-                        let content;
+                            <>
+                                <div className="form-group d-flex align-items-center">
+                                    <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
+                                    <select className='form-select' style={{maxWidth:"300px"}}>
+                                        <option value="priceAvg" selected="">Price vs 20-day Avg (%)</option>
+                                        <option value="price">Price</option>
+                                        <option value="ytdReturn">YTD Return</option>
+                                        <option value="dividendYield">Dividend Yield</option>
+                                        <option value="shortFloat">Short as % of Float</option>
+                                        <option value="relativeStrength">Relative Strength</option>
+                                        <option value="priceEarning">Price/Earnings</option>
+                                    </select>
+                                    <button className='ms-2 btn btn-primary'>GO</button>
+                                </div>
+                                <Line data={data} />
+                            </>
+                            :
+                            <>
+                                <div className="table-responsive">
+                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                        <thead>
+                                            <tr>
+                                                {columnNames.map((columnName, index) => (
+                                                    <th key={index}>{columnName.elementDisplayName}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filterData.map((rowData, rowIndex) => (
+                                                <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                    {
+                                                        columnNames.map((columnName, colIndex) => {
+                                                            let content;
 
-                        if (columnName.elementInternalName === 'element3') {
-                            content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+                                                            if (columnName.elementInternalName === 'element3') {
+                                                                content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                            } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
-                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                        } else {
-                            content = rowData[columnName.elementInternalName];
-                        }
+                                                                content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                            } else {
+                                                                content = rowData[columnName.elementInternalName];
+                                                            }
 
-                        return <td key={colIndex}>{content}</td>;
-                    })
-                }
-            </tr>
-        ))}
-    </tbody>
+                                                            return <td key={colIndex}>{content}</td>;
+                                                        })
+                                                    }
+                                                </tr>
+                                            ))}
+                                        </tbody>
 
-</table>
+                                    </table>
 
-</div>
-{tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-</>
+                                </div>
+                                {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                            </>
                     }
-                   
+
                 </div>
             </div>
             <Loader />

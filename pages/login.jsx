@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
+import backgroundImage from '../public/images/DRKBkgrd.png'
 export default function Login() {
   const [loginDetails,setLoginDetails] = useState({userName:"",password:""})
   const [error,setError] = useState(false)
@@ -76,7 +77,7 @@ export default function Login() {
 
   },[loginDetails])
   return (
-    <>
+    <> 
     <div className="deep-background container-scroller">
       <div className="container-fluid page-body-wrapper full-page-wrapper">
         <div className="content-wrapper d-flex align-items-center auth">

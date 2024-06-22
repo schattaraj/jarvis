@@ -593,13 +593,15 @@ margin-right: 16px;
     }
 }
 .deep-background{
-    background-image: url(../public/images/DRKBkgrd.png);
-    background-size: contain;
+    background-image: url('/images/DRKBkgrd.png');
+    background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
     .content-wrapper{
-        padding:40px 12px;
+        padding:50px 12px;
+        background:transparent;
+        border:none;
         }
     img{
         width: 100%;
