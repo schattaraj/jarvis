@@ -7,7 +7,7 @@ import { Context } from "../contexts/Context";
 export default function Layout({ children }) {
    const context = useContext(Context)
     const router = useRouter()
-    const backgroundRoutes = ['/admin','/BusinessActivity','/marketAnalytics','/compareStocks']
+    const backgroundRoutes = ['/admin','/BusinessActivity','/marketAnalytics','/compareStocks','/insights']
     const isBackgroundRoutes = backgroundRoutes.includes(router.pathname)
     return (
         <div className={isBackgroundRoutes ? "container-scroller background" : "container-scroller"}>

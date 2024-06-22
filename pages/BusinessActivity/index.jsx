@@ -21,8 +21,8 @@ function BusinessActivity() {
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin">
-            <Card route="/BusinessActivity/BusinessPipeline" bg="bg-seagreen" img="/icons/Business Pipeline.png" title="Business Pipeline"/>
-              
+              <Card route="/BusinessActivity/BusinessPipeline" bg="bg-seagreen" img="/icons/Business Pipeline.png" title="Business Pipeline" />
+
               {/* <div className="card bg-green-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessPipeline"}>
                   <div className="card-body">
@@ -35,7 +35,7 @@ function BusinessActivity() {
               </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-            <Card route="/BusinessActivity/BusinessTracking" bg="bg-blue" img="/icons/Business Tracking.png" title="Business Tracking"/>
+              <Card route="/BusinessActivity/BusinessTracking" bg="bg-blue" img="/icons/Business Tracking.png" title="Business Tracking" />
               {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessTracking"}>
                   <div className="card-body">
@@ -47,7 +47,7 @@ function BusinessActivity() {
               </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-            <Card route="/BusinessActivity/Prospects" bg="bg-blue" img="/icons/Prospects.png" title="Prospects"/>
+              <Card route="/BusinessActivity/Prospects" bg="bg-blue" img="/icons/Prospects.png" title="Prospects" />
               {/* <div className="card bg-red-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/Prospects"}>
                   <div className="card-body">

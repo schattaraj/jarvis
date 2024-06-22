@@ -3,6 +3,7 @@ import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Link from 'next/link'
+import Card from '../../components/Card';
 export default function InsightsHome() {
   return (
     <>
@@ -24,7 +25,8 @@ export default function InsightsHome() {
           </div>
           <div className="row">
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-gradient-danger card-img-holder text-white">
+              <Card route="/insights/videoes" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
+              {/* <div className="card bg-gradient-danger card-img-holder text-white">
                 <Link href="/insights/videoes">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -33,10 +35,11 @@ export default function InsightsHome() {
 
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-gradient-info card-img-holder text-white">
+              <Card route="/insights/podcast" bg="bg-orange" img="/icons/Upload Podcast.png" title="Podcast" />
+              {/* <div className="card bg-gradient-info card-img-holder text-white">
                 <Link href="/insights/podcast">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
@@ -45,27 +48,29 @@ export default function InsightsHome() {
 
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-gradient-success card-img-holder text-white">
+              <Card route="/insights/reports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Reports" />
+              {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href="/insights/reports">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     <h2 className="mb-5">Reports</h2>
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
             <div className="col-md-4 stretch-card grid-margin">
-              <div className="card bg-gradient-success card-img-holder text-white">
+              <Card route="/insights/onePageReport" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="One Page Report" />
+              {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href="/insights/reports">
                   <div className="card-body">
                     <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
                     <h2 className="mb-5">One Page Report</h2>
                   </div>
                 </Link>
-              </div>
+              </div> */}
             </div>
           </div>
 

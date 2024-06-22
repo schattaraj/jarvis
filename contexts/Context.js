@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, useContext,useRef } from "react";
 import {useRouter} from 'next/router'
 import Layout from "../components/Layout";
+import Loader from "../components/loader";
 
 export const Context = createContext()
 
@@ -58,7 +59,7 @@ else{
     let token = localStorage.getItem("access_token")
     if(token){
       if(router.route == '/login'){
-        router.push('/admin')
+        router.push('/admin') 
       }
     }
     else{
@@ -70,7 +71,7 @@ else{
     localStorage.setItem("access_token","")
     router.push('/login')
   }
-  useEffect(()=>{
+  useEffect(()=>{ 
     checkLoginStatus()
   },[router.route == "/login"])
   // const showMenu = (e)=>{
@@ -95,7 +96,7 @@ else{
         {children}
         </Layout>
         }
-         
+         <Loader/>
         </Context.Provider>
       )
 }

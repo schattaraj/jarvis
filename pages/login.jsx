@@ -5,6 +5,7 @@ import { Form } from 'react-bootstrap';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import backgroundImage from '../public/images/DRKBkgrd.png'
+import 'animate.css';
 export default function Login() {
   const [loginDetails,setLoginDetails] = useState({userName:"",password:""})
   const [error,setError] = useState(false)
@@ -83,12 +84,12 @@ export default function Login() {
         <div className="content-wrapper d-flex align-items-center auth">
           <div className="row flex-grow h-100">
             <div className="col-lg-4 d-none d-lg-block">
-              <div className="d-flex align-items-end h-100">
+              <div className="d-flex align-items-end h-100 animate__animated animate__fadeInLeft">
               <img className="left-side" src="/images/Hello_Title.png" alt="" />
               </div>
             </div>
             <div className="col-lg-4 mx-auto d-flex align-items-center">
-              <div className="auth-form-light w-100 py-4 px-3 h-100">
+              <div className="auth-form-light w-100 py-4 px-3 h-100 animate__animated animate__fadeInDown">
                 <div className="top">
                 <div className="background-image">
                   <img src="/images/J_logo.png" alt="" />
@@ -147,7 +148,7 @@ export default function Login() {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 d-none d-lg-block">
+            <div className="col-lg-4 d-none d-lg-block animate__animated animate__fadeInRight">
               <img className="right-side" src="/images/Jarvis_Logo.png" alt="" />
             </div>
           </div>
