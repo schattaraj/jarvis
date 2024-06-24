@@ -4,6 +4,7 @@ import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Link from 'next/link'
 import Card from '../components/Card';
+import 'animate.css';
 export default function MarketAnalytics() {
   return (
     <>
@@ -23,7 +24,7 @@ export default function MarketAnalytics() {
                 </ul>
               </nav>
             </div>
-            <div className="row">
+            <div className="row animate__animated animate__fadeInLeft">
               <div className="col-md-4 stretch-card grid-margin">
                 <Card route="/stocks" bg="bg-purple" img="/icons/Stocks.png" title="Stocks"/>
                 {/* <div className="card bg-gradient-danger card-img-holder text-white">

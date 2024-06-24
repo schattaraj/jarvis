@@ -4,6 +4,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Link from 'next/link';
 import Card from '../../components/Card';
+import 'animate.css';
 export default function CompareStocs() {
   return (
     <>
@@ -17,7 +18,7 @@ export default function CompareStocs() {
             </h3>
 
           </div>
-          <div className="row">
+          <div className="row animate__animated animate__fadeInLeft">
             <div className="col-md-4 stretch-card grid-margin">
             <Card route="/compareStocks/stocksPair" bg="bg-seagreen" img="/icons/Pair of Stocks.png" title="Pair of Stocks"/>
               {/* <div className="card bg-green-gradient card-img-holder text-white">

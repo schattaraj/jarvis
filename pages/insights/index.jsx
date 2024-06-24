@@ -4,6 +4,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Link from 'next/link'
 import Card from '../../components/Card';
+import 'animate.css';
 export default function InsightsHome() {
   return (
     <>
@@ -23,7 +24,7 @@ export default function InsightsHome() {
               </ul>
             </nav>
           </div>
-          <div className="row">
+          <div className="row animate__animated animate__fadeInLeft">
             <div className="col-md-4 stretch-card grid-margin">
               <Card route="/insights/videoes" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
               {/* <div className="card bg-gradient-danger card-img-holder text-white">

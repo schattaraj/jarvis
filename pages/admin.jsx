@@ -6,6 +6,7 @@ import Footer from '../components/footer';
 import Link from 'next/link'
 import { Context } from '../contexts/Context';
 import Card from '../components/Card';
+import 'animate.css';
 export default function Admin() {
     const context = useContext(Context)
     useEffect(()=>{
@@ -26,7 +27,7 @@ export default function Admin() {
                             </span> Admin
                         </h3>
                     </div>
-                    <div className="row justify-content-center align-items-center">
+                    <div className="row justify-content-center align-items-center animate__animated animate__fadeInLeft">
                         <div className="col-md-4 stretch-card grid-margin">
                         <Card route="/BusinessActivity" bg="bg-purple" img="/icons/BusinessActivity.png" title="Business Activity"/>
                             <div className="d-none card bg-gradient-danger card-img-holder text-white">

@@ -6,6 +6,7 @@ import Footer from '../../components/footer';
 import Link from 'next/link'
 import { Context } from '../../contexts/Context';
 import Card from '../../components/Card';
+import 'animate.css';
 function BusinessActivity() {
   return (
     <>
@@ -19,7 +20,7 @@ function BusinessActivity() {
             </h3>
 
           </div>
-          <div className="row">
+          <div className="row animate__animated animate__fadeInLeft">
             <div className="col-md-4 stretch-card grid-margin">
               <Card route="/BusinessActivity/BusinessPipeline" bg="bg-seagreen" img="/icons/Business Pipeline.png" title="Business Pipeline" />
 

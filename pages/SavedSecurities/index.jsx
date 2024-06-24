@@ -172,7 +172,7 @@ export default function SaveSecurities() {
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="form-group">
-                                            <label htmlFor="">Meta Data Type</label>
+                                            <label htmlFor="">Market Data Type</label>
                                             <select name="portfolio_name" className='form-select' value={metaDataType} onChange={handleChange}>
                                                 <option>Please Select</option>
                                                 <option value="Stocks">Stocks</option>
