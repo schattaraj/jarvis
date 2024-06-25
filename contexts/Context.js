@@ -14,6 +14,7 @@ export const ContextProvider = ({ children }) =>{
   const collapse = useRef("")
   const [businessActivity,setBusinessActivity] = useState(false)
   const [background,setBackground] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState(null);
   const router = useRouter();
   const toggleMarketAnalytics = ()=>{
     if(marketAnalytics){
@@ -71,6 +72,9 @@ else{
     localStorage.setItem("access_token","")
     router.push('/login')
   }
+  const handleDropdownClick = (dropdown) => {
+    setOpenDropdown(openDropdown === dropdown ? null : dropdown);
+  };
   useEffect(()=>{ 
     checkLoginStatus()
   },[router.route == "/login"])
@@ -88,7 +92,7 @@ else{
   const noLayoutRoutes = ['/login','/register'];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
     return (
-        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut,background,setBackground}}>
+        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,setCompareStocks,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut,background,setBackground,openDropdown,setOpenDropdown,handleDropdownClick}}>
           {isNoLayoutRoute ?
           children
         :  

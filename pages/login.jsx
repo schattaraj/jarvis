@@ -142,9 +142,9 @@ export default function Login() {
                   </div> */}
                 </Form>
                 </div>
-                <div className="bottom">
+                <div className="bottom mt-3">
                   <Link href="#">Forgot Username / password ?</Link>
-                  <label htmlFor="">Keep Me Sign in</label>
+                  <label htmlFor="checkbox" className='d-flex justify-content-center align-items-center'><input type="checkbox" id="checkbox" className='me-2'/>Keep Me Sign in</label>
                 </div>
               </div>
             </div>

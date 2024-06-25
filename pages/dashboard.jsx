@@ -5,6 +5,7 @@ import Sidebar from '../components/sidebar';
 import Footer from '../components/footer';
 import Link from 'next/link'
 import { Context } from '../contexts/Context';
+import Card from '../components/Card';
 export default function Admin() {
     const context = useContext(Context)
     return (
@@ -27,95 +28,19 @@ export default function Admin() {
                     </div>
                     <div className="row justify-content-center">
                         <div className="col-md-4 stretch-card grid-margin">
-                        <Link href={"marketAnalytics"} onClick={() => { context.setMarketAnalytics(true) }}>
-                        <div className="d-flex bg-yellow">
-                                    <img src="/icons/Marketing Analytics.png" alt="" />
-                                    <h3>Market Analytics (Stocks,Bonds,ETFs and more)</h3> 
-                                </div>
-                                </Link>
-                            <div className="d-none card bg-gradient-danger card-img-holder text-white">
-                                <Link href={"marketAnalytics"} onClick={() => { context.setMarketAnalytics(true) }}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-                                        <h2>Market Analytics</h2>
-                                        <h3 className="mb-5">(Stocks,Bonds,ETFs and more)</h3>
-
-                                    </div>
-                                </Link>
-                            </div>
+                        <Card route="/marketAnalytics" bg="bg-yellow" img="/icons/Marketing Analytics.png" title="Market Analytics (Stocks,Bonds,ETFs and more)" click={context.setMarketAnalytics(true)}/>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                        <Link href={"/compareStocks"}>
-                        <div className="d-flex bg-blue">
-                                    <img src="/icons/Compare Stocks.png" alt="" />
-                                    <h3>Compare Stocks, ETFs</h3> 
-                                </div>
-                                </Link>
-                            <div className="d-none card bg-gradient-info card-img-holder text-white">
-                                <Link href={"/compareStocks"}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-                                        <h2 className="mb-5">Compare Stocks, ETFs</h2>
-                                    </div>
-                                </Link>
-                            </div>
+                        <Card route="/compareStocks" bg="bg-blue" img="/icons/Compare Stocks.png" title="Compare Stocks, ETFs"  click={context.setCompareStocks(true)}/>
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                        <Link href={"/portfolio"}><div className="d-flex bg-orange">
-                                    <img src="/icons/Portfolio.png" alt="" />
-                                    <h3>Portfolios</h3> 
-                                </div>
-                                </Link>
-                            <div className="d-none card bg-orange-gradient card-img-holder text-white">
-                                <Link href={"/portfolio"}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-                                        <h2 className="mb-5">Portfolios</h2>
-
-                                    </div>
-                                </Link>
-                            </div>
+                        <Card route="/portfolio" bg="bg-orange" img="/icons/Portfolio.png" title="Portfolios" />
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                        <Link href={"insights"}>
-                        <div className="d-flex bg-red">
-                                    <img src="/icons/Insights.png" alt="" />
-                                    <h3>Insights (PDF Reports and Videos on investment Research and more)</h3> 
-                                </div>
-                                </Link>
-                            <div className="d-none card bg-green-gradient card-img-holder text-white">
-                                <Link href={"insights"}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-                                        <h2>Insights</h2>
-                                        <h3 className="mb-5">(PDF Reports and Videos on investment Research and more)</h3>
-
-                                    </div>
-                                </Link>
-                            </div>
+                        <Card route="/insights" bg="bg-red" img="/icons/Insights.png" title="Insights (PDF Reports and Videos on investment Research and more)" />
                         </div>
                         <div className="col-md-4 stretch-card grid-margin">
-                        <Link href={"/newsletter"}>
-                        <div className="d-flex bg-green">
-                                    <img src="/icons/Newsletter.png" alt="" />
-                                    <h3>Newsletter</h3> 
-                                </div>
-                                </Link>
-                            <div className="d-none card bg-red-gradient  card-img-holder text-white">
-                                <Link href={"/newsletter"}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-
-                                        <h2 className="mb-5">Newsletter</h2>
-
-                                    </div>
-                                </Link>
-                            </div>
+                        <Card route="/newsletter" bg="bg-green" img="/icons/Newsletter.png" title="Newsletter" />
                         </div>
                     </div>
                 </div>
