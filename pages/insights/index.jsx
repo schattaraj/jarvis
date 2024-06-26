@@ -63,7 +63,7 @@ export default function InsightsHome() {
               </div> */}
             </div>
             <div className="col-md-6 col-lg-6 stretch-card grid-margin">
-              <Card route="/insights/onePageReport" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="One Page Report" />
+              <Card route="/insights/onePageReport" bg="bg-green" img="/icons/Upload Ticker Reports.png" title="One Page Report" />
               {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href="/insights/reports">
                   <div className="card-body">
