@@ -27,19 +27,19 @@ export default function Admin() {
 
                     </div>
                     <div className="row justify-content-center animate__animated animate__fadeInLeft">
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/marketAnalytics" bg="bg-yellow" img="/icons/Marketing Analytics.png" title="Market Analytics (Stocks,Bonds,ETFs and more)" click={context.setMarketAnalytics(true)}/>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/compareStocks" bg="bg-blue" img="/icons/Compare Stocks.png" title="Compare Stocks, ETFs"  click={context.setCompareStocks(true)}/>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/portfolio" bg="bg-orange" img="/icons/Portfolio.png" title="Portfolios" />
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/insights" bg="bg-red" img="/icons/Insights.png" title="Insights (PDF Reports and Videos on investment Research and more)" />
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/newsletter" bg="bg-green" img="/icons/Newsletter.png" title="Newsletter" />
                         </div>
                     </div>
