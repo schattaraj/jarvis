@@ -25,7 +25,7 @@ export default function InsightsHome() {
             </nav>
           </div>
           <div className="row animate__animated animate__fadeInLeft">
-            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/insights/videoes" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
               {/* <div className="card bg-gradient-danger card-img-holder text-white">
                 <Link href="/insights/videoes">
@@ -38,7 +38,7 @@ export default function InsightsHome() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/insights/podcast" bg="bg-orange" img="/icons/Upload Podcast.png" title="Podcast" />
               {/* <div className="card bg-gradient-info card-img-holder text-white">
                 <Link href="/insights/podcast">
@@ -51,7 +51,7 @@ export default function InsightsHome() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/insights/reports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Reports" />
               {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href="/insights/reports">
@@ -62,7 +62,7 @@ export default function InsightsHome() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/insights/onePageReport" bg="bg-green" img="/icons/Upload Ticker Reports.png" title="One Page Report" />
               {/* <div className="card bg-gradient-success card-img-holder text-white">
                 <Link href="/insights/reports">
