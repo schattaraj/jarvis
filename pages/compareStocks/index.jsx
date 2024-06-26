@@ -19,7 +19,7 @@ export default function CompareStocs() {
 
           </div>
           <div className="row animate__animated animate__fadeInLeft">
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
             <Card route="/compareStocks/stocksPair" bg="bg-seagreen" img="/icons/Pair of Stocks.png" title="Pair of Stocks"/>
               {/* <div className="card bg-green-gradient card-img-holder text-white">
                 <Link href="/compareStocks/stocksPair">
@@ -32,7 +32,7 @@ export default function CompareStocs() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
             <Card route="/compareStocks/myStocks" bg="bg-blue" img="/icons/My Stocks.png" title="My Stocks"/>
               {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href="/compareStocks/myStocks">

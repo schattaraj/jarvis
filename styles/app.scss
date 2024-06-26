@@ -726,11 +726,14 @@ margin-right: 16px;
 .footer{
     background-color: transparent;
 }
-.navbar{
-    background-color: rgba(#fff,.4);
-}
-.sidebar{
-    background-color: rgba(#fff,.4);
+
+@media (min-width:992px) {
+    .navbar{
+        background-color: rgba(#fff,.4);
+    }
+    .sidebar{
+        background-color: rgba(#fff,.4);
+    } 
 }
 .navbar .navbar-brand-wrapper{
     background-color: rgba(#fff,.4);

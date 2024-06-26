@@ -53,7 +53,7 @@ if(businessActivity){
   setBusinessActivity(false)
 }
 else{
-  setBusinessActivity(true)
+  // setBusinessActivity(true)
 }
   }
   const checkLoginStatus = ()=>{

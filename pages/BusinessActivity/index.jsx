@@ -21,7 +21,7 @@ function BusinessActivity() {
 
           </div>
           <div className="row animate__animated animate__fadeInLeft">
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
               <Card route="/BusinessActivity/BusinessPipeline" bg="bg-seagreen" img="/icons/Business Pipeline.png" title="Business Pipeline" />
 
               {/* <div className="card bg-green-gradient card-img-holder text-white">
@@ -35,7 +35,7 @@ function BusinessActivity() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
               <Card route="/BusinessActivity/BusinessTracking" bg="bg-blue" img="/icons/Business Tracking.png" title="Business Tracking" />
               {/* <div className="card bg-orange-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/BusinessTracking"}>
@@ -47,7 +47,7 @@ function BusinessActivity() {
                 </Link>
               </div> */}
             </div>
-            <div className="col-md-4 stretch-card grid-margin">
+            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
               <Card route="/BusinessActivity/Prospects" bg="bg-blue" img="/icons/Prospects.png" title="Prospects" />
               {/* <div className="card bg-red-gradient card-img-holder text-white">
                 <Link href={"/BusinessActivity/Prospects"}>

@@ -28,8 +28,8 @@ export default function Admin() {
                         </h3>
                     </div>
                     <div className="row justify-content-center align-items-center animate__animated animate__fadeInLeft">
-                        <div className="col-md-4 stretch-card grid-margin">
-                        <Card route="/BusinessActivity" bg="bg-purple" img="/icons/BusinessActivity.png" title="Business Activity"/>
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
+                        <Card route="/BusinessActivity" bg="bg-purple" img="/icons/BusinessActivity.png" title="Business Activity" click={context.toggleBusinessActivity(true)}/>
                             <div className="d-none card bg-gradient-danger card-img-holder text-white">
                                 <Link href={"/BusinessActivity"} onClick={() => { context.toggleBusinessActivity(true) }}>
                                     <div className="card-body">
@@ -42,7 +42,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/SavedSecurities" bg="bg-gray" img="/icons/Saved Securities.png" title="Saved Securities"/>
                             <div className="d-none card bg-gradient-info card-img-holder text-white">
                                 <Link href={"/SavedSecurities"}>
@@ -54,7 +54,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/AddTicker" bg="bg-seagreen" img="/icons/Add Ticker.png" title="Add Ticker"/>
                             <div className="d-none card bg-orange-gradient card-img-holder text-white">
                                 <Link href={"/AddTicker"}>
@@ -67,7 +67,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/UploadTickerReports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Upload Ticker Reports"/>
                             <div className="d-none card bg-green-gradient card-img-holder text-white">
                                 <Link href={"/UploadTickerReports"}>
@@ -81,7 +81,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/UploadAnalystVideos" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Upload Analyst Videos"/>
                             <div className="d-none card bg-red-gradient  card-img-holder text-white">
                                 <Link href={"/UploadAnalystVideos"}>
@@ -95,7 +95,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/UploadPodcast" bg="bg-orange" img="/icons/Upload Podcast.png" title="Upload Podcast"/>
                             <div className="d-none card bg-gradient-dark  card-img-holder text-white">
                                 <Link href={"/UploadPodcast"}>
@@ -109,7 +109,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/ChangePassword" bg="bg-red" img="/icons/Change Password.png" title="Change Password"/>
                              
                             <div className="d-none card bg-gradient-info  card-img-holder text-white">
@@ -124,7 +124,7 @@ export default function Admin() {
                                 </Link>
                             </div>
                         </div>
-                        <div className="col-md-4 stretch-card grid-margin">
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/MutualFund" bg="bg-green" img="/icons/Mutual Funds.png" title="Mutual Fund"/>
                             <div className="d-none card bg-gradient-success  card-img-holder text-white">
                                 <Link href={"/MutualFund"}>
