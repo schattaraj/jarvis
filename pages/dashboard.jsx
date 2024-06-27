@@ -6,6 +6,7 @@ import Footer from '../components/footer';
 import Link from 'next/link'
 import { Context } from '../contexts/Context';
 import Card from '../components/Card';
+import 'animate.css';
 export default function Admin() {
     const context = useContext(Context)
     return (

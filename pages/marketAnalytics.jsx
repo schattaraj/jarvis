@@ -16,13 +16,6 @@ export default function MarketAnalytics() {
                 <i className="mdi mdi-home"></i>
               </span> Market Analytics
             </h3>
-            <nav aria-label="breadcrumb">
-              <ul className="breadcrumb">
-                <li className="breadcrumb-item active" aria-current="page">
-                  <span></span>Overview <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                </li>
-              </ul>
-            </nav>
           </div>
           <div className="row animate__animated animate__fadeInLeft">
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">

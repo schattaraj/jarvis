@@ -1,10 +1,10 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, formatDate, searchTable } from '../utils/utils';
+import { calculateAverage, exportToExcel, formatDate, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
@@ -13,6 +13,10 @@ import SliceData from '../components/SliceData';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import Select from 'react-select'
+import { utils } from 'xlsx';
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable' 
+import { generatePDF } from '../utils/utils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -62,6 +66,17 @@ export default function Etfs() {
     const [selectedTicker, setSelectedTicker] = useState(false)
     const [chartView, setChartView] = useState(false)
     const [chartHistory, setChartHistory] = useState([])
+    const [ViewOptions,setViewOptions] = useState({
+        element7:"Price vs 20-day Avg (%)",
+        element8:"Price",
+        element9:"YTD Return",
+        element10:"Dividend Yield",
+        element11:"Short as % of Float",
+        element16:"Relative Strength",
+        element17:"Price/Earnings"
+    })
+    const [chartData,setChartData] = useState([])
+    const [selectedView,setSelectedView] = useState('element7')
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -113,21 +128,6 @@ export default function Etfs() {
     }
     const filter = (e) => {
         const value = e.target.value;
-        // const filtered = tableData.filter(elememt => elememt.element4.toLowerCase().includes(value.toLowerCase()))
-        //   const filtered = tableData.map(elememt => {
-        //    return elememt['element4'].toLowerCase().includes(value.toLowerCase())
-        // columnNames.map((item,index)=>{
-        //     // (elememt.element+(index+1)).toLowerCase().includes(value.toLowerCase())
-        //     console.log(elememt['element4'].includes(value))
-        //      if(elememt['element4'] == value){
-        //    return elememt
-        //     }
-
-        // }) 
-        // });
-        // console.log('searchdata', filtered)
-        // console.log('tableData', tableData)
-        // setFilterData(filtered)
         setFilterData(searchTable(tableData, value))
     }
     const exportPdf = () => {
@@ -210,7 +210,7 @@ export default function Etfs() {
         datasets: [
             {
                 label: 'Price AVG',
-                data: chartHistory.map(item => parseFloat(item.element7)),
+                data: chartData,
                 fill: false,
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -222,6 +222,9 @@ export default function Etfs() {
             },
         ],
     };
+    const handleChange = (e)=>{
+        setSelectedView(e.target.value)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -234,8 +237,9 @@ export default function Etfs() {
         run()
     }, [currentPage, tableData])
     useEffect(() => {
-        console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
-    }, [chartHistory])
+        setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
+        //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
+    }, [chartHistory,selectedView])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
@@ -272,8 +276,8 @@ export default function Etfs() {
                     <div className='d-flex justify-content-between'>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                         <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
 
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
@@ -283,17 +287,25 @@ export default function Etfs() {
                             <>
                                 <div className="form-group d-flex align-items-center">
                                     <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
-                                    <select className='form-select' style={{maxWidth:"300px"}}>
-                                        <option value="priceAvg" selected="">Price vs 20-day Avg (%)</option>
+                                    <select className='form-select' style={{maxWidth:"300px"}} onChange={handleChange}>
+                                        {
+                                             Object.entries(ViewOptions).map(([key, value]) => (
+                                                <option key={key} value={key}>
+                                                    {value}
+                                                </option>
+                                            ))
+                                        }
+                                        {/* <option value="priceAvg" selected="">Price vs 20-day Avg (%)</option>
                                         <option value="price">Price</option>
                                         <option value="ytdReturn">YTD Return</option>
                                         <option value="dividendYield">Dividend Yield</option>
                                         <option value="shortFloat">Short as % of Float</option>
                                         <option value="relativeStrength">Relative Strength</option>
-                                        <option value="priceEarning">Price/Earnings</option>
+                                        <option value="priceEarning">Price/Earnings</option> */}
                                     </select>
                                     <button className='ms-2 btn btn-primary'>GO</button>
                                 </div>
+                                <h3>Chart View For {ViewOptions[selectedView]}</h3>
                                 <Line data={data} />
                             </>
                             :

@@ -8,8 +8,8 @@ export default function videoes() {
 
   return (
     <>
-        {/* <div className="main-panel"> */}
-        {/* <div className="content-wrapper"> */}
+        <div className="main-panel">
+        <div className="content-wrapper">
           <VideoComponent />
         {/* <div className="page-header">
               <h3 className="page-title">
@@ -70,9 +70,9 @@ export default function videoes() {
             </div>
           ))}
         </div> */}
-        {/* </div> */}
+        </div>
         {/* <Footer /> */}
-        {/* </div> */}
+        </div>
         </>
   );
 }

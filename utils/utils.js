@@ -1,3 +1,6 @@
+import html2canvas from 'html2canvas';
+import { jsPDF } from "jspdf";
+import * as XLSX from 'xlsx'
 export const calculateAveragePercentage = (tableData, columnName) => {
     const columnValues = tableData.map((row) => row[columnName]);
 
@@ -45,7 +48,7 @@ export const searchTable = (tableData, searchTerm) => {
 
 export const formatDate = (dateStr)=>{
     const date = new Date(dateStr);
-    console.log(dateStr,date)
+    // console.log(dateStr,date)
     // Get the year, month, and day
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
@@ -55,3 +58,58 @@ export const formatDate = (dateStr)=>{
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
 }
+export const generatePDF = () => {
+    const input = document.getElementById('my-table');
+    html2canvas(input).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('Jarvis Ticker for ' + formatDate(new Date()) + '.pdf');
+    });
+};
+const s2ab = (s) => {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < s.length; i++) {
+        view[i] = s.charCodeAt(i) & 0xFF;
+    }
+    return buf;
+};
+export const exportToExcel = () => {
+    const table = document.getElementById('my-table');    
+    const tableData = [];
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const rowData = [];
+        const cells = row.querySelectorAll('th, td');
+        cells.forEach(cell => {
+            rowData.push(cell.textContent);
+        });
+        tableData.push(rowData);
+    });
+
+    // Create a new workbook and a new worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(tableData);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // Generate a binary string representation of the workbook
+    const workbookBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+    // Convert the binary string to a Blob
+    const blob = new Blob([s2ab(workbookBinary)], { type: 'application/octet-stream' });
+
+    // Create a link element to trigger the download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'table_data.xlsx';
+    link.click();
+    URL.revokeObjectURL(link.href); // Clean up the URL object
+};
