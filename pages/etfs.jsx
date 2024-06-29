@@ -15,7 +15,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import Select from 'react-select'
 import { utils } from 'xlsx';
 import { jsPDF } from "jspdf";
-import autoTable from 'jspdf-autotable' 
+import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../utils/utils';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
@@ -48,6 +48,13 @@ const options = {
         },
     },
 };
+const rankingColumn = {
+    "company":"Company",
+    "bestMovedStock":"Most Risen Stock",
+    "bestMovedBy":"Price Risen By",
+    "percentageChangeRise":"% In Rise",
+    "bestMoveCurrValue":"Current Price"
+}
 export default function Etfs() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -66,17 +73,17 @@ export default function Etfs() {
     const [selectedTicker, setSelectedTicker] = useState(false)
     const [chartView, setChartView] = useState(false)
     const [chartHistory, setChartHistory] = useState([])
-    const [ViewOptions,setViewOptions] = useState({
-        element7:"Price vs 20-day Avg (%)",
-        element8:"Price",
-        element9:"YTD Return",
-        element10:"Dividend Yield",
-        element11:"Short as % of Float",
-        element16:"Relative Strength",
-        element17:"Price/Earnings"
+    const [ViewOptions, setViewOptions] = useState({
+        element7: "Price vs 20-day Avg (%)",
+        element8: "Price",
+        element9: "YTD Return",
+        element10: "Dividend Yield",
+        element11: "Short as % of Float",
+        element16: "Relative Strength",
+        element17: "Price/Earnings"
     })
-    const [chartData,setChartData] = useState([])
-    const [selectedView,setSelectedView] = useState('element7')
+    const [chartData, setChartData] = useState([])
+    const [selectedView, setSelectedView] = useState('element7')
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -178,6 +185,7 @@ export default function Etfs() {
         setSelectedTicker(e.target.value)
     }
     const fetchTickersFunc = async () => {
+        context.setLoaderState(true)
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496")
             const fetchTickersRes = await fetchTickers.json()
@@ -186,12 +194,14 @@ export default function Etfs() {
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const charts = async () => {
         if (!selectedTicker) {
             alert("Please Select a ticker")
             return;
         }
+        context.setLoaderState(true)
         try {
             const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + "&year=2023&year2=2023&_=1718886601497")
             const getChartHistroryRes = await getChartHistrory.json()
@@ -201,6 +211,7 @@ export default function Etfs() {
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const etfHome = () => {
         setChartView(false)
@@ -222,8 +233,11 @@ export default function Etfs() {
             },
         ],
     };
-    const handleChange = (e)=>{
+    const handleChange = (e) => {
         setSelectedView(e.target.value)
+    }
+    const ranking = ()=>{
+        
     }
     useEffect(() => {
         async function run() {
@@ -239,7 +253,7 @@ export default function Etfs() {
     useEffect(() => {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
-    }, [chartHistory,selectedView])
+    }, [chartHistory, selectedView])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
@@ -270,6 +284,7 @@ export default function Etfs() {
                         </select>
                         <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={charts}><span>Chart View</span></button>
                         <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={etfHome}><span>ETF Home</span></button>
+                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{}}><span>Ranking</span></button>
 
                         {/* <input type="search" placeholder='' className='form-control' onChange={filter} /> */}
                     </div>
@@ -280,16 +295,16 @@ export default function Etfs() {
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
 
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>}
                     </div>
                     {
                         chartView ?
                             <>
                                 <div className="form-group d-flex align-items-center">
                                     <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
-                                    <select className='form-select' style={{maxWidth:"300px"}} onChange={handleChange}>
+                                    <select className='form-select' style={{ maxWidth: "300px" }} onChange={handleChange}>
                                         {
-                                             Object.entries(ViewOptions).map(([key, value]) => (
+                                            Object.entries(ViewOptions).map(([key, value]) => (
                                                 <option key={key} value={key}>
                                                     {value}
                                                 </option>
@@ -303,7 +318,7 @@ export default function Etfs() {
                                         <option value="relativeStrength">Relative Strength</option>
                                         <option value="priceEarning">Price/Earnings</option> */}
                                     </select>
-                                    <button className='ms-2 btn btn-primary'>GO</button>
+                                    <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
                                 </div>
                                 <h3>Chart View For {ViewOptions[selectedView]}</h3>
                                 <Line data={data} />

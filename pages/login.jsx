@@ -41,7 +41,8 @@ export default function Login() {
     setSubmitted(true); 
     context.setLoaderState(true)
     try {
-      const loginApi = await fetch("https://www.jharvis.com/JarvisV2/authenticate",{
+      const sessionOut = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/sessionOut?username="+loginDetails?.userName)
+      const loginApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/authenticate",{
         method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -49,14 +50,19 @@ export default function Login() {
                 body: JSON.stringify(loginDetails)
       })
       const loginApiRes = await loginApi.json()
-      localStorage.setItem("access_token",loginApiRes.payload.accessToken)
-      localStorage.setItem("sessionId",loginApiRes.payload.sessionId)
-      if(localStorage.getItem('route') && localStorage.getItem('route') !=="/login"){
-        router.push(localStorage.getItem('route'))
+      if(loginApiRes?.statusCode == 4004){
+        setError(loginApiRes?.message)
       }
-      else{
-        router.push("/admin")
-      }
+      if(loginApiRes?.statusCode == 0){
+        localStorage.setItem("access_token",loginApiRes?.payload?.accessToken)
+        localStorage.setItem("sessionId",loginApiRes?.payload?.sessionId)
+        if(localStorage.getItem('route') && localStorage.getItem('route') !=="/login"){
+          router.push(localStorage.getItem('route'))
+        }
+        else{
+          router.push("/admin")
+        }
+      }     
       
     } catch (error) {
       console.log(error.message)
