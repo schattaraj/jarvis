@@ -304,7 +304,7 @@ export default function Etfs() {
                             ))}
                         </select> */}
                         <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth:"200px", maxWidth: "300px" }} options={
-  tickers.map((item, index) => (
+tickers && tickers.map((item, index) => (
      {value:item.element1,label:item.element1} 
 ))
 } />
