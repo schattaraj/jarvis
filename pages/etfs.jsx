@@ -48,12 +48,21 @@ const options = {
         },
     },
 };
-const rankingColumn = {
-    "company":"Company",
-    "bestMovedStock":"Most Risen Stock",
-    "bestMovedBy":"Price Risen By",
-    "percentageChangeRise":"% In Rise",
-    "bestMoveCurrValue":"Current Price"
+const bestFiveStockColumn = {
+    "company": "Company",
+    "bestMovedStock": "Most Risen Stock",
+    "bestMovedBy": "Price Risen By",
+    "percentageChangeRise": "% In Rise",
+    "bestMoveCurrValue": "Current Price",
+    "bestMovePrevValue": "Previous Price"
+}
+const worstFiveStockColumn = {
+    "company": "Company",
+    "worstMovedStock": "Most Dropped Stock",
+    "worstMovedBy": "Price Dropped By",
+    "percentageChangeRise": "% In Drop",
+    "worstMoveCurrValue": "Current Price",
+    "worstMovePrevValue": "Previous Price"
 }
 export default function Etfs() {
     const context = useContext(Context)
@@ -82,6 +91,7 @@ export default function Etfs() {
         element16: "Relative Strength",
         element17: "Price/Earnings"
     })
+    const [rankingData, setRankingData] = useState(false)
     const [chartData, setChartData] = useState([])
     const [selectedView, setSelectedView] = useState('element7')
     const handleOpenModal = () => {
@@ -181,8 +191,9 @@ export default function Etfs() {
                 break;
         }
     };
-    const handleSelect = (e) => {
-        setSelectedTicker(e.target.value)
+    const handleSelect = (inputs) => {
+        let arr = inputs.map((item)=>item.value)
+        setSelectedTicker(arr.join(","))
     }
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
@@ -215,6 +226,7 @@ export default function Etfs() {
     }
     const etfHome = () => {
         setChartView(false)
+        setRankingData(false)
     }
     const data = {
         labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
@@ -236,8 +248,17 @@ export default function Etfs() {
     const handleChange = (e) => {
         setSelectedView(e.target.value)
     }
-    const ranking = ()=>{
-        
+    const ranking = async () => {
+        context.setLoaderState(true)
+        try {
+            const rankingApi = await fetch("https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=1900-01-01&date2=1900-01-01&_=1719818279196")
+            const rankingApiRes = await rankingApi.json()
+            setChartView(false)
+            setRankingData(rankingApiRes)
+        } catch (error) {
+
+        }
+        context.setLoaderState(false)
     }
     useEffect(() => {
         async function run() {
@@ -274,29 +295,34 @@ export default function Etfs() {
                         </h3>
                     </div>
                     <div className="selection-area mb-3 d-flex align-items-center">
-                        <select name="" className='form-select mb-0 me-2' style={{ maxWidth: "300px" }} onChange={handleSelect}>
+                        {/* <select name="" className='form-select mb-0 me-2' style={{ maxWidth: "300px" }} onChange={handleSelect}>
                             <option value="">--Select Ticker--</option>
                             {tickers && tickers.map((item, index) => (
                                 <option key={index} value={item.element1}>
                                     {item.element1}
                                 </option>
                             ))}
-                        </select>
-                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={charts}><span>Chart View</span></button>
-                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={etfHome}><span>ETF Home</span></button>
-                        <button className="dt-button h-100 buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{}}><span>Ranking</span></button>
-
-                        {/* <input type="search" placeholder='' className='form-control' onChange={filter} /> */}
-                    </div>
-                    <div className='d-flex justify-content-between'>
+                        </select> */}
+                        <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth:"200px", maxWidth: "300px" }} options={
+  tickers.map((item, index) => (
+     {value:item.element1,label:item.element1} 
+))
+} />
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && !rankingData && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && rankingData && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                    </div>
+                    {
+                        !chartView && !rankingData &&
+                        <div className='d-flex justify-content-between'>
                         <div className="dt-buttons mb-3">
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-
                         </div>
                         {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>}
                     </div>
+                    }                    
                     {
                         chartView ?
                             <>
@@ -324,44 +350,91 @@ export default function Etfs() {
                                 <Line data={data} />
                             </>
                             :
-                            <>
-                                <div className="table-responsive">
-                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                        <thead>
-                                            <tr>
-                                                {columnNames.map((columnName, index) => (
-                                                    <th key={index}>{columnName.elementDisplayName}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filterData.map((rowData, rowIndex) => (
-                                                <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                    {
-                                                        columnNames.map((columnName, colIndex) => {
-                                                            let content;
-
-                                                            if (columnName.elementInternalName === 'element3') {
-                                                                content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                            } else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
-                                                                content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                            } else {
-                                                                content = rowData[columnName.elementInternalName];
-                                                            }
-
-                                                            return <td key={colIndex}>{content}</td>;
-                                                        })
-                                                    }
+                            rankingData
+                                ?
+                                <>
+                                    <h3 className='mb-3'>Best Five Stocks</h3>
+                                    <div className="table-responsive mb-4">
+                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                            <thead>
+                                                <tr>
+                                                    {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                        <th key={columnName}>{displayName}</th>
+                                                    ))}
                                                 </tr>
-                                            ))}
-                                        </tbody>
+                                            </thead>
+                                            <tbody>
+                                                {rankingData?.bestFiveStocks.map((item, index) => {
+                                                    return <tr key={"best"+index}>
+                                                        {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                        ))}
+                                                    </tr>
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <h3 className='mb-3'>Worst Five Stocks</h3>
+                                    <div className="table-responsive mb-4">
+                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                            <thead>
+                                                <tr>
+                                                    {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                        <th key={columnName}>{displayName}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {rankingData?.worstFiveStocks.map((item, index) => {
+                                                    return <tr key={"worst"+index}>
+                                                        {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                        ))}
+                                                    </tr>
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                                :
+                                <>
+                                    <div className="table-responsive">
+                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                            <thead>
+                                                <tr>
+                                                    {columnNames.map((columnName, index) => (
+                                                        <th key={index}>{columnName.elementDisplayName}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filterData.map((rowData, rowIndex) => (
+                                                    <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                        {
+                                                            columnNames.map((columnName, colIndex) => {
+                                                                let content;
 
-                                    </table>
+                                                                if (columnName.elementInternalName === 'element3') {
+                                                                    content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                                } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
-                                </div>
-                                {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-                            </>
+                                                                    content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                                } else {
+                                                                    content = rowData[columnName.elementInternalName];
+                                                                }
+
+                                                                return <td key={colIndex}>{content}</td>;
+                                                            })
+                                                        }
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+                                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                                </>
                     }
 
                 </div>

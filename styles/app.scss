@@ -316,8 +316,13 @@ margin-right: 16px;
 .btn-primary{
     background: linear-gradient(to right, #8bba6c, #719a57) !important;
     border:none;
-    &:active:focus{
+    &:focus{
         box-shadow: 0 0 0 0.25rem rgba(#719a57, 0.5);
+    }
+    &.active{
+    background: linear-gradient(to right, #719a57, #5a7745) !important;
+    box-shadow: 0 0 0 3px rgb(151 227 77 / 50%); 
+    font-weight: bold;
     }
 }
 .form-group{

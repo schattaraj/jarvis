@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Modal,
     Table,
@@ -21,14 +21,16 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
+import { Context } from '../contexts/Context';
 function EtfHistoryModal({ open, handleClose }) {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(20);
-
+    const context = useContext(Context)
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             const response = await fetch('https://jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127');
             const result = await response.json();
@@ -36,6 +38,7 @@ function EtfHistoryModal({ open, handleClose }) {
         } catch (error) {
             console.error('Error fetching data:', error);
         }
+        context.setLoaderState(false)
     };
     const confirmedDelete = async () => {
         console.log(`Delete action triggered for ID ${deleteItemId}`);
