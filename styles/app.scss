@@ -212,6 +212,7 @@ margin-right: 16px;
     thead{
         position: sticky;
         top:0;
+        z-index: 2;
         th{
             background-color: #719B5F;
             color: #fff;
@@ -292,6 +293,7 @@ margin-right: 16px;
         &.fixed{
             position: sticky;
             bottom: 0;
+            z-index: 3;
         }
     }
 }
@@ -733,6 +735,7 @@ margin-right: 16px;
 }
 
 @media (min-width:992px) {
+    .background{
     .navbar{
         background-color: rgba(#fff,.4);
     }
@@ -740,8 +743,10 @@ margin-right: 16px;
         background-color: rgba(#fff,.4);
     } 
 }
+   
+}
 .navbar .navbar-brand-wrapper{
-    background-color: rgba(#fff,.4);
+    background-color: transparent;
 }
 .main-panel .content-wrapper a{
     width: 100%;
@@ -766,4 +771,58 @@ margin-right: 16px;
         margin-bottom: 0;
         width: 100%;
     }
+}
+// scrollbar design
+::-webkit-scrollbar {
+    width: 8px; 
+    height: 8px; 
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 6px;  /* Round edges for the thumb */
+  }
+  
+  /* Style the handle (thumb) on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+  
+  /* Optional: Style the scrollbar buttons */
+//   ::-webkit-scrollbar-button {
+//     background: #ccc;
+//   }
+  
+  /* Optional: Style the scrollbar buttons on hover */
+  ::-webkit-scrollbar-button:hover {
+    background: #aaa;
+  }
+  .sticky-action {
+    position: sticky;
+    right: 0;
+    background-color: white; /* or whatever your table background color is */
+    z-index: 1; /* Adjust the z-index as needed */
+}
+.sticky-left {
+    position: sticky;
+    left: 0;
+    background-color: white; /* or whatever your table background color is */
+    z-index: 1; /* Adjust the z-index as needed */
+}
+th.sticky-left{
+    box-shadow: -3px 0 25px -5px #9c9b9b;
+    display: block;
+}
+td.sticky-left{
+    box-shadow: inset -4px 0 20px -16px #9c9b9b;
+}
+th.sticky-action{
+    box-shadow: -3px 0 25px -5px #9c9b9b;
+    display: block;
+}
+td.sticky-action{
+    box-shadow: -3px 31px 25px -5px #a0a0a0;
+    display: block;
 }

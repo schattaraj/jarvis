@@ -17,6 +17,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import StringToHTML from '../../../components/StringToHtml.jsx';
 import formatAmount from '../../../components/formatAmount.js';
+import Select from 'react-select'
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name" },
@@ -33,7 +34,8 @@ export default function BusinessPipeline() {
         { "data": "otherOpportunities" },
         { "data": "investorLifecycle" },
         { "data": "accreditedInvestor" },
-        { "data": "advisorName" }
+        { "data": "advisorName" },
+        {"data":"action"}
     ])
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
@@ -45,33 +47,40 @@ export default function BusinessPipeline() {
     const [allAmountString, setAllAmountString] = useState(false)
 
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-//
-const [totalAmount, setTotalAmount] = useState(0);
-const [byPersonModal,setByPersonModal] = useState(false)
-const [personModalData,setPersonModalData] = useState({advisorName:"",totalAmount:0})
-const [bPInputs,setBPInputs] = useState({
-    "name": "",
-    "opportunity": [],
-    "opportunityComeAbout": [],
-    "amounts": "",
-    "status": "",
-    "mostRecentActivity": "",
-    "dateAdded": "",
-    "lastContact": "",
-    "followUpAction": "",
-    "connections": "",
-    "autoFinding": "",
-    "otherOpportunities": "",
-    "investorLifecycle": "",
-    "accreditedInvestor": "",
-    "advisorName": "",
-    "followUpDate": ""
-})
+    //
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [byPersonModal, setByPersonModal] = useState(false)
+    const [personModalData, setPersonModalData] = useState({ advisorName: "", totalAmount: 0 })
+    const [bPInputs, setBPInputs] = useState({
+        "name": "",
+        "opportunity": [],
+        "opportunityComeAbout": [],
+        "amounts": "",
+        "status": "",
+        "mostRecentActivity": "",
+        "dateAdded": "",
+        "lastContact": "",
+        "followUpAction": "",
+        "connections": "",
+        "autoFinding": "",
+        "otherOpportunities": "",
+        "investorLifecycle": "",
+        "accreditedInvestor": "",
+        "advisorName": "",
+        "followUpDate": ""
+    })
+    const [errors, setErrors] = useState({})
+    const [validated, setValidated] = useState(false);
+    const [selectedOpportunity,setSelectedOpportunity] = useState([])
+    const [selectedOpportunityComeAbout,setSelectedOpportunityComeAbout] = useState([])
+    const [editModal,setEditModal] = useState(false)
+    const context = useContext(Context)
     const filter = (e) => {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
     }
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessPipeline?_=1710158570127")
             const getBondsRes = await getBonds.json()
@@ -81,6 +90,7 @@ const [bPInputs,setBPInputs] = useState({
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
     const handlePage = async (action) => {
         switch (action) {
@@ -130,7 +140,15 @@ const [bPInputs,setBPInputs] = useState({
     const handleOpen = () => {
         setOpenModal(true);
     }
-    const fetchAllAmount = async()=>{
+    const handleEditModal = (action)=>{
+        if(action == "close"){
+            setEditModal(false)
+        }
+        if(action == "open"){
+            setEditModal(true)
+        }
+    }
+    const fetchAllAmount = async () => {
         try {
             const getAllAmount = await fetch("https://jharvis.com/JarvisV2/getAmountsByAdvisor?_=1714645928468")
             const getAllAmountRes = await getAllAmount.json()
@@ -141,59 +159,113 @@ const [bPInputs,setBPInputs] = useState({
             console.log("error", e)
         }
     }
-    const handleOpenAmount = ()=>{
+    const handleOpenAmount = () => {
         setOpenAmountModal(true)
         fetchAllAmount()
     }
-    const handleCloseAmount = ()=>{
+    const handleCloseAmount = () => {
         setOpenAmountModal(false)
     }
     // function formatAmount(amount) {
     //     // Convert amount to number if it's not already
     //     amount = parseFloat(amount);
-      
+
     //     // Check if the amount is a valid number
     //     if (isNaN(amount)) {
     //       return "Invalid Amount";
     //     }
-      
+
     //     // Format the amount with commas and dollar sign
     //     return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
     //   }
-      
-      // Example usage:
+
+    // Example usage:
     //const formattedAmount = formatAmount(3700000); // Returns "$3,700,000"
-    const totalAmountByPerson = (person)=>{
+    const totalAmountByPerson = (person) => {
         const result = Object.values(tableData.reduce((acc, curr) => {
             const { advisorName, amounts } = curr;
             if (!acc[advisorName]) {
-              acc[advisorName] = { advisorName, totalAmount: 0 };
+                acc[advisorName] = { advisorName, totalAmount: 0 };
             }
             acc[advisorName].totalAmount += parseFloat(amounts ? amounts : 0);
             return acc;
-          }, {}));
+        }, {}));
         setALlAmounts(result)
-        console.log(result.filter((item)=>item.advisorName == person))
-        setPersonModalData(result.filter((item)=>item.advisorName == person)[0])
+        console.log(result.filter((item) => item.advisorName == person))
+        setPersonModalData(result.filter((item) => item.advisorName == person)[0])
         setByPersonModal(true)
     }
-    const hideTotalAmountPerson = ()=>{
+    const hideTotalAmountPerson = () => {
         setByPersonModal(false)
     }
-    const submitForm = (e)=>{
+    const formInput = (e) => {
+        console.log("name", e.target.name)
+    }
+    const selectOpportunity = (e) => {
+         setSelectedOpportunity(e.map((item)=>item.value))
+    }
+    const selecteOpportunityComeAbout = (e)=>{
+setSelectedOpportunityComeAbout(e.map((item)=>item.value))
+    }
+    const submitForm = async(e) => {
         e.preventDefault()
+        const errors = {}
+        context.setLoaderState(true)
         try {
             const form = e.target;
+            if (form.checkValidity() === false) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            setValidated(true);
             const formData = new FormData(form);
             let jsonObject = {}
             formData.forEach((value, key) => {
+                if (!value) {
+                    errors[key] = `${key} field is required`
+                }
                 jsonObject[key] = value;
             });
-            console.log("json",jsonObject)
+            setErrors(errors)
+            const addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"addBusinessPipeline",{
+                method:"POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify(jsonObject)
+            })
+            const addPipelineRes = await addPipeline.json()
+            alert(addPipelineRes?.msg)
+            fetchData()
+            console.log("json", jsonObject)
         } catch (error) {
-            
+            console.log(error)
         }
+        context.setLoaderState(false)
         console.log(e)
+    }
+    const deleteBusinessPipeline = async (id)=>{
+        let text = "Are you sure ?";
+        if (confirm(text) == true) {
+            context.setLoaderState(true)
+            try {
+                const formData = new FormData();
+                formData.append("idBusinessPipelineg", id)
+                const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"deleteBusinessPipeline", {
+                    method: 'DELETE',
+                    body: formData
+                })
+                if (rowDelete.ok) {
+                    const rowDeleteRes = await rowDelete.json()
+                    alert(rowDeleteRes.msg)
+                    fetchData()
+                }
+            } catch (error) {
+                console.log(error)
+            }
+            context.setLoaderState(false)
+        }
     }
     useEffect(() => {
         fetchData()
@@ -218,11 +290,11 @@ const [bPInputs,setBPInputs] = useState({
                 items = items.slice(startIndex, endIndex);
                 setFilterData(items);
                 //
-                  // Calculate total amount
-                  const total = items.reduce((acc, item) => {
+                // Calculate total amount
+                const total = items.reduce((acc, item) => {
                     return acc + Number(item.amounts);
                 }, 0);
-                  setTotalAmount(total);
+                setTotalAmount(total);
 
             }
         }
@@ -230,64 +302,73 @@ const [bPInputs,setBPInputs] = useState({
     }, [currentPage, tableData, sortConfig]);
     return (
         <>
-                    <div className="main-panel">
-                        <div className="content-wrapper">
-                            <div className="page-header">
-                                <h3 className="page-title">
-                                    <span className="page-title-icon bg-gradient-primary text-white me-2">
-                                        <i className="mdi mdi-home"></i>
-                                    </span>Business Pipeline
-                                </h3>
-                            </div>
-                            <div className='d-flex justify-content-between'>
-                                <div className="dt-buttons mb-3">
-                                    {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
-                                    <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
-                                    <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
-                                </div>
-                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
-                            </div>
-                            <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            {columnNames.map((columnName, index) => (
-                                                <th key={index} onClick={() => handleSort(columnName.data)}>
-                                                    {columnName.data}
-                                                    {getSortIcon(columnName.data)}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filterData.map((rowData, rowIndex) => (
-                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                {
-                                                    columnNames.map((columnName, colIndex) => {
-                                                        let content;
-                                                        content = rowData[columnName.data]
-                                                        if(columnName.data == "advisorName"){
-                                                            return <td key={colIndex}><a href="#" onClick={()=>{totalAmountByPerson(content)}}>{content}</a></td>;
-                                                        }
-                                                        return <td key={colIndex}>{content}</td>;
-                                                    })
-                                                }
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                    <tfoot className='fixed'>
-                                        <tr>
-                                            <td colSpan={3}>Total Amount</td>
-                                            <td>{formatAmount(totalAmount)}</td>
-                                            <td colSpan={11}></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-                        </div>
+            <div className="main-panel">
+                <div className="content-wrapper">
+                    <div className="page-header">
+                        <h3 className="page-title">
+                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
+                            </span>Business Pipeline
+                        </h3>
                     </div>
+                    <div className='d-flex justify-content-between'>
+                        <div className="dt-buttons mb-3">
+                            {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                            <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
+                            <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                    </div>
+                    <div className="table-responsive">
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                            <thead>
+                                <tr>
+                                    {columnNames.map((columnName, index) => (
+                                        <th key={index} onClick={() => handleSort(columnName.data)} className={columnName.data === "action" ? "sticky-action" : columnName.data == "name" ? "sticky-left" : ""}>
+                                            {columnName.data}
+                                            {getSortIcon(columnName.data)}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filterData.map((rowData, rowIndex) => (
+                                    <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                        {
+                                            columnNames.map((columnName, colIndex) => {
+                                                let content;
+                                                content = rowData[columnName.data]
+                                                if(columnName.data == "name" ){ 
+                                                    return <td key={colIndex} className='sticky-left'>{content}</td>;
+                                                }
+                                                if (columnName.data == "advisorName") {
+                                                    return <td key={colIndex}><a href="#" onClick={() => { totalAmountByPerson(content) }}>{content}</a></td>;
+                                                }
+                                                if(columnName.data == "action"){
+                                                    return <td key={colIndex}  className="sticky-action">
+                                                        <button className='px-4 btn btn-primary' onClick={() => { handleEditModal("open") }}><i className="mdi mdi-pen"></i></button>
+                                                        <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteBusinessPipeline(rowData?.idBusinessPipelineg) }}><i className="mdi mdi-delete"></i></button>
+                                                    </td>;
+                                                }
+                                                return <td key={colIndex}>{content}</td>;
+                                            })
+                                        }
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className='fixed'>
+                                <tr>
+                                    <td colSpan={3}>Total Amount</td>
+                                    <td>{formatAmount(totalAmount)}</td>
+                                    <td colSpan={12}></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                </div>
+            </div>
             <Modal show={openModal} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Add Pipeline</Modal.Title>
@@ -298,113 +379,119 @@ const [bPInputs,setBPInputs] = useState({
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Name</Form.Label>
-                                    <Form.Control type="text" name='name'/>
+                                    <Form.Control type="text" name='name' required />
+                                    <Form.Control.Feedback type="invalid">
+                                        Name is required
+                                    </Form.Control.Feedback>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>How did the opportunity come about?</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='opportunityComeAbout'> 
-                                        <option value="">--Select --</option>
-                                        <option value="Seminar">Seminar</option>
-                                        <option value="Referral">Referral</option>
-                                        <option value="Social_Media">Social Media</option>
-                                        <option value="Response_to_our_marketing">Response to our marketing</option>
-                                        <option value="Current_Client">Current Client</option>
-                                        <option value="LBCA_Investor">LBCA Investor</option>
-                                    </Form.Select>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selecteOpportunityComeAbout} isMulti options={[
+                                        { value: "Seminar", label: "Seminar" },
+                                        { value: "Referral", label: "Referral" },
+                                        { value: "Social_Media", label: "Social Media" },
+                                        { value: "Response_to_our_marketing", label: "Response to our marketing" },
+                                        { value: "Current_Client", label: "Current Client" },
+                                        { value: "LBCA_Investor", label: "LBCA Investor" }
+                                    ]
+                                    } required/>
+                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='status'>
-                                        <option>--Select--</option>
+                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} required>
+                                        <option value={""}>--Select--</option>
                                         <option value="Business has closed (Complete)">Business has closed (Complete)</option>
-										<option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
-										<option value="Upcoming Meeting">Upcoming Meeting</option>	
+                                        <option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
+                                        <option value="Upcoming Meeting">Upcoming Meeting</option>
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='mostRecentActivity'>
+                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' required>
                                         <option value={""}>--Select--</option>
                                         <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
-										<option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
-										<option value="Meeting scheduled">Meeting scheduled</option>
-										<option value="No contact in the past 30 days">No contact in the past 30 days</option>
+                                        <option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
+                                        <option value="Meeting scheduled">Meeting scheduled</option>
+                                        <option value="No contact in the past 30 days">No contact in the past 30 days</option>
                                     </Form.Select>
+                                    
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date Added</Form.Label>
-                                    <Form.Control type="date" name="dateAdded"/>
+                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Action</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="followUpAction">
+                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
                                         <option>--Select--</option>
                                         <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
-										<option value="Closed">Closed</option>
-										<option value="Discussed"> Discussed</option>
-										<option value="In Review">In Review</option>	
+                                        <option value="Closed">Closed</option>
+                                        <option value="Discussed"> Discussed</option>
+                                        <option value="In Review">In Review</option>
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3 form-group radio" controlId='exampleForm.ControlInput2'>
                                     <Form.Label>Auto Funding</Form.Label>
-                                    <Form.Check type="radio" label="Yes" name='funding' className='ms-4'/>
-                                    <Form.Check type="radio" label="No" name='funding' className='ms-4'/>
+                                    <Form.Check type="radio" value="Yes" label="Yes" name='funding' className='ms-4' required />
+                                    <Form.Check type="radio" value="No" label="No" name='funding' className='ms-4' required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Investor Lifecycle</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="investorLifecycle">
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle" required>
                                         <option value="">--Select --</option>
                                         <option value="Creating Wealth">Creating Wealth</option>
                                         <option value="Building Wealth">Building Wealth</option>
                                         <option value="Preserving Wealth">Preserving Wealth</option>
                                     </Form.Select>
-                                </Form.Group> 
+                                </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="advisorName">
+                                    <Form.Select aria-label="Default select example" name="advisorName" required>
                                         <option value="">--Select --</option>
                                         <option value="Noland">Noland</option>
                                         <option value="Freddy">Freddy</option>
                                         <option value="Brian">Brian</option>
                                     </Form.Select>
-                                </Form.Group> 
+                                </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Opportunity</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="opportunity" multiple>
-                                        <option value="">--Select --</option>
-                                        <option value="401K_rollover">401K Rollover</option>
-                                        <option value="Cash_Bank">Cash Bank</option>
-                                        <option value="Def_Comp_Payout">Def Comp Payout</option>
-                                        <option value="Life_Insurance">Life Insurance</option>
-                                        <option value="Brokerage">Brokerage</option>
-                                        <option value="Life_Insurance_with_Long_Term_Care_Riders">Life Insurance with Long Term Care Riders</option>
-                                    </Form.Select>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selectOpportunity} isMulti options={[
+                                        { value: "401K_rollover", label: "401K Rollover" },
+                                        { value: "Cash_Bank", label: "Cash Bank" },
+                                        { value: "Def_Comp_Payout", label: "Def Comp Payout" },
+                                        { value: "Life_Insurance", label: "Life Insurance" },
+                                        { value: "Brokerage", label: "Brokerage" },
+                                        { value: "Life_Insurance_with_Long_Term_Care_Riders", label: "Life Insurance with Long Term Care Riders" }
+                                    ]
+                                    } required/>
+                                    <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
-                                    <Form.Control type="number" name='amounts'/>
+                                    <Form.Control type="number" name='amounts' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status Notes</Form.Label>
-                                    <Form.Control type="text" name='statusNotes'/>
+                                    <Form.Control type="text" name='statusNotes' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity Notes</Form.Label>
-                                    <Form.Control type="text" name='mostRecentActivity'/>
+                                    <Form.Control type="text" name='mostRecentActivity' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Last Contact</Form.Label>
-                                    <Form.Control type="date" name='lastContact'/>
+                                    <Form.Control type="date" name='lastContact' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Date</Form.Label>
-                                    <Form.Control type="date" name='followUpDate'/>
+                                    <Form.Control type="date" name='followUpDate' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Other Opportunities</Form.Label>
-                                    <Form.Control type="text" name='otherOpportunities'/>
+                                    <Form.Control type="text" name='otherOpportunities' />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
@@ -419,9 +506,153 @@ const [bPInputs,setBPInputs] = useState({
                             </div>
                         </div>
                         <div className="d-flex justify-content-end">
-                    <button className='btn btn-primary me-2'>Submit</button>
-                    <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
-                    </div>
+                            <button className='btn btn-primary me-2'>Submit</button>
+                            <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
+                        </div>
+                    </Form>
+
+                </Modal.Body>
+            </Modal>
+            <Modal show={editModal} onHide={()=>{handleEditModal("close")}}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Pipeline</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={submitForm}>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Name</Form.Label>
+                                    <Form.Control type="text" name='name' required />
+                                    <Form.Control.Feedback type="invalid">
+                                        Name is required
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>How did the opportunity come about?</Form.Label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selecteOpportunityComeAbout} isMulti options={[
+                                        { value: "Seminar", label: "Seminar" },
+                                        { value: "Referral", label: "Referral" },
+                                        { value: "Social_Media", label: "Social Media" },
+                                        { value: "Response_to_our_marketing", label: "Response to our marketing" },
+                                        { value: "Current_Client", label: "Current Client" },
+                                        { value: "LBCA_Investor", label: "LBCA Investor" }
+                                    ]
+                                    } required/>
+                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)}/>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Status</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Business has closed (Complete)">Business has closed (Complete)</option>
+                                        <option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
+                                        <option value="Upcoming Meeting">Upcoming Meeting</option>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Most Recent Activity</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
+                                        <option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
+                                        <option value="Meeting scheduled">Meeting scheduled</option>
+                                        <option value="No contact in the past 30 days">No contact in the past 30 days</option>
+                                    </Form.Select>
+                                    
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Date Added</Form.Label>
+                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Follow Up Action</Form.Label>
+                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
+                                        <option>--Select--</option>
+                                        <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
+                                        <option value="Closed">Closed</option>
+                                        <option value="Discussed"> Discussed</option>
+                                        <option value="In Review">In Review</option>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3 form-group radio" controlId='exampleForm.ControlInput2'>
+                                    <Form.Label>Auto Funding</Form.Label>
+                                    <Form.Check type="radio" value="Yes" label="Yes" name='funding' className='ms-4' required />
+                                    <Form.Check type="radio" value="No" label="No" name='funding' className='ms-4' required />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Investor Lifecycle</Form.Label>
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle" required>
+                                        <option value="">--Select --</option>
+                                        <option value="Creating Wealth">Creating Wealth</option>
+                                        <option value="Building Wealth">Building Wealth</option>
+                                        <option value="Preserving Wealth">Preserving Wealth</option>
+                                    </Form.Select>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Advisor Name</Form.Label>
+                                    <Form.Select aria-label="Default select example" name="advisorName" required>
+                                        <option value="">--Select --</option>
+                                        <option value="Noland">Noland</option>
+                                        <option value="Freddy">Freddy</option>
+                                        <option value="Brian">Brian</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Opportunity</Form.Label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selectOpportunity} isMulti options={[
+                                        { value: "401K_rollover", label: "401K Rollover" },
+                                        { value: "Cash_Bank", label: "Cash Bank" },
+                                        { value: "Def_Comp_Payout", label: "Def Comp Payout" },
+                                        { value: "Life_Insurance", label: "Life Insurance" },
+                                        { value: "Brokerage", label: "Brokerage" },
+                                        { value: "Life_Insurance_with_Long_Term_Care_Riders", label: "Life Insurance with Long Term Care Riders" }
+                                    ]
+                                    } required/>
+                                    <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)}/>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Amount ($)</Form.Label>
+                                    <Form.Control type="number" name='amounts' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Status Notes</Form.Label>
+                                    <Form.Control type="text" name='statusNotes' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Most Recent Activity Notes</Form.Label>
+                                    <Form.Control type="text" name='mostRecentActivity' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Last Contact</Form.Label>
+                                    <Form.Control type="date" name='lastContact' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Follow Up Date</Form.Label>
+                                    <Form.Control type="date" name='followUpDate' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Other Opportunities</Form.Label>
+                                    <Form.Control type="text" name='otherOpportunities' />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Connections</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='connections'>
+                                        <option value="">--Select --</option>
+                                        <option value="Youtube">Youtube</option>
+                                        <option value="Jarvis Letter">Jarvis Letter</option>
+                                        <option value="LinkedIn"> LinkedIn</option>
+                                        <option value="In Review">In Review</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-primary me-2'>Submit</button>
+                            <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
+                        </div>
                     </Form>
 
                 </Modal.Body>
@@ -431,9 +662,9 @@ const [bPInputs,setBPInputs] = useState({
                     <Modal.Title>All Amounts</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                <div className="table-responsive">
-                <StringToHTML htmlString={allAmountString} />
-                                {/* <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                    <div className="table-responsive">
+                        <StringToHTML htmlString={allAmountString} />
+                        {/* <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
                                             <th>Advisor Name</th>
@@ -455,33 +686,34 @@ const [bPInputs,setBPInputs] = useState({
                                             }
                                         </tbody>
                                         </table> */}
-                                        </div>
+                    </div>
                 </Modal.Body>
             </Modal>
             <Modal show={byPersonModal} onHide={hideTotalAmountPerson}>
-            <Modal.Header closeButton>
+                <Modal.Header closeButton>
                     <Modal.Title>Total Amounts</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                <div className="table-responsive">
-                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Advisor Name</th>
-                                            <th>Total Amount</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                       
-                                                        <tr>
-                                                            <td>{personModalData.advisorName}</td>
-                                                            <td>{formatAmount(personModalData.totalAmount)}</td>
-                                                        </tr> 
-                                        </tbody>
-                                        </table>
-                                        </div>
+                    <div className="table-responsive">
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                            <thead>
+                                <tr>
+                                    <th>Advisor Name</th>
+                                    <th>Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>{personModalData.advisorName}</td>
+                                    <td>{formatAmount(personModalData.totalAmount)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </Modal.Body>
             </Modal>
+            <Loader/>
         </>
     )
 }
