@@ -41,7 +41,7 @@ export default function Login() {
     setSubmitted(true); 
     context.setLoaderState(true)
     try {
-      //const sessionOut = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/sessionOut?username="+loginDetails?.userName)
+      const sessionOut = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/sessionOut?username="+loginDetails?.userName)
       const loginApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/authenticate",{
         method: 'POST',
                 headers: {
