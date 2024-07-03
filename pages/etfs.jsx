@@ -234,14 +234,20 @@ export default function Etfs() {
             {
                 label: 'Price AVG',
                 data: chartData,
-                fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                options: {
-                    interaction: {
-                        mode: 'index',
-                    }
-                }
+                // fill: false,
+                // backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                // borderColor: 'rgba(75, 192, 192, 1)',
+                // pointStyle: 'circle',
+                // fill: false,
+                // stepped: true,
+                // pointRadius: 10,
+                // pointHoverRadius: 15,
+                // options: {
+                //     responsive: true,
+                //     interaction: {
+                //         mode: 'index',
+                //     }
+                // }
             },
         ],
     };
