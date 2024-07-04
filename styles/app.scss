@@ -298,6 +298,8 @@ margin-right: 16px;
     }
 }
 .selection-area{
+    position: relative;
+    z-index: 3;
     .form-select{
         margin-bottom: 24px;
     }

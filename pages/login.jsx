@@ -31,44 +31,85 @@ export default function Login() {
 
     return errors;
   };
-  const formSubmit = async(e)=>{
-    e.preventDefault()
+  const formSubmit = async(e) => {
+    e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
+        setErrors(validationErrors);
+        return;
     }
     setSubmitted(true); 
-    context.setLoaderState(true)
+    context.setLoaderState(true);
+
     try {
-      const sessionOut = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/sessionOut?username="+loginDetails?.userName)
-      const loginApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/authenticate",{
-        method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(loginDetails)
-      })
-      const loginApiRes = await loginApi.json()
-      if(loginApiRes?.statusCode == 4004){
-        setError(loginApiRes?.message)
-      }
-      if(loginApiRes?.statusCode == 0){
-        localStorage.setItem("access_token",loginApiRes?.payload?.accessToken)
-        localStorage.setItem("sessionId",loginApiRes?.payload?.sessionId)
-        if(localStorage.getItem('route') && localStorage.getItem('route') !=="/login"){
-          router.push(localStorage.getItem('route'))
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginDetails)
+        });
+
+        const result = await response.json();
+
+        if (response.status === 400) {
+            setError(result.message);
+        } else if (response.status === 200) {
+            localStorage.setItem('access_token', result.accessToken);
+            localStorage.setItem('sessionId', result.sessionId);
+            if (localStorage.getItem('route') && localStorage.getItem('route') !== '/login') {
+                router.push(localStorage.getItem('route'));
+            } else {
+                router.push('/admin');
+            }
+        } else {
+            console.error(result.message);
         }
-        else{
-          router.push("/admin")
-        }
-      }     
-      
     } catch (error) {
-      console.log(error.message)
+        console.error(error.message);
     }
-    context.setLoaderState(false) 
-  }
+
+    context.setLoaderState(false);
+}
+
+  // const formSubmit = async(e)=>{
+  //   e.preventDefault()
+  //   const validationErrors = validate();
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     return;
+  //   }
+  //   setSubmitted(true); 
+  //   context.setLoaderState(true)
+  //   try {
+  //     const sessionOut = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/sessionOut?username="+loginDetails?.userName)
+  //     const loginApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL+"authentication/authenticate",{
+  //       method: 'POST',
+  //               headers: {
+  //                   'Content-Type': 'application/json'
+  //               },
+  //               body: JSON.stringify(loginDetails)
+  //     })
+  //     const loginApiRes = await loginApi.json()
+  //     if(loginApiRes?.statusCode == 4004){
+  //       setError(loginApiRes?.message)
+  //     }
+  //     if(loginApiRes?.statusCode == 0){
+  //       localStorage.setItem("access_token",loginApiRes?.payload?.accessToken)
+  //       localStorage.setItem("sessionId",loginApiRes?.payload?.sessionId)
+  //       if(localStorage.getItem('route') && localStorage.getItem('route') !=="/login"){
+  //         router.push(localStorage.getItem('route'))
+  //       }
+  //       else{
+  //         router.push("/admin")
+  //       }
+  //     }     
+      
+  //   } catch (error) {
+  //     console.log(error.message)
+  //   }
+  //   context.setLoaderState(false) 
+  // }
   const handleInput = (e)=>{
     const { name, value } = e.target;
     setLoginDetails({
