@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Navigation from '../../../components/navigation';
 import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
@@ -44,7 +44,8 @@ export default function BusinessTracking() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const [editData, setEditData] = useState({})
     const [editModal, setEditModal] = useState(false)
-
+    const context = useContext(Context)
+    const searchRef = useRef()
     const filter = (e) => {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
@@ -55,6 +56,7 @@ export default function BusinessTracking() {
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
+            searchRef.current.value = ""
         }
         catch (e) {
             console.log("error", e)
@@ -172,6 +174,7 @@ export default function BusinessTracking() {
     }
     const updateBusinessTracking = async (e) => {
         e.preventDefault()
+        context.setLoaderState(true)
         try {
             const form = e.target;
             const formData = new FormData(form);
@@ -199,6 +202,7 @@ export default function BusinessTracking() {
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const handleEditData = (e)=>{
         setEditData({...editData,[e.target.name]: e.target.value})
@@ -248,20 +252,20 @@ export default function BusinessTracking() {
                             </span>Business Tracking
                         </h3>
                     </div>
-                    <div className='d-flex justify-content-between'>
+                    <div className='d-md-flex justify-content-between'>
                         <div className="dt-buttons mb-3">
                             {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                             <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Business Tracking</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input ref={searchRef} type="search" placeholder='' className='form-control' onChange={filter} /></div>
                     </div>
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
-                                        <th key={"table" + index} onClick={() => handleSort(columnName.data)}>
+                                        <th key={"table" + index} onClick={() => handleSort(columnName.data)} className={columnName.data === "idBusinessTracking" ? "sticky-action" : columnName.data == "advisorName" ? "sticky-left" : ""}>
                                             {columnName.column_name}
                                             {
                                                 columnName.data !== "idBusinessTracking" && getSortIcon(columnName.data)
@@ -277,8 +281,11 @@ export default function BusinessTracking() {
                                             columnNames.map((columnName, colIndex) => {
                                                 let content;
                                                 content = rowData[columnName.data]
+                                                if (columnName.data == "advisorName") {
+                                                    return <td key={colIndex} className='sticky-left'>{content}</td>;
+                                                }
                                                 if (columnName.data == "idBusinessTracking") {
-                                                    return <td key={colIndex}><button className='px-4 btn btn-primary' onClick={() => { editBusinessTracking(rowData[columnName.data]) }}><i className="mdi mdi-pen"></i></button>
+                                                    return <td key={colIndex} className="sticky-action"><button className='px-4 btn btn-primary' onClick={() => { editBusinessTracking(rowData[columnName.data]) }}><i className="mdi mdi-pen"></i></button>
                                                         <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteBusinessTracking(rowData[columnName.data]) }}><i className="mdi mdi-delete"></i></button>
                                                     </td>;
                                                 }
@@ -383,7 +390,7 @@ export default function BusinessTracking() {
                             </div>
                         </div>
                         <div className="d-flex justify-content-end">
-                            <button className='btn btn-success me-2'>Submit</button>
+                            <button className='btn btn-primary me-2'>Submit</button>
                             <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
                         </div>
                     </Form>
@@ -421,7 +428,7 @@ export default function BusinessTracking() {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>No. Of 2nd Meetings</Form.Label>
-                                    <Form.Control type="number" name='secondMeeting' value={editData?.secondMeeting}  onChange={handleEditData} required />
+                                    <Form.Control type="number" name='secondMeeting' value={editData?.secondMeeting}  onChange={handleEditData}  />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>No. of client review meetings</Form.Label>
@@ -447,7 +454,7 @@ export default function BusinessTracking() {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>2nd meeting with whom</Form.Label>
-                                    <Form.Control type="text" name='secondMeetingWhom' value={editData?.secondMeetingWhom}  onChange={handleEditData} required />
+                                    <Form.Control type="text" name='secondMeetingWhom' value={editData?.secondMeetingWhom}  onChange={handleEditData} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Review meetings with whom</Form.Label>
@@ -464,7 +471,7 @@ export default function BusinessTracking() {
                             </div>
                         </div>
                         <div className="d-flex justify-content-end">
-                            <button className='btn btn-success me-2'>Submit</button>
+                            <button className='btn btn-primary me-2'>Submit</button>
                             <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
                         </div>
                     </Form>

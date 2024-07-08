@@ -132,7 +132,8 @@ export default function Bonds() {
 
     // https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517
     const fetchColumnNames = async () => {
-        try {
+        context.setLoaderState(true)
+        try {            
             const columnApi = await fetch("https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
@@ -141,11 +142,13 @@ export default function Bonds() {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(true)
     }
 
 
     // https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
 
             const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
@@ -162,6 +165,7 @@ export default function Bonds() {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(true)
     }
     const filter = (e) => {
         console.log('search', e.target.value)

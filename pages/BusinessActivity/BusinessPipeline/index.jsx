@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Navigation from '../../../components/navigation';
 import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
@@ -35,7 +35,7 @@ export default function BusinessPipeline() {
         { "data": "investorLifecycle" },
         { "data": "accreditedInvestor" },
         { "data": "advisorName" },
-        {"data":"action"}
+        { "data": "action" }
     ])
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
@@ -71,10 +71,12 @@ export default function BusinessPipeline() {
     })
     const [errors, setErrors] = useState({})
     const [validated, setValidated] = useState(false);
-    const [selectedOpportunity,setSelectedOpportunity] = useState([])
-    const [selectedOpportunityComeAbout,setSelectedOpportunityComeAbout] = useState([])
-    const [editModal,setEditModal] = useState(false)
+    const [selectedOpportunity, setSelectedOpportunity] = useState([])
+    const [selectedOpportunityComeAbout, setSelectedOpportunityComeAbout] = useState([])
+    const [editModal, setEditModal] = useState(false)
+    const [editData, setEditData] = useState({})
     const context = useContext(Context)
+    const searchRef = useRef()
     const filter = (e) => {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
@@ -86,6 +88,7 @@ export default function BusinessPipeline() {
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
+            searchRef.current.value = ""
         }
         catch (e) {
             console.log("error", e)
@@ -140,12 +143,14 @@ export default function BusinessPipeline() {
     const handleOpen = () => {
         setOpenModal(true);
     }
-    const handleEditModal = (action)=>{
-        if(action == "close"){
+    const handleEditModal = (action, id) => {
+        if (action == "close") {
             setEditModal(false)
         }
-        if(action == "open"){
+        if (action == "open") {
             setEditModal(true)
+            setEditData(tableData.find((x) => x.idBusinessPipelineg == id));
+            console.log("id", id, tableData.find((x) => x.idBusinessPipelineg == id))
         }
     }
     const fetchAllAmount = async () => {
@@ -202,12 +207,12 @@ export default function BusinessPipeline() {
         console.log("name", e.target.name)
     }
     const selectOpportunity = (e) => {
-         setSelectedOpportunity(e.map((item)=>item.value))
+        setSelectedOpportunity(e.map((item) => item.value))
     }
-    const selecteOpportunityComeAbout = (e)=>{
-setSelectedOpportunityComeAbout(e.map((item)=>item.value))
+    const selecteOpportunityComeAbout = (e) => {
+        setSelectedOpportunityComeAbout(e.map((item) => item.value))
     }
-    const submitForm = async(e) => {
+    const submitForm = async (e) => {
         e.preventDefault()
         const errors = {}
         context.setLoaderState(true)
@@ -228,31 +233,32 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                 jsonObject[key] = value;
             });
             setErrors(errors)
-            const addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"addBusinessPipeline",{
-                method:"POST",
+            const addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "addBusinessPipeline", {
+                method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body:JSON.stringify(jsonObject)
+                body: JSON.stringify(jsonObject)
             })
             const addPipelineRes = await addPipeline.json()
             alert(addPipelineRes?.msg)
             fetchData()
-            console.log("json", jsonObject)
+            setOpenModal(false)
+            //console.log("json", jsonObject)
         } catch (error) {
             console.log(error)
         }
         context.setLoaderState(false)
         console.log(e)
     }
-    const deleteBusinessPipeline = async (id)=>{
+    const deleteBusinessPipeline = async (id) => {
         let text = "Are you sure ?";
         if (confirm(text) == true) {
             context.setLoaderState(true)
             try {
                 const formData = new FormData();
                 formData.append("idBusinessPipelineg", id)
-                const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"deleteBusinessPipeline", {
+                const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteBusinessPipeline", {
                     method: 'DELETE',
                     body: formData
                 })
@@ -266,6 +272,73 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
             }
             context.setLoaderState(false)
         }
+    }
+    const formatOpportunityValue = (value) => {
+        let arr;
+        if (Array.isArray(value)) {
+            arr = value;
+        } else {
+            arr = value.slice(1, -1).split(',').map(item => item.trim());
+        }
+        return arr.map(item => ({ value: item, label: item }))
+    };
+    const editOpportunity = (e) => {
+        const updatedObj = {
+            ...editData,
+            opportunity: e.map((item) => item.value)
+        };
+        setEditData(updatedObj);
+    };
+    const editOpportunityComeAbout = (e) =>{
+        const updatedObj = {
+            ...editData,
+            opportunityComeAbout: e.map((item) => item.value)
+        };
+        setEditData(updatedObj);
+    }
+    const updateBusinessPipeline = async(e)=>{
+        e.preventDefault()
+        const errors = {}
+        context.setLoaderState(true)
+        try {
+            const form = e.target;
+            if (form.checkValidity() === false) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            setValidated(true);
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                if (!value) {
+                    errors[key] = `${key} field is required`
+                }
+                jsonObject[key] = value;
+            });
+            setErrors(errors)
+            console.log("Form Data",jsonObject)
+            const updatePipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "editBusinessPipeline", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonObject)
+            })
+            const updatePipelineRes = await updatePipeline.json()
+            alert(updatePipelineRes?.msg)
+           fetchData()
+            setEditModal(false)
+        } catch (error) {
+            console.log(error)
+        }
+        context.setLoaderState(false)
+    }
+    const handleEditData = (e)=>{
+        const fieldsToExclude = ["funding"]; 
+        if (!fieldsToExclude.includes(e.target.name)){
+            setEditData({...editData,[e.target.name]: e.target.value})
+        }        
     }
     useEffect(() => {
         fetchData()
@@ -311,14 +384,14 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                             </span>Business Pipeline
                         </h3>
                     </div>
-                    <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
+                    <div className='d-md-flex justify-content-between'>
+                        <div className="dt-buttons">
                             {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
-                            <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
-                            <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
+                            <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
+                            <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} ref={searchRef}/></div>
                     </div>
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
@@ -339,15 +412,15 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                             columnNames.map((columnName, colIndex) => {
                                                 let content;
                                                 content = rowData[columnName.data]
-                                                if(columnName.data == "name" ){ 
+                                                if (columnName.data == "name") {
                                                     return <td key={colIndex} className='sticky-left'>{content}</td>;
                                                 }
                                                 if (columnName.data == "advisorName") {
                                                     return <td key={colIndex}><a href="#" onClick={() => { totalAmountByPerson(content) }}>{content}</a></td>;
                                                 }
-                                                if(columnName.data == "action"){
-                                                    return <td key={colIndex}  className="sticky-action">
-                                                        <button className='px-4 btn btn-primary' onClick={() => { handleEditModal("open") }}><i className="mdi mdi-pen"></i></button>
+                                                if (columnName.data == "action") {
+                                                    return <td key={colIndex} className="sticky-action">
+                                                        <button className='px-4 btn btn-primary' onClick={() => { handleEditModal("open", rowData?.idBusinessPipelineg) }}><i className="mdi mdi-pen"></i></button>
                                                         <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteBusinessPipeline(rowData?.idBusinessPipelineg) }}><i className="mdi mdi-delete"></i></button>
                                                     </td>;
                                                 }
@@ -394,8 +467,8 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         { value: "Current_Client", label: "Current Client" },
                                         { value: "LBCA_Investor", label: "LBCA Investor" }
                                     ]
-                                    } required/>
-                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)}/>
+                                    } required />
+                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status</Form.Label>
@@ -415,7 +488,7 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         <option value="Meeting scheduled">Meeting scheduled</option>
                                         <option value="No contact in the past 30 days">No contact in the past 30 days</option>
                                     </Form.Select>
-                                    
+
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date Added</Form.Label>
@@ -431,10 +504,10 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         <option value="In Review">In Review</option>
                                     </Form.Select>
                                 </Form.Group>
-                                <Form.Group className="mb-3 form-group radio" controlId='exampleForm.ControlInput2'>
+                                <Form.Group className="mb-3 form-group radio">
                                     <Form.Label>Auto Funding</Form.Label>
-                                    <Form.Check type="radio" value="Yes" label="Yes" name='funding' className='ms-4' required />
-                                    <Form.Check type="radio" value="No" label="No" name='funding' className='ms-4' required />
+                                    <Form.Check type="radio" id="yesFunding" value="Yes" label="Yes" name='autoFinding' className='ms-4' required />
+                                    <Form.Check type="radio" id="noFunding" value="No" label="No" name='autoFinding' className='ms-4' required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Investor Lifecycle</Form.Label>
@@ -466,8 +539,8 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         { value: "Brokerage", label: "Brokerage" },
                                         { value: "Life_Insurance_with_Long_Term_Care_Riders", label: "Life Insurance with Long Term Care Riders" }
                                     ]
-                                    } required/>
-                                    <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)}/>
+                                    } required />
+                                    <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
@@ -513,24 +586,25 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
 
                 </Modal.Body>
             </Modal>
-            <Modal show={editModal} onHide={()=>{handleEditModal("close")}}>
+            <Modal show={editModal} onHide={() => { handleEditModal("close") }}>
                 <Modal.Header closeButton>
                     <Modal.Title>Edit Pipeline</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form onSubmit={submitForm}>
+                    <Form onSubmit={updateBusinessPipeline}>
+                        <input type="hidden" name="idBusinessPipelineg" id="editIdBusinessPipelineg" value={editData?.idBusinessPipelineg} />
                         <div className="row">
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Name</Form.Label>
-                                    <Form.Control type="text" name='name' required />
+                                    <Form.Control type="text" name='name' required value={editData?.name}  onChange={handleEditData}/>
                                     <Form.Control.Feedback type="invalid">
                                         Name is required
                                     </Form.Control.Feedback>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>How did the opportunity come about?</Form.Label>
-                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selecteOpportunityComeAbout} isMulti options={[
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={editOpportunityComeAbout} isMulti options={[
                                         { value: "Seminar", label: "Seminar" },
                                         { value: "Referral", label: "Referral" },
                                         { value: "Social_Media", label: "Social Media" },
@@ -538,12 +612,14 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         { value: "Current_Client", label: "Current Client" },
                                         { value: "LBCA_Investor", label: "LBCA Investor" }
                                     ]
-                                    } required/>
-                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)}/>
+                                    }
+                                        value={editData?.opportunityComeAbout ? formatOpportunityValue(editData.opportunityComeAbout) : ''}
+                                        required />
+                                    <input type="hidden" name="opportunityComeAbout" value={typeof(editData?.opportunityComeAbout)=="string" ? editData?.opportunityComeAbout : JSON.stringify(editData?.opportunityComeAbout)}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} required>
+                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} onChange={handleEditData} value={editData?.status} required>
                                         <option value={""}>--Select--</option>
                                         <option value="Business has closed (Complete)">Business has closed (Complete)</option>
                                         <option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
@@ -552,22 +628,22 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' required>
+                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' value={editData?.mostRecentActivity} onChange={handleEditData} required>
                                         <option value={""}>--Select--</option>
                                         <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
                                         <option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
                                         <option value="Meeting scheduled">Meeting scheduled</option>
                                         <option value="No contact in the past 30 days">No contact in the past 30 days</option>
                                     </Form.Select>
-                                    
+
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date Added</Form.Label>
-                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} required />
+                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} onChange={handleEditData} value={editData?.dateAdded} required />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Action</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
+                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} onChange={() => { }} value={editData?.followUpAction} required>
                                         <option>--Select--</option>
                                         <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
                                         <option value="Closed">Closed</option>
@@ -575,14 +651,14 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         <option value="In Review">In Review</option>
                                     </Form.Select>
                                 </Form.Group>
-                                <Form.Group className="mb-3 form-group radio" controlId='exampleForm.ControlInput2'>
+                                <Form.Group className="mb-3 form-group radio">
                                     <Form.Label>Auto Funding</Form.Label>
-                                    <Form.Check type="radio" value="Yes" label="Yes" name='funding' className='ms-4' required />
-                                    <Form.Check type="radio" value="No" label="No" name='funding' className='ms-4' required />
+                                    <Form.Check type="radio" value="Yes" id="yes" onChange={handleEditData}  label="Yes" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "Yes" ? true : false}/>
+                                    <Form.Check type="radio" value="No"  id="no" onChange={handleEditData}  label="No" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "No" ? true : false}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Investor Lifecycle</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="investorLifecycle" required>
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle"  onChange={handleEditData} value={editData?.investorLifecycle} required>
                                         <option value="">--Select --</option>
                                         <option value="Creating Wealth">Creating Wealth</option>
                                         <option value="Building Wealth">Building Wealth</option>
@@ -591,7 +667,7 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="advisorName" required>
+                                    <Form.Select aria-label="Default select example" name="advisorName"  onChange={handleEditData} value={editData?.advisorName} required>
                                         <option value="">--Select --</option>
                                         <option value="Noland">Noland</option>
                                         <option value="Freddy">Freddy</option>
@@ -602,7 +678,7 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Opportunity</Form.Label>
-                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selectOpportunity} isMulti options={[
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={editOpportunity} isMulti options={[
                                         { value: "401K_rollover", label: "401K Rollover" },
                                         { value: "Cash_Bank", label: "Cash Bank" },
                                         { value: "Def_Comp_Payout", label: "Def Comp Payout" },
@@ -610,36 +686,38 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                                         { value: "Brokerage", label: "Brokerage" },
                                         { value: "Life_Insurance_with_Long_Term_Care_Riders", label: "Life Insurance with Long Term Care Riders" }
                                     ]
-                                    } required/>
-                                    <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)}/>
+                                    }
+                                        value={editData?.opportunity ? formatOpportunityValue(editData.opportunity) : ''}
+                                        required />
+                                    <input type="hidden" name="opportunity" value={typeof(editData.opportunity) == "string" ? editData.opportunity : JSON.stringify(editData.opportunity)} onChange={() => { }} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
-                                    <Form.Control type="number" name='amounts' />
+                                    <Form.Control type="number" name='amounts'  onChange={handleEditData} value={editData?.amounts}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status Notes</Form.Label>
-                                    <Form.Control type="text" name='statusNotes' />
+                                    <Form.Control type="text" name='statusNotes'  onChange={handleEditData} value={editData?.statusNotes}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity Notes</Form.Label>
-                                    <Form.Control type="text" name='mostRecentActivity' />
+                                    <Form.Control type="text" name='mostRecentActivityNotes'  onChange={handleEditData} value={editData?.mostRecentActivityNotes}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Last Contact</Form.Label>
-                                    <Form.Control type="date" name='lastContact' />
+                                    <Form.Control type="date" name='lastContact'  onChange={handleEditData} value={editData?.lastContact}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Date</Form.Label>
-                                    <Form.Control type="date" name='followUpDate' />
+                                    <Form.Control type="date" name='followUpDate'  onChange={handleEditData} value={editData?.followUpDate}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Other Opportunities</Form.Label>
-                                    <Form.Control type="text" name='otherOpportunities' />
+                                    <Form.Control type="text" name='otherOpportunities'  onChange={handleEditData} value={editData?.otherOpportunities}/>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='connections'>
+                                    <Form.Select aria-label="Default select example" name='connections' onChange={handleEditData} value={editData?.connections}>
                                         <option value="">--Select --</option>
                                         <option value="Youtube">Youtube</option>
                                         <option value="Jarvis Letter">Jarvis Letter</option>
@@ -713,7 +791,7 @@ setSelectedOpportunityComeAbout(e.map((item)=>item.value))
                     </div>
                 </Modal.Body>
             </Modal>
-            <Loader/>
+            <Loader />
         </>
     )
 }
