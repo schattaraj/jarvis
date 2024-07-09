@@ -234,7 +234,10 @@ export default function BondPortfolio() {
                                             {
                                                 columnNames.map((inner, keyid) => {
                                                     // return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
-                                                    return <td key={"keyid" + keyid}>{inner['elementInternalName'] == 'lastUpdatedAt' ? item['lastUpdatedAt'] : item['element' + (keyid + 1)]}</td>
+                                                    if (typeof (content) == 'string') {
+                                                        content = parse(content)
+                                                    }
+                                                    return <td key={"keyid" + keyid}>{inner['elementInternalName'] == 'lastUpdatedAt' ? item['lastUpdatedAt'] : typeof(item['element' + (keyid + 1)]) == "string" ? parse(item['element' + (keyid + 1)]) : item['element' + (keyid + 1)]}</td>
                                                 })
                                             }
                                         </tr>

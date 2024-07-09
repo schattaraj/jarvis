@@ -18,6 +18,8 @@ import Form from 'react-bootstrap/Form';
 import StringToHTML from '../../../components/StringToHtml.jsx';
 import formatAmount from '../../../components/formatAmount.js';
 import Select from 'react-select'
+import Swal from 'sweetalert2';
+import PieChart from '../../../components/PieChart.js';
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name" },
@@ -75,6 +77,10 @@ export default function BusinessPipeline() {
     const [selectedOpportunityComeAbout, setSelectedOpportunityComeAbout] = useState([])
     const [editModal, setEditModal] = useState(false)
     const [editData, setEditData] = useState({})
+    const [filterModal, setFilterModal] = useState(false)
+    const [filterInputs, setFilterInputs] = useState({})
+    const [analysisModal, setAnalysisModal] = useState(false)
+    const [analysisData,setAnalysisData] = useState(false)
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -241,7 +247,13 @@ export default function BusinessPipeline() {
                 body: JSON.stringify(jsonObject)
             })
             const addPipelineRes = await addPipeline.json()
-            alert(addPipelineRes?.msg)
+            Swal.fire({
+                title: addPipelineRes?.msg,
+                // text: "You clicked the button!",
+                icon: "success",
+                background: "green"
+            });
+            //alert(addPipelineRes?.msg)
             fetchData()
             setOpenModal(false)
             //console.log("json", jsonObject)
@@ -253,25 +265,35 @@ export default function BusinessPipeline() {
     }
     const deleteBusinessPipeline = async (id) => {
         let text = "Are you sure ?";
-        if (confirm(text) == true) {
-            context.setLoaderState(true)
-            try {
-                const formData = new FormData();
-                formData.append("idBusinessPipelineg", id)
-                const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteBusinessPipeline", {
-                    method: 'DELETE',
-                    body: formData
-                })
-                if (rowDelete.ok) {
-                    const rowDeleteRes = await rowDelete.json()
-                    alert(rowDeleteRes.msg)
-                    fetchData()
+        Swal.fire({
+            title: text,
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const formData = new FormData();
+                    formData.append("idBusinessPipelineg", id)
+                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteBusinessPipeline", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire("Deleted!", "", "success");
+                        alert(rowDeleteRes.msg)
+                        fetchData()
+                    }
+                } catch (error) {
+                    console.log(error)
                 }
-            } catch (error) {
-                console.log(error)
+                context.setLoaderState(false)
+            } else if (result.isDenied) {
+                Swal.fire("Changes are not saved", "", "info");
             }
-            context.setLoaderState(false)
-        }
+        });
     }
     const formatOpportunityValue = (value) => {
         let arr;
@@ -289,14 +311,14 @@ export default function BusinessPipeline() {
         };
         setEditData(updatedObj);
     };
-    const editOpportunityComeAbout = (e) =>{
+    const editOpportunityComeAbout = (e) => {
         const updatedObj = {
             ...editData,
             opportunityComeAbout: e.map((item) => item.value)
         };
         setEditData(updatedObj);
     }
-    const updateBusinessPipeline = async(e)=>{
+    const updateBusinessPipeline = async (e) => {
         e.preventDefault()
         const errors = {}
         context.setLoaderState(true)
@@ -317,7 +339,6 @@ export default function BusinessPipeline() {
                 jsonObject[key] = value;
             });
             setErrors(errors)
-            console.log("Form Data",jsonObject)
             const updatePipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "editBusinessPipeline", {
                 method: "POST",
                 headers: {
@@ -326,19 +347,98 @@ export default function BusinessPipeline() {
                 body: JSON.stringify(jsonObject)
             })
             const updatePipelineRes = await updatePipeline.json()
-            alert(updatePipelineRes?.msg)
-           fetchData()
+            Swal.fire({
+                title: updatePipelineRes?.msg,
+                // text: "You clicked the button!",
+                icon: "success",
+                confirmButtonColor: "#719B5F"
+            });
+            fetchData()
             setEditModal(false)
         } catch (error) {
             console.log(error)
         }
         context.setLoaderState(false)
     }
-    const handleEditData = (e)=>{
-        const fieldsToExclude = ["funding"]; 
-        if (!fieldsToExclude.includes(e.target.name)){
-            setEditData({...editData,[e.target.name]: e.target.value})
-        }        
+    const handleEditData = (e) => {
+        const fieldsToExclude = ["funding"];
+        if (!fieldsToExclude.includes(e.target.name)) {
+            setEditData({ ...editData, [e.target.name]: e.target.value })
+        }
+    }
+    const handleFilterInputs = (e) => {
+        setFilterInputs({ ...filterInputs, [e.target.name]: e.target.value })
+    }
+    const advisorName = (e) => {
+        console.log("filterInputs.searchMostRecentActivity.split(", ")", filterInputs?.searchMostRecentActivity?.split(","))
+        const result = e.map((item) => item.value).join(',')
+        setFilterInputs({ ...filterInputs, searchAdvisorName: result })
+    }
+    const filterStatus = (e) => {
+        const result = e.map((item) => item.value).join(',')
+        setFilterInputs({ ...filterInputs, searchStatus: result })
+    }
+    const filterSearchMostRecentActivity = (e) => {
+        const result = e.map((item) => item.value).join(',')
+        setFilterInputs({ ...filterInputs, searchMostRecentActivity: result })
+    }
+    const filterBusinessPipeline = async (e) => {
+        e.preventDefault()
+        const errors = {}
+        context.setLoaderState(true)
+        try {
+            const form = e.target;
+            if (form.checkValidity() === false) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            setValidated(true);
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                if (!value) {
+                    errors[key] = `${key} field is required`
+                }
+                jsonObject[key] = value;
+            });
+            setErrors(errors)
+            const addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getSearchBusinessPipeline?searchAdvisorName=" + jsonObject?.searchAdvisorName + "&searchStatus=" + jsonObject?.searchStatus + "&searchMostRecentActivity=" + jsonObject?.searchMostRecentActivity + "&startDate=" + jsonObject?.startDate + "&endDate=" + jsonObject?.endDate + "&_=1720517072931", {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            const addPipelineRes = await addPipeline.json()
+            if (addPipelineRes?.length == 0) {
+                Swal.fire({
+                    title: "No data found!",
+                    icon: "error",
+                    confirmButtonColor:"#719B5F"
+                });
+            }
+            if (addPipelineRes?.length > 0) {
+                setTableData(addPipelineRes)
+                setFilterData(addPipelineRes)
+            }
+            searchRef.current.value = ""
+        } catch (error) {
+            console.log(error)
+        }
+        context.setLoaderState(false)
+        setFilterModal(false)
+    }
+    const fetchAnalysisData = async()=>{
+        context.setLoaderState(true)
+        try {
+            const fetchAnalysis = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"getCountsByOpportunity?_=1720549352011")
+            const fetchAnalysisRes = await fetchAnalysis.json()
+            setAnalysisModal(true)
+            setAnalysisData(fetchAnalysisRes)
+        } catch (error) {
+            
+        }
+        context.setLoaderState(false)
     }
     useEffect(() => {
         fetchData()
@@ -390,8 +490,10 @@ export default function BusinessPipeline() {
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpen}><span>Add Pipeline</span></button>
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpenAmount}><span>All Amounts</span></button>
+                            <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={() => { setFilterModal(true) }}><span>Filter</span></button>
+                            <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={fetchAnalysisData}><span>Analysis</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} ref={searchRef}/></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} ref={searchRef} /></div>
                     </div>
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
@@ -420,8 +522,8 @@ export default function BusinessPipeline() {
                                                 }
                                                 if (columnName.data == "action") {
                                                     return <td key={colIndex} className="sticky-action">
-                                                        <button className='px-4 btn btn-primary' onClick={() => { handleEditModal("open", rowData?.idBusinessPipelineg) }}><i className="mdi mdi-pen"></i></button>
-                                                        <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteBusinessPipeline(rowData?.idBusinessPipelineg) }}><i className="mdi mdi-delete"></i></button>
+                                                        <button className='px-4 btn btn-primary' title="Edit" onClick={() => { handleEditModal("open", rowData?.idBusinessPipelineg) }}><i className="mdi mdi-pen"></i></button>
+                                                        <button className='px-4 ms-2 btn btn-danger' title='Delete' onClick={() => { deleteBusinessPipeline(rowData?.idBusinessPipelineg) }}><i className="mdi mdi-delete"></i></button>
                                                     </td>;
                                                 }
                                                 return <td key={colIndex}>{content}</td>;
@@ -597,7 +699,7 @@ export default function BusinessPipeline() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Name</Form.Label>
-                                    <Form.Control type="text" name='name' required value={editData?.name}  onChange={handleEditData}/>
+                                    <Form.Control type="text" name='name' required value={editData?.name} onChange={handleEditData} />
                                     <Form.Control.Feedback type="invalid">
                                         Name is required
                                     </Form.Control.Feedback>
@@ -615,7 +717,7 @@ export default function BusinessPipeline() {
                                     }
                                         value={editData?.opportunityComeAbout ? formatOpportunityValue(editData.opportunityComeAbout) : ''}
                                         required />
-                                    <input type="hidden" name="opportunityComeAbout" value={typeof(editData?.opportunityComeAbout)=="string" ? editData?.opportunityComeAbout : JSON.stringify(editData?.opportunityComeAbout)}/>
+                                    <input type="hidden" name="opportunityComeAbout" value={typeof (editData?.opportunityComeAbout) == "string" ? editData?.opportunityComeAbout : JSON.stringify(editData?.opportunityComeAbout)} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status</Form.Label>
@@ -653,12 +755,12 @@ export default function BusinessPipeline() {
                                 </Form.Group>
                                 <Form.Group className="mb-3 form-group radio">
                                     <Form.Label>Auto Funding</Form.Label>
-                                    <Form.Check type="radio" value="Yes" id="yes" onChange={handleEditData}  label="Yes" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "Yes" ? true : false}/>
-                                    <Form.Check type="radio" value="No"  id="no" onChange={handleEditData}  label="No" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "No" ? true : false}/>
+                                    <Form.Check type="radio" value="Yes" id="yes" onChange={handleEditData} label="Yes" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "Yes" ? true : false} />
+                                    <Form.Check type="radio" value="No" id="no" onChange={handleEditData} label="No" name='autoFinding' className='ms-4' required checked={editData?.autoFinding == "No" ? true : false} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Investor Lifecycle</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="investorLifecycle"  onChange={handleEditData} value={editData?.investorLifecycle} required>
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle" onChange={handleEditData} value={editData?.investorLifecycle} required>
                                         <option value="">--Select --</option>
                                         <option value="Creating Wealth">Creating Wealth</option>
                                         <option value="Building Wealth">Building Wealth</option>
@@ -667,7 +769,7 @@ export default function BusinessPipeline() {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="advisorName"  onChange={handleEditData} value={editData?.advisorName} required>
+                                    <Form.Select aria-label="Default select example" name="advisorName" onChange={handleEditData} value={editData?.advisorName} required>
                                         <option value="">--Select --</option>
                                         <option value="Noland">Noland</option>
                                         <option value="Freddy">Freddy</option>
@@ -689,31 +791,31 @@ export default function BusinessPipeline() {
                                     }
                                         value={editData?.opportunity ? formatOpportunityValue(editData.opportunity) : ''}
                                         required />
-                                    <input type="hidden" name="opportunity" value={typeof(editData.opportunity) == "string" ? editData.opportunity : JSON.stringify(editData.opportunity)} onChange={() => { }} />
+                                    <input type="hidden" name="opportunity" value={typeof (editData.opportunity) == "string" ? editData.opportunity : JSON.stringify(editData.opportunity)} onChange={() => { }} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
-                                    <Form.Control type="number" name='amounts'  onChange={handleEditData} value={editData?.amounts}/>
+                                    <Form.Control type="number" name='amounts' onChange={handleEditData} value={editData?.amounts} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status Notes</Form.Label>
-                                    <Form.Control type="text" name='statusNotes'  onChange={handleEditData} value={editData?.statusNotes}/>
+                                    <Form.Control type="text" name='statusNotes' onChange={handleEditData} value={editData?.statusNotes} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity Notes</Form.Label>
-                                    <Form.Control type="text" name='mostRecentActivityNotes'  onChange={handleEditData} value={editData?.mostRecentActivityNotes}/>
+                                    <Form.Control type="text" name='mostRecentActivityNotes' onChange={handleEditData} value={editData?.mostRecentActivityNotes} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Last Contact</Form.Label>
-                                    <Form.Control type="date" name='lastContact'  onChange={handleEditData} value={editData?.lastContact}/>
+                                    <Form.Control type="date" name='lastContact' onChange={handleEditData} value={editData?.lastContact} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Date</Form.Label>
-                                    <Form.Control type="date" name='followUpDate'  onChange={handleEditData} value={editData?.followUpDate}/>
+                                    <Form.Control type="date" name='followUpDate' onChange={handleEditData} value={editData?.followUpDate} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Other Opportunities</Form.Label>
-                                    <Form.Control type="text" name='otherOpportunities'  onChange={handleEditData} value={editData?.otherOpportunities}/>
+                                    <Form.Control type="text" name='otherOpportunities' onChange={handleEditData} value={editData?.otherOpportunities} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
@@ -789,6 +891,80 @@ export default function BusinessPipeline() {
                             </tbody>
                         </table>
                     </div>
+                </Modal.Body>
+            </Modal>
+            <Modal show={filterModal} onHide={() => { setFilterModal(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Filter Business Pipeline</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={filterBusinessPipeline}>
+                        <div className="row">
+                            <div className="col-md-4">
+                                <div className="form-group">
+                                    <label htmlFor="" className='form-label'>Advisor Name</label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={advisorName} isMulti options={[
+                                        { value: "Noland", label: "Noland" },
+                                        { value: "Freddy", label: "Freddy" },
+                                        { value: "Brian", label: "Brian" },
+                                    ]
+                                    } value={filterInputs?.searchAdvisorName?.split(",")?.filter(item => item.trim() !== "")?.map((item) => { return { value: item, label: item } })} required />
+                                    <input type="hidden" name='searchAdvisorName' value={filterInputs?.searchAdvisorName} />
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="form-group">
+                                    <label htmlFor="" className='form-label'>Status</label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={filterStatus} isMulti options={[
+                                        { value: "Business has closed (Complete)", label: "Business has closed (Complete)" },
+                                        { value: "Waiting for Outstanding Items", label: "Waiting for Outstanding Items" },
+                                        { value: "Upcoming Meeting", label: "Upcoming Meeting" },
+                                    ]
+                                    } value={filterInputs?.searchStatus?.split(",")?.filter(item => item.trim() !== "")?.map((item) => { return { value: item, label: item } })} required />
+                                    <input type="hidden" name='searchStatus' value={filterInputs?.searchStatus} />
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="form-group">
+                                    <label htmlFor="" className='form-label'>Most Recent Activity</label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={filterSearchMostRecentActivity} isMulti options={[
+                                        { value: "Business has closed (Complete)", label: "Business has closed (Complete)" },
+                                        { value: "Waiting for Outstanding Items", label: "Waiting for Outstanding Items" },
+                                        { value: "Upcoming Meeting", label: "Upcoming Meeting" },
+                                    ]
+                                    } value={filterInputs?.searchMostRecentActivity?.split(",")?.filter(item => item.trim() !== "")?.map((item) => { return { value: item, label: item } })} />
+                                    <input type="hidden" name='searchMostRecentActivity' value={filterInputs?.searchMostRecentActivity} />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className='form-label'>Start Date</label>
+                                    <input type="date" className='form-control' name="startDate" value={filterInputs?.startDate} onChange={handleFilterInputs} required />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className='form-label'>End Date</label>
+                                    <input type="date" className='form-control' name="endDate" value={filterInputs?.endDate} onChange={handleFilterInputs} required />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-primary me-2'>Submit</button>
+                            <button className='btn btn-secondary' onClick={() => { setFilterModal(false) }}>Cancel</button>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+            <Modal show={analysisModal} onHide={() => { setAnalysisModal(false) }} className='big-modal'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Analysis</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <PieChart data={{
+                        labels: Array.isArray(analysisData) && analysisData?.map((item)=>item?.name),
+                        values: Array.isArray(analysisData) && analysisData?.map((item)=>item?.y)
+                    }} /> 
                 </Modal.Body>
             </Modal>
             <Loader />

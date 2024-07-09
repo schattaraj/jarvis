@@ -32,7 +32,7 @@ export default function MarketAnalytics() {
                 </div> */}
             </div>
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/bonds" bg="bg-gray" img="/icons/Bonds.png" title="Stocks" />
+              <Card route="/bonds" bg="bg-gray" img="/icons/Bonds.png" title="Bonds" />
               {/* <div className="card bg-gradient-info card-img-holder text-white">
                 <Link href={"/bonds"}>
                   <div className="card-body">

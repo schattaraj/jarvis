@@ -2,7 +2,9 @@
 @import './vendors/css/vendor.bundle.base.css';
 @import './loader.scss';
 @import './style.css';
-
+:root{
+    --primary:"#719B5F"
+}
 i {
     pointer-events: none;
 }
@@ -240,10 +242,12 @@ a.navbar-brand {
 
 .dt-button {
     background: #719b5f !important;
-    padding: 12px 40px;
+    padding: 12px 18px;
     color: #fff;
     border: none;
     margin-right: 16px;
+    font-size: 14px;
+
     @media (max-width:575px) {
         padding: 12px 20px;
         font-size: 14px;
@@ -321,6 +325,23 @@ a.navbar-brand {
                     }
                 }
             }
+        }
+    }
+
+    tr:nth-child(even) {
+        td {
+            // background-color:  rgba(#719a57,0.1);#719a571a
+            background-color: #e7ede4;
+        }
+    }
+
+    td {
+        padding: 8px 12px;
+
+        img {
+            aspect-ratio: 2/2;
+            width: auto !important;
+            object-fit: contain;
         }
     }
 
@@ -622,6 +643,7 @@ input[type="range"] {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+
     p {
         margin-top: 16px;
         margin-bottom: 0;
@@ -630,6 +652,7 @@ input[type="range"] {
 
     .pagination-items {
         margin-top: 16px;
+
         button {
             border: none;
             background-color: #fff;
@@ -714,6 +737,7 @@ input[type="range"] {
     background-color: #F3F6F3;
     border-top: 1px solid #333333;
     border-left: 1px solid #333333;
+
     @media (max-width:575px) {
         padding: 32px 20px;
     }
@@ -914,6 +938,8 @@ input[type="range"] {
 .main-panel .content-wrapper a {
     width: 100%;
     text-decoration: none;
+    flex-wrap: wrap;
+    display: flex;
 }
 
 .main-panel .content-wrapper .flex {
@@ -975,12 +1001,18 @@ input[type="range"] {
     background-color: white;
     /* or whatever your table background color is */
     z-index: 1;
+
+    .btn {
+        padding: 10px 12px !important;
+    }
+
     /* Adjust the z-index as needed */
     @media (max-width:575px) {
-        button{
+        button {
             padding: 10px 12px !important;
             width: fit-content;
-            i{
+
+            i {
                 font-size: 16px;
             }
         }
@@ -998,21 +1030,46 @@ input[type="range"] {
     }
 }
 
-th.sticky-left {
-    box-shadow: -3px 0 25px -5px #9c9b9b;
-    display: block;
+.table {
+    th.sticky-left {
+        box-shadow: -3px 0 25px -5px #9c9b9b;
+        display: block;
+    }
+
+    tr {
+        td.sticky-left {
+            box-shadow: inset -4px 0 20px -16px #9c9b9b;
+            // background-color: #fff;
+        }
+    }
+
+    th.sticky-action {
+        box-shadow: -3px 0 25px -5px #9c9b9b;
+    }
+
+    tbody {
+        td.sticky-action {
+            box-shadow: -3px 31px 25px -5px #a0a0a0;
+            display: block;
+            // background: #fff;
+        }
+    }
+
 }
 
-td.sticky-left {
-    box-shadow: inset -4px 0 20px -16px #9c9b9b;
+.btn i {
+    font-size: 20px;
 }
 
-th.sticky-action {
-    box-shadow: -3px 0 25px -5px #9c9b9b;
-    display: block;
-}
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 
-td.sticky-action {
-    box-shadow: -3px 31px 25px -5px #a0a0a0;
-    display: block;
+.modal.big-modal {
+    .modal-dialog {
+        max-width: 900px;
+        .modal-body{
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+    }
 }

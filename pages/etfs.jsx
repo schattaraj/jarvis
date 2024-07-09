@@ -10,13 +10,14 @@ import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { Line } from 'react-chartjs-2';
+import { Line,Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import Select from 'react-select'
 import { utils } from 'xlsx';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../utils/utils';
+import BarChart from '../components/BarChart';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -36,18 +37,18 @@ const extraColumns = [
 
 
 
-const options = {
-    responsive: true,
-    plugins: {
-        legend: {
-            position: 'top',
-        },
-        title: {
-            display: true,
-            text: 'Chart.js Line Chart',
-        },
-    },
-};
+// const options = {
+//     responsive: true,
+//     plugins: {
+//         legend: {
+//             position: 'top',
+//         },
+//         title: {
+//             display: true,
+//             text: 'Chart.js Line Chart',
+//         },
+//     },
+// };
 const bestFiveStockColumn = {
     "company": "Company",
     "bestMovedStock": "Most Risen Stock",
@@ -231,26 +232,29 @@ export default function Etfs() {
     const data = {
         labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
         datasets: [
-            {
-                label: 'Price AVG',
-                data: chartData,
-                // fill: false,
-                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                 pointStyle: 'circle',
-                // fill: false,
-                // stepped: true,
-                // pointRadius: 10,
-                // pointHoverRadius: 15,
-                // options: {
-                //     responsive: true,
-                //     interaction: {
-                //         mode: 'index',
-                //     }
-                // }
-            },
+          {
+            label: ViewOptions[selectedView],
+            data: chartData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+            ],
+            borderWidth: 1,
+          },
         ],
-    };
+      };
     const handleChange = (e) => {
         setSelectedView(e.target.value)
     }
@@ -301,14 +305,6 @@ export default function Etfs() {
                         </h3>
                     </div>
                     <div className="selection-area mb-3 d-flex align-items-center">
-                        {/* <select name="" className='form-select mb-0 me-2' style={{ maxWidth: "300px" }} onChange={handleSelect}>
-                            <option value="">--Select Ticker--</option>
-                            {tickers && tickers.map((item, index) => (
-                                <option key={index} value={item.element1}>
-                                    {item.element1}
-                                </option>
-                            ))}
-                        </select> */}
                         <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth:"200px", maxWidth: "300px" }} options={
 tickers && tickers.map((item, index) => (
      {value:item.element1,label:item.element1} 
@@ -342,18 +338,11 @@ tickers && tickers.map((item, index) => (
                                                 </option>
                                             ))
                                         }
-                                        {/* <option value="priceAvg" selected="">Price vs 20-day Avg (%)</option>
-                                        <option value="price">Price</option>
-                                        <option value="ytdReturn">YTD Return</option>
-                                        <option value="dividendYield">Dividend Yield</option>
-                                        <option value="shortFloat">Short as % of Float</option>
-                                        <option value="relativeStrength">Relative Strength</option>
-                                        <option value="priceEarning">Price/Earnings</option> */}
                                     </select>
                                     <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
                                 </div>
                                 <h3>Chart View For {ViewOptions[selectedView]}</h3>
-                                <Line data={data} />
+                                <BarChart data={data} />
                             </>
                             :
                             rankingData

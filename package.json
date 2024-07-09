@@ -14,7 +14,7 @@
     "animate.css": "^4.1.1",
     "axios": "^1.6.1",
     "bootstrap": "^5.3.2",
-    "chart.js": "^4.4.1",
+    "chart.js": "^4.4.3",
     "chartjs-plugin-annotation": "^3.0.1",
     "dompurify": "^3.0.6",
     "html-react-parser": "^5.0.6",
@@ -34,6 +34,7 @@
     "react-player": "^2.13.0",
     "react-select": "^5.8.0",
     "sass": "^1.67.0",
+    "sweetalert2": "^11.12.2",
     "swiper": "^11.0.4",
     "use-sound": "^4.0.1",
     "xlsx": "^0.18.5"

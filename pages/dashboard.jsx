@@ -29,7 +29,7 @@ export default function Admin() {
                     </div>
                     <div className="row justify-content-center animate__animated animate__fadeInLeft">
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-                        <Card route="/marketAnalytics" bg="bg-yellow" img="/icons/Marketing Analytics.png" title="Market Analytics (Stocks,Bonds,ETFs and more)" click={context.setMarketAnalytics(true)}/>
+                        <Card route="/marketAnalytics" bg="bg-yellow" img="/icons/Marketing Analytics.png" title="Market Analytics (Stocks, Bonds, ETFs and more)" click={context.setMarketAnalytics(true)}/>
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/compareStocks" bg="bg-blue" img="/icons/Compare Stocks.png" title="Compare Stocks, ETFs"  click={context.setCompareStocks(true)}/>

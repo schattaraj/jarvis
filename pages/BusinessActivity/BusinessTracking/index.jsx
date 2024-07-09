@@ -16,6 +16,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import formatAmount from '../../../components/formatAmount.js';
+import Swal from 'sweetalert2';
 
 export default function BusinessTracking() {
     const [columnNames, setColumnNames] = useState([
@@ -112,6 +113,7 @@ export default function BusinessTracking() {
     }
     const addBusinessTracking = async (e) => {
         e.preventDefault()
+        context.setLoaderState(true)
         try {
             const form = e.target;
             const formData = new FormData(form);
@@ -129,16 +131,25 @@ export default function BusinessTracking() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result?.msg,
+                    icon: "success",
+                    confirmButtonColor:"#719B5F"
+                  });
                 handleClose()
                 fetchData()
             } else {
+                Swal.fire({
+                    title: response?.statusText,
+                    icon: "error",
+                  });
                 console.error('Error:', response.statusText);
             }
         }
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const editBusinessTracking = async (id) => {
         openEditModal()
@@ -146,25 +157,33 @@ export default function BusinessTracking() {
     }
     const deleteBusinessTracking = async (id) => {
         let text = "Are you sure ?";
-        if (confirm(text) == true) {
-            try {
-                const formData = new FormData();
-                formData.append("idBusinessTracking", id)
-                const rowDelete = await fetch("https://jharvis.com/JarvisV2/deleteBusinessTracking", {
-                    method: 'DELETE',
-                    body: formData
-                })
-                if (rowDelete.ok) {
-                    const rowDeleteRes = await rowDelete.json()
-                    alert(rowDeleteRes.msg)
-                    fetchData()
-
+        Swal.fire({
+            title: text, 
+            showCancelButton: true,
+            confirmButtonText: "Delete", 
+            customClass:{confirmButton: 'btn-danger',}
+          }).then(async(result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const formData = new FormData();
+                    formData.append("idBusinessTracking", id)
+                    const rowDelete = await fetch("https://jharvis.com/JarvisV2/deleteBusinessTracking", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        alert(rowDeleteRes.msg)
+                        fetchData()
+    
+                    }
+                } catch (error) {
+                    console.log(error)
                 }
-            } catch (error) {
-                console.log(error)
+                context.setLoaderState(false)
             }
-
-        }
+        })
     }
     const openEditModal = () => {
         setEditModal(true)
@@ -192,10 +211,18 @@ export default function BusinessTracking() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result?.msg,
+                    icon: "success",
+                    confirmButtonColor:"#719B5F"
+                  });
                 closeEditModal()
                 fetchData()
             } else {
+                Swal.fire({
+                    title: response?.statusText,
+                    icon: "error",
+                  });
                 console.error('Error:', response.statusText);
             }
         }
