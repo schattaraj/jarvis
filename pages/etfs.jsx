@@ -18,6 +18,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../utils/utils';
 import BarChart from '../components/BarChart';
+import HightChart from '../components/HighChart';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -341,8 +342,9 @@ tickers && tickers.map((item, index) => (
                                     </select>
                                     <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
                                 </div>
-                                <h3>Chart View For {ViewOptions[selectedView]}</h3>
-                                <BarChart data={data} />
+                                {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
+                                {/* <BarChart data={data} /> */}
+                                <HightChart data={chartHistory?.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && "Chart View For "+ViewOptions[selectedView]}/>
                             </>
                             :
                             rankingData

@@ -2,6 +2,9 @@ import * as Icon from "react-icons/fa";
 import { useState } from "react";
 export const Pagination = ({currentPage,totalItems,limit,setCurrentPage,handlePage}) => {
     const count = totalItems.length
+    if(limit == "all"){
+        limit = totalItems?.length
+    }
     const startIndex = (currentPage - 1) * limit + 1;
     const endIndex = Math.min(currentPage * limit, count);
     const totalPages = Math.ceil(count / limit)

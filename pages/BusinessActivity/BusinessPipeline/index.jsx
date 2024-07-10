@@ -80,7 +80,7 @@ export default function BusinessPipeline() {
     const [filterModal, setFilterModal] = useState(false)
     const [filterInputs, setFilterInputs] = useState({})
     const [analysisModal, setAnalysisModal] = useState(false)
-    const [analysisData,setAnalysisData] = useState(false)
+    const [analysisData, setAnalysisData] = useState(false)
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -94,7 +94,9 @@ export default function BusinessPipeline() {
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
-            searchRef.current.value = ""
+            if (searchRef.current && searchRef.current.value) {
+                searchRef.current.value = ""
+            }
         }
         catch (e) {
             console.log("error", e)
@@ -160,19 +162,21 @@ export default function BusinessPipeline() {
         }
     }
     const fetchAllAmount = async () => {
+        context.setLoaderState(true)
         try {
             const getAllAmount = await fetch("https://jharvis.com/JarvisV2/getAmountsByAdvisor?_=1714645928468")
             const getAllAmountRes = await getAllAmount.json()
-            console.log(getAllAmountRes.msg)
             setAllAmountString(getAllAmountRes.msg)
         }
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
     const handleOpenAmount = () => {
-        setOpenAmountModal(true)
         fetchAllAmount()
+        setOpenAmountModal(true)
+
     }
     const handleCloseAmount = () => {
         setOpenAmountModal(false)
@@ -370,7 +374,6 @@ export default function BusinessPipeline() {
         setFilterInputs({ ...filterInputs, [e.target.name]: e.target.value })
     }
     const advisorName = (e) => {
-        console.log("filterInputs.searchMostRecentActivity.split(", ")", filterInputs?.searchMostRecentActivity?.split(","))
         const result = e.map((item) => item.value).join(',')
         setFilterInputs({ ...filterInputs, searchAdvisorName: result })
     }
@@ -414,7 +417,7 @@ export default function BusinessPipeline() {
                 Swal.fire({
                     title: "No data found!",
                     icon: "error",
-                    confirmButtonColor:"#719B5F"
+                    confirmButtonColor: "#719B5F"
                 });
             }
             if (addPipelineRes?.length > 0) {
@@ -428,17 +431,20 @@ export default function BusinessPipeline() {
         context.setLoaderState(false)
         setFilterModal(false)
     }
-    const fetchAnalysisData = async()=>{
+    const fetchAnalysisData = async () => {
         context.setLoaderState(true)
         try {
-            const fetchAnalysis = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"getCountsByOpportunity?_=1720549352011")
+            const fetchAnalysis = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getCountsByOpportunity?_=1720549352011")
             const fetchAnalysisRes = await fetchAnalysis.json()
             setAnalysisModal(true)
             setAnalysisData(fetchAnalysisRes)
         } catch (error) {
-            
+
         }
         context.setLoaderState(false)
+    }
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
     }
     useEffect(() => {
         fetchData()
@@ -458,8 +464,12 @@ export default function BusinessPipeline() {
                         return 0;
                     });
                 }
-                const startIndex = (currentPage - 1) * limit;
-                const endIndex = startIndex + limit;
+                let dataLimit = limit
+                if (dataLimit == "all") {
+                    dataLimit = items?.length
+                }
+                const startIndex = (currentPage - 1) * dataLimit;
+                const endIndex = startIndex + dataLimit;
                 items = items.slice(startIndex, endIndex);
                 setFilterData(items);
                 //
@@ -472,7 +482,7 @@ export default function BusinessPipeline() {
             }
         }
         run();
-    }, [currentPage, tableData, sortConfig]);
+    }, [currentPage, tableData, sortConfig, limit]);
     return (
         <>
             <div className="main-panel">
@@ -493,7 +503,16 @@ export default function BusinessPipeline() {
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={() => { setFilterModal(true) }}><span>Filter</span></button>
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={fetchAnalysisData}><span>Analysis</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} ref={searchRef} /></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} ref={searchRef} />
+                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
@@ -843,7 +862,7 @@ export default function BusinessPipeline() {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="table-responsive">
-                        <StringToHTML htmlString={allAmountString} />
+                        {allAmountString && <StringToHTML htmlString={allAmountString} />}
                         {/* <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
@@ -962,9 +981,9 @@ export default function BusinessPipeline() {
                 </Modal.Header>
                 <Modal.Body>
                     <PieChart data={{
-                        labels: Array.isArray(analysisData) && analysisData?.map((item)=>item?.name),
-                        values: Array.isArray(analysisData) && analysisData?.map((item)=>item?.y)
-                    }} /> 
+                        labels: Array.isArray(analysisData) && analysisData?.map((item) => item?.name),
+                        values: Array.isArray(analysisData) && analysisData?.map((item) => item?.y)
+                    }} />
                 </Modal.Body>
             </Modal>
             <Loader />

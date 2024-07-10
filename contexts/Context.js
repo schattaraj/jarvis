@@ -96,6 +96,11 @@ else{
   useEffect(()=>{ 
     checkLoginStatus()
   },[router.route == "/login"])
+  useEffect(()=>{
+    if(!loaderState){
+      document.body.classList.remove("sidebar-icon-only")
+    }    
+  },[loaderState])
   // const showMenu = (e)=>{
   //   if(e.target.getAttribute('aria-expanded') == "false"){
   //     e.target.setAttribute('aria-expanded',"true");

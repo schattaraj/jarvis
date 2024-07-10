@@ -3,7 +3,7 @@
 @import './loader.scss';
 @import './style.css';
 :root{
-    --primary:"#719B5F"
+    --primary:#719B5F
 }
 i {
     pointer-events: none;
@@ -1062,7 +1062,9 @@ input[type="range"] {
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
-
+body{
+    font-family: Nunito,sans-serif;
+}
 .modal.big-modal {
     .modal-dialog {
         max-width: 900px;
@@ -1070,6 +1072,10 @@ input[type="range"] {
             max-width: 600px;
             width: 100%;
             margin: 0 auto;
+            a{
+                text-decoration: none;
+                color: var(--primary);
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ const PieChart = ({ data }) => {
                 backgroundColor: [
                     'rgba(255, 159, 64, 1)',
                     'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)',
+                    'rgba(153, 102, 255, 1)',
                     'rgb(255, 99, 132)'
                 ],
                 // borderColor: [
