@@ -126,7 +126,7 @@ export default function BusinessTracking() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
-            const response = await fetch('https://jharvis.com/JarvisV2/addBusinessTracking', {
+            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+'addBusinessTracking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Set the content type to JSON
