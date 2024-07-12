@@ -19,6 +19,7 @@ import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../utils/utils';
 import BarChart from '../components/BarChart';
 import HightChart from '../components/HighChart';
+import Swal from 'sweetalert2';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -133,6 +134,7 @@ export default function Etfs() {
 
     // https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
 
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Everything_List_New&_=1705403290395")
@@ -144,6 +146,7 @@ export default function Etfs() {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
     const filter = (e) => {
         const value = e.target.value;
@@ -211,7 +214,7 @@ export default function Etfs() {
     }
     const charts = async () => {
         if (!selectedTicker) {
-            alert("Please Select a ticker")
+            Swal.fire({title:"Please Select a ticker",confirmButtonColor:"#719B5F"});
             return;
         }
         context.setLoaderState(true)
