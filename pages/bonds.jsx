@@ -146,29 +146,21 @@ export default function Bonds() {
     }
 
 
-    // https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-
             const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setStocks(getBondsRes)
-            // setTimeout(() => {
-            //     setTableData(getImportsData)
-            //     setFilterData(getImportsData)
-            // }, 1500)
-
         }
         catch (e) {
             console.log("error", e)
         }
-        context.setLoaderState(true)
+        context.setLoaderState(false)
     }
     const filter = (e) => {
-        console.log('search', e.target.value)
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
     }
