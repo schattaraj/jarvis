@@ -5,11 +5,16 @@ import ReactDatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { Context } from '../../contexts/Context';
 import Loader from '../../components/loader';
+import SliceData from '../../components/SliceData';
+import Swal from 'sweetalert2';
 export default function UploadTickerReports() {
     const context = useContext(Context)
     const [tickers, setTickers] = useState([]);
     const [startDate, setStartDate] = useState("");
     const [tableData,setTableData] = useState([])
+    const [filteredData,setFilteredData] = useState([])
+    const [currentPage,setCurrentPage] = useState(1)
+    const [limit,setLimit] = useState(25)
     const fetchTickersFunc = async () => {
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerByAdmin?_=1716533190772")
@@ -60,10 +65,61 @@ export default function UploadTickerReports() {
         fetchTickerReports()
         context.setLoaderState(false)
     }
+    const downloadReport = async(fileName)=>{
+        context.setLoaderState(true)
+        try{
+            const downloadApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"downloadTickerReport?fileName="+fileName)
+            const downloadApiRes = await downloadApi.json()
+            window.open(downloadApiRes?.responseStr,'_blank')
+        }
+        catch(error){
+            console.log("Error",error)
+        }  
+        context.setLoaderState(false)      
+    }
+    const deleteTickerReport = async(id)=>{
+        let text = "Are you sure ?";
+        Swal.fire({
+            title: text,
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const formData = new FormData();
+                    formData.append("idTickerReports", id)
+                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"deleteTickerReport", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire({
+                            title: rowDeleteRes?.msg,
+                            icon: "success",
+                            confirmButtonColor: "#719B5F"
+                        })
+                        fetchTickerReports()
+
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+                context.setLoaderState(false)
+            }
+        })
+    }
     useEffect(() => {
         fetchTickersFunc()
         fetchTickerReports()
     }, [])
+    useEffect(()=>{
+        if(tableData.length > 0){
+           setFilteredData(SliceData(currentPage,limit,tableData))
+        }
+    },[tableData])
     return (
         <>
                     <div className="main-panel">
@@ -140,9 +196,26 @@ export default function UploadTickerReports() {
                                             <th>Description</th>
                                             <th>Report Type</th>
                                             <th>Report Date</th>
-                                            <th>Action</th>
+                                            <th className='sticky-action'>Action</th>
                                         </tr>
                                     </thead>
+                                    <tbody>
+                                        {
+                                        filteredData.length > 0 && filteredData.map((item,index)=>{
+                                            return <tr key={"report"+index}>
+                                                <td>{item?.tickerName}</td>
+                                                <td>{item?.companyName}</td>
+                                                <td>{item?.description}</td>
+                                                <td>{item?.catagoryType}</td>
+                                                <td>{item?.reportDate}</td>
+                                                <td className='sticky-action'>
+                                                <button className='px-4 btn btn-primary' onClick={() => { downloadReport(item?.reportfileDetails) }}><i className="mdi mdi-download"></i></button>
+                                                        <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteTickerReport(item?.idTickerReports) }}><i className="mdi mdi-delete"></i></button>
+                                                </td>
+                                            </tr>
+                                         })   
+                                        }
+                                    </tbody>
                                 </table>
                             </div>
                         </div>

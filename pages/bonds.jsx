@@ -138,11 +138,12 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
+            fetchData()
         }
         catch (e) {
             console.log("error", e)
-        }
-        context.setLoaderState(true)
+            context.setLoaderState(false)
+        }        
     }
 
 
@@ -237,7 +238,6 @@ export default function Bonds() {
 
     useEffect(() => {
         fetchColumnNames()
-        fetchData()
         getTickerCartDtata()
     }, [])
 
@@ -378,7 +378,6 @@ export default function Bonds() {
                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
         </>
     )
 }

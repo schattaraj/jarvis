@@ -1,6 +1,8 @@
 import html2canvas from 'html2canvas';
 import { jsPDF } from "jspdf";
 import * as XLSX from 'xlsx'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 export const calculateAveragePercentage = (tableData, columnName) => {
     const columnValues = tableData.map((row) => row[columnName]);
 
@@ -112,4 +114,24 @@ export const exportToExcel = () => {
     link.download = 'table_data.xlsx';
     link.click();
     URL.revokeObjectURL(link.href); // Clean up the URL object
+};
+export const getSortIcon = (columnName,sortConfig) => {
+    if (sortConfig && sortConfig.key === columnName) {
+        return sortConfig.direction === 'asc' ? <div className="arrow-icons up">
+            <ArrowDropUpIcon />
+            <ArrowDropDownIcon />
+        </div>
+            :
+            <div className="arrow-icons down">
+                <ArrowDropUpIcon />
+                <ArrowDropDownIcon />
+            </div>
+    }
+    else {
+        return <div className="arrow-icons">
+            <ArrowDropUpIcon />
+            <ArrowDropDownIcon />
+        </div>
+    }
+    return null;
 };

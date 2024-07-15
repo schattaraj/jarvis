@@ -4,7 +4,7 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, exportToExcel, formatDate, searchTable } from '../utils/utils';
+import { calculateAverage, exportToExcel, formatDate, getSortIcon, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
@@ -97,6 +97,7 @@ export default function Etfs() {
     const [rankingData, setRankingData] = useState(false)
     const [chartData, setChartData] = useState([])
     const [selectedView, setSelectedView] = useState('element7')
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -274,17 +275,42 @@ export default function Etfs() {
         }
         context.setLoaderState(false)
     }
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
-                // console.log("tableData",tableData)
-                const items = await SliceData(currentPage, limit, tableData);
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                }
+                items = await SliceData(currentPage, dataLimit, items);
                 // console.log("items",items)
                 setFilterData(items)
             }
         }
         run()
-    }, [currentPage, tableData])
+    }, [currentPage, tableData,limit,sortConfig])
     useEffect(() => {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
@@ -326,7 +352,16 @@ tickers && tickers.map((item, index) => (
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                         </div>
-                        {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>}
+                        {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>}
                     </div>
                     }                    
                     {
@@ -403,7 +438,7 @@ tickers && tickers.map((item, index) => (
                                             <thead>
                                                 <tr>
                                                     {columnNames.map((columnName, index) => (
-                                                        <th key={index}>{columnName.elementDisplayName}</th>
+                                                        <th key={index}  onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName,sortConfig)}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
