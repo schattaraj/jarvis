@@ -19,11 +19,13 @@ const BondReports = () => {
     const [limit, setLimit] = useState(25)
 
     const fetchColumnNames = async () => {
+        context.setLoaderState(true)
         try {
             const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Debt_Report_Matrices&_=1705582308870")
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
+            fetchData()
         }
         catch (e) {
             console.log("error", e)
@@ -32,6 +34,7 @@ const BondReports = () => {
 
 
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871")
             const getBondsRes = await getBonds.json()
@@ -45,6 +48,7 @@ const BondReports = () => {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
 
     const handleClick = (elm) => {
@@ -94,7 +98,6 @@ const BondReports = () => {
     }, [currentPage, tableData])
     useEffect(() => {
         fetchColumnNames()
-        fetchData()
     }, [])
     const extraColumns = [
         {

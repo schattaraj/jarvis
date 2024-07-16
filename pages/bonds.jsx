@@ -4,7 +4,7 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../utils/utils';
+import { calculateAverage, getSortIcon, searchTable } from '../utils/utils';
 import { getImportsData } from '../utils/staticData';
 import BondsHistoryModal from '../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -74,7 +74,7 @@ export default function Bonds() {
     const [callChart, setCallChart] = useState(false)
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
-
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
     };
@@ -133,7 +133,7 @@ export default function Bonds() {
     // https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
-        try {            
+        try {
             const columnApi = await fetch("https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
@@ -143,7 +143,7 @@ export default function Bonds() {
         catch (e) {
             console.log("error", e)
             context.setLoaderState(false)
-        }        
+        }
     }
 
 
@@ -223,18 +223,40 @@ export default function Bonds() {
                 break;
         }
     };
-
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
-                // console.log("tableData",tableData)
-                const items = await SliceData(currentPage, limit, tableData);
-                // console.log("items",items)
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
                 setFilterData(items)
             }
         }
         run()
-    }, [currentPage, tableData])
+    }, [currentPage, tableData, sortConfig,limit])
 
     useEffect(() => {
         fetchColumnNames()
@@ -325,7 +347,7 @@ export default function Bonds() {
                                 <thead>
                                     <tr>
                                         {columnNames.map((columnName, index) => (
-                                            <th key={'column' + index} style={{ width: '10% !imporatant' }}>{columnName.elementDisplayName}</th>
+                                            <th key={'column' + index} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
                                         ))}
                                     </tr>
                                 </thead>

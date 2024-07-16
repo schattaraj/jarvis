@@ -301,10 +301,12 @@ export default function Etfs() {
                     });
                 }
                 let dataLimit = limit
+                let page = currentPage
                 if (dataLimit == "all") {
                     dataLimit = tableData?.length
+                    page = 1
                 }
-                items = await SliceData(currentPage, dataLimit, items);
+                items = await SliceData(page, dataLimit, items);
                 // console.log("items",items)
                 setFilterData(items)
             }
@@ -382,7 +384,7 @@ tickers && tickers.map((item, index) => (
                                 </div>
                                 {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
                                 {/* <BarChart data={data} /> */}
-                                <HightChart data={chartHistory?.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && "Chart View For "+ViewOptions[selectedView]}/>
+                                <HightChart data={chartHistory?.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]}/>
                             </>
                             :
                             rankingData
@@ -474,7 +476,6 @@ tickers && tickers.map((item, index) => (
 
                 </div>
             </div>
-            <Loader />
         </>
     )
 }

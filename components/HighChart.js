@@ -20,7 +20,7 @@ const HightChart = ({data,title}) => {
           }
         },
         title: {
-          text: title ? title : "Chart",
+          text: title ? "Chart View For "+title : "Chart",
           align: 'left'
         },
         subtitle: {
@@ -74,7 +74,7 @@ const HightChart = ({data,title}) => {
         },
         series: [{
           type: 'area',
-          name: 'USD to EUR',
+          name: title,
         //   data:  data.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item['element7'])])// Assuming data is in the correct format
           data:  data
         }]

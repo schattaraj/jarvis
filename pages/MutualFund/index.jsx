@@ -121,6 +121,7 @@ export default function MutualFund() {
         e.preventDefault()
         const form = e.target;
         const formData = new FormData(form);
+        context.setLoaderState(true)
         try {
             const response = await fetch('https://jharvis.com/JarvisV2/createMutualFund', {
                 method: 'POST',
@@ -135,12 +136,14 @@ export default function MutualFund() {
                     confirmButtonColor: "#719B5F"
                 })
                 form.reset()
+                fetchMutualFund()
             } else {
                 console.error('Error:', response.statusText);
             }
         } catch (error) {
             console.error('Error:', error);
         }
+        context.setLoaderState(false)
     }
     const handleSort = (key) => {
         let direction = 'asc';
