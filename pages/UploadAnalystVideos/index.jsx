@@ -2,13 +2,14 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
-import { formatDate, searchTable } from '../../utils/utils';
+import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import ReactDatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { Context } from '../../contexts/Context';
 import Loader from '../../components/loader';
+import Swal from 'sweetalert2';
 export default function UploadAnalystVideos() {
     const [tickers, setTickers] = useState([]);
     const [allAnalystData, setAllAnalystData] = useState([])
@@ -18,6 +19,7 @@ export default function UploadAnalystVideos() {
     const [limit, setLimit] = useState(25)
     const [currentPage, setCurrentPage] = useState(1);
     const [startDate, setStartDate] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
@@ -36,6 +38,7 @@ export default function UploadAnalystVideos() {
 
     }
     const fetchAllAnalystVideos = async () => {
+        context.setLoaderState(true)
         try {
             const getAllAnalyst = await fetch("https://jharvis.com/JarvisV2/getAllAnalystVideo?_=1716538528362")
             const getAllAnalystRes = await getAllAnalyst.json()
@@ -44,7 +47,7 @@ export default function UploadAnalystVideos() {
         catch (e) {
             console.log("Error", e)
         }
-
+        context.setLoaderState(false)
 
     }
     const handleClose = () => setShow(false);
@@ -79,7 +82,11 @@ export default function UploadAnalystVideos() {
             if (!value) {
                 isFormValid = false;
                 // You can also display an error message or highlight the empty field
-                alert(`The field "${name}" is required.`);
+                Swal.fire({
+                    title: `The field "${name}" is required.`,
+                    icon: "error",
+                    confirmButtonColor: "#719B5F"
+                })
                 break; // Stop checking if any field is empty
             }
         }
@@ -96,7 +103,11 @@ export default function UploadAnalystVideos() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result.msg,
+                    icon: "success",
+                    confirmButtonColor: "#719B5F"
+                })
                 form.reset()
                 fetchAllAnalystVideos()
             } else {
@@ -109,36 +120,73 @@ export default function UploadAnalystVideos() {
     }
     const deleteAnalystVideo = async (id) => {
         let text = "Are you sure You want to delete ?";
-        if (confirm(text) == true) {
-            context.setLoaderState(true)
-            try {
-                const formData = new FormData();
-                formData.append("idAnaylstVideo", id)
-                const analystDelete = await fetch("https://jharvis.com/JarvisV2/deleteAnalystVideo", {
-                    method: 'DELETE',
-                    body: formData
-                })
-                if (analystDelete.ok) {
-                    const analystDeleteRes = await analystDelete.json()
-                    alert(analystDeleteRes.msg)
-                    fetchAllAnalystVideos()
+        Swal.fire({
+            title: text,
+            icon:'warning',
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const formData = new FormData();
+                    formData.append("idAnaylstVideo", id)
+                    const analystDelete = await fetch("https://jharvis.com/JarvisV2/deleteAnalystVideo", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (analystDelete.ok) {
+                        const analystDeleteRes = await analystDelete.json()
+                        Swal.fire({
+                            title: analystDeleteRes.msg,
+                            icon: "success",
+                            confirmButtonColor: "#719B5F"
+                        })
+                        fetchAllAnalystVideos()
+                    }
+                } catch (error) {
+                    console.log(error)
                 }
-            } catch (error) {
-                console.log(error)
+                fetchAllAnalystVideos()
+                context.setLoaderState(false)
             }
-            fetchAllAnalystVideos()
-            context.setLoaderState(false)
-        }
+        })
     }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     useEffect(() => {
         async function run() {
             if (allAnalystData.length > 0) {
-                const items = await SliceData(currentPage, limit, allAnalystData);
+                let items = [...allAnalystData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = items?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
                 setAllAnalystDataFiltered(items)
             }
         }
         run()
-    }, [currentPage, allAnalystData])
+    }, [currentPage, allAnalystData, sortConfig])
     useEffect(() => {
         fetchTickersFunc()
         fetchAllAnalystVideos()
@@ -204,10 +252,10 @@ export default function UploadAnalystVideos() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Ticker</th>
-                                    <th>Company</th>
-                                    <th>Description</th>
-                                    <th>Report Date</th>
+                                    <th onClick={()=>{handleSort("tickerName")}}>Ticker {getSortIcon("tickerName",sortConfig)}</th>
+                                    <th onClick={()=>{handleSort("companyName")}}>Company {getSortIcon("companyName",sortConfig)}</th>
+                                    <th onClick={()=>{handleSort("description")}}>Description {getSortIcon("description",sortConfig)}</th>
+                                    <th onClick={()=>{handleSort("reportDate")}}>Report Date {getSortIcon("reportDate",sortConfig)}</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -220,8 +268,8 @@ export default function UploadAnalystVideos() {
                                             <td>{item?.description}</td>
                                             <td>{item?.reportDate && formatDate(item?.reportDate)}</td>
                                             <td>
-                                                <button className='btn btn-primary me-2' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
-                                                <button className='btn btn-danger' onClick={() => { deleteAnalystVideo(item?.idAnaylstVideo) }}><i className="mdi mdi-delete menu-icon"></i></button>
+                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
+                                                <button className='btn btn-danger px-4' onClick={() => { deleteAnalystVideo(item?.idAnaylstVideo) }}><i className="mdi mdi-delete menu-icon"></i></button>
                                             </td>
                                         </tr>
                                     })
@@ -232,7 +280,6 @@ export default function UploadAnalystVideos() {
                     {allAnalystData.length > 0 && <Pagination currentPage={currentPage} totalItems={allAnalystData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Analyst Video</Modal.Title>

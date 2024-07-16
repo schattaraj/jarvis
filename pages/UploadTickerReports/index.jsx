@@ -84,6 +84,7 @@ export default function UploadTickerReports() {
         let text = "Are you sure ?";
         Swal.fire({
             title: text,
+            icon:'warning',
             showCancelButton: true,
             confirmButtonText: "Delete",
             customClass: { confirmButton: 'btn-danger', }
@@ -251,11 +252,11 @@ export default function UploadTickerReports() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th onClick={() => handleSort("tickerName")} >Ticker {getSortIcon("tickerName")}</th>
-                                    <th onClick={() => handleSort("companyName")} >Company {getSortIcon("companyName")}</th>
-                                    <th onClick={() => handleSort("description")} >Description {getSortIcon("description")}</th>
-                                    <th onClick={() => handleSort("catagoryType")} >Report Type {getSortIcon("catagoryType")}</th>
-                                    <th onClick={() => handleSort("reportDate")} >Report Date {getSortIcon("reportDate")}</th>
+                                    <th onClick={() => handleSort("tickerName")} >Ticker {getSortIcon("tickerName",sortConfig)}</th>
+                                    <th onClick={() => handleSort("companyName")} >Company {getSortIcon("companyName",sortConfig)}</th>
+                                    <th onClick={() => handleSort("description")} >Description {getSortIcon("description",sortConfig)}</th>
+                                    <th onClick={() => handleSort("catagoryType")} >Report Type {getSortIcon("catagoryType",sortConfig)}</th>
+                                    <th onClick={() => handleSort("reportDate")} >Report Date {getSortIcon("reportDate",sortConfig)}</th>
                                     <th className='sticky-action'>Action</th>
                                 </tr>
                             </thead>
@@ -281,7 +282,6 @@ export default function UploadTickerReports() {
                     {filteredData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
         </>
     )
 }

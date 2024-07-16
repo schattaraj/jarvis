@@ -2,13 +2,14 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
-import { formatDate, searchTable } from '../../utils/utils';
+import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
 import ReactDatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import SliceData from '../../components/SliceData';
+import Swal from 'sweetalert2';
 export default function UploadPodcast() {
     const [tickers, setTickers] = useState([]);
     const [allPodcastData, setallPodcastData] = useState([])
@@ -18,6 +19,7 @@ export default function UploadPodcast() {
     const [limit, setLimit] = useState(25)
     const [currentPage, setCurrentPage] = useState(1);
     const [startDate, setStartDate] = useState("");
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
@@ -85,7 +87,11 @@ export default function UploadPodcast() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result.msg,
+                    icon: "success",
+                    confirmButtonColor: "#719B5F"
+                })
                 form.reset()
                 fetchAllPodcastVideos()
             } else {
@@ -98,36 +104,67 @@ export default function UploadPodcast() {
     }
     const deletePodcast = async (id) => {
         let text = "Are you sure ?";
-        if (confirm(text) == true) {
-            try {
-                const formData = new FormData();
-                formData.append("idPodCast", id)
-                const podcastDelete = await fetch("https://jharvis.com/JarvisV2/deletePodCast", {
-                    method: 'DELETE',
-                    body: formData
-                })
-                if (podcastDelete.ok) {
-                    const podcastDeleteRes = await podcastDelete.json()
-                    alert(podcastDeleteRes.msg)
-                    fetchAllPodcastVideos()
+        Swal.fire({
+            title: text,
+            icon:'warning',
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const formData = new FormData();
+                    formData.append("idPodCast", id)
+                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deletePodCast", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire({
+                            title: rowDeleteRes?.msg,
+                            icon: "success",
+                            confirmButtonColor: "#719B5F"
+                        })
+                        fetchAllPodcastVideos()
 
+                    }
+                } catch (error) {
+                    console.log(error)
                 }
-            } catch (error) {
-                console.log(error)
+                context.setLoaderState(false)
             }
-
-        }
-
+        })
     }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     useEffect(() => {
         async function run() {
             if (allPodcastData.length > 0) {
-                const items = await SliceData(currentPage, limit, allPodcastData);
+                let items = [...allPodcastData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                items = await SliceData(currentPage, limit, items);
                 setallPodcastDataFiltered(items)
             }
         }
         run()
-    }, [currentPage, allPodcastData])
+    }, [currentPage, allPodcastData, sortConfig])
     useEffect(() => {
         fetchTickersFunc()
         fetchAllPodcastVideos()
@@ -193,10 +230,10 @@ export default function UploadPodcast() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Ticker</th>
-                                    <th>Company</th>
-                                    <th>Description</th>
-                                    <th>Report Date</th>
+                                    <th onClick={() => { handleSort("tickerName") }}>Ticker {getSortIcon("tickerName", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("companyName") }}>Company {getSortIcon("companyName", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("description") }}>Description {getSortIcon("description", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("reportDate") }}>Report Date {getSortIcon("reportDate", sortConfig)}</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -221,7 +258,6 @@ export default function UploadPodcast() {
                     {allPodcastData.length > 0 && <Pagination currentPage={currentPage} totalItems={allPodcastData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Podcasts</Modal.Title>

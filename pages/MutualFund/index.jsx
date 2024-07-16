@@ -1,9 +1,11 @@
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
-import { formatDate, searchTable } from '../../utils/utils';
+import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
+import { Context } from '../../contexts/Context';
+import Swal from 'sweetalert2';
 export default function MutualFund() {
     const [mutualFund, setMutualFund] = useState([])
     const [mutualFundFiltered, setMutualFundFiltered] = useState([])
@@ -11,7 +13,10 @@ export default function MutualFund() {
     const [currentPage, setCurrentPage] = useState(1);
     const [tickers, setTickers] = useState([]);
     const [navValue, setNavValue] = useState("")
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
+    const context = useContext(Context)
     const fetchMutualFund = async () => {
+        context.setLoaderState(true)
         try {
             const getMutualFund = await fetch("https://jharvis.com/JarvisV2/getAllMutualFund?_=1716649829527")
             const getMutualFundRes = await getMutualFund.json()
@@ -21,6 +26,7 @@ export default function MutualFund() {
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const filter = (e) => {
         const value = e.target.value;
@@ -63,25 +69,28 @@ export default function MutualFund() {
         setNavValue(e.target.value)
     }
     const getStockPriceCheck = async () => {
+        context.setLoaderState(true)
         try {
             const stockPrice = await fetch("https://jharvis.com/JarvisV2/getStockPriceCheck?_=1716883270435")
             const stockPriceRes = await stockPrice.json()
-            alert(stockPriceRes.msg)
+            Swal.fire({title:stockPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const getBondPriceCheck = async () => {
+        context.setLoaderState(true)
         try {
             const bondPrice = await fetch("https://jharvis.com/JarvisV2/getBondPriceCheck?_=1716883270437")
             const bondPriceRes = await bondPrice.json()
-            alert(bondPriceRes.msg)
+            Swal.fire({title:bondPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
         catch (e) {
 
         }
-
+        context.setLoaderState(false)
     }
     const createNav = async (e) => {
         e.preventDefault()
@@ -95,7 +104,11 @@ export default function MutualFund() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result.msg,
+                    icon: "success",
+                    confirmButtonColor: "#719B5F"
+                })
             } else {
                 console.error('Error:', response.statusText);
             }
@@ -116,7 +129,11 @@ export default function MutualFund() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert(result.msg)
+                Swal.fire({
+                    title: result.msg,
+                    icon: "success",
+                    confirmButtonColor: "#719B5F"
+                })
                 form.reset()
             } else {
                 console.error('Error:', response.statusText);
@@ -125,15 +142,34 @@ export default function MutualFund() {
             console.error('Error:', error);
         }
     }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
     useEffect(() => {
         async function run() {
             if (mutualFund.length > 0) {
-                const items = await SliceData(currentPage, limit, mutualFund);
+                let items = [...mutualFund];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                items = await SliceData(currentPage, limit, items);
                 setMutualFundFiltered(items)
             }
         }
         run()
-    }, [currentPage, mutualFund])
+    }, [currentPage, mutualFund, sortConfig])
     useEffect(() => {
         fetchTickersFunc()
         fetchMutualFund()
@@ -166,9 +202,9 @@ export default function MutualFund() {
                                     </div>
                                 </div>
                                 <div className="col-12">
-                                    <button type='submit' className="btn btn-primary me-3">Submit</button>
-                                    <button type='button' className="btn btn-primary me-3" onClick={getStockPriceCheck}>Stock Price Check</button>
-                                    <button type='button' className="btn btn-primary me-3" onClick={getBondPriceCheck}>Bond Price Check</button>
+                                    <button type='submit' className="btn btn-primary me-3 mb-2 mb-md-0 px-3 px-sm-5">Submit</button>
+                                    <button type='button' className="btn btn-primary me-3 mb-2 mb-md-0 px-3 px-sm-5" onClick={getStockPriceCheck}>Stock Price Check</button>
+                                    <button type='button' className="btn btn-primary me-3 mb-2 mb-md-0 px-3 px-sm-5" onClick={getBondPriceCheck}>Bond Price Check</button>
                                 </div>
                             </div>
                         </form>
@@ -230,12 +266,12 @@ export default function MutualFund() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Type</th>
-                                    <th>Security</th>
-                                    <th>No of Shares</th>
-                                    <th>Price/Shares</th>
-                                    <th>Total Amount</th>
-                                    <th>Date</th>
+                                    <th onClick={() => { handleSort("type") }}>Type {getSortIcon("type", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("tickerName") }}>Security {getSortIcon("tickerName", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("numberShare") }}>No of Shares {getSortIcon("numberShare", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("priceShare") }}>Price/Shares {getSortIcon("priceShare", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("totalPrice") }}>Total Amount {getSortIcon("totalPrice", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("mutualDate") }}>Date {getSortIcon("mutualDate", sortConfig)}</th>
                                 </tr>
                             </thead>
                             <tbody>
