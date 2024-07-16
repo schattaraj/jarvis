@@ -4,6 +4,7 @@ export const Pagination = ({currentPage,totalItems,limit,setCurrentPage,handlePa
     const count = totalItems.length
     if(limit == "all"){
         limit = totalItems?.length
+        currentPage = 1
     }
     const startIndex = (currentPage - 1) * limit + 1;
     const endIndex = Math.min(currentPage * limit, count);

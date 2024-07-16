@@ -5,6 +5,7 @@ import React from 'react'
 import { Pagination } from '../../components/Pagination';
 import { getSortIcon, searchTable } from '../../utils/utils';
 import { Context } from '../../contexts/Context';
+import SliceData from '../../components/SliceData';
 
 export default function SaveSecurities() {
     const [metaDataType, setMetaDataType] = useState("")
@@ -21,6 +22,8 @@ export default function SaveSecurities() {
     const [bondCurrentPage, setBondCurrentPage] = useState(1)
     const [favBondCurrentPage, setFavBondCurrentPage] = useState(1)
     const [limit, setLimit] = useState(25)
+    const [allBondLimit, setAllBondLimit] = useState(25)
+    const [favBondLimit, setFavBondLimit] = useState(25)
     const [sortAllBond, setSortAllBond] = useState({ key: null, direction: null });
     const [sortFavBond, setSortFavBond] = useState({ key: null, direction: null });
     const context = useContext(Context)
@@ -46,7 +49,7 @@ export default function SaveSecurities() {
             const findAllStocksRes = await findAllStocks.json()
             setStockData(findAllStocksRes)
         } catch (error) {
-            console.log("Error",error);
+            console.log("Error", error);
         }
         context.setLoaderState(false)
     }
@@ -57,7 +60,7 @@ export default function SaveSecurities() {
             const findAllFavoriteStocksRes = await findAllFavoriteStocks.json()
             setFavoriteStockData(findAllFavoriteStocksRes)
         } catch (error) {
-            console.log("Error",error);
+            console.log("Error", error);
         }
         context.setLoaderState(false)
     }
@@ -67,9 +70,9 @@ export default function SaveSecurities() {
             const findAllBonds = await fetch("https://jharvis.com/JarvisV2/findAllBonds")
             const findAllBondsRes = await findAllBonds.json()
             setAllBonds(findAllBondsRes)
-            setAllBondsFiltered(sliceData(findAllBondsRes, bondCurrentPage))
+            setAllBondsFiltered(SliceData(bondCurrentPage, allBondLimit, findAllBondsRes))
         } catch (error) {
-            console.log("Error",error);
+            console.log("Error", error);
         }
         context.setLoaderState(false)
     }
@@ -81,7 +84,7 @@ export default function SaveSecurities() {
             setAllFavoriteBonds(findAllFavoriteBondsRes)
             setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds, favBondCurrentPage))
         } catch (error) {
-            console.log("Error",error);
+            console.log("Error", error);
         }
         context.setLoaderState(false)
 
@@ -174,12 +177,18 @@ export default function SaveSecurities() {
         }
         setSortAllBond({ key, direction });
     };
-    const handleFavBondSort = (key)=>{
+    const handleFavBondSort = (key) => {
         let direction = 'asc'
-        if(sortFavBond && sortFavBond.key === key && sortFavBond.direction === 'asc'){
+        if (sortFavBond && sortFavBond.key === key && sortFavBond.direction === 'asc') {
             direction = 'desc'
         }
-        setSortFavBond({key, direction})
+        setSortFavBond({ key, direction })
+    }
+    const changeBondLimit = (e) => {
+        setAllBondLimit(e.target.value)
+    }
+    const changeFavBondLimit = (e)=>{
+        setFavBondLimit(e.target.value)
     }
     useEffect(() => {
         allStockData.length > 0 && setStockDataFiltered(sliceData(allStockData, stockCurrentPage))
@@ -201,9 +210,9 @@ export default function SaveSecurities() {
                     return 0;
                 });
             }
-            setAllBondsFiltered(sliceData(items, bondCurrentPage))
+            setAllBondsFiltered(SliceData(bondCurrentPage, allBondLimit, items))
         }
-    }, [allBonds, bondCurrentPage, sortAllBond])
+    }, [allBonds, bondCurrentPage, sortAllBond, allBondLimit])
     useEffect(() => {
         if (allFavoriteBonds.length > 0) {
             let items = [...allFavoriteBonds];
@@ -220,7 +229,7 @@ export default function SaveSecurities() {
             }
             setAllFavoriteBondsFiltered(sliceData(items, bondCurrentPage))
         }
-    }, [allFavoriteBonds, favBondCurrentPage, sortFavBond])
+    }, [allFavoriteBonds, favBondCurrentPage, sortFavBond,favBondLimit])
     return (
         <>
             <div className="main-panel">
@@ -344,21 +353,30 @@ export default function SaveSecurities() {
                                 <div className="col-md-6">
                                     <div className="card p-3">
                                         <div className="d-flex justify-content-between">
-                                            <h5>All Bonds: </h5>
-                                            <div className="form-group d-flex align-items-center">
-                                                <label htmlFor="" className='me-2'>Search:</label>
+                                            <h5 style={{ fontSize: "14px" }}>All Bonds: </h5>
+                                            <div className="form-group d-flex flex-wrap flex-sm-nowrap align-items-center">
+                                                <label style={{ textWrap: "nowrap", fontSize: "14px" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                                <select name="limit" className='form-select w-auto mb-0 me-2' style={{ fontSize: "14px" }} onChange={changeBondLimit} value={allBondLimit}>
+                                                    <option value="10">10</option>
+                                                    <option value="25">25</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                    <option value="all">All</option>
+                                                </select>
+                                                <label htmlFor="" className='me-2 mb-0' style={{ fontSize: "14px" }}>Search:</label>
                                                 <input type="text" className='form-control' name='allBonds' onChange={filter} />
+
                                             </div>
                                         </div>
                                         <div className="table-responsive">
                                             <table className="table">
                                                 <thead>
                                                     <tr>
-                                                        <th onClick={() => { handleAllBondSort("issuerName") }}>Issuer Name {getSortIcon("issuerName",sortAllBond)}</th>
-                                                        <th onClick={() => { handleAllBondSort("type") }}>Bond Type {getSortIcon("type",sortAllBond)}</th>
-                                                        <th onClick={() => { handleAllBondSort("ytm") }}>YTM {getSortIcon("ytm",sortAllBond)}</th>
-                                                        <th onClick={() => { handleAllBondSort("coupon") }}>Coupon {getSortIcon("coupon",sortAllBond)}</th>
-                                                        <th onClick={() => { handleAllBondSort("maturity") }}>Matuirity {getSortIcon("maturity",sortAllBond)}</th>
+                                                        <th onClick={() => { handleAllBondSort("issuerName") }}>Issuer Name {getSortIcon("issuerName", sortAllBond)}</th>
+                                                        <th onClick={() => { handleAllBondSort("type") }}>Bond Type {getSortIcon("type", sortAllBond)}</th>
+                                                        <th onClick={() => { handleAllBondSort("ytm") }}>YTM {getSortIcon("ytm", sortAllBond)}</th>
+                                                        <th onClick={() => { handleAllBondSort("coupon") }}>Coupon {getSortIcon("coupon", sortAllBond)}</th>
+                                                        <th onClick={() => { handleAllBondSort("maturity") }}>Matuirity {getSortIcon("maturity", sortAllBond)}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -377,15 +395,23 @@ export default function SaveSecurities() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <Pagination currentPage={bondCurrentPage} totalItems={allBonds} limit={limit} setCurrentPage={setBondCurrentPage} handlePage={handleBondsPage} />
+                                        <Pagination currentPage={bondCurrentPage} totalItems={allBonds} limit={allBondLimit} setCurrentPage={setBondCurrentPage} handlePage={handleBondsPage} />
                                     </div>
                                 </div>
                                 <div className="col-md-6">
                                     <div className="card p-3">
                                         <div className="d-flex justify-content-between">
                                             <h5>Favourite Bonds: </h5>
-                                            <div className="form-group d-flex align-items-center">
-                                                <label htmlFor="" className='me-2'>Search:</label>
+                                            <div className="form-group d-flex flex-wrap flex-sm-nowrap align-items-center">
+                                                <label style={{ textWrap: "nowrap", fontSize: "14px" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                                <select name="limit" className='form-select w-auto mb-0 me-2' style={{ fontSize: "14px" }} onChange={changeFavBondLimit} value={favBondLimit}>
+                                                    <option value="10">10</option>
+                                                    <option value="25">25</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                    <option value="all">All</option>
+                                                </select>
+                                                <label htmlFor="" className='me-2 mb-0' style={{ fontSize: "14px" }}>Search:</label>
                                                 <input type="text" className='form-control' name='allFavBonds' onChange={filter} />
                                             </div>
                                         </div>
@@ -393,11 +419,11 @@ export default function SaveSecurities() {
                                             <table className="table">
                                                 <thead>
                                                     <tr>
-                                                    <th onClick={() => { handleFavBondSort("issuerName") }}>Issuer Name {getSortIcon("issuerName",sortFavBond)}</th>
-                                                        <th onClick={() => { handleFavBondSort("type") }}>Bond Type {getSortIcon("type",sortFavBond)}</th>
-                                                        <th onClick={() => { handleFavBondSort("ytm") }}>YTM {getSortIcon("ytm",sortFavBond)}</th>
-                                                        <th onClick={() => { handleFavBondSort("coupon") }}>Coupon {getSortIcon("coupon",sortFavBond)}</th>
-                                                        <th onClick={() => { handleFavBondSort("maturity") }}>Matuirity {getSortIcon("maturity",sortFavBond)}</th>
+                                                        <th onClick={() => { handleFavBondSort("issuerName") }}>Issuer Name {getSortIcon("issuerName", sortFavBond)}</th>
+                                                        <th onClick={() => { handleFavBondSort("type") }}>Bond Type {getSortIcon("type", sortFavBond)}</th>
+                                                        <th onClick={() => { handleFavBondSort("ytm") }}>YTM {getSortIcon("ytm", sortFavBond)}</th>
+                                                        <th onClick={() => { handleFavBondSort("coupon") }}>Coupon {getSortIcon("coupon", sortFavBond)}</th>
+                                                        <th onClick={() => { handleFavBondSort("maturity") }}>Matuirity {getSortIcon("maturity", sortFavBond)}</th>
                                                         <th>Cusio No</th>
                                                     </tr>
                                                 </thead>
@@ -418,7 +444,7 @@ export default function SaveSecurities() {
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <Pagination currentPage={favBondCurrentPage} totalItems={allFavoriteBonds} limit={limit} setCurrentPage={setFavBondCurrentPage} handlePage={handleFavBondsPage} />
+                                        <Pagination currentPage={favBondCurrentPage} totalItems={allFavoriteBonds} limit={favBondLimit} setCurrentPage={setFavBondCurrentPage} handlePage={handleFavBondsPage} />
                                     </div>
                                 </div>
                             </div>
