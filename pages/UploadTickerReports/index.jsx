@@ -7,7 +7,7 @@ import { Context } from '../../contexts/Context';
 import Loader from '../../components/loader';
 import SliceData from '../../components/SliceData';
 import Swal from 'sweetalert2';
-import { formatDate, getSortIcon } from '../../utils/utils';
+import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 export default function UploadTickerReports() {
     const context = useContext(Context)
@@ -137,6 +137,10 @@ export default function UploadTickerReports() {
         }
         setSortConfig({ key, direction });
     };
+    const filter = (e) => {
+        const value = e.target.value;
+        setFilteredData(searchTable(tableData, value))
+    }
     useEffect(() => {
         fetchTickersFunc()
         fetchTickerReports()
@@ -232,7 +236,7 @@ export default function UploadTickerReports() {
                         </form>
                     </div>
                     <div className='d-md-flex justify-content-end'>
-                        <div className="form-group d-flex flex-wrap flex-sm-nowrap align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control mb-2 mb-sm-0' />
+                        <div className="form-group d-flex flex-wrap flex-sm-nowrap align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' onChange={filter} className='form-control mb-2 mb-sm-0' />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                             <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
                                 <option value="10">10</option>
