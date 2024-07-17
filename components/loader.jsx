@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Context } from '../contexts/Context'
+import FollowCursorMessage from "../components/FollowCursorMessage";
 export default function Loader() {
   const context = useContext(Context)
   const [showLongWaitMessage, setShowLongWaitMessage] = useState(false);
@@ -48,6 +49,7 @@ export default function Loader() {
             <div className="dot"></div>
           </div>
           </div>}
+          <FollowCursorMessage show={showLongWaitMessage} />
       </div>
     }
     </div>

@@ -6,7 +6,9 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { calculateAverage, searchTable } from '../utils/utils';
+import { calculateAverage, getSortIcon, searchTable } from '../utils/utils';
+import { Form, Modal } from 'react-bootstrap';
+import Swal from 'sweetalert2';
 
 const BondReports = () => {
     const context = useContext(Context)
@@ -17,7 +19,9 @@ const BondReports = () => {
     const [filterData, setFilterData] = useState([])
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
-
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
+    const [reportModal, setReportModal] = useState(false)
+    const [reportData, setReportData] = useState([])
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
@@ -29,6 +33,7 @@ const BondReports = () => {
         }
         catch (e) {
             console.log("error", e)
+            context.setLoaderState(false)
         }
     }
 
@@ -54,19 +59,6 @@ const BondReports = () => {
     const handleClick = (elm) => {
         console.log("element", elm)
     }
-
-    const options = {
-        replace: (elememt) => {
-            if (elememt.name === 'a') {
-                // console.log("replace",JSON.stringify(parse(elememt.children.join(''))))
-                return (
-                    <a onClick={() => { handleClick(elememt.children[0].data) }} href='#'>
-                        {parse(elememt.children[0].data)}
-                    </a>
-                );
-            }
-        }
-    }
     const handlePage = async (action) => {
         switch (action) {
             case 'prev':
@@ -85,17 +77,111 @@ const BondReports = () => {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
     }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
+    const options = {
+        replace: (elememt) => {
+            if (elememt.name === 'a') {
+                // console.log("replace",JSON.stringify(parse(elememt.children.join(''))))
+                return (
+                    <a onClick={() => { handleReportData(elememt.children[0].data) }} href='#'>
+                        {parse(elememt.children[0].data)}
+                    </a>
+                );
+            }
+        }
+    }
+    const handleReportData = async (name) => {
+        context.setLoaderState(true)
+        try {
+            const fetchReport = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getTickerReportsByTickerName?tickerName=" + name)
+            const fetchReportRes = await fetchReport.json()
+            setReportData(fetchReportRes)
+            setReportModal(true)
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+        context.setLoaderState(false)
+    }
+
+    const downloadReport = async (reportName) => {
+        context.setLoaderState(true)
+        try {
+            const fetchReport = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "downloadTickerReport?fileName=" + reportName)
+            const fetchReportRes = await fetchReport.json()
+            window.open(fetchReportRes.responseStr, '_blank')
+        }
+        catch (e) {
+
+        }
+        context.setLoaderState(false)
+    }
+    const deleteReport = async (reportName) => {
+        try {
+            Swal.fire({
+                title: "Are You sure ?",
+                icon:"warning",
+                showCancelButton: true,
+                confirmButtonText: "Delete",
+                customClass: { confirmButton: 'btn-danger', }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    context.setLoaderState(true)
+                    try {
+                        const deleteApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deletePortfolioByName?name=" + reportName)
+                        if (deleteApi.ok) {
+                            const deleteApiRes = await deleteApi.json()
+                            Swal.fire({ title: deleteApiRes.msg, confirmButtonColor: "#719B5F" })
+                        }
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    context.setLoaderState(false)
+                } else if (result.isDenied) {
+                    Swal.fire("Changes are not saved", "", "info");
+                }
+            })            
+        }
+        catch (e) {
+
+        }
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
-                // console.log("tableData",tableData)
-                const items = await SliceData(currentPage, limit, tableData);
-                // console.log("items",items)
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
                 setFilterData(items)
             }
         }
         run()
-    }, [currentPage, tableData])
+    }, [currentPage, tableData, sortConfig, limit])
     useEffect(() => {
         fetchColumnNames()
     }, [])
@@ -130,14 +216,23 @@ const BondReports = () => {
                             {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="table-responsive">
-                        <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
-                                        <th key={index}>{columnName.elementDisplayName}</th>
+                                        <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName.elementInternalName, sortConfig)}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -174,7 +269,45 @@ const BondReports = () => {
                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
+            <Modal className="report-modal" show={reportModal} onHide={() => { setReportModal(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Report Table</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="table-responsive">
+                        <table className="table report-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticker</th>
+                                    <th>Company</th>
+                                    <th>Description</th>
+                                    <th>Report Type</th>
+                                    <th>Report Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    reportData.map((item, index) => {
+                                        return (<tr key={"report" + index}>
+                                            <td>{item?.tickerName}</td>
+                                            <td>{item?.companyName}</td>
+                                            <td><p style={{ maxWidth: "400px" }} className="text-wrap">{item?.description}</p></td>
+                                            <td>{item?.catagoryType}</td>
+                                            <td>{item?.reportDate}</td>
+                                            <td>
+                                                <button onClick={() => { downloadReport(item?.reportfileDetails) }} className="btn me-2"><img src="/icons/download.svg" alt="" /></button>
+                                                <button onClick={() => { deleteReport(item?.idTickerReports) }} className="btn bg-danger"><img src="/icons/trash-2.svg" alt="" /></button>
+                                            </td>
+                                        </tr>)
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <p className="mt-2">Showing {reportData.length} entries</p>
+                </Modal.Body>
+            </Modal>
         </>
     )
 }

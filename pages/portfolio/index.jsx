@@ -496,7 +496,6 @@ export default function Portfolio() {
                     </Modal.Body>
                 </Modal>
             </div>
-            <Loader />
         </>
     )
 }
