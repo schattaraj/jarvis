@@ -6,7 +6,7 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { calculateAverage, getSortIcon, searchTable } from '../utils/utils';
+import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../utils/utils';
 import { Form, Modal } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 
@@ -212,11 +212,11 @@ const BondReports = () => {
                         </h3>
                     </div>
                     <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
-                            {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                        <div className="dt-buttons mb-3 d-flex align-items-center">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                             <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
                                 <option value="10">10</option>
