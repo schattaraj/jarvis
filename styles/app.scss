@@ -273,7 +273,7 @@ a.navbar-brand {
             border-right: 1px solid #fff;
             text-transform: capitalize;
             cursor: pointer;
-
+            font-family: Nunito,sans-serif;
             &:last-child {
                 border-right: 0;
             }
@@ -337,7 +337,7 @@ a.navbar-brand {
 
     td {
         padding: 8px 12px;
-
+        font-size: 12px;
         img {
             aspect-ratio: 2/2;
             width: auto !important;
@@ -996,7 +996,7 @@ input[type="range"] {
     h3 {
         text-align: center;
         padding: 24px;
-        font-size: 18px;
+        font-size: 14px;
         margin-bottom: 0;
         width: 100%;
     }
@@ -1043,7 +1043,19 @@ input[type="range"] {
     .btn {
         padding: 10px 12px !important;
     }
-
+    .btn-primary{
+        background: transparent !important; 
+        i{
+            color: var(--primary);
+        }
+    }
+    .btn-danger{
+        background: transparent !important;
+        border:none;
+        i{
+            color: #cd3434;
+        }
+    }
     /* Adjust the z-index as needed */
     @media (max-width:575px) {
         button {

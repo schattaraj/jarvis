@@ -50,6 +50,7 @@ export default function BusinessTracking() {
     const [filterModal, setFilterModal] = useState(false)
     const [advisorData, setAdvisorData] = useState(false)
     const [advisorName,setAdvisorName] = useState(false)
+    const [timeFrame, setTimeFrame] = useState("");
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -259,7 +260,14 @@ export default function BusinessTracking() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
-            const fetchAdvisor = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getDetailsByAdvisor?advisorName=" + jsonObject['advisorName'] + "&timeFrame=" + jsonObject['timeFrame'] + "&startdate=" + jsonObject['startdate'] + "&enddate=" + jsonObject['enddate'] + "&_=1720608071572=")
+            const { advisorName, timeFrame, startdate, enddate } = jsonObject;
+            let url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}getDetailsByAdvisor?advisorName=${advisorName}`;
+            if (timeFrame) {
+                url += `&timeFrame=${timeFrame}`;
+              } else {
+                url += `&startdate=${startdate}&enddate=${enddate}`;
+              }          
+            const fetchAdvisor = await fetch(url + "&_=1720608071572=")
             const fetchAdvisorRes = await fetchAdvisor.json()
             setAdvisorData(fetchAdvisorRes?.msg)
         } catch (error) {
@@ -574,7 +582,7 @@ export default function BusinessTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="timeFrame">
                                     <Form.Label>Time Frame</Form.Label>
-                                    <Form.Select name='timeFrame' defaultValue={editData?.advisorName} required>
+                                    <Form.Select name='timeFrame' defaultValue={editData?.timeFrame} onChange={(e) => setTimeFrame(e.target.value)} required>
                                         <option value={""}>--Select--</option>
                                         <option value="lastweek">Last Week</option>
                                         <option value="week">Current Week</option>
@@ -587,13 +595,13 @@ export default function BusinessTracking() {
                             <div className="col-md-6">
                                 <Form.Group className='mb-3'>
                                     <Form.Label>Start Date</Form.Label>
-                                    <Form.Control type='date' name='startdate' required />
+                                    <Form.Control type='date' name='startdate' disabled={!!timeFrame} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className='mb-3'>
                                     <Form.Label>End Date</Form.Label>
-                                    <Form.Control type='date' name='endDate' required />
+                                    <Form.Control type='date' name='endDate' disabled={!!timeFrame} required />
                                 </Form.Group>
                             </div>
                         </div>

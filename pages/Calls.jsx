@@ -8,6 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../utils/staticData'
 import Select from 'react-select'
+import { exportToExcel, generatePDF, getSortIcon } from '../utils/utils';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);
@@ -87,6 +88,7 @@ export default function Calls() {
     const [selectedTicker, setSelectedTicker] = useState('A')
     const [selectedDate, setSelectedDate] = useState('2023-10-10')
     const [tableData, setTableData] = useState([])
+    const [limit, setLimit] = useState(25)
     const fetchTickersFunc = async () => {
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
@@ -133,6 +135,13 @@ export default function Calls() {
     }
     const handleClick = () => {
 
+    }
+    const filter = (e) => {
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
     }
     const options = {
         replace: (elememt) => {
@@ -244,26 +253,41 @@ export default function Calls() {
                             </table>
                         </div>
                     }
-
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                    </div>
                     <div className="table-responsive mt-4">
                         <table id="example" className="table display">
                             <thead>
                                 <tr>
-                                    <th>Ticker</th>
-                                    <th>Current Ticker Price</th>
-                                    <th>Call Strike Price</th>
-                                    <th>Call Price</th>
-                                    <th>Expiration Date</th>
-                                    <th>Days To Expire</th>
-                                    <th>Required If Exercised</th>
-                                    <th>Break Even</th>
-                                    <th>Percentage(%)</th>
-                                    <th>Leverage Ratio</th>
-                                    <th>Cost Of 10 Calls</th>
-                                    <th>Income Per Day</th>
-                                    <th>Annualized premium</th>
-                                    <th>Rank</th>
-                                    <th>Date</th>
+                                    <th>Ticker {getSortIcon()}</th>
+                                    <th>Current Ticker Price {getSortIcon()}</th>
+                                    <th>Call Strike Price {getSortIcon()}</th>
+                                    <th>Call Price {getSortIcon()}</th>
+                                    <th>Expiration Date {getSortIcon()}</th>
+                                    <th>Days To Expire {getSortIcon()}</th>
+                                    <th>Required If Exercised {getSortIcon()}</th>
+                                    <th>Break Even {getSortIcon()}</th>
+                                    <th>Percentage(%) {getSortIcon()}</th>
+                                    <th>Leverage Ratio {getSortIcon()}</th>
+                                    <th>Cost Of 10 Calls {getSortIcon()}</th>
+                                    <th>Income Per Day {getSortIcon()}</th>
+                                    <th>Annualized premium {getSortIcon()}</th>
+                                    <th>Rank {getSortIcon()}</th>
+                                    <th>Date {getSortIcon()}</th>
                                     <th>Action</th>
 
                                 </tr>

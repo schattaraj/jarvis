@@ -106,7 +106,7 @@ export default function UploadPodcast() {
         let text = "Are you sure ?";
         Swal.fire({
             title: text,
-            icon:'warning',
+            icon: 'warning',
             showCancelButton: true,
             confirmButtonText: "Delete",
             customClass: { confirmButton: 'btn-danger', }
@@ -144,6 +144,9 @@ export default function UploadPodcast() {
         }
         setSortConfig({ key, direction });
     };
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
     useEffect(() => {
         async function run() {
             if (allPodcastData.length > 0) {
@@ -224,7 +227,16 @@ export default function UploadPodcast() {
                         </form>
                     </div>
                     <div className="d-flex justify-content-end">
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="table-responsive">
                         <table className="table">
@@ -245,9 +257,9 @@ export default function UploadPodcast() {
                                             <td>{item?.companyName}</td>
                                             <td>{item?.description}</td>
                                             <td>{item?.podCastDate && formatDate(item?.podCastDate)}</td>
-                                            <td>
-                                                <button className='btn btn-primary me-2' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
-                                                <button className='btn btn-danger' onClick={() => { deletePodcast(item?.idPodCast) }}><i className="mdi mdi-delete menu-icon"></i></button>
+                                            <td className='text-center'>
+                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
+                                                <button className='btn btn-danger px-4' onClick={() => { deletePodcast(item?.idPodCast) }}><i className="mdi mdi-delete menu-icon"></i></button>
                                             </td>
                                         </tr>
                                     })

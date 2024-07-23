@@ -88,17 +88,17 @@ export default function PemRule() {
                     </table>
                     <div className="text">
                         <h3>Simple Rules</h3>
-                        <textarea name="txtSimpleRule" id="txtSimpleRule" className="txtDropTarget" readonly="" cols="80" rows="4"></textarea>
+                        <textarea name="txtSimpleRule" id="txtSimpleRule" className="txtDropTarget" readOnly="" cols="80" rows="4"></textarea>
 
                     </div>
-                    <div class="row mt-3">
-                        <div class="col-md-4" style={{ marginLeft: "" }}>
+                    <div className="row mt-3">
+                        <div className="col-md-4" style={{ marginLeft: "" }}>
                             Rank : <input style={{ padding: "6px" }} type="text" id="rank" name="rank" />
                         </div>
-                        <div class="col-md-4">
-                            <button type="button" style={{ backgroundColor: "#357920", padding: "6px" }} class="btn btn-info btn-sm">Submit</button>
+                        <div className="col-md-4">
+                            <button type="button" style={{ backgroundColor: "#357920", padding: "6px" }} className="btn btn-info btn-sm">Submit</button>
                             &nbsp;&nbsp;
-                            <button type="button" style={{ backgroundColor: "#357920", padding: "6px" }} class="btn btn-info btn-sm">Reset</button>
+                            <button type="button" style={{ backgroundColor: "#357920", padding: "6px" }} className="btn btn-info btn-sm">Reset</button>
                         </div>
 
 
@@ -111,8 +111,7 @@ export default function PemRule() {
                     </div>
                 </div>
 
-            </div>
-            <Loader />
+            </div> 
         </>
     )
 }

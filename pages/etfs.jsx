@@ -20,6 +20,7 @@ import { generatePDF } from '../utils/utils';
 import BarChart from '../components/BarChart';
 import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
+import { Form } from 'react-bootstrap';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -285,6 +286,32 @@ export default function Etfs() {
         }
         setSortConfig({ key, direction });
     };
+    const uploadFile = async(e)=>{
+        e.preventDefault()
+        const form = e.target
+        if (form.checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        context.setLoaderState(true)
+        try {
+            const formData = new FormData(form);
+        const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileEveryThing", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: formData
+        })
+        const uploadRes = await upload.json()
+        if(upload.status == 400){
+        Swal.fire({title:uploadRes?.message,icon:"warning",confirmButtonColor:"var(--primary)"})
+        }
+        } catch (error) {
+         console.log("Error",error)   
+        }        
+        context.setLoaderState(false)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -336,6 +363,22 @@ export default function Etfs() {
                             </span>ETFs
                         </h3>
                     </div>
+                    <Form onSubmit={uploadFile}>
+                    <input type="hidden" name="metaDataName" value="Everything_List_New"/>
+                    <div className="row align-items-center">
+                        <div className="col-md-6">
+                        <div className="form-group">
+                                    <label htmlFor="">Upload File</label>
+                                    <input type="file" name="myfile" className='border-1 form-control' required />
+                                </div>
+                        </div>
+                        <div className="col-md-6">
+                                <div className="actions">
+                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                </div>
+                        </div>
+                    </div>
+                    </Form>
                     <div className="selection-area mb-3 d-flex align-items-center">
                         <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth:"200px", maxWidth: "300px" }} options={
 tickers && tickers.map((item, index) => (

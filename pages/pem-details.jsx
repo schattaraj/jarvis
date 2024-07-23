@@ -6,7 +6,9 @@ import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { calculateAverage, searchTable } from '../utils/utils';
+import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../utils/utils';
+import { Form } from 'react-bootstrap';
+import Swal from 'sweetalert2';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -16,6 +18,7 @@ export default function PemDetails() {
     const [filterData, setFilterData] = useState([])
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
 
     const fetchColumnNames = async () => {
         try {
@@ -33,6 +36,7 @@ export default function PemDetails() {
 
 
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM&_=1706681174128")
             const getBondsRes = await getBonds.json()
@@ -46,6 +50,7 @@ export default function PemDetails() {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
 
     const handleClick = (elm) => {
@@ -80,22 +85,73 @@ export default function PemDetails() {
     };
 
     const filter = (e) => {
-        console.log('search', e.target.value)
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
     }
-
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
+    const uploadFile = async (e)=>{
+        e.preventDefault()
+        const form = e.target
+        if (form.checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        context.setLoaderState(true)
+        try {
+            const formData = new FormData(form);
+        const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFilePEM", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: formData
+        })
+        const uploadRes = await upload.json()
+        if(upload.status == 400){
+        Swal.fire({title:uploadRes?.message,icon:"warning",confirmButtonColor:"var(--primary)"})
+        }
+        console.log("form",form,upload)
+        } catch (error) {
+         console.log("Error",error)   
+        }        
+        context.setLoaderState(false)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
-                // console.log("tableData",tableData)
-                const items = await SliceData(currentPage, limit, tableData);
-                // console.log("items",items)
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
                 setFilterData(items)
             }
         }
         run()
-    }, [currentPage, tableData])
+    }, [currentPage, tableData, sortConfig, limit])
 
     useEffect(() => {
         fetchColumnNames()
@@ -153,19 +209,45 @@ export default function PemDetails() {
                             </span>PEM Details
                         </h3>
                     </div>
-                    <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
-                            {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
+                    <div className="selection-area mb-3">
+                        <Form onSubmit={uploadFile} encType="multipart/form-data">
+                        <input type="hidden" name="metaDataName" value="PEM"/>
+                        <div className="row align-items-center">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="uploadFile">Upload File</label>
+                                    <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="actions">
+                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                </div></div>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        </Form>
+                    </div>
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
-                                        <th key={index}>{columnName.elementDisplayName}</th>
+                                        <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -212,7 +294,6 @@ export default function PemDetails() {
                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
-            <Loader />
         </>
     )
 }

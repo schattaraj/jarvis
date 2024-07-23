@@ -22,7 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import { Context } from '../contexts/Context';
-function EtfHistoryModal({ open, handleClose }) {
+function BondReportHistoryModal({ open, handleClose }) {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
@@ -32,7 +32,7 @@ function EtfHistoryModal({ open, handleClose }) {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch('https://jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127');
+            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+'findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567');
             const result = await response.json();
             setData(result);
         } catch (error) {
@@ -100,7 +100,7 @@ function EtfHistoryModal({ open, handleClose }) {
                 }}
             >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 2 }}>
-                    <Typography variant="h6">History - Everything List</Typography>
+                    <Typography variant="h6">Import History - Debt Report Matrices</Typography>
                     <IconButton onClick={handleClose}>
                         <CloseIcon />
                     </IconButton>
@@ -144,7 +144,6 @@ function EtfHistoryModal({ open, handleClose }) {
                     <DialogActions>
                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="delete" onClick={() => console.log('Compare clicked')}><span>Compare</span></button>
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Box>
@@ -165,4 +164,4 @@ function EtfHistoryModal({ open, handleClose }) {
   )
 }
 
-export default EtfHistoryModal
+export default BondReportHistoryModal

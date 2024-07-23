@@ -84,7 +84,6 @@ export default function AddTicker() {
                             </form>
                         </div>
                     </div>
-            <Loader/>
         </>
     )
 }
