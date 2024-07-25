@@ -209,7 +209,7 @@ export default function Calls() {
                             </div>
                         </div>
                     </div>
-                    <div className='d-flex justify-content-between'>
+                    <div className='d-flex justify-content-between mb-3'>
                         <input type="text" className="form-control me-2" placeholder='Call Strike Price' />
                         <input type="text" className="form-control me-2" placeholder='Call Price' />
                         {/* <input type="date" className="form-control me-2" placeholder='Expiration Date'/> */}
@@ -232,7 +232,16 @@ export default function Calls() {
                     </div>
                     {
                         meanCalls &&
-                        <div className="table-responsive mt-4">
+                        <div className=' my-4'>
+                        <span>Mean View : </span> <select name="selectColumn" className='form-select'>
+                            <option value="callPrice">Call Price</option>
+                            <option value="currentTickerPrice">Current Ticker Price</option>
+                            <option value="callStrikePrice">Call Strike Price</option>
+                            <option value="requiredIncrease">Required If Exercised</option>
+                            <option value="percentage">Required If Exercised</option>
+                        </select>
+                        <button className='btn btn-primary'>Go</button>
+                        <div className="table-responsive mt-2">
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -251,6 +260,7 @@ export default function Calls() {
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
                         </div>
                     }
                     <div className='d-flex justify-content-between align-items-center'>

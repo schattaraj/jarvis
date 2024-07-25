@@ -1040,6 +1040,20 @@ input[type="range"] {
     /* or whatever your table background color is */
     z-index: 1;
 
+   
+    /* Adjust the z-index as needed */
+    @media (max-width:575px) {
+        button {
+            padding: 10px 12px !important;
+            width: fit-content;
+
+            i {
+                font-size: 16px;
+            }
+        }
+    }
+}
+table td{
     .btn {
         padding: 10px 12px !important;
     }
@@ -1056,19 +1070,7 @@ input[type="range"] {
             color: #cd3434;
         }
     }
-    /* Adjust the z-index as needed */
-    @media (max-width:575px) {
-        button {
-            padding: 10px 12px !important;
-            width: fit-content;
-
-            i {
-                font-size: 16px;
-            }
-        }
-    }
 }
-
 .sticky-left {
     @media (min-width:576px) {
         position: sticky;
