@@ -1,9 +1,9 @@
 import{ useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import { formatDate } from '../utils/utils';
+import { convertToReadableString, formatDate } from '../utils/utils';
 
-const CallChart = ({data,title}) => {
+const CallChart = ({data,view,title}) => {
   const [chartOptions, setChartOptions] = useState(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const CallChart = ({data,title}) => {
         tooltip: {
           formatter: function () {
             const point = this.point;
-            return `<b>${point.category}</b><br/>Call Price: ${point.y}<br/>Expiration Date: ${data[point.index].expirationDate}`;
+            return `<b>${point.category}</b><br/>${convertToReadableString(view)}: ${point.y}<br/>Expiration Date: ${data[point.index].expirationDate}`;
           },
         },
         plotOptions: {
@@ -74,13 +74,13 @@ const CallChart = ({data,title}) => {
         series: [{
           type: 'area',
           name: title,
-          data:  data.map((item)=>parseFloat(item?.callPrice))
+          data:  data.map((item)=>parseFloat(item?.[view]))
         }]
       });
     };
 
     fetchData();
-  }, [data]);
+  }, [data,view]);
 
   if (!chartOptions) return <div>Loading...</div>;
 

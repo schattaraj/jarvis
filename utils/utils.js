@@ -135,3 +135,9 @@ export const getSortIcon = (columnName,sortConfig) => {
     }
     return null;
 };
+
+export const convertToReadableString = (str)=> {
+    return str
+      .replace(/([A-Z])/g, ' $1') // Add a space before each uppercase letter
+      .replace(/^./, (char) => char.toUpperCase()); // Capitalize the first letter
+  }
