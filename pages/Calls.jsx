@@ -9,86 +9,27 @@ import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../utils/staticData'
 import Select from 'react-select'
 import { exportToExcel, generatePDF, getSortIcon } from '../utils/utils';
+import SliceData from '../components/SliceData';
+import CallChart from '../components/CallChart';
+import Swal from 'sweetalert2';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);
-    const [dates, setDates] = useState([
-        "2023-10-10",
-        "2023-08-16",
-        "2023-05-31",
-        "2023-05-22",
-        "2023-02-15",
-        "2022-09-29",
-        "2022-04-28",
-        "2022-02-01",
-        "2021-10-25",
-        "2021-01-08",
-        "2020-04-17",
-        "2020-04-09",
-        "2020-03-24",
-        "2020-02-20",
-        "2020-02-07",
-        "2020-01-16",
-        "2019-12-30",
-        "2019-12-16",
-        "2019-11-26",
-        "2019-11-12",
-        "2019-10-31",
-        "2019-10-14",
-        "2019-10-01",
-        "2019-09-30",
-        "2019-09-16",
-        "2019-09-11",
-        "2019-08-20",
-        "2019-08-19",
-        "2019-07-31",
-        "2019-07-24",
-        "2019-07-23",
-        "2019-07-22",
-        "2019-07-19",
-        "2019-07-15",
-        "2019-07-10",
-        "2019-06-26",
-        "2019-06-11",
-        "2019-05-29",
-        "2019-05-24",
-        "2019-05-21",
-        "2019-05-13",
-        "2019-05-01",
-        "2019-04-15",
-        "2019-04-05",
-        "2019-04-01",
-        "2019-03-26",
-        "2019-01-02",
-        "2018-12-13",
-        "2018-12-06",
-        "2018-11-21",
-        "2018-11-15",
-        "2018-11-07",
-        "2018-10-25",
-        "2018-10-23",
-        "2018-10-12",
-        "2018-09-27",
-        "2018-09-12",
-        "2018-08-22",
-        "2018-08-10",
-        "2018-08-09",
-        "2018-07-27",
-        "2018-07-06",
-        "2017-02-15",
-        "2016-12-15",
-        "2016-12-08",
-        "2016-06-26",
-        null
-    ])
+    const [dates, setDates] = useState([])
     const [selectedOption, setSelectedOption] = useState('');
     const [expirationDate, setExpiration] = useState();
     const [addToDate, setAddToDate] = useState();
     const [meanCalls, setMeanCalls] = useState(false)
     const [selectedTicker, setSelectedTicker] = useState('A')
-    const [selectedDate, setSelectedDate] = useState('2023-10-10')
+    const [selectedDate, setSelectedDate] = useState("")
     const [tableData, setTableData] = useState([])
+    const [filterData, setFilterData] = useState([])
     const [limit, setLimit] = useState(25)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
+    const [chartView, setChartView] = useState(false)
+    const [chartData, setChartData] = useState(false)
+    const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
@@ -118,13 +59,16 @@ export default function Calls() {
         }
     }
     const fetchByDateFunc = async () => {
+        context.setLoaderState(true)
+        let date = selectedDate ? selectedDate : ""
         try {
-            const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date=" + selectedDate)
+            const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date=" + date)
             const fetchByDateRes = await fetchByDate.json()
             setTableData(fetchByDateRes)
         }
         catch (e) {
         }
+        context.setLoaderState(false)
     }
     const handleChange = (e) => {
         console.log("Ticker", e.target.value)
@@ -155,9 +99,58 @@ export default function Calls() {
             }
         }
     }
+    const handleSort = (key) => {
+        console.log("KEY", key)
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+    const findCallDataByDate = async () => {
+        if(!selectedDate){
+            Swal.fire({title:"Please select date",icon:"warning"})
+        }
+        if (selectedDate) {
+            context.setLoaderState(true)
+            try {
+                const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedDate + "&_=1721911430743")
+                const fetchDataRes = await fetchData.json()
+                setChartData(fetchDataRes)
+            } catch (error) {
+
+            }
+            setChartView(true)
+            context.setLoaderState(false)
+        }
+    }
     useEffect(() => {
-        // fetchTickersFunc()
-        // fetchDates()
+        if (tableData.length > 0) {
+            let items = [...tableData];
+            if (sortConfig !== null) {
+                items.sort((a, b) => {
+                    if (a[sortConfig.key] < b[sortConfig.key]) {
+                        return sortConfig.direction === 'asc' ? -1 : 1;
+                    }
+                    if (a[sortConfig.key] > b[sortConfig.key]) {
+                        return sortConfig.direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+            }
+            let dataLimit = limit
+            let page = currentPage
+            if (dataLimit == "all") {
+                dataLimit = tableData?.length
+                page = 1
+            }
+            items = SliceData(page, dataLimit, items);
+            setFilterData(items)
+        }
+    }, [tableData, sortConfig, limit])
+    useEffect(() => {
+        fetchTickersFunc()
+        fetchDates()
     }, [])
     return (
         <>
@@ -176,6 +169,7 @@ export default function Calls() {
                                 <div className="form-group">
                                     <label htmlFor="">Select Ticker</label>
                                     <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                        <option value="">--Select Ticker--</option>
                                         {tickers.map((item, index) => (
                                             <option key={index} value={item.element1}>
                                                 {item.element1}
@@ -194,6 +188,7 @@ export default function Calls() {
                                 <div className="form-group">
                                     <label htmlFor="">Select Date</label>
                                     <select name="portfolio_name" className='form-select' onChange={changeDate}>
+                                        <option value="">--Select Date--</option>
                                         {dates.map((option, index) => (
                                             <option key={index} value={option}>
                                                 {option}
@@ -209,7 +204,7 @@ export default function Calls() {
                             </div>
                         </div>
                     </div>
-                    <div className='d-flex justify-content-between mb-3'>
+                    <div className='d-flex justify-content-between mb-4'>
                         <input type="text" className="form-control me-2" placeholder='Call Strike Price' />
                         <input type="text" className="form-control me-2" placeholder='Call Price' />
                         {/* <input type="date" className="form-control me-2" placeholder='Expiration Date'/> */}
@@ -233,40 +228,44 @@ export default function Calls() {
                     {
                         meanCalls &&
                         <div className=' my-4'>
-                        <span>Mean View : </span> <select name="selectColumn" className='form-select'>
-                            <option value="callPrice">Call Price</option>
-                            <option value="currentTickerPrice">Current Ticker Price</option>
-                            <option value="callStrikePrice">Call Strike Price</option>
-                            <option value="requiredIncrease">Required If Exercised</option>
-                            <option value="percentage">Required If Exercised</option>
-                        </select>
-                        <button className='btn btn-primary'>Go</button>
-                        <div className="table-responsive mt-2">
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Ticker</th>
-                                        <th>Maximum Value</th>
-                                        <th>Mean Value</th>
-                                        <th>Minimum Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{meanCalls?.tickerName}</td>
-                                        <td>{meanCalls?.maxValue}</td>
-                                        <td>{meanCalls?.minValue}</td>
-                                        <td>{meanCalls?.meanValue}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                            <div className="d-flex align-items-center">
+                                <span className='me-2'>Mean View : </span> <select name="selectColumn" className='form-select me-2' style={{ maxWidth: "300px" }}>
+                                    <option value="callPrice">Call Price</option>
+                                    <option value="currentTickerPrice">Current Ticker Price</option>
+                                    <option value="callStrikePrice">Call Strike Price</option>
+                                    <option value="requiredIncrease">Required If Exercised</option>
+                                    <option value="percentage">Required If Exercised</option>
+                                </select>
+                                <button className='btn btn-primary'>Go</button>
+                            </div>
+                            <div className="table-responsive mt-2">
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ticker</th>
+                                            <th>Maximum Value</th>
+                                            <th>Mean Value</th>
+                                            <th>Minimum Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{meanCalls?.tickerName}</td>
+                                            <td>{meanCalls?.maxValue}</td>
+                                            <td>{meanCalls?.minValue}</td>
+                                            <td>{meanCalls?.meanValue}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     }
                     <div className='d-flex justify-content-between align-items-center'>
                         <div className="dt-buttons mb-3">
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={findCallDataByDate}><span>Chart View</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { setChartView(false) }}><span>Grid View</span></button>
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -279,32 +278,35 @@ export default function Calls() {
                             </select>
                         </div>
                     </div>
-                    <div className="table-responsive mt-4">
+                    {
+                        !chartView 
+                        ?
+                        <div className="table-responsive">
                         <table id="example" className="table display">
                             <thead>
                                 <tr>
-                                    <th>Ticker {getSortIcon()}</th>
-                                    <th>Current Ticker Price {getSortIcon()}</th>
-                                    <th>Call Strike Price {getSortIcon()}</th>
-                                    <th>Call Price {getSortIcon()}</th>
-                                    <th>Expiration Date {getSortIcon()}</th>
-                                    <th>Days To Expire {getSortIcon()}</th>
-                                    <th>Required If Exercised {getSortIcon()}</th>
-                                    <th>Break Even {getSortIcon()}</th>
-                                    <th>Percentage(%) {getSortIcon()}</th>
-                                    <th>Leverage Ratio {getSortIcon()}</th>
-                                    <th>Cost Of 10 Calls {getSortIcon()}</th>
-                                    <th>Income Per Day {getSortIcon()}</th>
-                                    <th>Annualized premium {getSortIcon()}</th>
-                                    <th>Rank {getSortIcon()}</th>
-                                    <th>Date {getSortIcon()}</th>
+                                    <th onClick={() => { handleSort("stockNameTicker") }}>Ticker {getSortIcon("stockNameTicker", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("stockPrice") }}>Current Ticker Price {getSortIcon("stockPrice", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("strikePrice") }}>Call Strike Price {getSortIcon("strikePrice", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("callPrice") }}>Call Price {getSortIcon("callPrice", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("expirationDate") }}>Expiration Date {getSortIcon("expirationDate", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("daysExpiration") }}>Days To Expire {getSortIcon("daysExpiration", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("reqIncrease") }}>Required If Exercised {getSortIcon("reqIncrease", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("breakEven") }}>Break Even {getSortIcon("breakEven", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("percentage") }}>Percentage(%) {getSortIcon("percentage", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("leverageRatio") }}>Leverage Ratio {getSortIcon("leverageRatio", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("costofTenCalls") }}>Cost Of 10 Calls {getSortIcon("costofTenCalls", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("incomePerDay") }}>Income Per Day {getSortIcon("incomePerDay", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("annualPremium") }}>Annualized premium {getSortIcon("annualPremium", sortConfig)}</th>
+                                    <th onClick={() => { handleSort("rank") }}>Rank {getSortIcon("rank", sortConfig)}</th>
+                                    <th>Date</th>
                                     <th>Action</th>
 
                                 </tr>
                             </thead>
                             <tbody>
                                 {
-                                    tableData.map((item, index) => {
+                                    filterData.map((item, index) => {
                                         return (
                                             <tr key={index + 'tr'}>
                                                 <td>{
@@ -335,6 +337,10 @@ export default function Calls() {
                             </tbody>
                         </table>
                     </div>
+                    :
+                    chartData && <CallChart data={chartData} title={"Date Wise Price"}/>
+                    }
+                    
                 </div>
             </div>
         </>

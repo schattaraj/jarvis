@@ -270,7 +270,7 @@ export default function UploadTickerReports() {
                                             <td>{item?.catagoryType}</td>
                                             <td>{formatDate(item?.reportDate)}</td>
                                             <td className='sticky-action'>
-                                                <button className='px-4 btn btn-primary' onClick={() => { downloadReport(item?.reportfileDetails) }}><i className="mdi mdi-download"></i></button>
+                                                <button className='px-4 btn btn-primary' onClick={() => { downloadReport(item?.reportfileDetails) }} title='Download'><i className="mdi mdi-download"></i></button>
                                                 <button className='px-4 ms-2 btn btn-danger' title='delete' onClick={() => { deleteTickerReport(item?.idTickerReports) }}><i className="mdi mdi-delete"></i></button>
                                             </td>
                                         </tr>

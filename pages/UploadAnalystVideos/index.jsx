@@ -280,8 +280,8 @@ export default function UploadAnalystVideos() {
                                             <td>{item?.description}</td>
                                             <td>{item?.reportDate && formatDate(item?.reportDate)}</td>
                                             <td className='text-center'>
-                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
-                                                <button className='btn btn-danger px-4' onClick={() => { deleteAnalystVideo(item?.idAnaylstVideo) }}><i className="mdi mdi-delete menu-icon"></i></button>
+                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }} title='show'><i className="mdi mdi-video menu-icon"></i></button>
+                                                <button className='btn btn-danger px-4' onClick={() => { deleteAnalystVideo(item?.idAnaylstVideo) }} title='delete'><i className="mdi mdi-delete menu-icon"></i></button>
                                             </td>
                                         </tr>
                                     })

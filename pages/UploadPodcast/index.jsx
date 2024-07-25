@@ -258,8 +258,8 @@ export default function UploadPodcast() {
                                             <td>{item?.description}</td>
                                             <td>{item?.podCastDate && formatDate(item?.podCastDate)}</td>
                                             <td className='text-center'>
-                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }}><i className="mdi mdi-video menu-icon"></i></button>
-                                                <button className='btn btn-danger px-4' onClick={() => { deletePodcast(item?.idPodCast) }}><i className="mdi mdi-delete menu-icon"></i></button>
+                                                <button className='btn btn-primary me-2 px-4' onClick={() => { handleShow(item?.anaylstVideoDetails) }} title="Video"><i className="mdi mdi-video menu-icon"></i></button>
+                                                <button className='btn btn-danger px-4' onClick={() => { deletePodcast(item?.idPodCast) }} title='delete'><i className="mdi mdi-delete menu-icon"></i></button>
                                             </td>
                                         </tr>
                                     })
