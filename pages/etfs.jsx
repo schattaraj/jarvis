@@ -10,7 +10,7 @@ import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { Line,Bar } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import Select from 'react-select'
 import { utils } from 'xlsx';
@@ -20,7 +20,8 @@ import { generatePDF } from '../utils/utils';
 import BarChart from '../components/BarChart';
 import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
-import { Form } from 'react-bootstrap';
+import { Form, Modal } from 'react-bootstrap';
+import { Filter, Filter1, Filter1Outlined, Filter1TwoTone, Filter3, FilterAlt } from '@mui/icons-material';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -97,8 +98,10 @@ export default function Etfs() {
     })
     const [rankingData, setRankingData] = useState(false)
     const [chartData, setChartData] = useState([])
+    const [dateRange, setDateRange] = useState({ startDate: "2023", endDate: "2023" })
     const [selectedView, setSelectedView] = useState('element7')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+    const [dateModal, setDateModal] = useState(false)
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -199,7 +202,7 @@ export default function Etfs() {
         }
     };
     const handleSelect = (inputs) => {
-        let arr = inputs.map((item)=>item.value)
+        let arr = inputs.map((item) => item.value)
         setSelectedTicker(arr.join(","))
     }
     const fetchTickersFunc = async () => {
@@ -216,12 +219,13 @@ export default function Etfs() {
     }
     const charts = async () => {
         if (!selectedTicker) {
-            Swal.fire({title:"Please Select a ticker",confirmButtonColor:"#719B5F"});
+            Swal.fire({ title: "Please Select a ticker", confirmButtonColor: "#719B5F" });
             return;
         }
+        setDateModal(false)
         context.setLoaderState(true)
         try {
-            const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + "&year=2023&year2=2023&_=1718886601497")
+            const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + `&year=${dateRange?.startDate}&year2=${dateRange?.endDate}&_=1718886601497`)
             const getChartHistroryRes = await getChartHistrory.json()
             setChartHistory(getChartHistroryRes)
             setChartView(true)
@@ -238,29 +242,29 @@ export default function Etfs() {
     const data = {
         labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
         datasets: [
-          {
-            label: ViewOptions[selectedView],
-            data: chartData,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)',
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)',
-            ],
-            borderWidth: 1,
-          },
+            {
+                label: ViewOptions[selectedView],
+                data: chartData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                ],
+                borderWidth: 1,
+            },
         ],
-      };
+    };
     const handleChange = (e) => {
         setSelectedView(e.target.value)
     }
@@ -286,7 +290,7 @@ export default function Etfs() {
         }
         setSortConfig({ key, direction });
     };
-    const uploadFile = async(e)=>{
+    const uploadFile = async (e) => {
         e.preventDefault()
         const form = e.target
         if (form.checkValidity() === false) {
@@ -296,21 +300,24 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-        const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileEveryThing", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: formData
-        })
-        const uploadRes = await upload.json()
-        if(upload.status == 400){
-        Swal.fire({title:uploadRes?.message,icon:"warning",confirmButtonColor:"var(--primary)"})
-        }
+            const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileEveryThing", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: formData
+            })
+            const uploadRes = await upload.json()
+            if (upload.status == 400) {
+                Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
+            }
         } catch (error) {
-         console.log("Error",error)   
-        }        
+            console.log("Error", error)
+        }
         context.setLoaderState(false)
+    }
+    const handleDateRange = (e) => {
+        setDateRange({...dateRange,[e.target.name]:[e.target.value]})
     }
     useEffect(() => {
         async function run() {
@@ -339,7 +346,7 @@ export default function Etfs() {
             }
         }
         run()
-    }, [currentPage, tableData,limit,sortConfig])
+    }, [currentPage, tableData, limit, sortConfig])
     useEffect(() => {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
@@ -364,27 +371,27 @@ export default function Etfs() {
                         </h3>
                     </div>
                     <Form onSubmit={uploadFile}>
-                    <input type="hidden" name="metaDataName" value="Everything_List_New"/>
-                    <div className="row align-items-center">
-                        <div className="col-md-6">
-                        <div className="form-group">
+                        <input type="hidden" name="metaDataName" value="Everything_List_New" />
+                        <div className="row align-items-center">
+                            <div className="col-md-6">
+                                <div className="form-group">
                                     <label htmlFor="">Upload File</label>
                                     <input type="file" name="myfile" className='border-1 form-control' required />
                                 </div>
-                        </div>
-                        <div className="col-md-6">
+                            </div>
+                            <div className="col-md-6">
                                 <div className="actions">
                                     <button className='btn btn-primary mb-0' type='submit'>Upload</button>
                                 </div>
+                            </div>
                         </div>
-                    </div>
                     </Form>
                     <div className="selection-area mb-3 d-flex align-items-center">
-                        <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth:"200px", maxWidth: "300px" }} options={
-tickers && tickers.map((item, index) => (
-     {value:item.element1,label:item.element1} 
-))
-} />
+                        <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                            tickers && tickers.map((item, index) => (
+                                { value: item.element1, label: item.element1 }
+                            ))
+                        } />
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && !rankingData && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && rankingData && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
@@ -393,22 +400,22 @@ tickers && tickers.map((item, index) => (
                     {
                         !chartView && !rankingData &&
                         <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            <div className="dt-buttons mb-3">
+                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            </div>
+                            {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                                <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="all">All</option>
+                                </select>
+                            </div>}
                         </div>
-                        {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
-                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="all">All</option>
-                            </select>
-                        </div>}
-                    </div>
-                    }                    
+                    }
                     {
                         chartView ?
                             <>
@@ -424,10 +431,14 @@ tickers && tickers.map((item, index) => (
                                         }
                                     </select>
                                     <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
+                                    <div className="d-flex align-items-center mx-2">
+                                        <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
+                                        <button className='ms-2 btn p-0 text-primary' onClick={()=>{setDateModal(true)}}><FilterAlt /></button>
+                                    </div>
                                 </div>
                                 {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
                                 {/* <BarChart data={data} /> */}
-                                <HightChart data={chartHistory?.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]}/>
+                                <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />
                             </>
                             :
                             rankingData
@@ -445,7 +456,7 @@ tickers && tickers.map((item, index) => (
                                             </thead>
                                             <tbody>
                                                 {rankingData?.bestFiveStocks.map((item, index) => {
-                                                    return <tr key={"best"+index}>
+                                                    return <tr key={"best" + index}>
                                                         {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
                                                             <td key={item[columnName] + index}>{item[columnName]}</td>
                                                         ))}
@@ -466,7 +477,7 @@ tickers && tickers.map((item, index) => (
                                             </thead>
                                             <tbody>
                                                 {rankingData?.worstFiveStocks.map((item, index) => {
-                                                    return <tr key={"worst"+index}>
+                                                    return <tr key={"worst" + index}>
                                                         {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
                                                             <td key={item[columnName] + index}>{item[columnName]}</td>
                                                         ))}
@@ -483,7 +494,7 @@ tickers && tickers.map((item, index) => (
                                             <thead>
                                                 <tr>
                                                     {columnNames.map((columnName, index) => (
-                                                        <th key={index}  onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName,sortConfig)}</th>
+                                                        <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
@@ -519,6 +530,52 @@ tickers && tickers.map((item, index) => (
 
                 </div>
             </div>
+            <Modal show={dateModal} onHide={() => { setDateModal(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Filter Chart</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="row">
+                        <div className="col-md-6">
+                    <div className="form-group">
+                        <label htmlFor="startDate">Start Date</label>
+                        <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023" selected="">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                        </select>
+                    </div>
+                    </div>
+                    <div className="col-md-6">
+                    <div className="form-group">
+                        <label htmlFor="endDate">End Date</label>
+                        <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023" selected="">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                        </select>
+                        </div>
+                    </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button className="btn btn-primary" onClick={charts}>Apply</button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

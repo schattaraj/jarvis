@@ -58,7 +58,9 @@ i {
 .bg-orange {
     background-color: #E8675F;
 }
-
+.text-primary{
+    color: var(--primary) !important;
+}
 .bg-seagreen {
     background-color: #43B2B5;
 }

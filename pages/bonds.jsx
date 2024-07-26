@@ -313,7 +313,7 @@ export default function Bonds() {
                                             <TextField
                                                 {...params}
                                                 variant="outlined"
-                                                label="Select Stocks"
+                                                label="Select Bond"
                                             />
                                         )}
                                     />
