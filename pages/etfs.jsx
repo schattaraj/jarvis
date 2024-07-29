@@ -98,7 +98,7 @@ export default function Etfs() {
     })
     const [rankingData, setRankingData] = useState(false)
     const [chartData, setChartData] = useState([])
-    const [dateRange, setDateRange] = useState({ startDate: "2023", endDate: "2023" })
+    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023})
     const [selectedView, setSelectedView] = useState('element7')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const [dateModal, setDateModal] = useState(false)
@@ -317,7 +317,7 @@ export default function Etfs() {
         context.setLoaderState(false)
     }
     const handleDateRange = (e) => {
-        setDateRange({...dateRange,[e.target.name]:[e.target.value]})
+        setDateRange({...dateRange,[e.target.name]:Number(e.target.value)})
     }
     useEffect(() => {
         async function run() {
@@ -433,12 +433,12 @@ export default function Etfs() {
                                     <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
                                     <div className="d-flex align-items-center mx-2">
                                         <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
-                                        <button className='ms-2 btn p-0 text-primary' onClick={()=>{setDateModal(true)}}><FilterAlt /></button>
+                                        <button className='ms-2 btn p-0 text-primary' onClick={()=>{setDateModal(true)}} type='button'><FilterAlt /></button>
                                     </div>
                                 </div>
                                 {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
                                 {/* <BarChart data={data} /> */}
-                                <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />
+                              {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />}
                             </>
                             :
                             rankingData
@@ -542,7 +542,7 @@ export default function Etfs() {
                         <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
                             <option value="2025">2025</option>
                             <option value="2024">2024</option>
-                            <option value="2023" selected="">2023</option>
+                            <option value="2023">2023</option>
                             <option value="2022">2022</option>
                             <option value="2021">2021</option>
                             <option value="2020">2020</option>
@@ -559,7 +559,7 @@ export default function Etfs() {
                         <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
                             <option value="2025">2025</option>
                             <option value="2024">2024</option>
-                            <option value="2023" selected="">2023</option>
+                            <option value="2023">2023</option>
                             <option value="2022">2022</option>
                             <option value="2021">2021</option>
                             <option value="2020">2020</option>

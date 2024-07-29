@@ -141,3 +141,7 @@ export const convertToReadableString = (str)=> {
       .replace(/([A-Z])/g, ' $1') // Add a space before each uppercase letter
       .replace(/^./, (char) => char.toUpperCase()); // Capitalize the first letter
   }
+
+export const roundToTwoDecimals = (number)=> {
+    return Math.round(number * 100) / 100;
+}

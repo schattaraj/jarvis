@@ -8,11 +8,6 @@ const HightChart = ({data,title}) => {
 
   useEffect(() => {
     const fetchData = async () => {
-    //   const response = await fetch(
-    //     'https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=AGG&year=2023&year2=2023&_=1718886601497'
-    //   );
-    //   const data = await response.json();
-        console.log("data",JSON.stringify(data.map((item)=>[parseFloat(item['element7']),formatDate(item['lastUpdatedAt'])])))
       setChartOptions({
         chart: {
           zooming: {

@@ -72,6 +72,9 @@ i {
 .main-panel .dropdown .dropdown-menu .dropdown-item:hover {
     color: #000;
 }
+.react-datepicker-popper{
+    z-index: 4 !important;
+}
 
 .stretch-card .video {
     position: relative;

@@ -8,10 +8,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../utils/staticData'
 import Select from 'react-select'
-import { convertToReadableString, exportToExcel, generatePDF, getSortIcon } from '../utils/utils';
+import { convertToReadableString, exportToExcel, generatePDF, getSortIcon, roundToTwoDecimals } from '../utils/utils';
 import SliceData from '../components/SliceData';
 import CallChart from '../components/CallChart';
 import Swal from 'sweetalert2';
+import { Pagination } from '../components/Pagination';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);
@@ -20,7 +21,7 @@ export default function Calls() {
     const [expirationDate, setExpiration] = useState();
     const [addToDate, setAddToDate] = useState();
     const [meanCalls, setMeanCalls] = useState(false)
-    const [selectedTicker, setSelectedTicker] = useState('A')
+    const [selectedTicker, setSelectedTicker] = useState('')
     const [selectedDate, setSelectedDate] = useState("")
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
@@ -30,6 +31,7 @@ export default function Calls() {
     const [chartView, setChartView] = useState(false)
     const [chartData, setChartData] = useState(false)
     const [viewBy, setViewBy] = useState("callPrice")
+    const [meanColumn,setMeanColumn] = useState("callPrice")
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
@@ -53,13 +55,15 @@ export default function Calls() {
         context.setLoaderState(false)
     }
     const fetchHistoryFuc = async () => {
+        context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCallsByTickerName?tickername=" + selectedTicker)
+            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
             const fetchHistoryRes = await fetchHistory.json()
             setMeanCalls(fetchHistoryRes)
         }
         catch (e) {
         }
+        context.setLoaderState(false)
     }
     const fetchByDateFunc = async () => {
         context.setLoaderState(true)
@@ -129,6 +133,22 @@ export default function Calls() {
     }
     const handleChart = (e) => {
         setViewBy(e.target.value)
+    }
+    const handlePage = async (action) => {
+        switch (action) {
+            case 'prev':
+                setCurrentPage(currentPage - 1)
+                break;
+            case 'next':
+                setCurrentPage(currentPage + 1)
+                break;
+            default:
+                setCurrentPage(currentPage)
+                break;
+        }
+    };
+    const handleMeanColumn = (e)=>{
+        setMeanColumn(e.target.value)
     }
     useEffect(() => {
         if (tableData.length > 0) {
@@ -235,14 +255,14 @@ export default function Calls() {
                         meanCalls &&
                         <div className=' my-4'>
                             <div className="d-flex align-items-center">
-                                <span className='me-2'>Mean View : </span> <select name="selectColumn" className='form-select me-2' style={{ maxWidth: "300px" }}>
+                                <span className='me-2'>Mean View : </span> <select name="selectColumn" className='form-select me-2' style={{ maxWidth: "300px" }} value={meanColumn} onChange={handleMeanColumn}>
                                     <option value="callPrice">Call Price</option>
                                     <option value="currentTickerPrice">Current Ticker Price</option>
                                     <option value="callStrikePrice">Call Strike Price</option>
                                     <option value="requiredIncrease">Required If Exercised</option>
                                     <option value="percentage">Required If Exercised</option>
                                 </select>
-                                <button className='btn btn-primary'>Go</button>
+                                <button className='btn btn-primary' onClick={fetchHistoryFuc}>Go</button>
                             </div>
                             <div className="table-responsive mt-2">
                                 <table className="table">
@@ -257,9 +277,9 @@ export default function Calls() {
                                     <tbody>
                                         <tr>
                                             <td>{meanCalls?.tickerName}</td>
-                                            <td>{meanCalls?.maxValue}</td>
-                                            <td>{meanCalls?.minValue}</td>
-                                            <td>{meanCalls?.meanValue}</td>
+                                            <td>{roundToTwoDecimals(meanCalls?.maxValue)}</td>
+                                            <td>{roundToTwoDecimals(meanCalls?.meanValue)}</td>
+                                            <td>{roundToTwoDecimals(meanCalls?.minValue)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -295,6 +315,7 @@ export default function Calls() {
                     {
                         !chartView
                             ?
+                            <>
                             <div className="table-responsive">
                                 <table id="example" className="table display">
                                     <thead>
@@ -351,6 +372,8 @@ export default function Calls() {
                                     </tbody>
                                 </table>
                             </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                            </>
                             :
                             chartData &&
                             <><div className="form-group d-flex align-items-center">
