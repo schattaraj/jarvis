@@ -980,13 +980,13 @@ export default function BusinessPipeline() {
                     <Modal.Title>Analysis</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <PieChart data={{
+                    {/* <PieChart data={{
                         labels: Array.isArray(analysisData) && analysisData?.map((item) => item?.name),
                         values: Array.isArray(analysisData) && analysisData?.map((item) => item?.y)
-                    }} />
+                    }} /> */}
+                   {analysisData && <PieChart data={analysisData?.map((item)=>({name:item?.name,y:item?.y}))} />}
                 </Modal.Body>
             </Modal>
-            <Loader />
         </>
     )
 }

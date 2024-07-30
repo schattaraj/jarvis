@@ -22,6 +22,7 @@ import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
 import { Form, Modal } from 'react-bootstrap';
 import { Filter, Filter1, Filter1Outlined, Filter1TwoTone, Filter3, FilterAlt } from '@mui/icons-material';
+import { TablePagination } from '@mui/material';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -98,10 +99,12 @@ export default function Etfs() {
     })
     const [rankingData, setRankingData] = useState(false)
     const [chartData, setChartData] = useState([])
-    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023})
+    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023 })
     const [selectedView, setSelectedView] = useState('element7')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const [dateModal, setDateModal] = useState(false)
+    const [bestStocksFiltered,setBestStocksFiltered] = useState([])
+    const [worstStocksFiltered,setWorstStocksFiltered] = useState([])
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -146,6 +149,26 @@ export default function Etfs() {
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
+
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+        context.setLoaderState(false)
+    }
+    const getHistoryByTicker = async () => {
+        if (!selectedTicker) {
+            Swal.fire({ title: "Please Select a ticker", confirmButtonColor: "#719B5F" });
+            return;
+        }
+        context.setLoaderState(true)
+        try {
+            const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`)
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
+            setChartView(false)
+            setRankingData(false)
 
         }
         catch (e) {
@@ -317,7 +340,15 @@ export default function Etfs() {
         context.setLoaderState(false)
     }
     const handleDateRange = (e) => {
-        setDateRange({...dateRange,[e.target.name]:Number(e.target.value)})
+        setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) })
+    }
+    const searchBestStocks = (e)=>{
+        const value = e.target.value;
+        setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value))
+    }
+    const searchWorstStocks = (e)=>{
+        const value = e.target.value;
+        setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value))
     }
     useEffect(() => {
         async function run() {
@@ -351,6 +382,14 @@ export default function Etfs() {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
     }, [chartHistory, selectedView])
+    useEffect(()=>{
+        if(rankingData?.bestFiveStocks?.length > 0){
+            setBestStocksFiltered(rankingData?.bestFiveStocks)
+        }
+        if(rankingData?.worstFiveStocks?.length > 0){
+            setWorstStocksFiltered(rankingData?.worstFiveStocks)
+        }
+    },[rankingData])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
@@ -392,6 +431,7 @@ export default function Etfs() {
                                 { value: item.element1, label: item.element1 }
                             ))
                         } />
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && !rankingData && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && rankingData && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
@@ -433,18 +473,34 @@ export default function Etfs() {
                                     <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
                                     <div className="d-flex align-items-center mx-2">
                                         <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
-                                        <button className='ms-2 btn p-0 text-primary' onClick={()=>{setDateModal(true)}} type='button'><FilterAlt /></button>
+                                        <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
                                     </div>
                                 </div>
                                 {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
                                 {/* <BarChart data={data} /> */}
-                              {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />}
+                                {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />}
                             </>
                             :
                             rankingData
                                 ?
                                 <>
-                                    <h3 className='mb-3'>Best Five Stocks</h3>
+                                    <h3 className='mb-3'>Best Stocks</h3>
+                                    <div className='d-flex justify-content-between align-items-center'>
+                                        <div className="dt-buttons mb-3">
+                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                        </div>
+                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
+                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                        </div>
+                                    </div>
                                     <div className="table-responsive mb-4">
                                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                             <thead>
@@ -455,17 +511,37 @@ export default function Etfs() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {rankingData?.bestFiveStocks.map((item, index) => {
+                                                {bestStocksFiltered.map((item, index) => {
                                                     return <tr key={"best" + index}>
                                                         {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
                                                             <td key={item[columnName] + index}>{item[columnName]}</td>
                                                         ))}
                                                     </tr>
                                                 })}
+                                                {bestStocksFiltered?.length == 0 &&
+                                                <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                                }
                                             </tbody>
                                         </table>
                                     </div>
-                                    <h3 className='mb-3'>Worst Five Stocks</h3>
+                                     
+                                    <h3 className='mb-3'>Worst Stocks</h3>
+                                    <div className='d-flex justify-content-between align-items-center'>
+                                        <div className="dt-buttons mb-3">
+                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                        </div>
+                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
+                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                        </div>
+                                    </div>
                                     <div className="table-responsive mb-4">
                                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                             <thead>
@@ -476,13 +552,16 @@ export default function Etfs() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {rankingData?.worstFiveStocks.map((item, index) => {
+                                                {worstStocksFiltered.map((item, index) => {
                                                     return <tr key={"worst" + index}>
                                                         {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
                                                             <td key={item[columnName] + index}>{item[columnName]}</td>
                                                         ))}
                                                     </tr>
                                                 })}
+                                                {worstStocksFiltered?.length == 0 &&
+                                                <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                                }
                                             </tbody>
                                         </table>
                                     </div>
@@ -506,7 +585,8 @@ export default function Etfs() {
                                                                 let content;
 
                                                                 if (columnName.elementInternalName === 'element3') {
-                                                                    content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                                    // content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                                    content = rowData[columnName.elementInternalName];
                                                                 } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
                                                                     content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
@@ -537,39 +617,39 @@ export default function Etfs() {
                 <Modal.Body>
                     <div className="row">
                         <div className="col-md-6">
-                    <div className="form-group">
-                        <label htmlFor="startDate">Start Date</label>
-                        <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="2019">2019</option>
-                            <option value="2018">2018</option>
-                            <option value="2017">2017</option>
-                            <option value="2016">2016</option>
-                        </select>
-                    </div>
-                    </div>
-                    <div className="col-md-6">
-                    <div className="form-group">
-                        <label htmlFor="endDate">End Date</label>
-                        <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="2019">2019</option>
-                            <option value="2018">2018</option>
-                            <option value="2017">2017</option>
-                            <option value="2016">2016</option>
-                        </select>
+                            <div className="form-group">
+                                <label htmlFor="startDate">Start Date</label>
+                                <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                        <div className="col-md-6">
+                            <div className="form-group">
+                                <label htmlFor="endDate">End Date</label>
+                                <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>

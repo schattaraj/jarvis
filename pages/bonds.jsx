@@ -285,7 +285,7 @@ export default function Bonds() {
                     </div>
                     <div className="selection-area mb-3">
                         <div className="row">
-                            <div className="col-md-3">
+                            {/* <div className="col-md-3">
                                 <div className="form-group">
                                     <label htmlFor="">Options</label>
                                     <select name="portfolio_name" className='form-select' onChange={handleChange}>
@@ -296,7 +296,7 @@ export default function Bonds() {
                                         ))}
                                     </select>
                                 </div>
-                            </div>
+                            </div> */}
                             {(<div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="">Filter Bonds</label>
