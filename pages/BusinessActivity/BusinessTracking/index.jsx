@@ -19,6 +19,7 @@ import formatAmount from '../../../components/formatAmount.js';
 import Swal from 'sweetalert2';
 import StringToHTML from '../../../components/StringToHtml.jsx';
 import ReactSelect from 'react-select';
+import Link from 'next/link.js';
 
 export default function BusinessTracking() {
     const [columnNames, setColumnNames] = useState([
@@ -319,9 +320,9 @@ export default function BusinessTracking() {
                 <div className="content-wrapper">
                     <div className="page-header">
                         <h3 className="page-title">
-                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                        <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
-                            </span>Business Tracking
+                            </span></Link>Business Tracking
                         </h3>
                     </div>
                     <div className='d-md-flex justify-content-between'>

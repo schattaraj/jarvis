@@ -17,6 +17,7 @@ import formatAmount from '../../../components/formatAmount';
 import { Form, Modal } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import ReactSelect from 'react-select';
+import Link from 'next/link';
 
 export default function Prospects() {
     const [columnNames, setColumnNames] = useState([
@@ -326,9 +327,9 @@ export default function Prospects() {
                 <div className="content-wrapper">
                     <div className="page-header">
                         <h3 className="page-title">
-                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                        <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
-                            </span>Prospects
+                            </span></Link>Prospects
                         </h3>
                     </div>
                     <div className='d-flex justify-content-between'>

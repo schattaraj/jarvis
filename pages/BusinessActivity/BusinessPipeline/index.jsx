@@ -20,6 +20,7 @@ import formatAmount from '../../../components/formatAmount.js';
 import Select from 'react-select'
 import Swal from 'sweetalert2';
 import PieChart from '../../../components/PieChart.js';
+import Link from 'next/link.js';
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name" },
@@ -489,9 +490,9 @@ export default function BusinessPipeline() {
                 <div className="content-wrapper">
                     <div className="page-header">
                         <h3 className="page-title">
-                            <span className="page-title-icon bg-gradient-primary text-white me-2">
-                                <i className="mdi mdi-home"></i>
-                            </span>Business Pipeline
+                        <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
+                               <i className="mdi mdi-home"></i>
+                            </span></Link>Business Pipeline
                         </h3>
                     </div>
                     <div className='d-md-flex justify-content-between'>
