@@ -22,12 +22,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import { Context } from '../contexts/Context';
-function EtfHistoryModal({ open, handleClose }) {
+import Swal from 'sweetalert2';
+function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDates, setActiveView}) {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(20);
+    const [dates, setDates] = useState({ date1: null, date2: null });
     const context = useContext(Context)
     const fetchData = async () => {
         context.setLoaderState(true)
@@ -73,11 +75,83 @@ function EtfHistoryModal({ open, handleClose }) {
         setPage(newPage);
     };
 
+    const handleDateChange = (event) => {
+        const selectedDate = event.target.value;
+        const updateDates = (prevDates,ranking) => {
+            if(ranking){
+                if (!prevDates.date1) {
+                            return { ...prevDates, date1: selectedDate };
+                        } else if (!prevDates.date2 && prevDates.date1 !== selectedDate) {
+                            return { ...prevDates, date2: selectedDate };
+                        } else if (prevDates.date1 === selectedDate) {
+                            return { ...prevDates, date1: null };
+                        } else if (prevDates.date2 === selectedDate) {
+                            return { ...prevDates, date2: null };
+                        }
+                        return prevDates;
+            }
+            else{
+                if (!prevDates.date1) {
+                    return { ...prevDates, date1: selectedDate };
+                } else if (!prevDates.date2 && prevDates.date1 !== selectedDate) {
+                    return { ...prevDates, date2: selectedDate };
+                } else if (prevDates.date1 === selectedDate) {
+                    return { ...prevDates, date1: null };
+                } else if (prevDates.date2 === selectedDate) {
+                    return { ...prevDates, date2: null };
+                } else {
+                    Swal.fire({
+                        title: 'You can only select up to two dates.',
+                        icon: 'warning',
+                        confirmButtonColor: "var(--primary)"
+                    });
+                    return prevDates;
+                }
+            }
+           
+        };
+        setDates((prevDates) => updateDates(prevDates, false));
+        setRankingDates((prevDates) => updateDates(prevDates, true));
+
+    };
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
+    const options = {
+        replace: (elememt) => {
+            if (elememt?.attribs?.type === 'checkbox') {
+                return (
+                <input
+                type="checkbox"
+                value={elememt?.attribs?.value}
+                name="dateChkBox"
+                checked={dates.date1 === elememt?.attribs?.value || dates.date2 === elememt?.attribs?.value}
+                onChange={handleDateChange}
+              />
+                );
+            }
+        }
+    }
+    const compare = async()=>{
+        if (!dates.date1 || !dates.date2) {
+            Swal.fire({title:'Please select two dates',icon:'warning',confirmButtonColor:"var(--primary)"});
+            return;
+          }
+        //   handleCloseModal()
+        //   return
+          context.setLoaderState(true)
+          try {
+            const historyCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`)
+            const historyCompareRes = await historyCompare.json()
+            setCompareData(historyCompareRes)
+            setActiveView("History")
+            handleCloseModal()
+          } catch (error) {
+            console.log("Error 152",error);
+          }
+          context.setLoaderState(false)
+    }
     useEffect(() => {
         if (open) {
             fetchData();
@@ -85,7 +159,7 @@ function EtfHistoryModal({ open, handleClose }) {
     }, [open]);
 
   return (
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleCloseModal}>
             <Box
                 sx={{
                     position: 'absolute',
@@ -101,7 +175,7 @@ function EtfHistoryModal({ open, handleClose }) {
             >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 2 }}>
                     <Typography variant="h6">History - Everything List</Typography>
-                    <IconButton onClick={handleClose}>
+                    <IconButton onClick={handleCloseModal}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
@@ -118,7 +192,7 @@ function EtfHistoryModal({ open, handleClose }) {
                         <TableBody>
                             {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
-                                    <TableCell>{parse(row.checkBoxHtml)}</TableCell>
+                                    <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
                                     <TableCell>{row.importDate}</TableCell>
                                     <TableCell>{row.month}</TableCell>
                                     <TableCell>
@@ -144,7 +218,7 @@ function EtfHistoryModal({ open, handleClose }) {
                     <DialogActions>
                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="delete" onClick={() => console.log('Compare clicked')}><span>Compare</span></button>
+                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Compare" onClick={compare}><span>Compare</span></button>
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Box>

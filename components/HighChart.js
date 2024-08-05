@@ -2,10 +2,11 @@ import{ useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { formatDate } from '../utils/utils';
+import Exporting from 'highcharts/modules/exporting';
 
-const HightChart = ({data,title}) => {
+const HightChart = ({data,title,typeCheck,yAxisTitle,titleAlign,subTitle}) => {
   const [chartOptions, setChartOptions] = useState(null);
-
+  Exporting(Highcharts);
   useEffect(() => {
     const fetchData = async () => {
       setChartOptions({
@@ -15,26 +16,28 @@ const HightChart = ({data,title}) => {
           }
         },
         title: {
-          text: title ? "Chart View For "+title : "Chart",
-          align: 'left'
+          text: title ? title : "Chart",
+          align: titleAlign ? titleAlign : 'left'
         },
         subtitle: {
-          text: document.ontouchstart === undefined ?
+          text: subTitle ? subTitle : document.ontouchstart === undefined ?
             'Click and drag in the plot area to zoom in' :
             'Pinch the chart to zoom in',
-          align: 'left'
+          align: titleAlign ? titleAlign : 'left'
         },
-        xAxis: {
+        xAxis: typeCheck == null ? {
+           
         //   tickInterval: 1 // Ensures whole years on the x-axis
         type: 'datetime', // Use datetime axis
         tickInterval: 24 * 3600 * 1000 * 30, // Monthly intervals
         dateTimeLabelFormats: {
           month: '%b %Y'
         }
-        },
+        }
+        : typeCheck,
         yAxis: {
           title: {
-            text: 'Avg (%)'
+            text:yAxisTitle ? yAxisTitle : 'Avg (%)'
           }
         },
         legend: {

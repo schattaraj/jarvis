@@ -1,23 +1,16 @@
 import { useContext, useEffect, useRef, useState } from 'react'
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
 import { calculateAverage, exportToExcel, formatDate, getSortIcon, searchTable } from '../utils/utils';
-import { getImportsData } from '../utils/staticData';
-import BondsHistoryModal from '../components/BondHstoryModal';
 import EtfHistoryModal from '../components/EtfHistoryModal';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import Select from 'react-select'
 import { utils } from 'xlsx';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../utils/utils';
-import BarChart from '../components/BarChart';
 import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
 import { Form, Modal } from 'react-bootstrap';
@@ -105,6 +98,9 @@ export default function Etfs() {
     const [dateModal, setDateModal] = useState(false)
     const [bestStocksFiltered,setBestStocksFiltered] = useState([])
     const [worstStocksFiltered,setWorstStocksFiltered] = useState([])
+    const [dates, setRankingDates] = useState({ date1: null, date2: null });
+    const [compareData,setCompareData] = useState(false)
+    const [activeView,setActiveView] = useState("ETF Home")
     const handleOpenModal = () => {
         setOpenModal(true);
     };
@@ -169,6 +165,7 @@ export default function Etfs() {
             setFilterData(getBondsRes)
             setChartView(false)
             setRankingData(false)
+            setActiveView("ETF Home")
 
         }
         catch (e) {
@@ -252,6 +249,7 @@ export default function Etfs() {
             const getChartHistroryRes = await getChartHistrory.json()
             setChartHistory(getChartHistroryRes)
             setChartView(true)
+            setActiveView("Chart View")
         }
         catch (e) {
 
@@ -261,6 +259,7 @@ export default function Etfs() {
     const etfHome = () => {
         setChartView(false)
         setRankingData(false)
+        setActiveView("ETF Home")
     }
     const data = {
         labels: chartHistory.map(item => formatDate(item.lastUpdatedAt)),
@@ -294,10 +293,11 @@ export default function Etfs() {
     const ranking = async () => {
         context.setLoaderState(true)
         try {
-            const rankingApi = await fetch("https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=1900-01-01&date2=1900-01-01&_=1719818279196")
+            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
             const rankingApiRes = await rankingApi.json()
             setChartView(false)
             setRankingData(rankingApiRes)
+            setActiveView("Ranking")
         } catch (error) {
 
         }
@@ -389,16 +389,23 @@ export default function Etfs() {
         if(rankingData?.worstFiveStocks?.length > 0){
             setWorstStocksFiltered(rankingData?.worstFiveStocks)
         }
-    },[rankingData])
+        console.log("rankingData",rankingData)
+    },[rankingData,activeView])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
         fetchData()
     }, [])
+    useEffect(()=>{
+        console.log("Change",compareData)
+if(compareData && activeView == "History"){
+    setRankingData(compareData)
+}
+    },[compareData,activeView])
     return (
         <>
             <div>
-                <EtfHistoryModal open={openModal} handleClose={handleCloseModal} />
+                <EtfHistoryModal open={openModal} handleCloseModal={handleCloseModal} setCompareData={setCompareData} setRankingDates={setRankingDates} setActiveView={setActiveView}/>
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
@@ -433,12 +440,12 @@ export default function Etfs() {
                         } />
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
-                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && !rankingData && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
-                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (!chartView && rankingData && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
-                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "ETF Home" && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ranking" && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
+                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                     </div>
                     {
-                        !chartView && !rankingData &&
+                        activeView == "ETF Home" &&
                         <div className='d-flex justify-content-between'>
                             <div className="dt-buttons mb-3">
                                 <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
@@ -457,7 +464,7 @@ export default function Etfs() {
                         </div>
                     }
                     {
-                        chartView ?
+                        activeView == "Chart View" &&
                             <>
                                 <div className="form-group d-flex align-items-center">
                                     <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
@@ -478,11 +485,11 @@ export default function Etfs() {
                                 </div>
                                 {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
                                 {/* <BarChart data={data} /> */}
-                                {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && ViewOptions[selectedView]} />}
+                                {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && `Chart View For ${ViewOptions[selectedView]}`} />}
                             </>
-                            :
-                            rankingData
-                                ?
+}
+{
+                            activeView == "Ranking" &&
                                 <>
                                     <h3 className='mb-3'>Best Stocks</h3>
                                     <div className='d-flex justify-content-between align-items-center'>
@@ -566,7 +573,9 @@ export default function Etfs() {
                                         </table>
                                     </div>
                                 </>
-                                :
+}
+{
+    activeView == "ETF Home" &&
                                 <>
                                     <div className="table-responsive">
                                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
@@ -599,6 +608,7 @@ export default function Etfs() {
                                                         }
                                                     </tr>
                                                 ))}
+                                                {filterData?.length == 0 && <tr><td colSpan={columnNames?.length}>No data available</td></tr>}
                                             </tbody>
 
                                         </table>
@@ -607,7 +617,92 @@ export default function Etfs() {
                                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                                 </>
                     }
-
+{
+    activeView == "History" &&
+    <>
+                                    <h3 className='mb-3'>Best Stocks</h3>
+                                    <div className='d-flex justify-content-between align-items-center'>
+                                        <div className="dt-buttons mb-3">
+                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                        </div>
+                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
+                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                        </div>
+                                    </div>
+                                    <div className="table-responsive mb-4">
+                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                            <thead>
+                                                <tr>
+                                                    {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                        <th key={columnName}>{displayName}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {bestStocksFiltered.map((item, index) => {
+                                                    return <tr key={"best" + index}>
+                                                        {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                        ))}
+                                                    </tr>
+                                                })}
+                                                {bestStocksFiltered?.length == 0 &&
+                                                <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                     
+                                    <h3 className='mb-3'>Worst Stocks</h3>
+                                    <div className='d-flex justify-content-between align-items-center'>
+                                        <div className="dt-buttons mb-3">
+                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                        </div>
+                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
+                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                        </div>
+                                    </div>
+                                    <div className="table-responsive mb-4">
+                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                            <thead>
+                                                <tr>
+                                                    {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                        <th key={columnName}>{displayName}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {worstStocksFiltered.map((item, index) => {
+                                                    return <tr key={"worst" + index}>
+                                                        {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                        ))}
+                                                    </tr>
+                                                })}
+                                                {worstStocksFiltered?.length == 0 &&
+                                                <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+}
                 </div>
             </div>
             <Modal show={dateModal} onHide={() => { setDateModal(false) }}>

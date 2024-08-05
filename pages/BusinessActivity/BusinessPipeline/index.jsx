@@ -948,9 +948,10 @@ export default function BusinessPipeline() {
                                 <div className="form-group">
                                     <label htmlFor="" className='form-label'>Most Recent Activity</label>
                                     <Select className='w-100 mb-0 me-2 col-md-4' onChange={filterSearchMostRecentActivity} isMulti options={[
-                                        { value: "Business has closed (Complete)", label: "Business has closed (Complete)" },
-                                        { value: "Waiting for Outstanding Items", label: "Waiting for Outstanding Items" },
-                                        { value: "Upcoming Meeting", label: "Upcoming Meeting" },
+                                        { value: "Meeting/Contact in the last 10 days", label: "Meeting/Contact in the last 10 days" },
+                                        { value: "Meeting/Contact in the past 11-30 days", label: "Meeting/Contact in the past 11-30 days" },
+                                        { value: "Meeting scheduled", label: "Meeting scheduled" },
+                                        { value: "No contact in the past 30 days", label: "No contact in the past 30 days" },
                                     ]
                                     } value={filterInputs?.searchMostRecentActivity?.split(",")?.filter(item => item.trim() !== "")?.map((item) => { return { value: item, label: item } })} />
                                     <input type="hidden" name='searchMostRecentActivity' value={filterInputs?.searchMostRecentActivity} />

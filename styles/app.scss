@@ -1187,3 +1187,6 @@ body {
 .minimized .message.show {
     display: none;
 }
+div:where(.swal2-container){
+z-index: 1301 !important;
+}
