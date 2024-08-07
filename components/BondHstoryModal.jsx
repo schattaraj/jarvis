@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
     Modal,
     Table,
@@ -21,14 +21,18 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
+import Swal from 'sweetalert2';
+import { Context } from '../contexts/Context';
 
-const BondsHistoryModal = ({ open, handleClose }) => {
+const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption }) => {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(20);
-
+    const [dates, setDates] = useState({ date1: null, date2: null });
+    // const [compareData,setCompareData] = useState(false)
+    const context = useContext(Context)
     const fetchData = async () => {
         try {
             const response = await fetch('https://www.jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Bondpricing_Master&_=1705052752528');
@@ -87,7 +91,58 @@ const BondsHistoryModal = ({ open, handleClose }) => {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+    const handleDateChange = (event) => {
+        const selectedDate = event.target.value;
 
+        setDates((prevDates) => {
+            if (!prevDates.date1) {
+                return { ...prevDates, date1: selectedDate };
+            } else if (!prevDates.date2 && prevDates.date1 !== selectedDate) {
+                return { ...prevDates, date2: selectedDate };
+            } else if (prevDates.date1 === selectedDate) {
+                return { ...prevDates, date1: null };
+            } else if (prevDates.date2 === selectedDate) {
+                return { ...prevDates, date2: null };
+            }
+            else {
+                Swal.fire({title:'You can only select up to two dates.',icon:'warning',confirmButtonColor:"var(--primary)"});
+                return prevDates;
+              }
+        });
+    };
+    const options = {
+        replace: (elememt) => {
+            if (elememt?.attribs?.type === 'checkbox') {
+                return (
+                <input
+                type="checkbox"
+                value={elememt?.attribs?.value}
+                name="dateChkBox"
+                checked={dates.date1 === elememt?.attribs?.value || dates.date2 === elememt?.attribs?.value}
+                onChange={handleDateChange}
+              />
+                );
+            }
+        }
+    }
+    const bondCompare = async()=>{
+        if (!dates.date1 || !dates.date2) {
+            Swal.fire({title:'Please select two dates',icon:'warning',confirmButtonColor:"var(--primary)"});
+            return;
+          }
+          context.setLoaderState(true)
+          try {
+            const bondHistoryCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=${dates.date1}&date2=${dates.date2}`)
+            const bondHistoryCompareRes = await bondHistoryCompare.json()
+            setCompareData(bondHistoryCompareRes)
+            setSelectedOption("History")
+            handleClose()
+            console.log("bondHistoryCompareRes",bondHistoryCompareRes?.bestFiveStocks?.length) 
+          } catch (error) {
+            
+          }
+          context.setLoaderState(false)
+    }
     return (
         <Modal open={open} onClose={handleClose}>
             <Box
@@ -110,7 +165,7 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                     </IconButton>
                 </Box>
                 <TableContainer component={Paper} sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                    <Table>
+                    <Table className='table'>
                         <TableHead>
                             <TableRow>
                                 <TableCell>Select</TableCell>
@@ -122,7 +177,7 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                         <TableBody>
                             {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
-                                    <TableCell>{parse(row.checkBoxHtml)}</TableCell>
+                                    <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
                                     <TableCell>{row.importDate}</TableCell>
                                     <TableCell>{row.month}</TableCell>
                                     <TableCell>
@@ -148,7 +203,7 @@ const BondsHistoryModal = ({ open, handleClose }) => {
                     <DialogActions>
                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="delete" onClick={() => console.log('Compare clicked')}><span>Compare</span></button>
+                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Compare" onClick={bondCompare}><span>Compare</span></button>
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Box>

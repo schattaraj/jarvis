@@ -11,7 +11,14 @@ import { Autocomplete, TextField } from '@mui/material';
 import BondChart from '../components/charts';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
-
+import HightChart from '../components/HighChart';
+import { Form, Modal } from 'react-bootstrap';
+import ReactSelect from 'react-select';
+import Swal from 'sweetalert2';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+import { FilterAlt } from '@mui/icons-material';
+import { useRouter } from 'next/router';
 const extraColumns = [
     {
         "elementId": null,
@@ -67,19 +74,45 @@ export default function Bonds() {
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
     const [openModal, setOpenModal] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedOption, setSelectedOption] = useState('Bond Home');
     const [stocks, setStocks] = useState([]);
-    const [selectedStock, setSelectedStock] = useState([])
+    const [selectedBond, setSelectedBond] = useState([])
     const [chartData, setChartData] = useState()
     const [callChart, setCallChart] = useState(false)
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+    const [compareData, setCompareData] = useState(false)
+    const [risenStocks, setRisenStocks] = useState([])
+    const [risenStocksFiltered, setRisenStocksFiltered] = useState([])
+    const [dropStocks, setDropStocks] = useState([])
+    const [dropStocksFiltered, setDropStocksFiltered] = useState([])
+    const [rankingData, setRankingData] = useState(false)
+    const [calculateModal, setCalculateModal] = useState(false)
+    const [rating, setRating] = useState([]);
+    const [treasuryYield, setTreasuryYield] = useState('');
+    const [year, setYear] = useState('Any');
+    const [maturityMin, setMaturityMin] = useState('Any');
+    const [maturityMax, setMaturityMax] = useState('Any');
+    const [ytwMin, setYtwMin] = useState('Any');
+    const [ytwMax, setYtwMax] = useState('Any');
+    const [callable, setCallable] = useState('Any');
+    const [secured, setSecured] = useState('Any');
+    const [tickers, setTickers] = useState([]);
+    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023 })
+    const [chartHistory, setChartHistory] = useState([])
+    const [ViewOptions, setViewOptions] = useState({
+        element9: "Price",
+        element3: "YTW",
+    })
+    const [selectedView, setSelectedView] = useState('element9')
+    const [dateModal, setDateModal] = useState(false)
+    const router = useRouter()
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
     };
     const handleStockChange = (event) => {
-        setSelectedStock(event.target.value);
+        setSelectedBond(event.target.value);
     };
 
     const option = [
@@ -138,7 +171,8 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
-            fetchData()
+            // fetchData()
+            context.setLoaderState(false)
         }
         catch (e) {
             console.log("error", e)
@@ -199,7 +233,7 @@ export default function Bonds() {
 
     const getTickerCartDtata = async () => {
         try {
-            const tickerName = selectedStock.map(item => item.element1)
+            const tickerName = selectedBond.map(item => item.element1)
             const apiUrl = `https://www.jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(tickerName)}&year=2023&year2=2023`;
 
             const response = await fetch(apiUrl);
@@ -230,6 +264,143 @@ export default function Bonds() {
         }
         setSortConfig({ key, direction });
     };
+    const filterBestStocks = (e) => {
+        const value = e.target.value;
+        setRisenStocksFiltered(searchTable(risenStocks, value))
+    }
+    const filterWorstStocks = (e) => {
+        const value = e.target.value;
+        setDropStocksFiltered(searchTable(dropStocks, value))
+    }
+    const ranking = async () => {
+        context.setLoaderState(true)
+        try {
+            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
+            const rankingApiRes = await rankingApi.json()
+            setRankingData(rankingApiRes)
+            setCompareData(rankingApiRes)
+            setSelectedOption("Ranking")
+        } catch (error) {
+            console.log("Erorr 258", error)
+        }
+        context.setLoaderState(false)
+    }
+    const handleSearch = async () => {
+        const payload = {
+            couponMin: '',
+            couponMax: '',
+            rating: rating.map(r => r.value).join(','),
+            treasuryYield,
+            treasuryYr: year,
+            ytwMin,
+            ytwMax,
+            maturityMin,
+            maturityMax,
+            callable,
+            secured,
+            metadataName: 'Bondpricing_Master',
+            _: new Date().getTime() // This will generate a unique timestamp
+        };
+
+        const queryString = new URLSearchParams(payload).toString();
+        console.log("queryString", queryString)
+        const url = `https://jharvis.com/JarvisV2/getCalculateBond?${queryString}`;
+        context.setLoaderState(true)
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            setTableData(data)
+            setFilterData(data)
+            setCalculateModal(false)
+            setSelectedOption("Calculate")
+            console.log(data); // Handle the response data here
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+        context.setLoaderState(false)
+    };
+    const charts = async () => {
+        if (!selectedBond || selectedBond.length == 0) {
+            Swal.fire({ title: "Please Select Bond", confirmButtonColor: "#719B5F" });
+            return;
+        }
+        context.setLoaderState(true)
+        try {
+            const payload = {
+                ticker: selectedBond.map(r => r.value.split('-')[1]).join(','),
+                year: dateRange?.startDate,
+                year2: dateRange?.endDate,
+                metadataName: 'Bondpricing_Master',
+                _: new Date().getTime() // This will generate a unique timestamp
+            };
+            const queryString = new URLSearchParams(payload).toString();
+            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            const getChartHistroryRes = await getChartHistrory.json()
+            console.log("getChartHistroryRes", getChartHistroryRes)
+            setChartHistory(getChartHistroryRes)
+            setSelectedOption("Chart View")
+            setDateModal(false)
+            setTableData(getChartHistroryRes)
+            setFilterData(getChartHistroryRes)
+        }
+        catch (e) {
+
+        }
+        context.setLoaderState(false)
+    }
+    const fetchTickersFunc = async () => {
+        context.setLoaderState(true)
+        try {
+            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
+            const fetchTickersRes = await fetchTickers.json()
+            setTickers(fetchTickersRes)
+            console.log("fetchTickersRes", fetchTickersRes)
+        }
+        catch (e) {
+            console.log("Error - 335", e);
+        }
+        context.setLoaderState(false)
+    }
+    const handleDateRange = (e) => {
+        setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) })
+    }
+    const gridView = () => {
+        setSelectedOption("Grid View")
+    }
+    const bondHome = () => {
+        setSelectedOption("Bond Home")
+        fetchData()
+    }
+    const uploadFile = async (e) => {
+        e.preventDefault()
+        const form = e.target
+        if (form.checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        context.setLoaderState(true)
+        try {
+            const formData = new FormData(form);
+            const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileBondImport", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: formData
+            })
+            const uploadRes = await upload.json()
+            if (upload.status == 400) {
+                Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
+            }
+        } catch (error) {
+            console.log("Error", error)
+        }
+        context.setLoaderState(false)
+    }
+    const reset = ()=>{
+        // router.push('/bonds')
+        location.reload()
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -256,23 +427,36 @@ export default function Bonds() {
             }
         }
         run()
-    }, [currentPage, tableData, sortConfig,limit])
+    }, [currentPage, tableData, sortConfig, limit])
 
     useEffect(() => {
+        fetchTickersFunc()
         fetchColumnNames()
         getTickerCartDtata()
     }, [])
-
+    useEffect(() => {
+        if (compareData) {
+            setRisenStocks(compareData?.bestFiveStocks)
+            setRisenStocksFiltered(compareData?.bestFiveStocks)
+            setDropStocks(compareData?.worstFiveStocks)
+            setDropStocksFiltered(compareData?.worstFiveStocks)
+        }
+    }, [compareData])
     // useEffect(() => {
     //     selectedStock.length && getTickerCartDtata()
     // }, [callChart])
 
-
+    const customStyles = {
+        container: (provided) => ({
+            ...provided,
+            zIndex: 4,
+        }),
+    };
 
     return (
         <>
             <div>
-                <BondsHistoryModal open={openModal} handleClose={handleCloseModal} />
+                <BondsHistoryModal open={openModal} handleClose={handleCloseModal} setCompareData={setCompareData} setSelectedOption={setSelectedOption} />
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
@@ -297,18 +481,18 @@ export default function Bonds() {
                                     </select>
                                 </div>
                             </div> */}
-                            {(<div className="col-md-6">
+                            {(<div className="col-md-4">
                                 <div className="form-group">
-                                    <label htmlFor="">Filter Bonds</label>
-                                    <Autocomplete
+                                    {/* <label htmlFor="">Filter Bonds</label> */}
+                                    {/* <Autocomplete
                                         multiple
                                         id="tags-standard"
-                                        value={selectedStock}
+                                        value={selectedBond}
                                         onChange={(event, newValue) => {
-                                            setSelectedStock(newValue);
+                                            setSelectedBond(newValue?.element1);
                                         }}
-                                        options={stocks}
-                                        getOptionLabel={(option) => option.element98}
+                                        options={tickers.map((item)=>({label:item?.elememt1,value:item?.elememt1}))}
+                                        getOptionLabel={(option) => option?.element1}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
@@ -316,14 +500,19 @@ export default function Bonds() {
                                                 label="Select Bond"
                                             />
                                         )}
-                                    />
+                                    /> */}
+                                    <ReactSelect className='mb-0 me-2' isMulti onChange={setSelectedBond} styles={customStyles} options={
+                                        tickers && tickers.map((item, index) => (
+                                            { value: item.element1, label: item.element1 }
+                                        ))
+                                    } />
                                 </div>
                             </div>)}
 
                             <div className="col-md-3">
                                 <div className="actions">
                                     <button className='btn btn-primary' onClick={() => {
-                                        if (selectedStock.length && selectedOption === 'Chart View') {
+                                        if (selectedBond.length && selectedOption === 'Chart View') {
                                             getTickerCartDtata()
                                         } else {
 
@@ -332,72 +521,426 @@ export default function Bonds() {
                                     }}>GO</button>
                                 </div>
                             </div>
+                            <div className="col-md-4">
+
+                            </div>
                         </div>
                     </div>
-                    <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                        </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
+                        <Form onSubmit={uploadFile} encType="multipart/form-data">
+                            <input type="hidden" name="metaDataName" value="Bondpricing_Master" />
+                            <div className="row align-items-center">
+                                <div className="col-md-3">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>File Upload Date</label>
+                                        <input type="date" className="form-control" name='fileDate' />
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="form-group">
+                                        <label htmlFor="uploadFile">Upload File</label>
+                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required />
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                    <div className="actions">
+                                        <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                    </div></div>
+                            </div>
+                        </Form>
                     </div>
-                    {selectedOption === 'Chart View' ? <BondChart bondData={chartData} /> :
-                        (<div className="table-responsive">
-                            <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                <thead>
-                                    <tr>
-                                        {columnNames.map((columnName, index) => (
-                                            <th key={'column' + index} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filterData.map((rowData, rowIndex) => (
-                                        <tr key={'rowIndex' + rowIndex} style={{ overflowWrap: 'break-word' }}>
+                    <div className="d-flex">
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "History" ? ` active` : ''}`} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Bond Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={bondHome}><span>Bond Home</span></button>
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Calculate" ? ` active` : ''}`} type="button" title="Calculate" onClick={() => { setCalculateModal(true) }}><span>Calculate</span></button>
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Grid View" ? ` active` : ''}`} type="button" title="Grid View" onClick={gridView}><span>Grid View</span></button>
+                        <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
+                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                        {/* <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={() => { }}><span>Bond Details</span></button> */}
+                    </div>
+
+                    {
+                        (selectedOption === 'Bond Home' || selectedOption === 'Calculate' || selectedOption === 'Grid View') &&
+                        (
+                            <>
+                                <div className='d-flex justify-content-between'>
+                                    <div className="dt-buttons mb-3">
+                                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                        <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                    </div>
+                                    <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                                </div>
+
+                                <div className="table-responsive">
+                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                        <thead>
+                                            <tr>
+                                                {columnNames.map((columnName, index) => (
+                                                    <th key={'column' + index} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filterData.map((rowData, rowIndex) => (
+                                                <tr key={'rowIndex' + rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                    {
+                                                        columnNames.map((columnName, colIndex) => {
+                                                            let content;
+
+                                                            if (columnName.elementInternalName === 'element3') {
+                                                                content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                            } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                                content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                            } else {
+                                                                content = rowData[columnName.elementInternalName];
+                                                            }
+
+                                                            if (typeof (content) == 'string') {
+                                                                content = parse(content)
+                                                            }
+                                                            return <td key={colIndex}>{content}</td>;
+                                                        })
+                                                    }
+                                                </tr>
+                                            ))}
                                             {
-                                                columnNames.map((columnName, colIndex) => {
-                                                    let content;
-
-                                                    if (columnName.elementInternalName === 'element3') {
-                                                        content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                    } else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
-                                                        content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                    } else {
-                                                        content = rowData[columnName.elementInternalName];
+                                                filterData.length == 0 &&
+                                                <tr>
+                                                    <td colSpan={columnNames?.length}>No data available</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <thead>
+                                            <tr>
+                                                {filterData.length ? columnNames.map((item, index) => {
+                                                    {
+                                                        if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
+                                                            return <th>
+                                                                {calculateAverage(filterData, item.elementInternalName)} % <br />
+                                                                ({calculateAverage(tableData, item.elementInternalName)}) %
+                                                            </th>
+                                                        } else {
+                                                            return <th key={index}></th>
+                                                        }
                                                     }
+                                                }) : null
+                                                }
+                                            </tr>
+                                        </thead>
+                                    </table>
 
-                                                    if (typeof (content) == 'string') {
-                                                        content = parse(content)
-                                                    }
-                                                    return <td key={colIndex}>{content}</td>;
+                                </div>
+                                {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                            </>)
+                    }
+                    {(selectedOption == "History" || selectedOption == "Ranking") &&
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group d-flex align-items-center mb-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filterBestStocks} /></div>
+                                <div className="table-responsive mb-3">
+                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Most Risen Stock</th>
+                                                <th>Price Risen By</th>
+                                                <th>% In Rise</th>
+                                                <th>Current Price</th>
+                                                <th>Previous Price</th>
+                                                <th>Current YTM</th>
+                                                <th>Previous YTM</th>
+                                                <th>Maturity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                risenStocksFiltered?.map((item, index) => {
+                                                    return <tr key={"bestStock" + index}>
+                                                        <td>{item?.bestMovedStock}</td>
+                                                        <td>{item?.bestMovedBy}</td>
+                                                        <td>{item?.percentageChangeRise}</td>
+                                                        <td>{item?.bestMoveCurrValue}</td>
+                                                        <td>{item?.bestMovePrevValue}</td>
+                                                        <td>{item?.currytm}</td>
+                                                        <td>{item?.prevytm}</td>
+                                                        <td>{item?.maturityDate}</td>
+                                                    </tr>
                                                 })
                                             }
-                                        </tr>
-                                    ))}
-                                </tbody>
-                                <thead>
-                                    <tr>
-                                        {filterData.length ? columnNames.map((item, index) => {
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <HightChart data={compareData?.bestFiveStocks?.map((item) => [item['bestMovedStock'], parseFloat(item['percentageChangeRise'])])} title={"Bond Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Best Fifty"} />
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group d-flex align-items-center mb-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filterWorstStocks} /></div>
+                                <div className="table-responsive mb-3">
+                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Most Dropped Stock</th>
+                                                <th>Price Dropped By</th>
+                                                <th>% In Drop</th>
+                                                <th>Current Price</th>
+                                                <th>Previous Price</th>
+                                                <th>Current YTM</th>
+                                                <th>Previous YTM</th>
+                                                <th>Maturity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
                                             {
-                                                if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
-                                                    return <th>
-                                                        {calculateAverage(filterData, item.elementInternalName)} % <br />
-                                                        ({calculateAverage(tableData, item.elementInternalName)}) %
-                                                    </th>
-                                                } else {
-                                                    return <th key={index}></th>
-                                                }
+                                                dropStocksFiltered?.map((item, index) => {
+                                                    return <tr key={"worstStock" + index}>
+                                                        <td>{item?.worstMovedStock}</td>
+                                                        <td>{item?.worstMovedBy}</td>
+                                                        <td>{item?.percentageChangeRise}</td>
+                                                        <td>{item?.worstMoveCurrValue}</td>
+                                                        <td>{item?.worstMovePrevValue}</td>
+                                                        <td>{item?.currytm}</td>
+                                                        <td>{item?.prevytm}</td>
+                                                        <td>{item?.maturityDate}</td>
+                                                    </tr>
+                                                })
                                             }
-                                        }) : null
-                                        }
-                                    </tr>
-                                </thead>
-                            </table>
-
-                        </div>)
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <HightChart data={compareData?.worstFiveStocks?.map((item) => [item['worstMovedStock'], parseFloat(item['percentageChangeDrop'])])} title={"Bond Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Worst Fifty"} />
+                            </div>
+                        </div>
                     }
-                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                    {
+                        selectedOption == "Chart View" &&
+                        <>
+                            <Tabs
+                                defaultActiveKey="price"
+                                id="uncontrolled-tab-example"
+                                className="mb-3"
+                            >
+                                <Tab eventKey="price" title="Price">
+                                    <div className="d-flex align-items-center mx-2 mb-2">
+                                        <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
+                                        <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
+                                    </div>
+                                    <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && `Chart View For ${ViewOptions[selectedView]}`} yAxisTitle="Price" />
+                                </Tab>
+                                <Tab eventKey="ytm" title="YTM">
+                                    <div className="d-flex align-items-center mx-2 mb-2">
+                                        <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
+                                        <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
+                                    </div>
+                                    <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item['element3'])])} title={ViewOptions['element3'] && `Chart View For ${ViewOptions['element3']}`} yAxisTitle="YTW" />
+                                </Tab>
+                            </Tabs>
+
+                        </>
+
+                    }
+                    <Modal show={calculateModal} onHide={() => { setCalculateModal(false) }}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Analysis - Bond</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className="form-label">Rating</label>
+                                        <ReactSelect className='' isMulti onChange={setRating} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                                            [
+                                                { value: "Any", label: "Any" },
+                                                { value: "AAA", label: "AAA" },
+                                                { value: "AA", label: "AA" },
+                                                { value: "A", label: "A" },
+                                                { value: "BBB", label: "BBB" },
+                                                { value: "BB", label: "BB" },
+                                                { value: "B", label: "B" },
+                                                { value: "CCC", label: "CCC" },
+                                                { value: "CC", label: "CC" },
+                                                { value: "C", label: "C" },
+                                            ]
+                                        } />
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="treasuryYield" className="form-label">Treasury Yield</label>
+                                        <input type="text" name="treasuryYield" id="treasuryYield" className="form-control" />
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className="form-label">Year</label>
+                                        <select name="year" id="" className='form-select'>
+                                            <option value="Any">Any</option>
+                                            <option value="0-1">0-1</option>
+                                            <option value="1-3">1-3</option>
+                                            <option value="3-5">3-5</option>
+                                            <option value="5-7">5-7</option>
+                                            <option value="7-10">7-10</option>
+                                            <option value="10-20">10-20</option>
+                                            <option value="20+">20+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>Maturity Range(Min):</label>
+                                        <select name="maturityMin" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>Maturity Range(Max):</label>
+                                        <select name="maturityMax" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>YTM Range(Min):</label>
+                                        <select name="ytwMin" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>YTM Range(Max):</label>
+                                        <select name="ytwMax" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="15">15</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>Callable:</label>
+                                        <select name="callable" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-4">
+                                    <div className="form-group">
+                                        <label htmlFor="" className='form-label'>Secured:</label>
+                                        <select name="secured" id="" className="form-select">
+                                            <option value="Any">Any</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <button className="btn btn-secondary" onClick={() => { setCalculateModal(false) }}>Cancel</button>
+                            <button className="btn btn-primary" onClick={handleSearch}>Search</button>
+                        </Modal.Footer>
+                    </Modal>
+                    <Modal show={dateModal} onHide={() => { setDateModal(false) }}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Filter Chart</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="form-group">
+                                        <label htmlFor="startDate">Start Date</label>
+                                        <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
+                                            <option value="2025">2025</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2023">2023</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2016">2016</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="form-group">
+                                        <label htmlFor="endDate">End Date</label>
+                                        <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
+                                            <option value="2025">2025</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2023">2023</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2017">2017</option>
+                                            <option value="2016">2016</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <button className="btn btn-primary" onClick={charts}>Apply</button>
+                        </Modal.Footer>
+                    </Modal>
                 </div>
             </div>
         </>
