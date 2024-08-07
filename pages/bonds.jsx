@@ -136,13 +136,26 @@ export default function Bonds() {
         setOpenModal(false);
     };
 
-    const handleSelectClick = () => {
-        if (selectedOption === 'History') {
-            handleOpenModal()
+    const handleSelectClick = async () => {
+        const payload = {
+            ticker: selectedBond.map(r => r.value.split('-')[1]).join(','),            
+            metadataName: 'Bondpricing_Master',
+            _: new Date().getTime() 
+        };
+
+        const queryString = new URLSearchParams(payload).toString();
+        context.setLoaderState(true)
+        try {
+            const getBonds = await fetch(`https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`)
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
+            setSelectedOption("Bond Home")
         }
-        if (selectedOption === 'Chart View') {
-            setCallChart()
+        catch (e) {
+            console.log("error", e)
         }
+        context.setLoaderState(false)
     }
 
     const handleChartView = () => [
@@ -513,7 +526,7 @@ export default function Bonds() {
                                 <div className="actions">
                                     <button className='btn btn-primary' onClick={() => {
                                         if (selectedBond.length && selectedOption === 'Chart View') {
-                                            getTickerCartDtata()
+                                            charts()
                                         } else {
 
                                             handleSelectClick()
