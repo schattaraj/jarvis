@@ -187,7 +187,6 @@ export default function Bonds() {
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
             fetchData()
-            context.setLoaderState(false)
         }
         catch (e) {
             console.log("error", e)
