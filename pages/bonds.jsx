@@ -186,7 +186,7 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
-            // fetchData()
+            fetchData()
             context.setLoaderState(false)
         }
         catch (e) {
@@ -422,7 +422,9 @@ export default function Bonds() {
         console.log(e.target.files)
         setFile(e.target.files[0]);
       };
-    
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -591,7 +593,19 @@ export default function Bonds() {
                                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                         <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                     </div>
-                                    <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                                    <div className="form-group d-flex align-items-center">
+                                    <div className="form-group d-flex align-items-center mb-0 me-3">
+                                        {/* <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /> */}
+                                <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="all">All</option>
+                                </select>
+                            </div>
+                                        <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                                 </div>
 
                                 <div className="table-responsive">
