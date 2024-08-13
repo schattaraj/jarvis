@@ -322,7 +322,11 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Seminar Type</Form.Label>
-                                    <Form.Control type="text" name='seminarType' required />
+                                    <Form.Select required>
+                                        <option value={""}>--Select--</option>
+                                        <option value={"Dinner"}>Dinner</option>
+                                        <option value={"Library"}>Library</option>
+                                    </Form.Select>
                                 </Form.Group>
                             </div>
                         </div>
@@ -330,7 +334,7 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Geographic Location</Form.Label>
-                                    <Form.Control type="email" name='geographicLocation' required />
+                                    <Form.Control type="text" name='geographicLocation' required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">

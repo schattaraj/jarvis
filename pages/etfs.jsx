@@ -350,6 +350,10 @@ export default function Etfs() {
         const value = e.target.value;
         setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value))
     }
+    const reset = ()=>{
+        setSelectedTicker(false)
+        fetchData()
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -389,7 +393,6 @@ export default function Etfs() {
         if(rankingData?.worstFiveStocks?.length > 0){
             setWorstStocksFiltered(rankingData?.worstFiveStocks)
         }
-        console.log("rankingData",rankingData)
     },[rankingData,activeView])
     useEffect(() => {
         fetchTickersFunc()
@@ -397,7 +400,6 @@ export default function Etfs() {
         fetchData()
     }, [])
     useEffect(()=>{
-        console.log("Change",compareData)
 if(compareData && activeView == "History"){
     setRankingData(compareData)
 }
@@ -433,7 +435,7 @@ if(compareData && activeView == "History"){
                         </div>
                     </Form>
                     <div className="selection-area mb-3 d-flex align-items-center">
-                        <Select className='mb-0 me-2 col-md-4' isMulti onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                        <Select className='mb-0 me-2 col-md-4' isMulti value={selectedTicker && selectedTicker.split(",").map((item)=>({value:item,label:item}))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
                             tickers && tickers.map((item, index) => (
                                 { value: item.element1, label: item.element1 }
                             ))
@@ -443,6 +445,7 @@ if(compareData && activeView == "History"){
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "ETF Home" && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ranking" && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
                     </div>
                     {
                         activeView == "ETF Home" &&

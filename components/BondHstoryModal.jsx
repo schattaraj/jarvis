@@ -60,7 +60,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
     };
 
     const confirmedDelete = async () => {
-        console.log(`Delete action triggered for ID ${deleteItemId}`);
+        // console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
             const response = await fetch(`https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
@@ -70,7 +70,6 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
             const result = await response.json();
 
             if (response.ok) {
-                console.log(result.msg);
                 alert(result.msg);
                 fetchData();
             } else {
@@ -142,7 +141,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
             setCompareData(bondHistoryCompareRes)
             setSelectedOption("History")
             handleClose()
-            console.log("bondHistoryCompareRes",bondHistoryCompareRes?.bestFiveStocks?.length) 
+            // console.log("bondHistoryCompareRes",bondHistoryCompareRes?.bestFiveStocks?.length) 
           } catch (error) {
             
           }
