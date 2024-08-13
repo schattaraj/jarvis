@@ -145,3 +145,19 @@ export const convertToReadableString = (str)=> {
 export const roundToTwoDecimals = (number)=> {
     return Math.round(number * 100) / 100;
 }
+export const amountSeperator = (amount)=>{
+    amount = parseFloat(amount);
+  
+    // Check if the amount is a valid number
+    if (isNaN(amount)) {
+      return "";
+    }
+    let formattedAmount = amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+    // Remove the .00 if it's not needed
+    if (formattedAmount.endsWith(".00")) {
+        formattedAmount = formattedAmount.slice(0, -3);
+    }
+
+    return formattedAmount;
+}

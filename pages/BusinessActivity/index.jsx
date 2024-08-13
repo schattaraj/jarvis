@@ -59,6 +59,9 @@ function BusinessActivity() {
                 </Link>
               </div> */}
             </div>
+            <div className="col-md-6 col-lg-6 stretch-card grid-margin">
+              <Card route="/BusinessActivity/SeminarTracking" bg="bg-orange" img="/icons/Bond Reports.png" title="Seminar Tracking" />
+            </div>
           </div>
 
         </div>

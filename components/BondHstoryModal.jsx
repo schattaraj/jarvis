@@ -17,6 +17,7 @@ import {
     DialogContent,
     TablePagination,
     Button,
+    TextField
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,6 +32,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [dates, setDates] = useState({ date1: null, date2: null });
+    const [searchQuery, setSearchQuery] = useState(''); 
     // const [compareData,setCompareData] = useState(false)
     const context = useContext(Context)
     const fetchData = async () => {
@@ -42,7 +44,10 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
             console.error('Error fetching data:', error);
         }
     };
-
+    const filteredData = data.filter((row) =>
+    row.importDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    row.month.toLowerCase().includes(searchQuery.toLowerCase())
+);
     useEffect(() => {
         if (open) {
             fetchData();
@@ -152,7 +157,8 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
                     width: '80%',
-                    maxHeight: '90vh',
+                    // maxHeight: '90vh',
+                    overflowY:"auto",
                     bgcolor: 'background.paper',
                     boxShadow: 24,
                     p: 3,
@@ -164,6 +170,14 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
                         <CloseIcon />
                     </IconButton>
                 </Box>
+                <TextField
+                    label="Search"
+                    variant="outlined"
+                    fullWidth
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ marginBottom: 2 }}
+                />
                 <TableContainer component={Paper} sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
                     <Table className='table'>
                         <TableHead>
@@ -175,7 +189,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                            {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
                                     <TableCell>{row.importDate}</TableCell>
@@ -201,9 +215,9 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                     <DialogActions>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
+                        <button className="btn btn-secondary" type="button" title="Cancel" onClick={handleClose}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Compare" onClick={bondCompare}><span>Compare</span></button>
+                        <button className="btn btn-primary" type="button" title="Compare" onClick={bondCompare}><span>Compare</span></button>
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Box>

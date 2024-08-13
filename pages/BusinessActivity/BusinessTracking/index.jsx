@@ -52,6 +52,8 @@ export default function BusinessTracking() {
     const [advisorData, setAdvisorData] = useState(false)
     const [advisorName,setAdvisorName] = useState(false)
     const [timeFrame, setTimeFrame] = useState("");
+    const [isDate,setIsDate] = useState(false)
+    const [dateRange,setDateRange] = useState({startdate:"",enddate:""})
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -276,6 +278,17 @@ export default function BusinessTracking() {
         }
         context.setLoaderState(false)
     }
+    const handleDate = (e)=>{
+        let selectedDate = {...dateRange,[e.target.name]:e.target.value}
+        if(selectedDate?.startdate || selectedDate?.enddate){
+            setIsDate(true)
+            console.log("selectedDate",selectedDate);
+        }
+        else{
+            setIsDate(false)
+        }
+        setDateRange({...dateRange,[e.target.name]:e.target.value})
+    }
     useEffect(() => {
         fetchData()
     }, [])
@@ -405,73 +418,110 @@ export default function BusinessTracking() {
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={addBusinessTracking} autoComplete={"true"} method='POST' encType='multipart/form-data'>
-                        <div className="row">
-                            <div className="col-md-6">
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='advisorName' onChange={() => { }} required>
-                                        <option value={""}>--Select--</option>
-                                        <option value="Noland">Noland</option>
-                                        <option value="Freddy">Freddy</option>
-                                        <option value="Brian">Brian</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Date</Form.Label>
-                                    <Form.Control type="date" name="date" onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Which client was assets brought in from?</Form.Label>
-                                    <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. Of 1st Meetings</Form.Label>
-                                    <Form.Control type="number" name='firstMeeting' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. Of 2nd Meetings</Form.Label>
-                                    <Form.Control type="number" name='secondMeeting' onChange={() => { }} />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. of client review meetings</Form.Label>
-                                    <Form.Control type="number" name='clientReview' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
-                                    <Form.Control type="text" name='outBoundId' onChange={() => { }} required />
-                                </Form.Group>
-                            </div>
-                            <div className="col-md-6">
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Assets Brought In ($)</Form.Label>
-                                    <Form.Control type="number" name='assetBroughtIn' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Total Assets Under Management ($)</Form.Label>
-                                    <Form.Control type="number" name='totalAssetManagement' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>1st meeting with whom</Form.Label>
-                                    <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>2nd meeting with whom</Form.Label>
-                                    <Form.Control type="text" name='secondMeetingWhom' onChange={() => { }} />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Review meetings with whom</Form.Label>
-                                    <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>No. of new clients</Form.Label>
-                                    <Form.Control type="number" name='newClientId' onChange={() => { }} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>New client name</Form.Label>
-                                    <Form.Control type="text" name='newClientName' onChange={() => { }} required />
-                                </Form.Group>
-                            </div>
-                        </div>
+                    <div className="row">
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Advisor Name</Form.Label>
+            <Form.Select aria-label="Default select example" name='advisorName' onChange={() => { }} required>
+                <option value={""}>--Select--</option>
+                <option value="Noland">Noland</option>
+                <option value="Freddy">Freddy</option>
+                <option value="Brian">Brian</option>
+            </Form.Select>
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Assets Brought In ($)</Form.Label>
+            <Form.Control type="number" name='assetBroughtIn' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
+            <Form.Control type="text" name='outBoundId' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Date</Form.Label>
+            <Form.Control type="date" name="date" onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Which client was assets brought in from?</Form.Label>
+            <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Total Assets Under Management ($)</Form.Label>
+            <Form.Control type="number" name='totalAssetManagement' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>No. Of 1st Meetings</Form.Label>
+            <Form.Control type="number" name='firstMeeting' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>1st meeting with whom</Form.Label>
+            <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>No. Of 2nd Meetings</Form.Label>
+            <Form.Control type="number" name='secondMeeting' onChange={() => { }} />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>2nd meeting with whom</Form.Label>
+            <Form.Control type="text" name='secondMeetingWhom' onChange={() => { }} />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>No. of client review meetings</Form.Label>
+            <Form.Control type="number" name='clientReview' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>Review meetings with whom</Form.Label>
+            <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+<div className="row">
+    <div className="col-md-6">
+    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>No. of new clients</Form.Label>
+            <Form.Control type="number" name='newClientId' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+    <div className="col-md-6">
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Label>New Client Name</Form.Label>
+            <Form.Control type="text" name='newClientName' onChange={() => { }} required />
+        </Form.Group>
+    </div>
+</div>
+
                         <div className="d-flex justify-content-end">
                             <button className='btn btn-primary me-2'>Submit</button>
                             <button className='btn btn-secondary' onClick={handleClose}>Cancel</button>
@@ -583,7 +633,9 @@ export default function BusinessTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="timeFrame">
                                     <Form.Label>Time Frame</Form.Label>
-                                    <Form.Select name='timeFrame' defaultValue={editData?.timeFrame} onChange={(e) => setTimeFrame(e.target.value)} required>
+                                    <Form.Select name='timeFrame' defaultValue={editData?.timeFrame} onChange={(e) => setTimeFrame(e.target.value)} 
+                                    disabled={isDate}
+                                    required>
                                         <option value={""}>--Select--</option>
                                         <option value="lastweek">Last Week</option>
                                         <option value="week">Current Week</option>
@@ -596,13 +648,13 @@ export default function BusinessTracking() {
                             <div className="col-md-6">
                                 <Form.Group className='mb-3'>
                                     <Form.Label>Start Date</Form.Label>
-                                    <Form.Control type='date' name='startdate' disabled={!!timeFrame} required />
+                                    <Form.Control type='date' name='startdate' onChange={handleDate} disabled={!!timeFrame} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className='mb-3'>
                                     <Form.Label>End Date</Form.Label>
-                                    <Form.Control type='date' name='endDate' disabled={!!timeFrame} required />
+                                    <Form.Control type='date' name='enddate' onChange={handleDate} disabled={!!timeFrame} required />
                                 </Form.Group>
                             </div>
                         </div>

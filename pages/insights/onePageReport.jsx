@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
+import PDFViewer from '../../components/PDFViewer';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -75,7 +76,9 @@ export default function OnePageReport() {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.companyName}</p>
-                <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+                {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
+                <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>
+                {console.log("pDF url",`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`)}
               </div>
             </div>
             <div className="col-md-5">

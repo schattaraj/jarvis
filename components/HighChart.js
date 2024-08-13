@@ -20,19 +20,25 @@ const HightChart = ({data,title,typeCheck,yAxisTitle,titleAlign,subTitle}) => {
           align: titleAlign ? titleAlign : 'left'
         },
         subtitle: {
-          text: subTitle ? subTitle : document.ontouchstart === undefined ?
-            'Click and drag in the plot area to zoom in' :
-            'Pinch the chart to zoom in',
+          // text: subTitle ? subTitle : document.ontouchstart === undefined ?
+          //   'Click and drag in the plot area to zoom in' :
+          //   'Pinch the chart to zoom in',
           align: titleAlign ? titleAlign : 'left'
         },
         xAxis: typeCheck == null ? {
            
         //   tickInterval: 1 // Ensures whole years on the x-axis
         type: 'datetime', // Use datetime axis
-        tickInterval: 24 * 3600 * 1000 * 30, // Monthly intervals
-        dateTimeLabelFormats: {
-          month: '%b %Y'
-        }
+        // tickInterval: 24 * 3600 * 1000 * 30, // Monthly intervals
+        tickInterval: 24 * 3600 * 1000, // Monthly intervals
+        labels: {
+          format: '{value:%e %b %Y}', // Display day, abbreviated month, and year
+          rotation: -45, // Optional: rotate labels for better readability
+          align: 'right',
+        },
+        // dateTimeLabelFormats: {
+        //   month: '%b %Y'
+        // }
         }
         : typeCheck,
         yAxis: {

@@ -78,6 +78,7 @@ export default function Sidebar() {
                   <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/BusinessPipeline' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/BusinessPipeline">Business Pipeline</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/BusinessTracking' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/BusinessTracking">Business Tracking</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/Prospects' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/Prospects">Prospects</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/BusinessActivity/SeminarTracking' ? 'nav-link btn active' : 'nav-link'} href="/BusinessActivity/SeminarTracking">Seminar Tracking</Link></li>
                 </ul>
                 </div>
             </li>

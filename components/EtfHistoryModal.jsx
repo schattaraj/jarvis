@@ -17,14 +17,19 @@ import {
     DialogContent,
     TablePagination,
     Button,
+    TextField
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import { Context } from '../contexts/Context';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx'; // For Excel export
+import jsPDF from 'jspdf'; // For PDF export
+import 'jspdf-autotable'; // For PDF table auto-generation
 function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDates, setActiveView}) {
     const [data, setData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState(''); // State for search query
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
     const [page, setPage] = useState(0);
@@ -67,8 +72,9 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
     };
 
     const cancelDelete = () => {
-        setDeleteItemId(null);
-        setDeleteConfirmationOpen(false);
+        handleCloseModal()
+        // setDeleteItemId(null);
+        // setDeleteConfirmationOpen(false);
     };
 
     const handleChangePage = (event, newPage) => {
@@ -118,6 +124,9 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
+    const handleDelete = ()=>{
+
+    }
     const options = {
         replace: (elememt) => {
             if (elememt?.attribs?.type === 'checkbox') {
@@ -152,12 +161,52 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
           }
           context.setLoaderState(false)
     }
+    // Filter the data based on the search query
+    const filteredData = data.filter((row) =>
+        row.importDate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        row.month.toLowerCase().includes(searchQuery.toLowerCase())
+    );
     useEffect(() => {
         if (open) {
             fetchData();
         }
     }, [open]);
+    
+// Export table to Excel
+const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, "HistoryData.xlsx");
+};
 
+// Export table to CSV
+const exportToCSV = () => {
+    const csvData = filteredData.map(row => ({
+        "Import Date": row.importDate,
+        "Month": row.month,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(csvData);
+    const csv = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'HistoryData.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+};
+
+// Export table to PDF
+const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("History Data", 20, 10);
+    doc.autoTable({
+        head: [['Import Date', 'Month']],
+        body: filteredData.map(row => [row.importDate, row.month]),
+    });
+    doc.save('HistoryData.pdf');
+};
   return (
       <Modal open={open} onClose={handleCloseModal}>
             <Box
@@ -166,8 +215,11 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
+                    marginLeft:"auto",
+                    marginRight:"auto",
                     width: '80%',
-                    maxHeight: '90vh',
+                    overflowY:"auto",
+                    // maxHeight: '90vh',
                     bgcolor: 'background.paper',
                     boxShadow: 24,
                     p: 3,
@@ -179,6 +231,25 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
                         <CloseIcon />
                     </IconButton>
                 </Box>
+                <Box className="mb-3">
+                        <Button variant="contained" color="primary" onClick={exportToExcel} sx={{ marginRight: 1 }}>
+                            Export to Excel
+                        </Button>
+                        <Button variant="contained" color="secondary" onClick={exportToCSV} sx={{ marginRight: 1 }}>
+                            Export to CSV
+                        </Button>
+                        <Button variant="contained" color="error" onClick={exportToPDF}>
+                            Export to PDF
+                        </Button>
+                    </Box>
+                <TextField
+                    label="Search"
+                    variant="outlined"
+                    fullWidth
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ marginBottom: 2 }}
+                />
                 <TableContainer component={Paper} sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
                     <Table className='table'>
                         <TableHead>
@@ -190,7 +261,7 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                            {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
                                     <TableCell>{row.importDate}</TableCell>
@@ -216,9 +287,9 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                     <DialogActions>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
+                        <button className="btn btn-secondary" type="button" title="Cancel" onClick={cancelDelete}><span>Cancel</span></button>
                         <div className="dt-buttons mb-3"></div>
-                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="Compare" onClick={compare}><span>Compare</span></button>
+                        <button className="btn btn-primary" type="button" title="Compare" onClick={compare}><span>Compare</span></button>
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Box>

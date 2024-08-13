@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../../../utils/utils';
+import { amountSeperator, calculateAverage, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -23,22 +23,22 @@ import PieChart from '../../../components/PieChart.js';
 import Link from 'next/link.js';
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
-        { "data": "name" },
-        { "data": "opportunity" },
-        { "data": "opportunityComeAbout" },
-        { "data": "amounts" },
-        { "data": "status" },
-        { "data": "mostRecentActivity" },
-        { "data": "dateAdded" },
-        { "data": "lastContact" },
-        { "data": "followUpAction" },
-        { "data": "connections" },
-        { "data": "autoFinding" },
-        { "data": "otherOpportunities" },
-        { "data": "investorLifecycle" },
-        { "data": "accreditedInvestor" },
-        { "data": "advisorName" },
-        { "data": "action" }
+        { "data": "name", "display_name": "Name" },
+        { "data": "opportunity", "display_name": "Opportunity" },
+        { "data": "opportunityComeAbout", "display_name": "How did the ooportunity come about?" },
+        { "data": "amounts", "display_name": "Amount($)" },
+        { "data": "status", "display_name": "Status" },
+        { "data": "mostRecentActivity", "display_name": "Most Recent Activity" },
+        { "data": "dateAdded", "display_name": "Date added" },
+        { "data": "lastContact", "display_name": "Last Contact" },
+        { "data": "followUpAction", "display_name": "Follow Up Action" },
+        { "data": "connections", "display_name": "Connections" },
+        { "data": "autoFinding", "display_name": "Auto Funding" },
+        { "data": "otherOpportunities", "display_name": "Other Opportunities" },
+        { "data": "investorLifecycle", "display_name": "Investor Lifecycle" },
+        { "data": "accreditedInvestor", "display_name": "Accredited Investor" },
+        { "data": "advisorName", "display_name": "Advisor Name" },
+        { "data": "action", "display_name": "Action" }
     ])
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
@@ -447,6 +447,10 @@ export default function BusinessPipeline() {
     const changeLimit = (e) => {
         setLimit(e.target.value)
     }
+    const filterReset = ()=>{
+        setFilterInputs({startDate:"", endDate:"", searchAdvisorName:"", searchStatus:"", searchMostRecentActivity:"" })
+        fetchData()
+    }
     useEffect(() => {
         fetchData()
     }, [])
@@ -490,8 +494,8 @@ export default function BusinessPipeline() {
                 <div className="content-wrapper">
                     <div className="page-header">
                         <h3 className="page-title">
-                        <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
-                               <i className="mdi mdi-home"></i>
+                            <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
+                                <i className="mdi mdi-home"></i>
                             </span></Link>Business Pipeline
                         </h3>
                     </div>
@@ -520,8 +524,9 @@ export default function BusinessPipeline() {
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
-                                        <th key={index} onClick={() => handleSort(columnName.data)} className={columnName.data === "action" ? "sticky-action" : columnName.data == "name" ? "sticky-left" : ""}>
-                                            {columnName.data}
+                                        <th key={index} onClick={() => handleSort(columnName.data)}
+                                            className={columnName.data === "action" ? "sticky-action" : columnName.data == "name" ? "sticky-left" : ""}>
+                                            {columnName.display_name}
                                             {getSortIcon(columnName.data)}
                                         </th>
                                     ))}
@@ -540,8 +545,11 @@ export default function BusinessPipeline() {
                                                 if (columnName.data == "advisorName") {
                                                     return <td key={colIndex}><a href="#" onClick={() => { totalAmountByPerson(content) }}>{content}</a></td>;
                                                 }
+                                                if (columnName.data == "amounts") {
+                                                    content = amountSeperator(rowData[columnName.data])
+                                                }
                                                 if (columnName.data == "action") {
-                                                    return <td key={colIndex} className="sticky-action">
+                                                    return <td key={colIndex} className='sticky-action'>
                                                         <button className='px-4 btn btn-primary' title="Edit" onClick={() => { handleEditModal("open", rowData?.idBusinessPipelineg) }}><i className="mdi mdi-pen"></i></button>
                                                         <button className='px-4 ms-2 btn btn-danger' title='Delete' onClick={() => { deleteBusinessPipeline(rowData?.idBusinessPipelineg) }}><i className="mdi mdi-delete"></i></button>
                                                     </td>;
@@ -579,76 +587,6 @@ export default function BusinessPipeline() {
                                         Name is required
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>How did the opportunity come about?</Form.Label>
-                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selecteOpportunityComeAbout} isMulti options={[
-                                        { value: "Seminar", label: "Seminar" },
-                                        { value: "Referral", label: "Referral" },
-                                        { value: "Social_Media", label: "Social Media" },
-                                        { value: "Response_to_our_marketing", label: "Response to our marketing" },
-                                        { value: "Current_Client", label: "Current Client" },
-                                        { value: "LBCA_Investor", label: "LBCA Investor" }
-                                    ]
-                                    } required />
-                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)} />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Status</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} required>
-                                        <option value={""}>--Select--</option>
-                                        <option value="Business has closed (Complete)">Business has closed (Complete)</option>
-                                        <option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
-                                        <option value="Upcoming Meeting">Upcoming Meeting</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Most Recent Activity</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' required>
-                                        <option value={""}>--Select--</option>
-                                        <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
-                                        <option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
-                                        <option value="Meeting scheduled">Meeting scheduled</option>
-                                        <option value="No contact in the past 30 days">No contact in the past 30 days</option>
-                                    </Form.Select>
-
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Date Added</Form.Label>
-                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Follow Up Action</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
-                                        <option>--Select--</option>
-                                        <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
-                                        <option value="Closed">Closed</option>
-                                        <option value="Discussed"> Discussed</option>
-                                        <option value="In Review">In Review</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-3 form-group radio">
-                                    <Form.Label>Auto Funding</Form.Label>
-                                    <Form.Check type="radio" id="yesFunding" value="Yes" label="Yes" name='autoFinding' className='ms-4' required />
-                                    <Form.Check type="radio" id="noFunding" value="No" label="No" name='autoFinding' className='ms-4' required />
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Investor Lifecycle</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="investorLifecycle" required>
-                                        <option value="">--Select --</option>
-                                        <option value="Creating Wealth">Creating Wealth</option>
-                                        <option value="Building Wealth">Building Wealth</option>
-                                        <option value="Preserving Wealth">Preserving Wealth</option>
-                                    </Form.Select>
-                                </Form.Group>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Advisor Name</Form.Label>
-                                    <Form.Select aria-label="Default select example" name="advisorName" required>
-                                        <option value="">--Select --</option>
-                                        <option value="Noland">Noland</option>
-                                        <option value="Freddy">Freddy</option>
-                                        <option value="Brian">Brian</option>
-                                    </Form.Select>
-                                </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -664,30 +602,153 @@ export default function BusinessPipeline() {
                                     } required />
                                     <input type="hidden" name="opportunity" value={JSON.stringify(selectedOpportunity)} />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>How did the opportunity come about?</Form.Label>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selecteOpportunityComeAbout} isMulti options={[
+                                        { value: "Seminar", label: "Seminar" },
+                                        { value: "Referral", label: "Referral" },
+                                        { value: "Social_Media", label: "Social Media" },
+                                        { value: "Response_to_our_marketing", label: "Response to our marketing" },
+                                        { value: "Current_Client", label: "Current Client" },
+                                        { value: "LBCA_Investor", label: "LBCA Investor" }
+                                    ]
+                                    } required />
+                                    <input type="hidden" name="opportunityComeAbout" value={JSON.stringify(selectedOpportunityComeAbout)} />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Amount ($)</Form.Label>
                                     <Form.Control type="number" name='amounts' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Status</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='status' isInvalid={!!errors.status} required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Business has closed (Complete)">Business has closed (Complete)</option>
+                                        <option value="Waiting for Outstanding Items">Waiting for Outstanding Items</option>
+                                        <option value="Upcoming Meeting">Upcoming Meeting</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Status Notes</Form.Label>
                                     <Form.Control type="text" name='statusNotes' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Most Recent Activity</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='mostRecentActivity' required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Meeting/Contact in the last 10 days">Meeting/Contact in the last 10 days</option>
+                                        <option value="Meeting/Contact in the past 11-30 days">Meeting/Contact in the past 11-30 days</option>
+                                        <option value="Meeting scheduled">Meeting scheduled</option>
+                                        <option value="No contact in the past 30 days">No contact in the past 30 days</option>
+                                    </Form.Select>
+
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Most Recent Activity Notes</Form.Label>
                                     <Form.Control type="text" name='mostRecentActivity' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Date Added</Form.Label>
+                                    <Form.Control type="date" name="dateAdded" isInvalid={!!errors.dateAdded} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Last Contact</Form.Label>
                                     <Form.Control type="date" name='lastContact' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Follow Up Action</Form.Label>
+                                    <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
+                                        <option>--Select--</option>
+                                        <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
+                                        <option value="Closed">Closed</option>
+                                        <option value="Discussed"> Discussed</option>
+                                        <option value="In Review">In Review</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Follow Up Date</Form.Label>
                                     <Form.Control type="date" name='followUpDate' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3 form-group radio">
+                                    <Form.Label>Auto Funding</Form.Label>
+                                    <Form.Check type="radio" id="yesFunding" value="Yes" label="Yes" name='autoFinding' className='ms-4' required />
+                                    <Form.Check type="radio" id="noFunding" value="No" label="No" name='autoFinding' className='ms-4' required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Other Opportunities</Form.Label>
                                     <Form.Control type="text" name='otherOpportunities' />
                                 </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Investor Lifecycle</Form.Label>
+                                    <Form.Select aria-label="Default select example" name="investorLifecycle" required>
+                                        <option value="">--Select --</option>
+                                        <option value="Creating Wealth">Creating Wealth</option>
+                                        <option value="Building Wealth">Building Wealth</option>
+                                        <option value="Preserving Wealth">Preserving Wealth</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3 form-group radio">
+                                    <Form.Label>Accredited Investor</Form.Label>
+                                    <Form.Check type="radio" id="investorYes" value="Yes" label="Yes" name='accreditedInvestor' className='ms-4' required />
+                                    <Form.Check type="radio" id="investorNo" value="No" label="No" name='accreditedInvestor' className='ms-4' required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Advisor Name</Form.Label>
+                                    <Form.Select aria-label="Select Advisor" name="advisorName" required>
+                                        <option value="">--Select --</option>
+                                        <option value="Noland">Noland</option>
+                                        <option value="Freddy">Freddy</option>
+                                        <option value="Brian">Brian</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
                                     <Form.Select aria-label="Default select example" name='connections'>
@@ -972,6 +1033,7 @@ export default function BusinessPipeline() {
                         </div>
                         <div className="d-flex justify-content-end">
                             <button className='btn btn-primary me-2'>Submit</button>
+                            <button className='btn btn-primary me-2' type='button' onClick={filterReset}>Reset</button>
                             <button className='btn btn-secondary' onClick={() => { setFilterModal(false) }}>Cancel</button>
                         </div>
                     </Form>
@@ -986,7 +1048,7 @@ export default function BusinessPipeline() {
                         labels: Array.isArray(analysisData) && analysisData?.map((item) => item?.name),
                         values: Array.isArray(analysisData) && analysisData?.map((item) => item?.y)
                     }} /> */}
-                   {analysisData && <PieChart data={analysisData?.map((item)=>({name:item?.name,y:item?.y}))} />}
+                    {analysisData && <PieChart data={analysisData?.map((item) => ({ name: item?.name, y: item?.y }))} />}
                 </Modal.Body>
             </Modal>
         </>

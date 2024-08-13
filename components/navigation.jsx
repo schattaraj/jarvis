@@ -20,7 +20,7 @@ export default function Navigation() {
           
           <ul className="navbar-nav navbar-nav-right">
             
-            <li className="nav-item dropdown">
+            {/* <li className="nav-item dropdown">
               <a className="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
                 <i className="mdi mdi-bell-outline"></i>
                 <span className="count-symbol bg-danger"></span>
@@ -107,7 +107,7 @@ export default function Navigation() {
                 <div className="dropdown-divider"></div>
                 <h6 className="p-3 mb-0 text-center">4 new messages</h6>
               </div>
-            </li>
+            </li> */}
             <li className="nav-item nav-profile dropdown">
             <Dropdown>
       <Dropdown.Toggle variant="" className='nav-link' id="dropdown-basic">

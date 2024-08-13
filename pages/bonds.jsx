@@ -107,6 +107,8 @@ export default function Bonds() {
     })
     const [selectedView, setSelectedView] = useState('element9')
     const [dateModal, setDateModal] = useState(false)
+    const [file, setFile] = useState(null);
+    const [fileDate, setFileDate] = useState('');
     const router = useRouter()
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -393,12 +395,18 @@ export default function Bonds() {
         }
         context.setLoaderState(true)
         try {
-            const formData = new FormData(form);
+            const formData = new FormData();
+            formData.append('metaDataName', 'Bondpricing_Master');
+            formData.append('fileDate', fileDate);
+            formData.append('myfile', file);
+            console.log("formData",formData)
             const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileBondImport", {
                 method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                    'Cache-Control': 'max-age=0',
+                    'Content-Type': 'multipart/form-data',
+                  },
                 body: formData
             })
             const uploadRes = await upload.json()
@@ -410,10 +418,11 @@ export default function Bonds() {
         }
         context.setLoaderState(false)
     }
-    const reset = ()=>{
-        // router.push('/bonds')
-        location.reload()
-    }
+    const handleFileChange = (e) => {
+        console.log(e.target.files)
+        setFile(e.target.files[0]);
+      };
+    
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -546,13 +555,13 @@ export default function Bonds() {
                                 <div className="col-md-3">
                                     <div className="form-group">
                                         <label htmlFor="" className='form-label'>File Upload Date</label>
-                                        <input type="date" className="form-control" name='fileDate' />
+                                        <input type="date" className="form-control" name='fileDate' required onChange={(e)=>{setFileDate(e.target.value)}}/>
                                     </div>
                                 </div>
                                 <div className="col-md-6">
                                     <div className="form-group">
                                         <label htmlFor="uploadFile">Upload File</label>
-                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required />
+                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required  onChange={handleFileChange} />
                                     </div>
                                 </div>
                                 <div className="col-md-3">
@@ -569,7 +578,7 @@ export default function Bonds() {
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Calculate" ? ` active` : ''}`} type="button" title="Calculate" onClick={() => { setCalculateModal(true) }}><span>Calculate</span></button>
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Grid View" ? ` active` : ''}`} type="button" title="Grid View" onClick={gridView}><span>Grid View</span></button>
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
-                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={bondHome}><span>Reset</span></button>
                         {/* <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={() => { }}><span>Bond Details</span></button> */}
                     </div>
 

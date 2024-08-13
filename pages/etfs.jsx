@@ -660,8 +660,8 @@ if(compareData && activeView == "History"){
                                             </tbody>
                                         </table>
                                     </div>
-                                     
-                                    <h3 className='mb-3'>Worst Stocks</h3>
+                                    <HightChart data={compareData?.bestFiveStocks?.map((item) => [item['bestMovedStock'], parseFloat(item['percentageChangeRise'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={`Best Twenty`}/>
+                                    <h3 className='my-3'>Worst Stocks</h3>
                                     <div className='d-flex justify-content-between align-items-center'>
                                         <div className="dt-buttons mb-3">
                                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
@@ -701,6 +701,7 @@ if(compareData && activeView == "History"){
                                             </tbody>
                                         </table>
                                     </div>
+                                    <HightChart data={compareData?.worstFiveStocks?.map((item) => [item['worstMovedStock'], parseFloat(item['percentageChangeDrop'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Worst Twenty"} />
                                 </>
 }
                 </div>

@@ -29,6 +29,7 @@ export default function Prospects() {
         { "data": "notes", "column_name": "Notes" },
         { "data": "refferedBy", "column_name": "Referred by" },
         { "data": "recentActivity", "column_name": "Most recent activity" },
+        { "data": "mostRecentActivity", "column_name": "Relationship Manager" },
         { "data": "idProspect", "column_name": "Action" }
     ])
     const [tableData, setTableData] = useState([])
