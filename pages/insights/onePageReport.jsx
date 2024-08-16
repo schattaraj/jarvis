@@ -11,7 +11,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
-// import PDFViewer from '../../components/PDFViewer';
+import PDFViewer from '../../components/PDFViewer';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -39,6 +39,9 @@ export default function OnePageReport() {
     setCurrentPdf(path)
     console.log("path", path)
   }
+  const filter = (e) => {
+
+  }
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   useEffect(() => {
     fetchVideoes()
@@ -55,14 +58,20 @@ export default function OnePageReport() {
             </h3>
             <nav aria-label="breadcrumb">
               <ul className="breadcrumb">
-                <li className="breadcrumb-item active" aria-current="page">
+                {/* <li className="breadcrumb-item active" aria-current="page">
                   <span></span>Overview <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                </li>
+                </li> */}
               </ul>
             </nav>
           </div>
           {/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
           <p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
+          <div className='d-flex justify-content-between align-items-center'>
+            <div className="d-flex dt-buttons mb-3">
+            <div className="d-flex align-items-center me-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+            <button className="dt-button buttons-html5 btn-primary h-auto" type="button" onClick="#"><span>Filter</span></button>
+            </div>
+          </div>
           <div className="row">
             <div className="col-md-7">
               <div className="left">
@@ -76,7 +85,8 @@ export default function OnePageReport() {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.companyName}</p>
-                <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
+                {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
                 {/* <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/> */}
                 {/* {console.log("pDF url",`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`)} */}
               </div>

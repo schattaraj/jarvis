@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
+import Select from 'react-select'
 export default function Reports() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -68,9 +69,9 @@ export default function Reports() {
             </h3>
             <nav aria-label="breadcrumb">
               <ul className="breadcrumb">
-                <li className="breadcrumb-item active" aria-current="page">
+                {/* <li className="breadcrumb-item active" aria-current="page">
                   <span></span>Overview <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
-                </li>
+                </li> */}
               </ul>
             </nav>
           </div>
@@ -81,15 +82,63 @@ export default function Reports() {
               {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
               {/* <button className="dt-button buttons-html5 btn-primary" type="button" onClick={handleOpen}><span>Add Pipeline</span></button> */}
-              <div className="form-group mb-0">
-                <label htmlFor="">Options</label>
-                <select name="portfolio_name" className='form-select' onChange={handleChange} style={{width:"200px",marginRight:"8px"}}>
+              <div className="d-flex align-items-center me-2">
+                <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Sort By : </label>
+                <select name="portfolio_name" className='form-select' onChange={handleChange} style={{width:"140px",marginRight:"8px"}}>
+									<option value="Ticker Name">Ticker Name</option>
+									<option value="Report Date">Report Date</option>
                   {/* {option.map((option, index) => (
                                                     <option key={index} value={option}>
                                                         {option}
                                                     </option>
                                                 ))} */}
                 </select>
+              </div>
+              <div className="d-flex align-items-center me-2">
+                <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Order : </label>
+                <select name="portfolio_name" className='form-select' onChange={handleChange} style={{width:"130px",marginRight:"8px"}}>
+									<option value="Asc">Ascending</option>
+									<option value="Desc">Descending</option>
+                  {/* {option.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))} */}
+                </select>
+              </div>
+              <div className="d-flex align-items-center me-2">
+                <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Options : </label>
+                {/* <select name="portfolio_name" className='form-select' onChange={handleChange} style={{width:"180px",marginRight:"8px"}}>
+                  <option value="-1">--Select Category--</option>
+									<option value="First Focus">First Focus</option>
+									<option value="Fresh Look">Fresh Look</option>
+									<option value="Read and React">Read and React</option>	
+									<option value="Grab and Go 7-packs">Grab and Go 7-packs</option>
+									<option value="Special Reports">Special Reports</option>
+									<option value="Annual Reports">Annual Reports</option>
+									<option value="Shareholder Letters">Shareholder Letters</option>
+									<option value="Jarvis Weekly">Jarvis Weekly</option>
+									<option value="Logo">Logo</option>
+									<option value="One Page Reports">One Page Reports</option>
+                  {option.map((option, index) => (
+                                                    <option key={index} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))}
+                </select> */}
+                <Select name="portfolio_name" className='w-100 mb-0 me-2 col-md-4'  isMulti options={[
+                                        { value: "First Focus", label: "First Focus" },
+                                        { value: "Fresh Look", label: "Fresh Look" },
+                                        { value: "Read and React", label: "Read and React" },
+                                        { value: "Grab and Go 7-packs", label: "Grab and Go 7-packs" },
+                                        { value: "Special Reports", label: "Special Reports" },
+                                        { value: "Annual Reports", label: "Annual Reports" },
+                                        { value: "Shareholder Letters", label: "Shareholder Letters" },
+                                        { value: "Jarvis Weekly", label: "Jarvis Weekly" },
+                                        { value: "Logo", label: "Logo" },
+                                        { value: "One Page Reports", label: "One Page Reports" },
+                                    ]
+                                    }  required />
               </div>
               <div className="d-flex align-items-center me-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
               <button className="dt-button buttons-html5 btn-primary h-auto" type="button" onClick={handleOpenAmount}><span>Filter</span></button>
