@@ -455,7 +455,7 @@ export default function Bonds() {
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
-        getTickerCartDtata()
+        // getTickerCartDtata()
     }, [])
     useEffect(() => {
         if (compareData) {

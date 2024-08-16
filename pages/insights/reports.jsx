@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
+import PDFViewer from '../../components/PDFViewer';
 export default function Reports() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -25,7 +26,6 @@ export default function Reports() {
       const response = await apiCall.json()
       setReports(response)
       setCurrentPdf(response[0])
-      console.log(response)
     }
     catch (e) {
       console.log("error", e)
@@ -109,7 +109,8 @@ export default function Reports() {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.companyName}</p>
-                <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+               {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
+                {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
               </div>
             </div>
             <div className="col-md-5">
@@ -127,7 +128,7 @@ export default function Reports() {
                 <Swiper
                   spaceBetween={30}
                   slidesPerView={1}
-                  onSlideChange={() => console.log('slide change')}
+                  // onSlideChange={() => console.log('slide change')}
                   navigation={true} modules={[Nav2, Autoplay]}
                   autoplay={{
                     delay: 2500,

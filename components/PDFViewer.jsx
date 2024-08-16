@@ -1,34 +1,70 @@
-import React, { useState } from 'react';
-import { Document, Page } from 'react-pdf';
-import { pdfjs } from 'react-pdf';
-// import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
+import { useContext, useEffect } from "react";
+import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.js";
+import { Context } from "../contexts/Context";
 
-// // pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-//     'pdfjs-dist/build/pdf.worker.min.mjs',
-//     import.meta.url,
-//   ).toString();
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const PDFViewer = ({ pdfUrl }) => {
-  const [numPages, setNumPages] = useState(null);
+  const context = useContext(Context)
+  useEffect(() => {
+    context.setLoaderState(true)
+    if (pdfUrl) {
+      const loadingTask = pdfjsLib.getDocument({ url: pdfUrl });
+      loadingTask.promise.then((pdf) => {
+        const container = document.getElementById("pdf-container");
+        container.innerHTML = ""; // Clear the container before rendering
+        const renderPages = async () => {
+          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const scale = 1.5;
+            const viewport = page.getViewport({ scale });
 
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
-  }
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            canvas.style.width = "100%";
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            container.appendChild(canvas);
+
+            const renderContext = {
+              canvasContext: context,
+              viewport: viewport,
+            };
+
+            await page.render(renderContext).promise;
+          }
+          context.setLoaderState(false); // Hide loader after rendering all pages
+        };
+
+        renderPages();
+      }).catch(error => {
+        console.error("Error loading PDF: ", error);
+      });
+    } else {
+      console.error("PDF URL is not provided");
+    }
+  }, [pdfUrl]);
+
+  // Function to handle fullscreen
+  const handleFullScreen = () => {
+    const container = document.getElementById("pdf-container");
+    if (container.requestFullscreen) {
+      container.requestFullscreen();
+    } else if (container.mozRequestFullScreen) { // Firefox
+      container.mozRequestFullScreen();
+    } else if (container.webkitRequestFullscreen) { // Chrome, Safari and Opera
+      container.webkitRequestFullscreen();
+    } else if (container.msRequestFullscreen) { // IE/Edge
+      container.msRequestFullscreen();
+    }
+  };
 
   return (
     <div>
-      <Document
-        file={pdfUrl}
-        onLoadSuccess={onDocumentLoadSuccess}
-      >
-        {Array.from(
-          new Array(numPages),
-          (el, index) => (
-            <Page key={`page_${index + 1}`} pageNumber={index + 1} />
-          ),
-        )}
-      </Document>
+      <button className="btn btn-primary mb-3" onClick={handleFullScreen}>View Fullscreen</button>
+      <div id="pdf-container" style={{ width: '100%', height: 'auto',maxHeight: '100vh',overflowY: 'auto', }}></div>
     </div>
   );
 };
