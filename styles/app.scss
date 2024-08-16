@@ -1202,3 +1202,7 @@ z-index: 999999 !important;
     margin: 5px;
     -webkit-backface-visibility: hidden;
   }
+  #pdf-container {
+    position: relative;
+    overflow: hidden;
+  }

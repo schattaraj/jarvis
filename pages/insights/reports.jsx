@@ -98,7 +98,7 @@ export default function Reports() {
           </div>
           <div className="row">
             <div className="col-md-7">
-              <div className="left">
+              <div className="left" style={{height:"auto"}}>
                 <h3>Latest Post</h3>
                 {!currentPdf &&
                   <SkeletonTheme>
