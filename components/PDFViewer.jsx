@@ -3,6 +3,8 @@ import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.js";
 import { Context } from "../contexts/Context";
 import { PageFlip } from "page-flip";
+import Link from "next/link";
+import { Button } from "react-bootstrap";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -91,10 +93,25 @@ const PDFViewer = ({ pdfUrl }) => {
       container.msRequestFullscreen();
     }
   };
-
+  function downloadPDF(url) {
+    const slipLength = url.split("/").length
+    const fileName = url.split("/")[slipLength - 1]
+    fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        })
+        .catch(error => console.error('Error downloading the PDF:', error));
+}
   return (
     <div>
-      <button className="btn btn-primary mb-3" onClick={handleFullScreen}>View Fullscreen</button>
+      <div className="d-flex">
+      <button className="btn btn-primary mb-3 me-2" onClick={handleFullScreen}>View Fullscreen</button>
+      <button className="btn btn-primary mb-3 w-auto" onClick={()=>{downloadPDF(pdfUrl)}}>Download</button>
+      </div>
       <div
         id="pdf-container"
         ref={flipbookRef}

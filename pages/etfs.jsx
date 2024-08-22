@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { Context } from '../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, exportToExcel, formatDate, getSortIcon, searchTable } from '../utils/utils';
+import { exportToExcel, formatDate, getSortIcon, searchTable } from '../utils/utils';
 import EtfHistoryModal from '../components/EtfHistoryModal';
 import { Pagination } from '../components/Pagination';
 import SliceData from '../components/SliceData';
@@ -14,8 +14,7 @@ import { generatePDF } from '../utils/utils';
 import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
 import { Form, Modal } from 'react-bootstrap';
-import { Filter, Filter1, Filter1Outlined, Filter1TwoTone, Filter3, FilterAlt } from '@mui/icons-material';
-import { TablePagination } from '@mui/material';
+import { FilterAlt } from '@mui/icons-material';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {

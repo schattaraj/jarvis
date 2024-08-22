@@ -363,7 +363,7 @@ export default function Bonds() {
         context.setLoaderState(false)
     }
     const fetchTickersFunc = async () => {
-        context.setLoaderState(true)
+        // context.setLoaderState(true)
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
             const fetchTickersRes = await fetchTickers.json()
@@ -373,7 +373,7 @@ export default function Bonds() {
         catch (e) {
             console.log("Error - 335", e);
         }
-        context.setLoaderState(false)
+        // context.setLoaderState(false)
     }
     const handleDateRange = (e) => {
         setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) })

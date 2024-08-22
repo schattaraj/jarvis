@@ -136,7 +136,7 @@ export default function Sidebar() {
               <div className={context.openDropdown === "marketAnalytics" ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
                   <li className="nav-item"><Link className={router.pathname === '/stocks' ? 'nav-link btn active' : 'nav-link'} href="/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
-                  <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
+                  {/* <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
                 <ul className="nav flex-column sub-menu ps-3">
                 <li className='nav-item'>
                   <Link className={router.pathname === '/stocks' ? 'nav-link active' : 'nav-link'} href="/stocks">Screener</Link>
@@ -151,7 +151,7 @@ export default function Sidebar() {
                   <Link className={router.pathname === '/topStocks' ? 'nav-link active' : 'nav-link'} href="/topStocks">Top Stocks</Link>
                 </li>
                 </ul>
-                </div>
+                </div> */}
                   </li>
                   <li className="nav-item"><Link className={router.pathname === '/bonds' ? 'nav-link active' : 'nav-link'} href="/bonds">Bonds</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/etfs' ? 'nav-link active' : 'nav-link'} href="/etfs">ETFs</Link></li>
@@ -205,7 +205,7 @@ export default function Sidebar() {
                 <li className="nav-item"><Link className={router.pathname === '/insights/videoes' ? 'nav-link active' : 'nav-link'} href="/insights/videoes">Videos</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/podcast' ? 'nav-link active' : 'nav-link'} href="/insights/podcast">Podcast</Link></li>
                 <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/reports">Reports</Link></li>
-                <li className="nav-item"><Link className={router.pathname === '/insights/reports' ? 'nav-link active' : 'nav-link'} href="/insights/onePageReport">One Page Report</Link></li>
+                <li className="nav-item"><Link className={router.pathname === '/insights/onePageReport' ? 'nav-link active' : 'nav-link'} href="/insights/onePageReport">One Page Report</Link></li>
                 </ul>
               </div>
             </li>

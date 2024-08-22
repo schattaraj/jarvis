@@ -1,1275 +1,780 @@
 import React from 'react'
 import Footer from '../components/footer';
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
+import Select from 'react-select'
+import { Context } from '../contexts/Context';
+import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../utils/utils';
+import { Pagination } from '../components/Pagination';
+import parse from 'html-react-parser';
+import SliceData from '../components/SliceData';
+import Swal from 'sweetalert2';
+import { Form, Modal } from 'react-bootstrap';
+import HightChart from '../components/HighChart';
+import { FilterAlt } from '@mui/icons-material';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'
+import StockHistoryModal from '../components/StockHistoryModal';
+const extraColumns = [
+    {
+        "elementId": null,
+        "elementName": "Date",
+        "elementInternalName": "lastUpdatedAt",
+        "elementDisplayName": "Date",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    }
+];
+const bestFiveStockColumn = {
+    "company": "Company",
+    "bestMovedStock": "Most Risen Stock",
+    "bestMovedBy": "Price Risen By",
+    "percentageChangeRise": "% In Rise",
+    "bestMoveCurrValue": "Current Price",
+    "bestMovePrevValue": "Previous Price"
+}
+const worstFiveStockColumn = {
+    "company": "Company",
+    "worstMovedStock": "Most Dropped Stock",
+    "worstMovedBy": "Price Dropped By",
+    "percentageChangeRise": "% In Drop",
+    "worstMoveCurrValue": "Current Price",
+    "worstMovePrevValue": "Previous Price"
+}
 export default function Stocks() {
+    const [columnNames, setColumnNames] = useState([])
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
+    const [selectedTicker, setSelectedTicker] = useState(false)
+    const [tickers, setTickers] = useState(false);
+    const [activeView, setActiveView] = useState("Ticker Home")
+    const [chartHistory, setChartHistory] = useState([])
+    const [rankingData, setRankingData] = useState(false)
+    const [bestStocksFiltered, setBestStocksFiltered] = useState([])
+    const [worstStocksFiltered, setWorstStocksFiltered] = useState([])
+    const [historyModal, setHistoryModal] = useState(false)
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(25)
+    const [calculateModal, setCalculate] = useState(false)
+    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023 })
+    const [ViewOptions, setViewOptions] = useState({
+        element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
+        element32: { name: "enterPriseValue", displayName: "Enterprise value($M)" },
+        element33: { name: "priceSale", displayName: "Price / Sales" },
+        element34: { name: "grossMargin", displayName: "Gross Margin" },
+        element34: { name: "roic", displayName: "ROIC" },
+        element34: { name: "priceAvg", displayName: "Price vs 20-day Avg (%)" },
+        element34: { name: "price", displayName: "Price" },
+        element34: { name: "ytdReturn", displayName: "YTD Return" },
+        element34: { name: "dividendYield", displayName: "Dividend Yield" },
+        element34: { name: "shortFloat", displayName: "Short as % of Float" },
+        element34: { name: "relativeStrength", displayName: "Relative Strength" },
+        element34: { name: "priceEarning", displayName: "Price/Earnings" },
+        element34: { name: "evEbitda", displayName: "EV / EBITDA" },
+    })
+    const [selectedView, setSelectedView] = useState('element3')
+    const [chartData, setChartData] = useState([])
+    const [dateModal, setDateModal] = useState(false)
+    const [dates, setRankingDates] = useState({ date1: null, date2: null });
+    const [compareData, setCompareData] = useState(false)
+    const [openModal, setOpenModal] = useState(false);
+    const context = useContext(Context)
+    const handleSelect = (inputs) => {
+        let arr = inputs.map((item) => item.value)
+        setSelectedTicker(arr.join(","))
+    }
+    const getHistoryByTicker = async () => {
+        if (!selectedTicker) {
+            Swal.fire({ title: "Please Select a ticker", confirmButtonColor: "#719B5F" });
+            return;
+        }
+        context.setLoaderState(true)
+        try {
+            const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
+            setActiveView("Ticker Home")
+
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+        context.setLoaderState(false)
+    }
+    const charts = async () => {
+        if (!selectedTicker || selectedTicker.length == 0) {
+            Swal.fire({ title: "Please Select a Ticker", confirmButtonColor: "#719B5F" });
+            return;
+        }
+        context.setLoaderState(true)
+        try {
+            const payload = {
+                ticker: selectedTicker,
+                year: dateRange?.startDate,
+                year2: dateRange?.endDate,
+                metadataName: 'Tickers_Watchlist',
+                _: new Date().getTime() // This will generate a unique timestamp
+            };
+            const queryString = new URLSearchParams(payload).toString();
+            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            const getChartHistroryRes = await getChartHistrory.json()
+            console.log("getChartHistroryRes", getChartHistroryRes)
+            setChartHistory(getChartHistroryRes)
+            setActiveView("Chart View")
+            setTableData(getChartHistroryRes)
+            setFilterData(getChartHistroryRes)
+            setDateModal(false)
+        }
+        catch (e) {
+            console.log("Error", e)
+        }
+        context.setLoaderState(false)
+    }
+    const tickerHome = () => {
+        setActiveView("Ticker Home")
+    }
+    const ranking = async () => {
+        context.setLoaderState(true)
+        try {
+            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+            const rankingApiRes = await rankingApi.json()
+            setRankingData(rankingApiRes)
+            setActiveView("Ranking")
+        } catch (error) {
+
+        }
+        context.setLoaderState(false)
+    }
+    const reset = () => {
+
+    }
+    const fetchColumnNames = async () => {
+        context.setLoaderState(true)
+        try {
+            const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
+            const columnApiRes = await columnApi.json()
+            columnApiRes.push(...extraColumns)
+            setColumnNames(columnApiRes)
+            fetchData()
+        }
+        catch (e) {
+            console.log("error", e)
+            context.setLoaderState(false)
+        }
+
+    }
+    const fetchData = async () => {
+        context.setLoaderState(true)
+        try {
+
+            const getBonds = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
+            const getBondsRes = await getBonds.json()
+            setTableData(getBondsRes)
+            setFilterData(getBondsRes)
+
+        }
+        catch (e) {
+            console.log("error", e)
+        }
+        context.setLoaderState(false)
+    }
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+    const handlePage = async (action) => {
+        switch (action) {
+            case 'prev':
+                setCurrentPage(currentPage - 1)
+                break;
+            case 'next':
+                setCurrentPage(currentPage + 1)
+                break;
+            default:
+                setCurrentPage(currentPage)
+                break;
+        }
+    };
+    const filter = (e) => {
+        const value = e.target.value;
+        setFilterData(searchTable(tableData, value))
+    }
+    const exportPdf = () => {
+        if (tableData.length > 0) {
+            const doc = new jsPDF({ orientation: 'landscape' });
+            // Define autoTable options
+            const options = {
+                html: '#my-table',
+                theme: 'striped', // Optional: adds some style
+                margin: { top: 10, left: 10, right: 10, bottom: 10 },
+                // tableWidth: 'auto', // Automatically adjust table width
+                startY: 20, // Adjust this if the table starts too close to the top of the page
+                pageBreak: 'auto', // Automatically handle page breaks
+                styles: {
+                    cellPadding: 2, // Adjust padding if needed
+                    fontSize: 10, // Adjust font size if needed
+                    halign: 'center', // Horizontal alignment of text
+                    valign: 'middle' // Vertical alignment of text
+                },
+                headStyles: {
+                    fillColor: [255, 255, 255], // Header background color
+                    textColor: [0, 0, 0], // Header text color
+                    fontSize: 12, // Font size for headers
+                    halign: 'center', // Horizontal alignment of header text
+                    valign: 'middle', // Vertical alignment of header text
+                },
+                didParseCell: (data) => {
+                    // This callback allows you to make further adjustments if needed
+                    if (data.row.index === 0) { // Header row
+                        data.cell.styles.cellWidth = 'auto'; // Ensure header cells have auto width
+                    }
+                },
+                // Adjust column widths as needed
+                // columnStyles: {
+                //     0: { cellWidth: 30 }, // Example: set width for the first column
+                //     1: { cellWidth: 40 }, // Set width for the second column
+                //     2: { cellWidth: 40 }, // Set width for the second column
+                //     3: { cellWidth: 40 }, // Set width for the second column
+                //     4: { cellWidth: 40 }, // Set width for the second column
+                //     // Add more as needed
+                // },
+                // Ensure the table fits within the page bounds
+            };
+
+            autoTable(doc, options)
+
+            doc.save('table.pdf')
+        }
+    }
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
+    const fetchTickersFunc = async () => {
+        context.setLoaderState(true)
+        try {
+            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+            const fetchTickersRes = await fetchTickers.json()
+            setTickers(fetchTickersRes)
+        }
+        catch (e) {
+
+        }
+        context.setLoaderState(false)
+    }
+    const handleChartView = (e) => {
+        setSelectedView(e.target.value)
+    }
+    const handleDateRange = (e) => {
+        setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) })
+    }
+    const searchBestStocks = (e) => {
+        const value = e.target.value;
+        setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value))
+    }
+    const searchWorstStocks = (e) => {
+        const value = e.target.value;
+        setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value))
+    }
+    const handleCloseModal = () => {
+        setHistoryModal(false);
+    };
+    useEffect(() => {
+        setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
+        //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
+    }, [chartHistory, selectedView])
+    useEffect(() => {
+        if (rankingData?.bestFiveStocks?.length > 0) {
+            setBestStocksFiltered(rankingData?.bestFiveStocks)
+        }
+        if (rankingData?.worstFiveStocks?.length > 0) {
+            setWorstStocksFiltered(rankingData?.worstFiveStocks)
+        }
+    }, [rankingData, activeView])
+    useEffect(() => {
+        console.log("tickers", tickers);
+    }, [tickers])
+    useEffect(() => {
+        fetchColumnNames()
+        fetchTickersFunc()
+    }, [])
+    useEffect(() => {
+        async function run() {
+            if (tableData.length > 0) {
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
+                setFilterData(items)
+            }
+        }
+        run()
+    }, [currentPage, tableData, sortConfig, limit])
+    useEffect(() => {
+        if (compareData && activeView == "History") {
+            setRankingData(compareData)
+        }
+    }, [compareData, activeView])
     return (
         <>
+            <StockHistoryModal open={historyModal} handleClose={handleCloseModal} setCompareData={setCompareData} setSelectedOption={setActiveView} />
             <div className="main-panel">
                 <div className="content-wrapper">
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
-                            </span>Screener
+                            </span>Stocks
                         </h3>
 
                     </div>
-                    <Tabs
-                        defaultActiveKey="general"
-                        id="uncontrolled-tab-example"
-                        className="mb-3"
-                    >
-                        <Tab eventKey="general" title="General">
-                            <div className="row">
-                                <div className="col-md-4 offset-md-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
+                    <div className="selection-area mb-3 d-flex align-items-center">
+                        <Select className='mb-0 me-2 col-md-4' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                            tickers && tickers.map((item, index) => (
+                                { value: item.element1, label: item.element1 }
+                            ))
+                        } />
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
+                    </div>
+                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
+                        <Form onSubmit={(uploadFile) => { }} encType="multipart/form-data">
+                            <input type="hidden" name="metaDataName" value="Bondpricing_Master" />
+                            <div className="row align-items-center">
+                                <div className="col-md-6">
+                                    <div className="form-group">
+                                        <label htmlFor="uploadFile">Upload File</label>
+                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={(handleFileChange) => { }} />
                                     </div>
                                 </div>
+                                <div className="col-md-3">
+                                    <div className="actions">
+                                        <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                    </div></div>
+                            </div>
+                        </Form>
+                    </div>
+                    <div className="d-flex mb-3">
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={() => { setCalculate(true) }}><span>Calculate</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Chart View" && " active")} type="button" onClick={charts}><span>Chart View</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ticker Home" && " active")} type="button" onClick={tickerHome}><span>Ticker Home</span></button>
+                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ranking" && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
+                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={() => { setHistoryModal(true) }}><span>History</span></button>
+                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                    </div>
+                    {activeView == "Ticker Home" &&
+                        <>
+                            <div className='d-flex justify-content-between'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" title='EXCEL' onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center">
+                                    <div className="form-group d-flex align-items-center mb-0 me-3">
+                                        {/* <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /> */}
+                                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                        <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="all">All</option>
+                                        </select>
+                                    </div>
+                                    <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                             </div>
                             <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Industry</th>
-                                            <th>Volume</th>
-                                            <th>PE Ratio</th>
+                                            {columnNames.map((columnName, index) => (
+                                                <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td>Consumer Electronics</td>
-                                            <td>5676050</td>
-                                            <td>29.19</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td>Software - Infrastructure</td>
-                                            <td>2009071</td>
-                                            <td>32.76</td>
-                                        </tr>
-                                        <tr>
-                                            <td>GOOG</td>
-                                            <td>Alphabet Inc.</td>
-                                            <td>1698.86B</td>
-                                            <td>135.25</td>
-                                            <td style={{ color: "#dc2626" }}>-0.75%</td>
-                                            <td>Internet Content & Information</td>
-                                            <td>2021572</td>
-                                            <td>28.77</td>
-                                        </tr>
-                                        <tr>
-                                            <td>GOOG</td>
-                                            <td>Alphabet Inc.</td>
-                                            <td>1697.87B</td>
-                                            <td>134.25</td>
-                                            <td style={{ color: "#dc2626" }}>-0.68%</td>
-                                            <td>Internet Content & Information</td>
-                                            <td>2351569</td>
-                                            <td>28.52</td>
-                                        </tr>
-                                        {/* <tr>
-                          <td>Yuri Berry</td>
-                          <td>Chief Marketing Officer (CMO)</td>
-                          <td>New York</td>
-                          <td>40</td>
-                          <td>2009-06-25</td>
-                          <td>$675,000</td>
-                      </tr>
-                      <tr>
-                          <td>Caesar Vance</td>
-                          <td>Pre-Sales Support</td>
-                          <td>New York</td>
-                          <td>21</td>
-                          <td>2011-12-12</td>
-                          <td>$106,450</td>
-                      </tr>
-                      <tr>
-                          <td>Doris Wilder</td>
-                          <td>Sales Assistant</td>
-                          <td>Sydney</td>
-                          <td>23</td>
-                          <td>2010-09-20</td>
-                          <td>$85,600</td>
-                      </tr>
-                      <tr>
-                          <td>Angelica Ramos</td>
-                          <td>Chief Executive Officer (CEO)</td>
-                          <td>London</td>
-                          <td>47</td>
-                          <td>2009-10-09</td>
-                          <td>$1,200,000</td>
-                      </tr>
-                      <tr>
-                          <td>Gavin Joyce</td>
-                          <td>Developer</td>
-                          <td>Edinburgh</td>
-                          <td>42</td>
-                          <td>2010-12-22</td>
-                          <td>$92,575</td>
-                      </tr>
-                      <tr>
-                          <td>Jennifer Chang</td>
-                          <td>Regional Director</td>
-                          <td>Singapore</td>
-                          <td>28</td>
-                          <td>2010-11-14</td>
-                          <td>$357,650</td>
-                      </tr>
-                      <tr>
-                          <td>Brenden Wagner</td>
-                          <td>Software Engineer</td>
-                          <td>San Francisco</td>
-                          <td>28</td>
-                          <td>2011-06-07</td>
-                          <td>$206,850</td>
-                      </tr>
-                      <tr>
-                          <td>Fiona Green</td>
-                          <td>Chief Operating Officer (COO)</td>
-                          <td>San Francisco</td>
-                          <td>48</td>
-                          <td>2010-03-11</td>
-                          <td>$850,000</td>
-                      </tr>
-                      <tr>
-                          <td>Shou Itou</td>
-                          <td>Regional Marketing</td>
-                          <td>Tokyo</td>
-                          <td>20</td>
-                          <td>2011-08-14</td>
-                          <td>$163,000</td>
-                      </tr>
-                      <tr>
-                          <td>Michelle House</td>
-                          <td>Integration Specialist</td>
-                          <td>Sydney</td>
-                          <td>37</td>
-                          <td>2011-06-02</td>
-                          <td>$95,400</td>
-                      </tr>
-                      <tr>
-                          <td>Suki Burks</td>
-                          <td>Developer</td>
-                          <td>London</td>
-                          <td>53</td>
-                          <td>2009-10-22</td>
-                          <td>$114,500</td>
-                      </tr>
-                      <tr>
-                          <td>Prescott Bartlett</td>
-                          <td>Technical Author</td>
-                          <td>London</td>
-                          <td>27</td>
-                          <td>2011-05-07</td>
-                          <td>$145,000</td>
-                      </tr>
-                      <tr>
-                          <td>Gavin Cortez</td>
-                          <td>Team Leader</td>
-                          <td>San Francisco</td>
-                          <td>22</td>
-                          <td>2008-10-26</td>
-                          <td>$235,500</td>
-                      </tr>
-                      <tr>
-                          <td>Martena Mccray</td>
-                          <td>Post-Sales support</td>
-                          <td>Edinburgh</td>
-                          <td>46</td>
-                          <td>2011-03-09</td>
-                          <td>$324,050</td>
-                      </tr>
-                      <tr>
-                          <td>Unity Butler</td>
-                          <td>Marketing Designer</td>
-                          <td>San Francisco</td>
-                          <td>47</td>
-                          <td>2009-12-09</td>
-                          <td>$85,675</td>
-                      </tr>
-                      <tr>
-                          <td>Howard Hatfield</td>
-                          <td>Office Manager</td>
-                          <td>San Francisco</td>
-                          <td>51</td>
-                          <td>2008-12-16</td>
-                          <td>$164,500</td>
-                      </tr>
-                      <tr>
-                          <td>Hope Fuentes</td>
-                          <td>Secretary</td>
-                          <td>San Francisco</td>
-                          <td>41</td>
-                          <td>2010-02-12</td>
-                          <td>$109,850</td>
-                      </tr>
-                      <tr>
-                          <td>Vivian Harrell</td>
-                          <td>Financial Controller</td>
-                          <td>San Francisco</td>
-                          <td>62</td>
-                          <td>2009-02-14</td>
-                          <td>$452,500</td>
-                      </tr>
-                      <tr>
-                          <td>Timothy Mooney</td>
-                          <td>Office Manager</td>
-                          <td>London</td>
-                          <td>37</td>
-                          <td>2008-12-11</td>
-                          <td>$136,200</td>
-                      </tr>
-                      <tr>
-                          <td>Jackson Bradshaw</td>
-                          <td>Director</td>
-                          <td>New York</td>
-                          <td>65</td>
-                          <td>2008-09-26</td>
-                          <td>$645,750</td>
-                      </tr>
-                      <tr>
-                          <td>Olivia Liang</td>
-                          <td>Support Engineer</td>
-                          <td>Singapore</td>
-                          <td>64</td>
-                          <td>2011-02-03</td>
-                          <td>$234,500</td>
-                      </tr>
-                      <tr>
-                          <td>Bruno Nash</td>
-                          <td>Software Engineer</td>
-                          <td>London</td>
-                          <td>38</td>
-                          <td>2011-05-03</td>
-                          <td>$163,500</td>
-                      </tr>
-                      <tr>
-                          <td>Sakura Yamamoto</td>
-                          <td>Support Engineer</td>
-                          <td>Tokyo</td>
-                          <td>37</td>
-                          <td>2009-08-19</td>
-                          <td>$139,575</td>
-                      </tr>
-                      <tr>
-                          <td>Thor Walton</td>
-                          <td>Developer</td>
-                          <td>New York</td>
-                          <td>61</td>
-                          <td>2013-08-11</td>
-                          <td>$98,540</td>
-                      </tr>
-                      <tr>
-                          <td>Finn Camacho</td>
-                          <td>Support Engineer</td>
-                          <td>San Francisco</td>
-                          <td>47</td>
-                          <td>2009-07-07</td>
-                          <td>$87,500</td>
-                      </tr>
-                      <tr>
-                          <td>Serge Baldwin</td>
-                          <td>Data Coordinator</td>
-                          <td>Singapore</td>
-                          <td>64</td>
-                          <td>2012-04-09</td>
-                          <td>$138,575</td>
-                      </tr>
-                      <tr>
-                          <td>Zenaida Frank</td>
-                          <td>Software Engineer</td>
-                          <td>New York</td>
-                          <td>63</td>
-                          <td>2010-01-04</td>
-                          <td>$125,250</td>
-                      </tr>
-                      <tr>
-                          <td>Zorita Serrano</td>
-                          <td>Software Engineer</td>
-                          <td>San Francisco</td>
-                          <td>56</td>
-                          <td>2012-06-01</td>
-                          <td>$115,000</td>
-                      </tr>
-                      <tr>
-                          <td>Jennifer Acosta</td>
-                          <td>Junior Javascript Developer</td>
-                          <td>Edinburgh</td>
-                          <td>43</td>
-                          <td>2013-02-01</td>
-                          <td>$75,650</td>
-                      </tr>
-                      <tr>
-                          <td>Cara Stevens</td>
-                          <td>Sales Assistant</td>
-                          <td>New York</td>
-                          <td>46</td>
-                          <td>2011-12-06</td>
-                          <td>$145,600</td>
-                      </tr>
-                      <tr>
-                          <td>Hermione Butler</td>
-                          <td>Regional Director</td>
-                          <td>London</td>
-                          <td>47</td>
-                          <td>2011-03-21</td>
-                          <td>$356,250</td>
-                      </tr>
-                      <tr>
-                          <td>Lael Greer</td>
-                          <td>Systems Administrator</td>
-                          <td>London</td>
-                          <td>21</td>
-                          <td>2009-02-27</td>
-                          <td>$103,500</td>
-                      </tr>
-                      <tr>
-                          <td>Jonas Alexander</td>
-                          <td>Developer</td>
-                          <td>San Francisco</td>
-                          <td>30</td>
-                          <td>2010-07-14</td>
-                          <td>$86,500</td>
-                      </tr>
-                      <tr>
-                          <td>Shad Decker</td>
-                          <td>Regional Director</td>
-                          <td>Edinburgh</td>
-                          <td>51</td>
-                          <td>2008-11-13</td>
-                          <td>$183,000</td>
-                      </tr>
-                      <tr>
-                          <td>Michael Bruce</td>
-                          <td>Javascript Developer</td>
-                          <td>Singapore</td>
-                          <td>29</td>
-                          <td>2011-06-27</td>
-                          <td>$183,000</td>
-                      </tr>
-                      <tr>
-                          <td>Donna Snider</td>
-                          <td>Customer Support</td>
-                          <td>New York</td>
-                          <td>27</td>
-                          <td>2011-01-25</td>
-                          <td>$112,000</td>
-                      </tr> */}
+                                        {filterData.map((rowData, rowIndex) => (
+                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                {
+                                                    columnNames.map((columnName, colIndex) => {
+                                                        let content;
+
+                                                        if (columnName.elementInternalName === 'element3') {
+                                                            // content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                            content = rowData[columnName.elementInternalName];
+                                                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                        } else {
+                                                            content = rowData[columnName.elementInternalName];
+                                                        }
+                                                        if (typeof (content) == 'string') {
+                                                            content = parse(content)
+                                                        }
+                                                        return <td key={colIndex}>{content}</td>;
+                                                    })
+                                                }
+                                            </tr>
+                                        ))}
+                                        {filterData?.length == 0 && <tr><td colSpan={columnNames?.length}>No data available</td></tr>}
                                     </tbody>
-                                    {/* <tfoot>
-                      <tr>
-                          <th>Name</th>
-                          <th>Position</th>
-                          <th>Office</th>
-                          <th>Age</th>
-                          <th>Start date</th>
-                          <th>Salary</th>
-                      </tr>
-                  </tfoot> */}
+
                                 </table>
+
                             </div>
-                        </Tab>
-                        <Tab eventKey="performance" title="Performance">
-                            <div className="row">
-                                <div className="col-md-4 offset-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
-                                    </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                        </>
+                    }
+                    {
+                        activeView == "Chart View" &&
+                        <>
+                            <div className="form-group d-flex align-items-center">
+                                <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
+                                <select className='form-select' style={{ maxWidth: "300px" }} onChange={handleChartView}>
+                                    {
+                                        Object.entries(ViewOptions).map(([key, option]) => (
+                                            <option key={key} value={key}>
+                                                {option.displayName}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                                <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
+                                <div className="d-flex align-items-center mx-2">
+                                    <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
+                                    <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
                                 </div>
                             </div>
-                            <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                            {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
+                            {/* <BarChart data={data} /> */}
+                            {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={selectedView && `Chart View For ${ViewOptions[selectedView].displayName}`} />}
+                        </>
+                    }
+                    {
+                        activeView == "Ranking" &&
+                        <>
+                            <h3 className='mb-3'>Best Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Change 1W</th>
-                                            <th>Change 1M</th>
-                                            <th>Change 6M</th>
-                                            <th>Change YTM</th>
-                                            <th>Change 1Y</th>
-                                            <th>Change 3Y</th>
-                                            <th>Change 5Y</th>
+                                            {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td style={{ color: "#15803d" }}>1.80%</td>
-                                            <td style={{ color: "#dc2626" }}>-8.40%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>33.74%</td>
-                                            <td style={{ color: "#15803d" }}>18.70%</td>
-                                            <td style={{ color: "#15803d" }}>49.16%</td>
-                                            <td style={{ color: "#15803d" }}>209.90%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#dc2626" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#dc2626" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#dc2626" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#dc2626" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
+                                        {bestStocksFiltered.map((item, index) => {
+                                            return <tr key={"best" + index}>
+                                                {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {bestStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
-                        </Tab>
-                        <Tab eventKey="analysts" title="Analysts">
-                            <div className="row">
-                                <div className="col-md-4 offset-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
-                                    </div>
+
+                            <h3 className='mb-3'>Worst Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
                                 </div>
                             </div>
-                            <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Change 1W</th>
-                                            <th>Change 1M</th>
-                                            <th>Change 6M</th>
-                                            <th>Change YTM</th>
-                                            <th>Change 1Y</th>
-                                            <th>Change 3Y</th>
-                                            <th>Change 5Y</th>
+                                            {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td style={{ color: "#15803d" }}>1.80%</td>
-                                            <td style={{ color: "#dc2626" }}>-8.40%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>33.74%</td>
-                                            <td style={{ color: "#15803d" }}>18.70%</td>
-                                            <td style={{ color: "#15803d" }}>49.16%</td>
-                                            <td style={{ color: "#15803d" }}>209.90%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>GOOG</td>
-                                            <td>Alphabet Inc.</td>
-                                            <td>1698.86B</td>
-                                            <td>135.25</td>
-                                            <td style={{ color: "#dc2626" }}>-0.75%</td>
-                                            <td style={{ color: "#15803d" }}>2.15%</td>
-                                            <td style={{ color: "#dc2626" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>GOOG</td>
-                                            <td>Alphabet Inc.</td>
-                                            <td>1698.86B</td>
-                                            <td>135.25</td>
-                                            <td style={{ color: "#15803d" }}>-0.75%</td>
-                                            <td style={{ color: "#15803d" }}>2.15%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
+                                        {worstStocksFiltered.map((item, index) => {
+                                            return <tr key={"worst" + index}>
+                                                {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {worstStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
-                        </Tab>
-                        <Tab eventKey="dividends" title="Dividends">
-                            <div className="row">
-                                <div className="col-md-4 offset-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
-                                    </div>
+                        </>
+                    }
+                    {
+                        activeView == "History" &&
+                        <>
+                            <h3 className='mb-3'>Best Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
                                 </div>
                             </div>
-                            <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Change 1W</th>
-                                            <th>Change 1M</th>
-                                            <th>Change 6M</th>
-                                            <th>Change YTM</th>
-                                            <th>Change 1Y</th>
-                                            <th>Change 3Y</th>
-                                            <th>Change 5Y</th>
+                                            {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td style={{ color: "#15803d" }}>1.80%</td>
-                                            <td style={{ color: "#15803d" }}>-8.40%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>33.74%</td>
-                                            <td style={{ color: "#15803d" }}>18.70%</td>
-                                            <td style={{ color: "#15803d" }}>49.16%</td>
-                                            <td style={{ color: "#15803d" }}>209.90%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
+                                        {bestStocksFiltered.map((item, index) => {
+                                            return <tr key={"best" + index}>
+                                                {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {bestStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
-                        </Tab>
-                        <Tab eventKey="financials" title="Financials">
-                            <div className="row">
-                                <div className="col-md-4 offset-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
-                                    </div>
+                            <HightChart data={compareData?.bestFiveStocks?.map((item) => [item['bestMovedStock'], parseFloat(item['percentageChangeRise'])])} title={"Ticker Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={`Best Twenty`} />
+                            <h3 className='my-3'>Worst Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
                                 </div>
                             </div>
-                            <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                     <thead>
                                         <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Change 1W</th>
-                                            <th>Change 1M</th>
-                                            <th>Change 6M</th>
-                                            <th>Change YTM</th>
-                                            <th>Change 1Y</th>
-                                            <th>Change 3Y</th>
-                                            <th>Change 5Y</th>
+                                            {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td style={{ color: "#15803d" }}>1.80%</td>
-                                            <td style={{ color: "#dc2626" }}>-8.40%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>33.74%</td>
-                                            <td style={{ color: "#15803d" }}>18.70%</td>
-                                            <td style={{ color: "#15803d" }}>49.16%</td>
-                                            <td style={{ color: "#15803d" }}>209.90%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
+                                        {worstStocksFiltered.map((item, index) => {
+                                            return <tr key={"worst" + index}>
+                                                {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {worstStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
                                     </tbody>
                                 </table>
                             </div>
-                        </Tab>
-                        <Tab eventKey="valuation" title="Valuation">
-                            <div className="row">
-                                <div className="col-md-4 offset-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <label className='me-2'>Search:</label><input type="search" className="ml-3 px-3 form-control" placeholder="" aria-controls="example" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="table-responsive">
-                                <table id="example" className="table table-striped" style={{ width: '100%' }}>
-                                    <thead>
-                                        <tr>
-                                            <th>Symbol</th>
-                                            <th>Company Name</th>
-                                            <th>Market Cap</th>
-                                            <th>Stock Price</th>
-                                            <th>% Change</th>
-                                            <th>Change 1W</th>
-                                            <th>Change 1M</th>
-                                            <th>Change 6M</th>
-                                            <th>Change YTM</th>
-                                            <th>Change 1Y</th>
-                                            <th>Change 3Y</th>
-                                            <th>Change 5Y</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>AAPL</td>
-                                            <td>Apple Inc.</td>
-                                            <td>2715.75B</td>
-                                            <td>173.72</td>
-                                            <td style={{ color: "#15803d" }}>0.03%</td>
-                                            <td style={{ color: "#15803d" }}>1.80%</td>
-                                            <td style={{ color: "#15803d" }}>-8.40%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>33.74%</td>
-                                            <td style={{ color: "#15803d" }}>18.70%</td>
-                                            <td style={{ color: "#15803d" }}>49.16%</td>
-                                            <td style={{ color: "#15803d" }}>209.90%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>MSFT</td>
-                                            <td>Microsoft Corporation</td>
-                                            <td>2360.21B</td>
-                                            <td>317.81</td>
-                                            <td style={{ color: "#15803d" }}>-0.36%</td>
-                                            <td style={{ color: "#15803d" }}>1.46%</td>
-                                            <td style={{ color: "#15803d" }}>-4.60%</td>
-                                            <td style={{ color: "#15803d" }}>6.11%</td>
-                                            <td style={{ color: "#15803d" }}>32.74%</td>
-                                            <td style={{ color: "#15803d" }}>27.70%</td>
-                                            <td style={{ color: "#15803d" }}>51.16%</td>
-                                            <td style={{ color: "#15803d" }}>183.79%</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Tab>
-                    </Tabs>
-                    {/* <ul className="nav nav-tabs" id="myTab" role="tablist">
-              <li className="nav-item" role="presentation">
-                <button className="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="filters-tab" data-bs-toggle="tab" data-bs-target="#filters" type="button" role="tab" aria-controls="filters" aria-selected="false">Filters</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="performance-tab" data-bs-toggle="tab" data-bs-target="#performance" type="button" role="tab" aria-controls="performance" aria-selected="false">Performance</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="analysts-tab" data-bs-toggle="tab" data-bs-target="#analysts" type="button" role="tab" aria-controls="analysts" aria-selected="false">Analysts</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="dividends-tab" data-bs-toggle="tab" data-bs-target="#dividends" type="button" role="tab" aria-controls="dividends" aria-selected="false">Dividends</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="financials-tab" data-bs-toggle="tab" data-bs-target="#financials" type="button" role="tab" aria-controls="financials" aria-selected="false">Financials</button>
-              </li>
-              <li className="nav-item" role="presentation">
-                <button className="nav-link" id="valuation-tab" data-bs-toggle="tab" data-bs-target="#valuation" type="button" role="tab" aria-controls="valuation" aria-selected="false">Valuation</button>
-              </li>
-            </ul>
-            <div className="tab-content" id="myTabContent">
-              <div className="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
-                <table id="example" className="table table-striped" style={{width:'100%'}}>
-                  <thead>
-                      <tr>
-                          <th>Name</th>
-                          <th>Position</th>
-                          <th>Office</th>
-                          <th>Age</th>
-                          <th>Start date</th>
-                          <th>Salary</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <tr>
-                          <td>Tiger Nixon</td>
-                          <td>System Architect</td>
-                          <td>Edinburgh</td>
-                          <td>61</td>
-                          <td>2011-04-25</td>
-                          <td>$320,800</td>
-                      </tr>
-                      <tr>
-                          <td>Garrett Winters</td>
-                          <td>Accountant</td>
-                          <td>Tokyo</td>
-                          <td>63</td>
-                          <td>2011-07-25</td>
-                          <td>$170,750</td>
-                      </tr>
-                      <tr>
-                          <td>Ashton Cox</td>
-                          <td>Junior Technical Author</td>
-                          <td>San Francisco</td>
-                          <td>66</td>
-                          <td>2009-01-12</td>
-                          <td>$86,000</td>
-                      </tr>
-                      <tr>
-                          <td>Cedric Kelly</td>
-                          <td>Senior Javascript Developer</td>
-                          <td>Edinburgh</td>
-                          <td>22</td>
-                          <td>2012-03-29</td>
-                          <td>$433,060</td>
-                      </tr>
-                      <tr>
-                          <td>Airi Satou</td>
-                          <td>Accountant</td>
-                          <td>Tokyo</td>
-                          <td>33</td>
-                          <td>2008-11-28</td>
-                          <td>$162,700</td>
-                      </tr>
-                      <tr>
-                          <td>Brielle Williamson</td>
-                          <td>Integration Specialist</td>
-                          <td>New York</td>
-                          <td>61</td>
-                          <td>2012-12-02</td>
-                          <td>$372,000</td>
-                      </tr>
-                      <tr>
-                          <td>Herrod Chandler</td>
-                          <td>Sales Assistant</td>
-                          <td>San Francisco</td>
-                          <td>59</td>
-                          <td>2012-08-06</td>
-                          <td>$137,500</td>
-                      </tr>
-                      <tr>
-                          <td>Rhona Davidson</td>
-                          <td>Integration Specialist</td>
-                          <td>Tokyo</td>
-                          <td>55</td>
-                          <td>2010-10-14</td>
-                          <td>$327,900</td>
-                      </tr>
-                      <tr>
-                          <td>Colleen Hurst</td>
-                          <td>Javascript Developer</td>
-                          <td>San Francisco</td>
-                          <td>39</td>
-                          <td>2009-09-15</td>
-                          <td>$205,500</td>
-                      </tr>
-                      <tr>
-                          <td>Sonya Frost</td>
-                          <td>Software Engineer</td>
-                          <td>Edinburgh</td>
-                          <td>23</td>
-                          <td>2008-12-13</td>
-                          <td>$103,600</td>
-                      </tr>
-                      <tr>
-                          <td>Jena Gaines</td>
-                          <td>Office Manager</td>
-                          <td>London</td>
-                          <td>30</td>
-                          <td>2008-12-19</td>
-                          <td>$90,560</td>
-                      </tr>
-                      <tr>
-                          <td>Quinn Flynn</td>
-                          <td>Support Lead</td>
-                          <td>Edinburgh</td>
-                          <td>22</td>
-                          <td>2013-03-03</td>
-                          <td>$342,000</td>
-                      </tr>
-                      <tr>
-                          <td>Charde Marshall</td>
-                          <td>Regional Director</td>
-                          <td>San Francisco</td>
-                          <td>36</td>
-                          <td>2008-10-16</td>
-                          <td>$470,600</td>
-                      </tr>
-                      <tr>
-                          <td>Haley Kennedy</td>
-                          <td>Senior Marketing Designer</td>
-                          <td>London</td>
-                          <td>43</td>
-                          <td>2012-12-18</td>
-                          <td>$313,500</td>
-                      </tr>
-                      <tr>
-                          <td>Tatyana Fitzpatrick</td>
-                          <td>Regional Director</td>
-                          <td>London</td>
-                          <td>19</td>
-                          <td>2010-03-17</td>
-                          <td>$385,750</td>
-                      </tr>
-                      <tr>
-                          <td>Michael Silva</td>
-                          <td>Marketing Designer</td>
-                          <td>London</td>
-                          <td>66</td>
-                          <td>2012-11-27</td>
-                          <td>$198,500</td>
-                      </tr>
-                      <tr>
-                          <td>Paul Byrd</td>
-                          <td>Chief Financial Officer (CFO)</td>
-                          <td>New York</td>
-                          <td>64</td>
-                          <td>2010-06-09</td>
-                          <td>$725,000</td>
-                      </tr>
-                      <tr>
-                          <td>Gloria Little</td>
-                          <td>Systems Administrator</td>
-                          <td>New York</td>
-                          <td>59</td>
-                          <td>2009-04-10</td>
-                          <td>$237,500</td>
-                      </tr>
-                      <tr>
-                          <td>Bradley Greer</td>
-                          <td>Software Engineer</td>
-                          <td>London</td>
-                          <td>41</td>
-                          <td>2012-10-13</td>
-                          <td>$132,000</td>
-                      </tr>
-                      <tr>
-                          <td>Dai Rios</td>
-                          <td>Personnel Lead</td>
-                          <td>Edinburgh</td>
-                          <td>35</td>
-                          <td>2012-09-26</td>
-                          <td>$217,500</td>
-                      </tr>
-                      <tr>
-                          <td>Jenette Caldwell</td>
-                          <td>Development Lead</td>
-                          <td>New York</td>
-                          <td>30</td>
-                          <td>2011-09-03</td>
-                          <td>$345,000</td>
-                      </tr>
-                      <tr>
-                          <td>Yuri Berry</td>
-                          <td>Chief Marketing Officer (CMO)</td>
-                          <td>New York</td>
-                          <td>40</td>
-                          <td>2009-06-25</td>
-                          <td>$675,000</td>
-                      </tr>
-                      <tr>
-                          <td>Caesar Vance</td>
-                          <td>Pre-Sales Support</td>
-                          <td>New York</td>
-                          <td>21</td>
-                          <td>2011-12-12</td>
-                          <td>$106,450</td>
-                      </tr>
-                      <tr>
-                          <td>Doris Wilder</td>
-                          <td>Sales Assistant</td>
-                          <td>Sydney</td>
-                          <td>23</td>
-                          <td>2010-09-20</td>
-                          <td>$85,600</td>
-                      </tr>
-                      <tr>
-                          <td>Angelica Ramos</td>
-                          <td>Chief Executive Officer (CEO)</td>
-                          <td>London</td>
-                          <td>47</td>
-                          <td>2009-10-09</td>
-                          <td>$1,200,000</td>
-                      </tr>
-                      <tr>
-                          <td>Gavin Joyce</td>
-                          <td>Developer</td>
-                          <td>Edinburgh</td>
-                          <td>42</td>
-                          <td>2010-12-22</td>
-                          <td>$92,575</td>
-                      </tr>
-                      <tr>
-                          <td>Jennifer Chang</td>
-                          <td>Regional Director</td>
-                          <td>Singapore</td>
-                          <td>28</td>
-                          <td>2010-11-14</td>
-                          <td>$357,650</td>
-                      </tr>
-                      <tr>
-                          <td>Brenden Wagner</td>
-                          <td>Software Engineer</td>
-                          <td>San Francisco</td>
-                          <td>28</td>
-                          <td>2011-06-07</td>
-                          <td>$206,850</td>
-                      </tr>
-                      <tr>
-                          <td>Fiona Green</td>
-                          <td>Chief Operating Officer (COO)</td>
-                          <td>San Francisco</td>
-                          <td>48</td>
-                          <td>2010-03-11</td>
-                          <td>$850,000</td>
-                      </tr>
-                      <tr>
-                          <td>Shou Itou</td>
-                          <td>Regional Marketing</td>
-                          <td>Tokyo</td>
-                          <td>20</td>
-                          <td>2011-08-14</td>
-                          <td>$163,000</td>
-                      </tr>
-                      <tr>
-                          <td>Michelle House</td>
-                          <td>Integration Specialist</td>
-                          <td>Sydney</td>
-                          <td>37</td>
-                          <td>2011-06-02</td>
-                          <td>$95,400</td>
-                      </tr>
-                      <tr>
-                          <td>Suki Burks</td>
-                          <td>Developer</td>
-                          <td>London</td>
-                          <td>53</td>
-                          <td>2009-10-22</td>
-                          <td>$114,500</td>
-                      </tr>
-                      <tr>
-                          <td>Prescott Bartlett</td>
-                          <td>Technical Author</td>
-                          <td>London</td>
-                          <td>27</td>
-                          <td>2011-05-07</td>
-                          <td>$145,000</td>
-                      </tr>
-                      <tr>
-                          <td>Gavin Cortez</td>
-                          <td>Team Leader</td>
-                          <td>San Francisco</td>
-                          <td>22</td>
-                          <td>2008-10-26</td>
-                          <td>$235,500</td>
-                      </tr>
-                      <tr>
-                          <td>Martena Mccray</td>
-                          <td>Post-Sales support</td>
-                          <td>Edinburgh</td>
-                          <td>46</td>
-                          <td>2011-03-09</td>
-                          <td>$324,050</td>
-                      </tr>
-                      <tr>
-                          <td>Unity Butler</td>
-                          <td>Marketing Designer</td>
-                          <td>San Francisco</td>
-                          <td>47</td>
-                          <td>2009-12-09</td>
-                          <td>$85,675</td>
-                      </tr>
-                      <tr>
-                          <td>Howard Hatfield</td>
-                          <td>Office Manager</td>
-                          <td>San Francisco</td>
-                          <td>51</td>
-                          <td>2008-12-16</td>
-                          <td>$164,500</td>
-                      </tr>
-                      <tr>
-                          <td>Hope Fuentes</td>
-                          <td>Secretary</td>
-                          <td>San Francisco</td>
-                          <td>41</td>
-                          <td>2010-02-12</td>
-                          <td>$109,850</td>
-                      </tr>
-                      <tr>
-                          <td>Vivian Harrell</td>
-                          <td>Financial Controller</td>
-                          <td>San Francisco</td>
-                          <td>62</td>
-                          <td>2009-02-14</td>
-                          <td>$452,500</td>
-                      </tr>
-                      <tr>
-                          <td>Timothy Mooney</td>
-                          <td>Office Manager</td>
-                          <td>London</td>
-                          <td>37</td>
-                          <td>2008-12-11</td>
-                          <td>$136,200</td>
-                      </tr>
-                      <tr>
-                          <td>Jackson Bradshaw</td>
-                          <td>Director</td>
-                          <td>New York</td>
-                          <td>65</td>
-                          <td>2008-09-26</td>
-                          <td>$645,750</td>
-                      </tr>
-                      <tr>
-                          <td>Olivia Liang</td>
-                          <td>Support Engineer</td>
-                          <td>Singapore</td>
-                          <td>64</td>
-                          <td>2011-02-03</td>
-                          <td>$234,500</td>
-                      </tr>
-                      <tr>
-                          <td>Bruno Nash</td>
-                          <td>Software Engineer</td>
-                          <td>London</td>
-                          <td>38</td>
-                          <td>2011-05-03</td>
-                          <td>$163,500</td>
-                      </tr>
-                      <tr>
-                          <td>Sakura Yamamoto</td>
-                          <td>Support Engineer</td>
-                          <td>Tokyo</td>
-                          <td>37</td>
-                          <td>2009-08-19</td>
-                          <td>$139,575</td>
-                      </tr>
-                      <tr>
-                          <td>Thor Walton</td>
-                          <td>Developer</td>
-                          <td>New York</td>
-                          <td>61</td>
-                          <td>2013-08-11</td>
-                          <td>$98,540</td>
-                      </tr>
-                      <tr>
-                          <td>Finn Camacho</td>
-                          <td>Support Engineer</td>
-                          <td>San Francisco</td>
-                          <td>47</td>
-                          <td>2009-07-07</td>
-                          <td>$87,500</td>
-                      </tr>
-                      <tr>
-                          <td>Serge Baldwin</td>
-                          <td>Data Coordinator</td>
-                          <td>Singapore</td>
-                          <td>64</td>
-                          <td>2012-04-09</td>
-                          <td>$138,575</td>
-                      </tr>
-                      <tr>
-                          <td>Zenaida Frank</td>
-                          <td>Software Engineer</td>
-                          <td>New York</td>
-                          <td>63</td>
-                          <td>2010-01-04</td>
-                          <td>$125,250</td>
-                      </tr>
-                      <tr>
-                          <td>Zorita Serrano</td>
-                          <td>Software Engineer</td>
-                          <td>San Francisco</td>
-                          <td>56</td>
-                          <td>2012-06-01</td>
-                          <td>$115,000</td>
-                      </tr>
-                      <tr>
-                          <td>Jennifer Acosta</td>
-                          <td>Junior Javascript Developer</td>
-                          <td>Edinburgh</td>
-                          <td>43</td>
-                          <td>2013-02-01</td>
-                          <td>$75,650</td>
-                      </tr>
-                      <tr>
-                          <td>Cara Stevens</td>
-                          <td>Sales Assistant</td>
-                          <td>New York</td>
-                          <td>46</td>
-                          <td>2011-12-06</td>
-                          <td>$145,600</td>
-                      </tr>
-                      <tr>
-                          <td>Hermione Butler</td>
-                          <td>Regional Director</td>
-                          <td>London</td>
-                          <td>47</td>
-                          <td>2011-03-21</td>
-                          <td>$356,250</td>
-                      </tr>
-                      <tr>
-                          <td>Lael Greer</td>
-                          <td>Systems Administrator</td>
-                          <td>London</td>
-                          <td>21</td>
-                          <td>2009-02-27</td>
-                          <td>$103,500</td>
-                      </tr>
-                      <tr>
-                          <td>Jonas Alexander</td>
-                          <td>Developer</td>
-                          <td>San Francisco</td>
-                          <td>30</td>
-                          <td>2010-07-14</td>
-                          <td>$86,500</td>
-                      </tr>
-                      <tr>
-                          <td>Shad Decker</td>
-                          <td>Regional Director</td>
-                          <td>Edinburgh</td>
-                          <td>51</td>
-                          <td>2008-11-13</td>
-                          <td>$183,000</td>
-                      </tr>
-                      <tr>
-                          <td>Michael Bruce</td>
-                          <td>Javascript Developer</td>
-                          <td>Singapore</td>
-                          <td>29</td>
-                          <td>2011-06-27</td>
-                          <td>$183,000</td>
-                      </tr>
-                      <tr>
-                          <td>Donna Snider</td>
-                          <td>Customer Support</td>
-                          <td>New York</td>
-                          <td>27</td>
-                          <td>2011-01-25</td>
-                          <td>$112,000</td>
-                      </tr>
-                  </tbody>
-                  <tfoot>
-                      <tr>
-                          <th>Name</th>
-                          <th>Position</th>
-                          <th>Office</th>
-                          <th>Age</th>
-                          <th>Start date</th>
-                          <th>Salary</th>
-                      </tr>
-                  </tfoot>
-                </table>
-              </div>
-              <div className="tab-pane fade" id="filters" role="tabpanel" aria-labelledby="filters-tab">
-                hi...
-              </div>
-              <div className="tab-pane fade" id="performance" role="tabpanel" aria-labelledby="performance-tab">
-                 tab 3
-              </div>
-              <div className="tab-pane fade" id="analysts" role="tabpanel" aria-labelledby="analysts-tab">
-                tab 4
-             </div>
-             <div className="tab-pane fade" id="dividends" role="tabpanel" aria-labelledby="dividends-tab">
-              tab 5
-             </div>
-             <div className="tab-pane fade" id="financials" role="tabpanel" aria-labelledby="financials-tab">
-              tab 6
-             </div>
-             <div className="tab-pane fade" id="valuation" role="tabpanel" aria-labelledby="valuation-tab">
-              tab 7
-             </div>
-          </div>           */}
+                            <HightChart data={compareData?.worstFiveStocks?.map((item) => [item['worstMovedStock'], parseFloat(item['percentageChangeDrop'])])} title={"Ticker Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Worst Twenty"} />
+                        </>
+                    }
                 </div>
-                <Footer />
             </div>
+            <Modal show={calculateModal} onHide={() => { setCalculate(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Analysis - Ticker Watchlist</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={() => { console.log("Form----") }}>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Performance</label>
+                                    <select name="isHighPerforming" id="" className='form-select'>
+                                        <option value="true">Best Performing</option>
+                                        <option value="false">Worst Performing</option>
+                                        <option value="NA">NA</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Rank Less Than(for consecutive 3 weeks)</label>
+                                    <input type="text" className="form-control" name='rankWithinTableW' />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Relative Strength Greater Than</label>
+                                    <input type="text" className="form-control" name='relativeStrengthW' />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Price Vs 20 Day Average Greater Than</label>
+                                    <input type="text" className="form-control" name='priceVs20DAvgW' />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Sales 3 Year Average Greater Than</label>
+                                    <input type="text" className="form-control" name='salesAvgW' />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Price/Sales Less Than</label>
+                                    <input type="text" className="form-control" name='priceSalesW' />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">EV/Ebitda Less Than</label>
+                                    <input type="text" className="form-control" name='ebitdaW' />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Gross Margin Greater Than</label>
+                                    <input type="text" className="form-control" name='grossMarginW' />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">ROIC Greater Than</label>
+                                    <input type="text" className="form-control" name='roicW' />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Price/Earning Less Than</label>
+                                    <input type="text" className="form-control" name='priceEarningW' />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="" className="form-label">Price/Free CashFlow Less Than</label>
+                                    <input type="text" className="form-control" name='priceFreeW' />
+                                </div>
+                            </div>
+                        </div>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button className="btn btn-secondary">Cancel</button>
+                    <button className="btn btn-primary">Reset</button>
+                    <button className="btn btn-primary">Compare</button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={dateModal} onHide={() => { setDateModal(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Filter Chart</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="row">
+                        <div className="col-md-6">
+                            <div className="form-group">
+                                <label htmlFor="startDate">Start Date</label>
+                                <select name="startDate" id="startDate" className='form-select' value={dateRange?.startDate} onChange={handleDateRange}>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="form-group">
+                                <label htmlFor="endDate">End Date</label>
+                                <select name="endDate" id="endDate" className='form-select' value={dateRange?.endDate} onChange={handleDateRange}>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button className="btn btn-primary" onClick={charts}>Apply</button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

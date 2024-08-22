@@ -60,8 +60,8 @@ export const formatDate = (dateStr)=>{
     const formattedDate = `${year}-${month}-${day}`;
     return formattedDate;
 }
-export const generatePDF = () => {
-    const input = document.getElementById('my-table');
+export const generatePDF = (id = 'my-table') => {
+    const input = document.getElementById(id);
     html2canvas(input).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF();
@@ -90,7 +90,7 @@ export const exportToExcel = () => {
         const rowData = [];
         const cells = row.querySelectorAll('th, td');
         cells.forEach(cell => {
-            rowData.push(cell.textContent);
+            rowData.push(cell.textContent.trim());
         });
         tableData.push(rowData);
     });
@@ -99,21 +99,51 @@ export const exportToExcel = () => {
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.aoa_to_sheet(tableData);
 
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+ // Style the header row
+ if (tableData.length > 0) {
+    // Apply bold font style to the header row (first row)
+    const headerRow = tableData[0];
+    headerRow.forEach((_, colIndex) => {
+        const cellAddress = { c: colIndex, r: 0 }; // First row, each column
+        const cellRef = XLSX.utils.encode_cell(cellAddress);
 
-    // Generate a binary string representation of the workbook
-    const workbookBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+        if (!worksheet[cellRef]) worksheet[cellRef] = {}; // Ensure cell object exists
+        worksheet[cellRef].s = {
+            font: {
+                bold: true,
+            }
+        };
+    });
+}
+ // Adjust column widths based on the content
+ const columnWidths = tableData[0].map((_, colIndex) => {
+    // Get the maximum length of data in each column
+    const maxLength = tableData.reduce((max, row) => Math.max(max, row[colIndex].length), 0);
+    return { wpx: maxLength * 10 }; // Adjust multiplier (10) as needed for padding
+});
 
-    // Convert the binary string to a Blob
-    const blob = new Blob([s2ab(workbookBinary)], { type: 'application/octet-stream' });
+worksheet['!cols'] = columnWidths;
 
-    // Create a link element to trigger the download
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'table_data.xlsx';
-    link.click();
-    URL.revokeObjectURL(link.href); // Clean up the URL object
+// Add the worksheet to the workbook
+XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+// Write the workbook to a file
+XLSX.writeFile(workbook, 'exported-data.xlsx');
+    // // Append the worksheet to the workbook
+    // XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+    // // Generate a binary string representation of the workbook
+    // const workbookBinary = XLSX.write(workbook, { bookType: 'xlsx', type: 'binary' });
+
+    // // Convert the binary string to a Blob
+    // const blob = new Blob([s2ab(workbookBinary)], { type: 'application/octet-stream' });
+
+    // // Create a link element to trigger the download
+    // const link = document.createElement('a');
+    // link.href = URL.createObjectURL(blob);
+    // link.download = 'table_data.xlsx';
+    // link.click();
+    // URL.revokeObjectURL(link.href); // Clean up the URL object
 };
 export const getSortIcon = (columnName,sortConfig) => {
     if (sortConfig && sortConfig.key === columnName) {
