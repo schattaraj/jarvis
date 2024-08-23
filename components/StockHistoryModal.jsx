@@ -25,7 +25,7 @@ import parse from 'html-react-parser';
 import Swal from 'sweetalert2';
 import { Context } from '../contexts/Context';
 
-const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption }) => {
+const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption,filterBydate }) => {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
     const [deleteItemId, setDeleteItemId] = useState(null);
@@ -206,7 +206,7 @@ const exportToPDF = () => {
                     </IconButton>
                 </Box>
                 <Box className="mb-3">
-                        <Button variant="contained" color="primary" onClick={exportToExcel} sx={{ marginRight: 1 }}>
+                        <Button variant="contained" color="primary" onClick={()=>{exportToExcel()}} sx={{ marginRight: 1 }}>
                             Export to Excel
                         </Button>
                         <Button variant="contained" color="secondary" onClick={exportToCSV} sx={{ marginRight: 1 }}>
@@ -238,7 +238,7 @@ const exportToPDF = () => {
                             {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
-                                    <TableCell>{row.importDate}</TableCell>
+                                    <TableCell><a href='javascript:;' onClick={()=>{filterBydate(row.importDate)}}>{row.importDate}</a></TableCell>
                                     <TableCell>{row.month}</TableCell>
                                     <TableCell>
                                         <IconButton onClick={() => handleDelete(row.idMarketDataFile)}>

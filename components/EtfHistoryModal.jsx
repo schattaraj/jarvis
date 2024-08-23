@@ -232,7 +232,7 @@ const exportToPDF = () => {
                     </IconButton>
                 </Box>
                 <Box className="mb-3">
-                        <Button variant="contained" color="primary" onClick={exportToExcel} sx={{ marginRight: 1 }}>
+                        <Button variant="contained" color="primary" onClick={()=>{exportToExcel()}} sx={{ marginRight: 1 }}>
                             Export to Excel
                         </Button>
                         <Button variant="contained" color="secondary" onClick={exportToCSV} sx={{ marginRight: 1 }}>

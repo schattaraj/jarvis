@@ -228,8 +228,8 @@ export default function PemDetails() {
                     </div>
                     <div className='d-flex justify-content-between align-items-center'>
                         <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={generatePDF}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={exportToExcel}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -243,7 +243,7 @@ export default function PemDetails() {
                         </div>
                     </div>
                     <div className="table-responsive">
-                        <table className="table border display no-footer dataTable" style={{ width: "", marginLeft: "0px" }} role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
@@ -286,6 +286,7 @@ export default function PemDetails() {
                                         }
                                     </tr>
                                 ))}
+                                {filterData?.length == 0 && <tr><td colSpan={columnNames?.length}>No data available</td></tr>}
                             </tbody>
 
                         </table>

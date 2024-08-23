@@ -19,7 +19,7 @@ import {
   ErrorMessage,
   useFormik,
 } from "formik";
-import { strocksValidationSchema } from "./stocksValidationSchema";
+import { strocksValidationSchema } from "../../components/stocksValidationSchema";
 export default function StocksPair() {
   const [stocks, setStocks] = useState([]);
   const [inputData, setInputData] = useState({
@@ -42,7 +42,7 @@ export default function StocksPair() {
     context.setLoaderState(true);
     try {
       const stocksApi = await fetch(
-        "https://jharvis.com/JarvisV2/getAllStocks?_=1699957833250"
+        `https://jharvis.com/JarvisV2/getAllStocks?_=${new Date().getTime()}`
       );
       const stocksRes = await stocksApi.json();
       setStocks(stocksRes);
@@ -258,7 +258,7 @@ export default function StocksPair() {
         },
       });
     }
-    console.log("Chart Options ", options);
+    // console.log("Chart Options ", options);
     setChartOption(options);
   }, [tableData, viewChart, filterData]);
 
@@ -302,6 +302,7 @@ export default function StocksPair() {
                             }
                             </select> */}
                 <Select
+                value={{value:inputData?.stockA,label:inputData?.stockA}}
                   options={selectOptions}
                   name="stockA"
                   onChange={(e) => {
@@ -312,6 +313,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
+                value={{value:inputData?.stockB,label:inputData?.stockB}}
                   options={selectOptions}
                   name="stockB"
                   onChange={(e) => {
@@ -330,6 +332,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
+                value={{value:inputData?.stockC,label:inputData?.stockC}}
                   options={selectOptions}
                   name="stockC"
                   onChange={(e) => {
@@ -348,6 +351,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
+                value={{value:inputData?.stockD,label:inputData?.stockD}}
                   options={selectOptions}
                   name="stockD"
                   onChange={(e) => {
@@ -576,7 +580,6 @@ export default function StocksPair() {
         </div>
         <Footer />
       </div>
-      <Loader />
     </>
   );
 }

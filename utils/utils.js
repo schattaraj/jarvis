@@ -3,6 +3,8 @@ import { jsPDF } from "jspdf";
 import * as XLSX from 'xlsx'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useContext } from 'react';
+import { Context } from '../contexts/Context';
 export const calculateAveragePercentage = (tableData, columnName) => {
     const columnValues = tableData.map((row) => row[columnName]);
 
@@ -61,6 +63,15 @@ export const formatDate = (dateStr)=>{
     return formattedDate;
 }
 export const generatePDF = (id = 'my-table') => {
+    //loader
+    const parentDiv = document.createElement('div');
+    parentDiv.id = 'loader';
+    parentDiv.classList.add('loader-container', 'flex-column');
+const loaderDiv = document.createElement('div');
+loaderDiv.className = 'loader';
+parentDiv.appendChild(loaderDiv);
+document.body.appendChild(parentDiv);
+
     const input = document.getElementById(id);
     html2canvas(input).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
@@ -71,6 +82,12 @@ export const generatePDF = (id = 'my-table') => {
 
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('Jarvis Ticker for ' + formatDate(new Date()) + '.pdf');
+        const parentDiv = document.getElementById('loader');
+        if (parentDiv) {
+            parentDiv.remove();
+        }
+    }).catch((error)=>{
+        console.error('Error generating PDF:', error);
     });
 };
 const s2ab = (s) => {
@@ -81,8 +98,8 @@ const s2ab = (s) => {
     }
     return buf;
 };
-export const exportToExcel = () => {
-    const table = document.getElementById('my-table');    
+export const exportToExcel = (id = 'my-table') => {
+    const table = document.getElementById(id);    
     const tableData = [];
     const rows = table.querySelectorAll('tr');
 
