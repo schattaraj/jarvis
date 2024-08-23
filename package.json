@@ -17,6 +17,7 @@
     "chart.js": "^4.4.3",
     "chartjs-plugin-annotation": "^3.0.1",
     "dompurify": "^3.0.6",
+    "formik": "^2.4.6",
     "highcharts-react-official": "^3.2.1",
     "html-react-parser": "^5.0.6",
     "html2canvas": "^1.4.1",
@@ -44,7 +45,8 @@
     "turn.js": "^1.0.5",
     "use-sound": "^4.0.1",
     "xlsx": "^0.18.5",
-    "xlsx-style": "^0.8.13"
+    "xlsx-style": "^0.8.13",
+    "yup": "^1.4.0"
   },
   "engines": {
     "node": ">=18"
