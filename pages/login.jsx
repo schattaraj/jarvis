@@ -60,7 +60,7 @@ export default function Login() {
             if (localStorage.getItem('route') && localStorage.getItem('route') !== '/login') {
                 router.push(localStorage.getItem('route'));
             } else {
-                router.push('/admin');
+                router.push('/dashboard');
             }
         } else {
             console.error(result.message);

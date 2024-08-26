@@ -1,20 +1,28 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Footer from '../components/footer';
 import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Link from 'next/link'
 import Card from '../components/Card';
 import 'animate.css';
+import { useRouter } from 'next/router';
+import { Context } from '../contexts/Context';
+import Breadcrumb from '../components/Breadcrumb';
 export default function MarketAnalytics() {
+  const context = useContext(Context);
+  const router = useRouter();
   return (
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <div className="page-header">
+          
             <h3 className="page-title">
+              <Link href="/">
               <span className="page-title-icon bg-gradient-primary text-white me-2">
-                <i className="mdi mdi-home"></i>
-              </span> Market Analytics
+                  <i className="mdi mdi-home"></i>
+              </span></Link> Market Analytics
             </h3>
           </div>
           <div className="row animate__animated animate__fadeInLeft">

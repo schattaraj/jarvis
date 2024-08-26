@@ -43,6 +43,9 @@ export default function Admin() {
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/newsletter" bg="bg-green" img="/icons/Newsletter.png" title="Newsletter" />
                         </div>
+                        <div className="col-md-6 col-lg-4 stretch-card grid-margin">
+                        <Card route="/admin" bg="bg-primary" img="/icons/BusinessActivity.png" title="Admin" />
+                        </div>
                     </div>
                 </div>
 
