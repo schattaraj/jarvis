@@ -353,6 +353,19 @@ export default function Etfs() {
         setSelectedTicker(false)
         fetchData()
     }
+    const filterBydate = async (date) => {
+        context.setLoaderState(true)
+        try {
+            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getDataByWeek?metadataName=Everything_List_New&date=${date}&_=${new Date().getTime()}`)
+            const getStocksRes = await getStocks.json()
+            setTableData(getStocksRes)
+            setFilterData(getStocksRes)
+            setOpenModal(false)
+        } catch (error) {
+            console.log("Error: ", error)
+        }
+        context.setLoaderState(false)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -406,7 +419,7 @@ if(compareData && activeView == "History"){
     return (
         <>
             <div>
-                <EtfHistoryModal open={openModal} handleCloseModal={handleCloseModal} setCompareData={setCompareData} setRankingDates={setRankingDates} setActiveView={setActiveView}/>
+                <EtfHistoryModal open={openModal} handleCloseModal={handleCloseModal} setCompareData={setCompareData} setRankingDates={setRankingDates} setActiveView={setActiveView} filterBydate={filterBydate}/>
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">

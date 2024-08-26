@@ -352,7 +352,7 @@ export default function Stocks() {
     const filterBydate = async (date) => {
         context.setLoaderState(true)
         try {
-            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getDataByWeek?metaDataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`)
+            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`)
             const getStocksRes = await getStocks.json()
             setTableData(getStocksRes)
             setFilterData(getStocksRes)

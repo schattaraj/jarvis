@@ -238,7 +238,7 @@ const exportToPDF = () => {
                             {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
-                                    <TableCell><a href='javascript:;' onClick={()=>{filterBydate(row.importDate)}}>{row.importDate}</a></TableCell>
+                                    <TableCell><button className='p-0 border-0 bg-transparent' onClick={()=>{filterBydate(row.importDate)}}>{row.importDate}</button></TableCell>
                                     <TableCell>{row.month}</TableCell>
                                     <TableCell>
                                         <IconButton onClick={() => handleDelete(row.idMarketDataFile)}>

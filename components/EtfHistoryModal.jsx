@@ -27,7 +27,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx'; // For Excel export
 import jsPDF from 'jspdf'; // For PDF export
 import 'jspdf-autotable'; // For PDF table auto-generation
-function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDates, setActiveView}) {
+function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDates, setActiveView, filterBydate}) {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
@@ -264,7 +264,7 @@ const exportToPDF = () => {
                             {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                                 <TableRow key={row.idMarketDataFile}>
                                     <TableCell>{parse(row.checkBoxHtml,options)}</TableCell>
-                                    <TableCell>{row.importDate}</TableCell>
+                                    <TableCell><button className='p-0 border-0 bg-transparent' onClick={()=>{filterBydate(row.importDate)}}>{row.importDate}</button></TableCell>
                                     <TableCell>{row.month}</TableCell>
                                     <TableCell>
                                         <IconButton onClick={() => handleDelete(row.idMarketDataFile)}>
