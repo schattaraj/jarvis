@@ -8,7 +8,7 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
-import { calculateAverage, calculateAveragePercentage, formatDate, searchTable } from '../../utils/utils';
+import { calculateAverage, calculateAveragePercentage, formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../components/Pagination';
@@ -38,6 +38,7 @@ export default function Portfolio() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [limit, setLimit] = useState(25)
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const tableRef = useRef(null);
     const options = {
         replace: (elememt) => {
@@ -249,18 +250,43 @@ export default function Portfolio() {
                 break;
         }
     };
-
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+    const changeLimit = (e) => {
+        setLimit(e.target.value)
+    }
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
-                // console.log("tableData",tableData)
-                const items = await SliceData(currentPage, limit, tableData);
-                // console.log("items",items)
+                let items = [...tableData];
+                if (sortConfig !== null) {
+                    items.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'asc' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                let dataLimit = limit
+                let page = currentPage
+                if (dataLimit == "all") {
+                    dataLimit = tableData?.length
+                    page = 1
+                }
+                items = await SliceData(page, dataLimit, items);
                 setFilterData(items)
             }
         }
         run()
-    }, [currentPage])
+    }, [currentPage, tableData, sortConfig, limit])
 
     useEffect(() => {
         fetchColumnNames()
@@ -316,7 +342,19 @@ export default function Portfolio() {
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                         </div>
-                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
+                        <div className="form-group d-flex align-items-center">
+                        <div className="form-group d-flex align-items-center mb-0 me-3">
+                                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                        <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="all">All</option>
+                                        </select>
+                                    </div>
+                            <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                        </div>
                     </div>
                     <div className="table-responsive">
                         <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
@@ -324,7 +362,7 @@ export default function Portfolio() {
                                 <tr>
                                     {
                                         columnNames.length > 0 && columnNames.map((item, index) => {
-                                            return <th key={index}>{item?.elementDisplayName}</th>
+                                            return <th key={index}  onClick={() => handleSort(item.elementInternalName)}>{item?.elementDisplayName} {getSortIcon(item, sortConfig)}</th>
                                         })
                                     }
                                 </tr>
