@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Context } from '../contexts/Context';
 import Card from '../components/Card';
 import 'animate.css';
+import Breadcrumb from '../components/Breadcrumb';
 export default function Admin() {
     const context = useContext(Context)
     return (
@@ -19,6 +20,7 @@ export default function Admin() {
             </Head>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

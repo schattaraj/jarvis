@@ -11,7 +11,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 const PDFViewer = ({ pdfUrl }) => {
   const context = useContext(Context);
   const flipbookRef = useRef(null);
-
+  const [flipSound] = useState(new Audio('/page-flip2-178323.mp3')); 
   useEffect(() => {
     context.setLoaderState(true);
 
@@ -40,7 +40,6 @@ const PDFViewer = ({ pdfUrl }) => {
             useMouseEvents: true,
             display: "double",  // Show two pages by default
           });
-
           const pages = [];
 
           for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -64,6 +63,14 @@ const PDFViewer = ({ pdfUrl }) => {
 
           // Add pages to the flipbook
           flipbook.loadFromHTML(pages);
+ // Set up page turn sound
+  flipbook.on("changeState", (e) => {
+    if(e.data == "flipping"){
+      flipSound.pause();
+      flipSound.currentTime = 0;
+      flipSound.play();
+    }
+  });
 
           // Set the initial view to show two pages
           // if (pdf.numPages > 1) {
@@ -78,7 +85,7 @@ const PDFViewer = ({ pdfUrl }) => {
     } else {
       console.error("PDF URL is not provided");
     }
-  }, [pdfUrl]);
+  }, [pdfUrl,flipSound]);
 
   // Function to handle fullscreen
   const handleFullScreen = () => {

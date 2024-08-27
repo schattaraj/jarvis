@@ -4,7 +4,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
-
+import Breadcrumb from '../../components/Breadcrumb';
 export default function Podcast() {
   const [podcasts, setPodcasts] = useState([])
   const [show, setShow] = useState(false);

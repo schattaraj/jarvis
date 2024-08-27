@@ -18,7 +18,7 @@ import { Form, Modal } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import ReactSelect from 'react-select';
 import Link from 'next/link';
-
+import Breadcrumb from '../../../components/Breadcrumb.js';
 export default function Prospects() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name", "column_name": "Name" },
@@ -326,6 +326,7 @@ export default function Prospects() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+                <Breadcrumb parent={"Admin"}/>
                     <div className="page-header">
                         <h3 className="page-title">
                         <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">

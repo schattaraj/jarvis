@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -50,6 +51,7 @@ export default function OnePageReport() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -6,6 +6,7 @@ import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import { Context } from '../../contexts/Context';
 import Swal from 'sweetalert2';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function MutualFund() {
     const [mutualFund, setMutualFund] = useState([])
     const [mutualFundFiltered, setMutualFundFiltered] = useState([])
@@ -182,6 +183,7 @@ export default function MutualFund() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -14,6 +14,7 @@ import * as Icon from "react-icons/fa";
 import { Pagination } from '../../components/Pagination';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx'
+import Breadcrumb from '../../components/Breadcrumb';
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -87,6 +88,7 @@ export default function Portfolio() {
         }
     }
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             if (selectedPortfolioId) {
                 const getPortfolio = await fetch("https://www.jharvis.com/JarvisV2/getPortFolioStockSet?idPortfolio=" + selectedPortfolioId)
@@ -103,6 +105,7 @@ export default function Portfolio() {
         catch (e) {
             console.log("error", e)
         }
+        context.setLoaderState(false)
     }
     const handleChange = (e) => {
         setPortfolioId(e.target.value)
@@ -303,6 +306,7 @@ export default function Portfolio() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -5,6 +5,7 @@ import Sidebar from '../../components/sidebar';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import { calculateAverage, searchTable } from '../../utils/utils';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function MyStocks() {
     const [favStocks, setFavStocks] = useState([])
     const [inputData, setInputData] = useState({
@@ -79,6 +80,7 @@ export default function MyStocks() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

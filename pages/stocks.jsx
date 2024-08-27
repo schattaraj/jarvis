@@ -16,6 +16,7 @@ import { FilterAlt } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'
 import StockHistoryModal from '../components/StockHistoryModal';
+import Breadcrumb from '../components/Breadcrumb';
 const extraColumns = [
     {
         "elementId": null,
@@ -499,6 +500,7 @@ export default function Stocks() {
             <StockHistoryModal open={historyModal} handleClose={handleCloseModal} setCompareData={setCompareData} setSelectedOption={setActiveView} filterBydate={filterBydate} />
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -508,14 +510,12 @@ export default function Stocks() {
 
                     </div>
                     <div className="selection-area mb-3 d-flex align-items-center">
-                        <Select className='mb-0 me-2 col-md-4' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                        <Select className='mb-0 me-2 col-md-3' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
                             tickers && tickers.map((item, index) => (
                                 { value: item.element1, label: item.element1 }
                             ))
                         } />
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
-                    </div>
-                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
                         <Form onSubmit={uploadFile} encType="multipart/form-data">
                             <input type="hidden" name="metaDataName" value="Tickers_Watchlist" />
                             <div className="row align-items-center">
@@ -531,6 +531,9 @@ export default function Stocks() {
                                     </div></div>
                             </div>
                         </Form>
+                    </div>
+                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
+                     
                     </div>
                     <div className="d-flex mb-3">
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={() => { setCalculate(true) }}><span>Calculate</span></button>

@@ -12,6 +12,7 @@ import { calculateAverage, searchTable } from "../../utils/utils";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Select from "react-select";
+import Breadcrumb from '../../components/Breadcrumb';
 import {
   Formik,
   Form as FormikForm,
@@ -282,6 +283,7 @@ export default function StocksPair() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">

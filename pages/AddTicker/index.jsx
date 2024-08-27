@@ -32,6 +32,7 @@ export default function AddTicker() {
         <>
                     <div className="main-panel">
                         <div className="content-wrapper">
+        <Breadcrumb />
                             <div className="page-header">
                                 <h3 className="page-title">
                                     <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -3,13 +3,14 @@ import Footer from "../../components/footer";
 import Navigation from "../../components/navigation";
 import Sidebar from "../../components/sidebar";
 import VideoComponent from "../../components/videos";
-
+import Breadcrumb from '../../components/Breadcrumb';
 export default function videoes() {
 
   return (
     <>
         <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <VideoComponent />
         {/* <div className="page-header">
               <h3 className="page-title">

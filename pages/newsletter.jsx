@@ -11,6 +11,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
+import Breadcrumb from '../components/Breadcrumb';
+import PDFViewer from '../components/PDFViewer';
 export default function Newsletter() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -46,6 +48,7 @@ export default function Newsletter() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -75,7 +78,8 @@ export default function Newsletter() {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.description}</p>
-                <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+                {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
+                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
               </div>
             </div>
             <div className="col-md-5">

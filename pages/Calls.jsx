@@ -13,6 +13,7 @@ import SliceData from '../components/SliceData';
 import CallChart from '../components/CallChart';
 import Swal from 'sweetalert2';
 import { Pagination } from '../components/Pagination';
+import Breadcrumb from '../components/Breadcrumb';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);
@@ -182,6 +183,7 @@ export default function Calls() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

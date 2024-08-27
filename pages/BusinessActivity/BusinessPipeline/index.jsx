@@ -21,6 +21,7 @@ import Select from 'react-select'
 import Swal from 'sweetalert2';
 import PieChart from '../../../components/PieChart.js';
 import Link from 'next/link.js';
+import Breadcrumb from '../../../components/Breadcrumb.js';
 export default function BusinessPipeline() {
     const [columnNames, setColumnNames] = useState([
         { "data": "name", "display_name": "Name" },
@@ -492,6 +493,7 @@ export default function BusinessPipeline() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb parent={"Admin"}/>
                     <div className="page-header">
                         <h3 className="page-title">
                             <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">

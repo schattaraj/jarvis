@@ -93,6 +93,7 @@ else{
       router.events.off('routeChangeError', handleComplete);
     };
   }, [router]);
+  
   useEffect(()=>{ 
     checkLoginStatus()
   },[router.route == "/login"])

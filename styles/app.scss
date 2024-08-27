@@ -4,7 +4,8 @@
 @import './style.css';
 
 :root {
-    --primary: #719B5F
+    --primary: #719B5F;
+    --swiper-navigation-size: 14px !important;
 }
 
 i {
@@ -68,7 +69,9 @@ i {
 .bg-seagreen {
     background-color: #43B2B5;
 }
-
+.text-success{
+    color: var(--primary) !important;
+}
 .main-panel .dropdown .dropdown-menu .dropdown-item {
     padding: 0.5rem 1.5rem;
 }
@@ -453,7 +456,8 @@ a.navbar-brand {
 //swiper navigation
 .swiper-button-prev::after,
 .swiper-button-next::after {
-    color: #0b0b0b;
+    color: var(--primary);
+    font-weight: 900;
 }
 
 //portfolio
@@ -995,8 +999,11 @@ input[type="range"] {
     text-decoration: none;
     flex-wrap: wrap;
     display: flex;
+    color: var(--primary);
 }
-
+.main-panel .content-wrapper .breadcrumb .breadcrumb-item a{
+font-weight: bold;
+}
 .main-panel .content-wrapper .page-title {
     display: flex;
     align-items: center;
@@ -1029,8 +1036,8 @@ input[type="range"] {
 
 // scrollbar design
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1038,7 +1045,8 @@ input[type="range"] {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #888;
+    // background: #888;
+    background: var(--primary);
     border-radius: 6px;
     /* Round edges for the thumb */
 }
@@ -1205,4 +1213,10 @@ z-index: 999999 !important;
   #pdf-container {
     position: relative;
     overflow: hidden;
+  }
+  .navbar .navbar-menu-wrapper .navbar-nav .nav-item.nav-profile .nav-link .nav-profile-img .availability-status.online{
+    background: var(--primary);
+  }
+  .navbar .navbar-menu-wrapper .navbar-nav .nav-item.dropdown .dropdown-toggle:after{
+    color: var(--primary);
   }

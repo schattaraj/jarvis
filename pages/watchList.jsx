@@ -5,12 +5,14 @@ import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Dropdown from 'react-bootstrap/Dropdown';
+import Breadcrumb from '../components/Breadcrumb';
 export default function WatchList() {
     const [WatchList, setWatchList] = useState([{ name: "My Watchlist" }])
     return (
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

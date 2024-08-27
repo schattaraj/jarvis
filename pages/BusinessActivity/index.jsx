@@ -7,11 +7,13 @@ import Link from 'next/link'
 import { Context } from '../../contexts/Context';
 import Card from '../../components/Card';
 import 'animate.css';
+import Breadcrumb from '../../components/Breadcrumb';
 function BusinessActivity() {
   return (
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb parent={"Admin"}/>
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">

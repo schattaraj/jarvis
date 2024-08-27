@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-const Breadcrumb = () => {
+const Breadcrumb = ({parent = "Dashboard"}) => {
   const router = useRouter();
   const pathArray = router.pathname.split('/').filter(path => path);
 
@@ -14,9 +14,11 @@ const Breadcrumb = () => {
 
   return (
     <nav aria-label="breadcrumb">
+      {
+        pathArray[pathArray.length - 1] != "dashboard" &&
       <ol className="breadcrumb" style={{border: "0px", padding: "0px"}}>
         <li className="breadcrumb-item">
-          <Link href="/">Dashboard</Link>
+          <Link href="/">{parent}</Link>
         </li>
         {pathArray.map((path, index) => {
           const href = '/' + pathArray.slice(0, index + 1).join('/');
@@ -36,7 +38,9 @@ const Breadcrumb = () => {
           );
         })}
       </ol>
+    }
     </nav>
+
   );
 };
 

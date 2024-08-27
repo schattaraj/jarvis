@@ -15,6 +15,7 @@ import HightChart from '../components/HighChart';
 import Swal from 'sweetalert2';
 import { Form, Modal } from 'react-bootstrap';
 import { FilterAlt } from '@mui/icons-material';
+import Breadcrumb from '../components/Breadcrumb';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -423,6 +424,7 @@ if(compareData && activeView == "History"){
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -10,7 +10,7 @@ import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable 
 import { Form, Modal } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import BondReportHistoryModal from '../components/BondReportHistoryModal';
-
+import Breadcrumb from '../components/Breadcrumb';
 const BondReports = () => {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -275,6 +275,7 @@ const BondReports = () => {
             <BondReportHistoryModal open={historyModal} handleClose={() => { setHistoryModal(false) }} />
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -4,11 +4,13 @@ import Navigation from '../components/navigation';
 import Sidebar from '../components/sidebar';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import Breadcrumb from '../components/Breadcrumb';
 export default function ByIndustry() {
     return (
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

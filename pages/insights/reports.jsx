@@ -13,6 +13,7 @@ import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
 import Select from 'react-select'
+import Breadcrumb from '../../components/Breadcrumb';
 export default function Reports() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -61,6 +62,7 @@ export default function Reports() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">

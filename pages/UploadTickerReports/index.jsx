@@ -9,6 +9,7 @@ import SliceData from '../../components/SliceData';
 import Swal from 'sweetalert2';
 import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function UploadTickerReports() {
     const context = useContext(Context)
     const [tickers, setTickers] = useState([]);
@@ -173,6 +174,7 @@ export default function UploadTickerReports() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

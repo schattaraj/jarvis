@@ -10,6 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Context } from '../../contexts/Context';
 import Loader from '../../components/loader';
 import Swal from 'sweetalert2';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function UploadAnalystVideos() {
     const [tickers, setTickers] = useState([]);
     const [allAnalystData, setAllAnalystData] = useState([])
@@ -198,6 +199,7 @@ export default function UploadAnalystVideos() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

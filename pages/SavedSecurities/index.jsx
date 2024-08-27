@@ -6,7 +6,7 @@ import { Pagination } from '../../components/Pagination';
 import { getSortIcon, searchTable } from '../../utils/utils';
 import { Context } from '../../contexts/Context';
 import SliceData from '../../components/SliceData';
-
+import Breadcrumb from '../../components/Breadcrumb';
 export default function SaveSecurities() {
     const [metaDataType, setMetaDataType] = useState("")
     const [allStockData, setStockData] = useState([])
@@ -234,6 +234,7 @@ export default function SaveSecurities() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">

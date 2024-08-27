@@ -4,6 +4,7 @@ import Sidebar from '../components/sidebar';
 import Loader from '../components/loader'; 
 import { Context } from '../contexts/Context'; 
 import parse from 'html-react-parser';
+import Breadcrumb from '../components/Breadcrumb';
 export default function PUTS() {
     const [option,setOption] = useState([]);
     const [tickers,setTickers] = useState([]);
@@ -64,6 +65,7 @@ export default function PUTS() {
     <>
                    <div className="main-panel">
                         <div className="content-wrapper">
+        <Breadcrumb />
                             <div className="page-header">
                                 <h3 className="page-title">
                                     <span className="page-title-icon bg-gradient-primary text-white me-2">

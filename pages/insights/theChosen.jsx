@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2,Autoplay } from 'swiper/modules';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function TheChosen() {
     const [reports,setReports] = useState([])
     const [show, setShow] = useState(false);
@@ -50,6 +51,7 @@ export default function TheChosen() {
         <Sidebar />
         <div className="main-panel">
         <div className="content-wrapper">
+        <Breadcrumb />
 <div className="page-header">
   <h3 className="page-title">
     <span className="page-title-icon bg-gradient-primary text-white me-2">

@@ -10,6 +10,7 @@ import ReactDatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import SliceData from '../../components/SliceData';
 import Swal from 'sweetalert2';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function UploadPodcast() {
     const [tickers, setTickers] = useState([]);
     const [allPodcastData, setallPodcastData] = useState([])
@@ -176,6 +177,7 @@ export default function UploadPodcast() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+        <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
