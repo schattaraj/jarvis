@@ -24,7 +24,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import Swal from 'sweetalert2';
 import { Context } from '../contexts/Context';
-
+import * as XLSX from 'xlsx'; // For Excel export
+import jsPDF from 'jspdf'; // For PDF export
+import 'jspdf-autotable'; // For PDF table auto-generation
 const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption,filterBydate }) => {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);

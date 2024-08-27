@@ -1,6 +1,7 @@
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
+import Breadcrumb from '../../components/Breadcrumb';
 export default function ChangePassword() {
     return (
         <>
