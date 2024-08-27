@@ -109,10 +109,20 @@ export default function Sidebar() {
                 </div>
             </li>
             <li className="nav-item">
-              <Link className={router.pathname === '/portfolio' ? 'nav-link btn active' : 'nav-link'} href="/portfolio">
+              <div className="d-flex align-items-center justify-content-between">
+              <Link className={router.pathname === '/portfolios' ? 'nav-link btn active' : 'nav-link'} href="/portfolios">
                 <span className="menu-title">Portfolios</span>
-                <i className="mdi mdi-chart-bar menu-icon"></i>
               </Link>
+              <button className="btn nav-link" data-bs-toggle="collapse" onClick={()=>{context.handleDropdownClick("portfolios")}} aria-expanded={context.openDropdown === "portfolios" ? "true" :"false"} aria-controls="ui-basic">
+                <i className="menu-arrow"></i> <i className="mdi mdi-chart-bar menu-icon"></i>
+              </button>
+              </div>
+              <div className={context.openDropdown === "portfolios" ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
+                <ul className="nav flex-column sub-menu">
+                  <li className="nav-item"><Link className={router.pathname === '/portfolio' ? 'nav-link active' : 'nav-link'} href="/portfolio">Stock Portfolio</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/bondPortfolio' ? 'nav-link active' : 'nav-link'} href="/bondPortfolio">Bond Portfolio</Link></li>
+                </ul> 
+                </div>
             </li>
             <li className="nav-item">
             <div className="d-flex align-items-center justify-content-between">
