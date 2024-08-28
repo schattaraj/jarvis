@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react'
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Loader from '../components/loader'; 
-import { Context } from '../contexts/Context'; 
+import Navigation from '../../components/navigation';
+import Sidebar from '../../components/sidebar';
+import Loader from '../../components/loader'; 
+import { Context } from '../../contexts/Context'; 
 import parse from 'html-react-parser';
-import Breadcrumb from '../components/Breadcrumb';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function PUTS() {
     const [option,setOption] = useState([]);
     const [tickers,setTickers] = useState([]);

@@ -208,3 +208,17 @@ export const amountSeperator = (amount)=>{
 
     return formattedAmount;
 }
+export const mmddyy = (inputDate)=>{
+    const [year, month, day] = inputDate.split('-').map(Number);
+    
+    // Create a new Date object with the year, month, and day
+    const date = new Date(year, month - 1, day); // Months are zero-based in JavaScript
+
+    // Format the month and day with leading zeros if needed
+    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const formattedDay = String(date.getDate()).padStart(2, '0');
+    const formattedYear = date.getFullYear();
+
+    // Return the formatted date string
+    return `${formattedMonth}/${formattedDay}/${formattedYear}`;
+}

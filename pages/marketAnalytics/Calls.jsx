@@ -1,19 +1,19 @@
 import { useContext, useEffect, useState } from 'react'
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Loader from '../components/loader';
-import { Context } from '../contexts/Context';
+import Navigation from '../../components/navigation';
+import Sidebar from '../../components/sidebar';
+import Loader from '../../components/loader';
+import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { tickersData } from '../utils/staticData'
+import { tickersData } from '../../utils/staticData'
 import Select from 'react-select'
-import { convertToReadableString, exportToExcel, generatePDF, getSortIcon, roundToTwoDecimals } from '../utils/utils';
-import SliceData from '../components/SliceData';
-import CallChart from '../components/CallChart';
+import { convertToReadableString, exportToExcel, generatePDF, getSortIcon, roundToTwoDecimals } from '../../utils/utils';
+import SliceData from '../../components/SliceData';
+import CallChart from '../../components/CallChart';
 import Swal from 'sweetalert2';
-import { Pagination } from '../components/Pagination';
-import Breadcrumb from '../components/Breadcrumb';
+import { Pagination } from '../../components/Pagination';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);

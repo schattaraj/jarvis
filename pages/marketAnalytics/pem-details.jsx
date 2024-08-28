@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from 'react'
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Loader from '../components/loader';
-import { Context } from '../contexts/Context';
+import Navigation from '../../components/navigation';
+import Sidebar from '../../components/sidebar';
+import Loader from '../../components/loader';
+import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
-import { Pagination } from '../components/Pagination';
-import SliceData from '../components/SliceData';
-import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../utils/utils';
+import { Pagination } from '../../components/Pagination';
+import SliceData from '../../components/SliceData';
+import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Form } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import Breadcrumb from '../components/Breadcrumb';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])

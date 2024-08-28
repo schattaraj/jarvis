@@ -12688,6 +12688,7 @@ code {
 .breadcrumb {
   border: 1px solid #ebedf2; }
   .breadcrumb .breadcrumb-item {
+    display: flex;
     font-size: 0.875rem; }
     .breadcrumb .breadcrumb-item.active {
       color: rgba(52, 58, 64, 0.8); }

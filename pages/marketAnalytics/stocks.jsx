@@ -1,22 +1,22 @@
 import React from 'react'
-import Footer from '../components/footer';
+import Footer from '../../components/footer';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
 import Select from 'react-select'
-import { Context } from '../contexts/Context';
-import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../utils/utils';
-import { Pagination } from '../components/Pagination';
+import { Context } from '../../contexts/Context';
+import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { Pagination } from '../../components/Pagination';
 import parse from 'html-react-parser';
-import SliceData from '../components/SliceData';
+import SliceData from '../../components/SliceData';
 import Swal from 'sweetalert2';
 import { Form, Modal } from 'react-bootstrap';
-import HightChart from '../components/HighChart';
+import HightChart from '../../components/HighChart';
 import { FilterAlt } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'
-import StockHistoryModal from '../components/StockHistoryModal';
-import Breadcrumb from '../components/Breadcrumb';
+import StockHistoryModal from '../../components/StockHistoryModal';
+import Breadcrumb from '../../components/Breadcrumb';
 const extraColumns = [
     {
         "elementId": null,
