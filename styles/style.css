@@ -14177,7 +14177,8 @@ dl {
               margin-left: 0;
               margin-right: auto; }
             .sidebar .nav .nav-item .nav-link i.menu-arrow:before {
-              content: "\f141";
+              /* content: "\f141"; */
+              content: "\f142";
               font-size: inherit;
               color: inherit; }
             .sidebar .nav .nav-item .nav-link i.menu-arrow + .menu-icon {

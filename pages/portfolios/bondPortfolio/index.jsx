@@ -10,6 +10,7 @@ import { calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, 
 import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
+import { Box, TablePagination } from '@mui/material';
 export default function BondPortfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -25,7 +26,7 @@ export default function BondPortfolio() {
     const [limit, setLimit] = useState(25)
     const [limit2, setLimit2] = useState(25)
     const [countApiCall, setCountApiCall] = useState(0)
-    const [allStocks, setAllStocks] = useState([])
+    const [allBondPortfoilo, setAllBondPortfolio] = useState([])
     const [portfolioPayload, setPortfolioPayload] = useState({
         myArr: [],
         portfolioName: "",
@@ -40,6 +41,11 @@ export default function BondPortfolio() {
     const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null })
     const [editModal,setEditModal] = useState(false)
     const [editPortfolioName,setEditPortfolioName] = useState("")
+    const [portfolioName, setPortfolioName] = useState("");
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedStocks,setSelectedStocks] = useState([])
     const options = {
         replace: (elememt) => {
             if (elememt.name === 'a') {
@@ -142,7 +148,7 @@ export default function BondPortfolio() {
         try {
             const allStocksApi = await fetch("https://jharvis.com/JarvisV2/getAllBondForPolio?_=1716357445057")
             const allStocksApiRes = await allStocksApi.json()
-            setAllStocks(allStocksApiRes)
+            setAllBondPortfolio(allStocksApiRes)
         }
         catch (e) {
             console.log("error", e)
@@ -184,6 +190,19 @@ export default function BondPortfolio() {
     const changeLimit2 = (e)=>{
         setLimit2(e.target.value)
     }
+    const handlePage2 = async (action) => {
+        switch (action) {
+            case 'prev':
+                setCurrentPage(currentPage2 - 1)
+                break;
+            case 'next':
+                setCurrentPage(currentPage2 + 1)
+                break;
+            default:
+                setCurrentPage(currentPage2)
+                break;
+        }
+    };
     const getAllBondForPolios = async()=>{
         setManageView(true)
         context.setLoaderState(true)
@@ -210,6 +229,10 @@ export default function BondPortfolio() {
         }
         setSortConfig2({ key, direction });
     }
+    const filter2 = (e) => {
+        const value = e.target.value;
+        setfilteredBondportfolios(searchTable(bondPortfolios, value))
+    }
     const handleEditModal = (name)=>{
         setEditModal(true)
         setEditPortfolioName(name)
@@ -223,10 +246,126 @@ export default function BondPortfolio() {
             customClass: { confirmButton: 'btn-danger'}
         }).then(async (result)=>{
             if (result.isConfirmed) {
-                
+                context.setLoaderState(true)
+                try {
+                    const deleteApi = await fetch(`https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
+                const deleteApiRes = deleteApi.json()
+                console.log("Success",deleteApiRes)
+                getAllBondForPolios()
+                } catch (error) {
+                    console.log("Error",error)
+                }
+                context.setLoaderState(false)
             }
         })
     }
+    const validateStocks = () => {
+        const newErrors = {};
+        selectedStocks.forEach(stock => {
+          if (!stock.share) newErrors[stock.name] = { ...newErrors[stock.name], share: 'Share is required' };
+          if (!stock.purchaseDate) newErrors[stock.name] = { ...newErrors[stock.name], purchaseDate: 'Purchase Date is required' };
+          if (!stock.purchasePrice) newErrors[stock.name] = { ...newErrors[stock.name], purchasePrice: 'Purchase Price is required' };
+        });
+        // setErrors(newErrors);
+        // return Object.keys(newErrors).length === 0;
+        return newErrors;
+      };
+    const createPortfolio = async()=>{
+        const errors = validateStocks();
+        if (Object.keys(errors).length > 0) {
+          Swal.fire({
+            title: 'Validation Errors',
+            text: 'Please fill in all required fields for selected symbols.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor:"var(--primary)"
+          });
+          return;
+        }
+    
+        if (!portfolioName) {
+          Swal.fire({
+            title: 'Portfolio Name Required',
+            text: 'Please enter a portfolio name.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor:"var(--primary)"
+          });
+          return;
+        }
+            const url = new URL("https://jharvis.com/JarvisV2/createBondPortfolio");
+            const params = {
+                name: portfolioName,
+                visiblePortFolio: "yes",
+                userId: 2 // Get userId dynamically if needed
+            };
+    
+            const formData = new FormData();
+            selectedStocks.forEach(stock => {
+                const dataString = `${stock.name}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+                formData.append("myArray[]", dataString);
+            });
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+            context.setLoaderState(true)
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    // Note: Fetch does not support query parameters directly; add them manually to the URL if needed
+                    headers: {
+                        // 'Content-Type': 'multipart/form-data' is not needed for FormData; fetch will set the correct headers
+                    },
+                    params: params // fetch does not support params directly; append them to URL if needed
+                });
+        
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+        
+                const data = await response.json();
+                setShow(false)
+                getAllBondForPolios()
+                console.log('Portfolio created successfully:', data);
+            } catch (error) {
+                console.error('Error creating portfolio:', error);
+            }
+            context.setLoaderState(false)
+    }
+    const selectStock = (e,issuerName)=>{
+        const isChecked = e.target.checked;
+
+    setSelectedStocks(prevStocks => {
+      if (isChecked) {
+        // Add stock if checkbox is checked
+        console.log("Output",{ name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
+        return [...prevStocks, { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" }];
+      } else {
+        console.log("Output",prevStocks.filter(stock => stock.name !== issuerName));
+        // Remove stock if checkbox is unchecked
+        return prevStocks.filter(stock => stock.name !== issuerName);
+      }
+    });
+console.log("issuerName",issuerName,e.target.checked)
+    }
+    const updateSelectedBond = (e, issuerName) => {
+        const { name, value } = e.target;
+    
+        setSelectedStocks(prevStocks =>
+          prevStocks.map(stock =>
+            stock.name === issuerName ? { ...stock, [name]: value } : stock
+          )
+        );
+      };
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+    const filteredPortfolio = allBondPortfoilo.filter((row) =>
+        row.issuerName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
     useEffect(() => {
         fetchPortfolioNames()
         fetchColumnNames()
@@ -261,6 +400,9 @@ useEffect(()=>{
         setFilterData(items);
     }
 },[currentPage,tableData,sortConfig,limit])
+useEffect(()=>{
+
+},[allBondPortfoilo])
 useEffect(()=>{
     if (bondPortfolios.length > 0) {
         let items = [...bondPortfolios];
@@ -377,28 +519,44 @@ useEffect(()=>{
                     {
                         manageView &&
 <div className="manage">
-    <div className="d-flex justify-content-center"> 
+    <div className="d-flex"> 
             <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
             <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
     </div>
+    <div className='d-flex justify-content-between align-items-center'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                        </div>
+                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter2} />
+                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                            <select name="limit" className='form-select w-auto' onChange={changeLimit2} value={limit}>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                    </div>
 <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
                                      <th onClick={()=>{handleSort2("name")}}>PortFolio Name {getSortIcon("name",sortConfig2)}</th>
                                      <th onClick={()=>{handleSort2("ticker")}}>Symbol {getSortIcon("ticker",sortConfig2)}</th>
-                                     <th>Action</th>
+                                     <th className='sticky-action'>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                {
                                 filteredBondPortfolios.map((item,index)=>{
-                                    return <tr key={"portfolio"+index}><td>{item?.name}</td><td>{item?.ticker}</td><td><button className='px-4 btn btn-primary' onClick={()=>{handleEditModal(item?.name)}} title="Edit"><i className="mdi mdi-pen"></i></button><button className='px-4 btn btn-danger' onClick={() => { deleteBondPortFolio(item?.name) }} title="Delete"><i className="mdi mdi-delete"></i></button></td></tr>
+                                    return <tr key={"portfolio"+index}><td>{item?.name}</td><td>{item?.ticker}</td><td className='sticky-action'><button className='px-4 btn btn-primary' onClick={()=>{handleEditModal(item?.name)}} title="Edit"><i className="mdi mdi-pen"></i></button><button className='px-4 btn btn-danger' onClick={() => { deleteBondPortFolio(item?.name) }} title="Delete"><i className="mdi mdi-delete"></i></button></td></tr>
                                 })
                                }
                             </tbody>
                         </table>
                     </div>
+                    <Pagination currentPage={currentPage2} totalItems={bondPortfolios} limit={limit2} setCurrentPage={setCurrentPage2} handlePage={handlePage2} />
                     </div>
                     }                    
                 </div>
@@ -410,7 +568,7 @@ useEffect(()=>{
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group d-flex">
-                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={portfolioInputs} />
+                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={(e) => setPortfolioName(e.target.value)}/>
                                     <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
                                 </div>
                             </div>
@@ -429,13 +587,59 @@ useEffect(()=>{
                                 </thead>
                                 <tbody>
                                     {
-                                        allStocks.length > 0 && allStocks.map((item, index) => {
-                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.issuerName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
+                                        allBondPortfoilo.length > 0 && filteredPortfolio.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => {
+                                            const isChecked = selectedStocks.some(stock => stock.name === item?.issuerName);
+                                            return <tr key={"stock" + index}><td>
+                                                <input type="checkbox" name='stockChkBox' value={item?.idBond} onChange={(e)=>{selectStock(e,item?.issuerName)}} checked={isChecked}/></td>
+                                                <td>{item?.issuerName}</td>
+                                            <td>
+                  <input
+                    type="text"
+                    value={selectedStocks.find(stock => stock.name === item?.issuerName)?.share || ""}
+                    name="share"
+                    placeholder="Share"
+                    className='form-control'
+                    onChange={(e) => updateSelectedBond(e, item?.issuerName)}
+                    style={{minWidth:"150px"}}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="date"
+                    value={selectedStocks.find(stock => stock.name === item?.issuerName)?.purchaseDate || ""}
+                    name="purchaseDate"
+                    className='form-control'
+                    onChange={(e) => updateSelectedBond(e, item?.issuerName)}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={selectedStocks.find(stock => stock.name === item?.issuerName)?.purchasePrice || ""}
+                    name="purchasePrice"
+                    placeholder='Purchase Price'
+                    className='form-control'
+                    onChange={(e) => updateSelectedBond(e, item?.issuerName)}
+                    style={{minWidth:"150px"}}
+                  />
+                </td>
+                                            </tr>
                                         })
                                     }
                                 </tbody>
                             </table>
                         </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                        <TablePagination
+                        rowsPerPageOptions={[20, 50, 100]}
+                        component="div"
+                        count={allBondPortfoilo.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                        </Box>
                     </Modal.Body>
                 </Modal>
                 <Modal show={editModal} onHide={()=>{setEditModal(false)}} className='portfolio-modal'>
@@ -465,7 +669,7 @@ useEffect(()=>{
                                 </thead>
                                 <tbody>
                                     {
-                                        allStocks.length > 0 && allStocks.map((item, index) => {
+                                        allBondPortfoilo.length > 0 && allBondPortfoilo.map((item, index) => {
                                             return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.issuerName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
                                         })
                                     }

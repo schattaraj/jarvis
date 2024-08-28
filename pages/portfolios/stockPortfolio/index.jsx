@@ -622,12 +622,13 @@ export default function Portfolio() {
                 {
                     manageView &&
                         <div className="manage">
-                            <div className="d-flex justify-content-center"> 
+                            <div className="d-flex"> 
                                     <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
                                     <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
                             </div>
-                            <div className='d-flex justify-content-between'>
+                            <div className='d-flex justify-content-between align-items-center'>
                                 <div className="dt-buttons mb-3">
+                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                 </div>
                                 <div className="form-group d-flex align-items-center">
                                 <div className="form-group d-flex align-items-center mb-0 me-3">
@@ -640,7 +641,7 @@ export default function Portfolio() {
                                             <option value="all">All</option>
                                         </select>
                                     </div>
-                                    <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={stockFilter} />
+                                    <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={stockFilter} />
                                 </div>
                             </div>
                         <div className="table-responsive">
