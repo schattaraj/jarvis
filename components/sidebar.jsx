@@ -119,8 +119,8 @@ export default function Sidebar() {
               </div>
               <div className={context.openDropdown === "portfolios" ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className={router.pathname === '/portfolio' ? 'nav-link active' : 'nav-link'} href="/portfolio">Stock Portfolio</Link></li>
-                  <li className="nav-item"><Link className={router.pathname === '/bondPortfolio' ? 'nav-link active' : 'nav-link'} href="/bondPortfolio">Bond Portfolio</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/portfolios/stockPortfolio' ? 'nav-link active' : 'nav-link'} href="/portfolios/stockPortfolio">Stock Portfolio</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/portfolios/bondPortfolio' ? 'nav-link active' : 'nav-link'} href="/portfolios/bondPortfolio">Bond Portfolio</Link></li>
                 </ul> 
                 </div>
             </li>

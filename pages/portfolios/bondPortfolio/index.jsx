@@ -1,15 +1,15 @@
-import Navigation from '../../components/navigation';
-import Sidebar from '../../components/sidebar';
+import Navigation from '../../../components/navigation';
+import Sidebar from '../../../components/sidebar';
 import { useState, useEffect, useContext } from 'react';
 import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
-import Loader from '../../components/loader';
-import { Context } from '../../contexts/Context';
-import { Pagination } from '../../components/Pagination';
-import { calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, searchTable } from '../../utils/utils'
-import SliceData from '../../components/SliceData';
+import Loader from '../../../components/loader';
+import { Context } from '../../../contexts/Context';
+import { Pagination } from '../../../components/Pagination';
+import { calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
+import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../../components/Breadcrumb';
 export default function BondPortfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -378,8 +378,8 @@ useEffect(()=>{
                         manageView &&
 <div className="manage">
     <div className="d-flex justify-content-center"> 
-            <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>CREATE NEW PORTFOLIO</button>
-            <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View PortFolio</button>
+            <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
+            <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
     </div>
 <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">

@@ -1,12 +1,13 @@
 import React, { useContext } from 'react'
 import Head from 'next/head';
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Footer from '../components/footer';
+import Navigation from '../../components/navigation';
+import Sidebar from '../../components/sidebar';
+import Footer from '../../components/footer';
 import Link from 'next/link'
-import { Context } from '../contexts/Context';
-import Card from '../components/Card';
+import { Context } from '../../contexts/Context';
+import Card from '../../components/Card';
 import 'animate.css';
+import Breadcrumb from '../../components/Breadcrumb';
 export default function Portfolios() {
     const context = useContext(Context)
     return (
@@ -19,6 +20,7 @@ export default function Portfolios() {
             </Head>
             <div className="main-panel">
                 <div className="content-wrapper">
+                    <Breadcrumb/>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -29,10 +31,10 @@ export default function Portfolios() {
                     </div>
                     <div className="row justify-content-center animate__animated animate__fadeInLeft">
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-                        <Card route="/portfolio" bg="bg-yellow" img="/icons/Stocks.png" title="Stock Portfolio" />
+                        <Card route="/portfolios/stockPortfolio" bg="bg-yellow" img="/icons/Stocks.png" title="Stock Portfolio" />
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-                        <Card route="/bondPortfolio" bg="bg-blue" img="/icons/Bonds.png" title="Bond Portfolio" />
+                        <Card route="/portfolios/bondPortfolio" bg="bg-blue" img="/icons/Bonds.png" title="Bond Portfolio" />
                         </div>
                     </div>
                 </div>

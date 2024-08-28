@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import Footer from '../../components/footer';
-import Navigation from '../../components/navigation';
-import Sidebar from '../../components/sidebar';
+import Footer from '../../../components/footer';
+import Navigation from '../../../components/navigation';
+import Sidebar from '../../../components/sidebar';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable'
 import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
-import Loader from '../../components/loader';
-import { Context } from '../../contexts/Context';
-import { calculateAverage, calculateAveragePercentage, formatDate, getSortIcon, searchTable } from '../../utils/utils';
-import SliceData from '../../components/SliceData';
+import Loader from '../../../components/loader';
+import { Context } from '../../../contexts/Context';
+import { calculateAverage, calculateAveragePercentage, formatDate, getSortIcon, searchTable } from '../../../utils/utils';
+import SliceData from '../../../components/SliceData';
 import * as Icon from "react-icons/fa";
-import { Pagination } from '../../components/Pagination';
+import { Pagination } from '../../../components/Pagination';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx'
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../../components/Breadcrumb';
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -311,7 +311,7 @@ export default function Portfolio() {
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
-                            </span>Portfolio
+                            </span>Stock Portfolio
                         </h3>
                     </div>
                     <div className="selection-area mb-3">
