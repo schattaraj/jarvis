@@ -64,12 +64,14 @@ const VideoComponent = () => {
     );
   };
 
+  console.log("Videos", videoes);
+
   return (
     <Grid container>
       <Grid container item xs={12} sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)', marginBottom: '4px' }}>
 
         <Grid container item xs={6} justifyContent="flex-start" alignItems="center">
-          <Grid item>
+          {/* <Grid item>
             <img
               id="dimg_1"
               src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAUVBMVEX///9mZmZeXl5iYmJXV1daWlqlpaXBwcH8/Py0tLRubm6rq6vw8PCIiIiBgYHc3Nz29vbQ0NCfn590dHTj4+OQkJDq6upSUlKWlpbHx8e6urpx1ZffAAABmElEQVRIib2W65KDIAyFIQQvULRg1db3f9AFu91tazTQmd38ZOabE5KTgBB/GX3dfECdg9bzuZyrUUkJ5YoVyhimmLM6cepayvlVT2pfyDVq5coztbByWCoo7noQSrnLekNwpZy4pUz1WMyJBUHLupwTfbD5ZTnVYXTXZfo5aHrrBjM42x9hF4egYgAae0kHfgQNqZvqMGuL3x1PxURTBaV/D2Kdup0hcVq+hFLy7UCeKG4EyYUyxHy1muViDtsSTchz4AhB934hQo8y3zTzguR0WV4QSQsYPtGO4k58aYA0jud7gRMF1nzzgeJEy4PyU5BedRmg+hREcqZyikOukZ5vhyLXXYYBdhrJW3XHcxlTJXVLgEuGAyQSds1ZAJGstiQ/VynAbJqS49ZEbl71c1au1Bq4ZtSVtHpWefSN6MiYI0lwObYjBTMKS5suxsAki+RjlZI9Hi6kE03hj6657f3zNZ9JBc9PK+xd8B4WHxAOwYYOH485w6VfUdSBuavvhWh8iN8HgJmYiw0aKv/ygPaLbcm18b/xBf8tD08u8Xy+AAAAAElFTkSuQmCC"
@@ -80,14 +82,18 @@ const VideoComponent = () => {
               data-atf="1"
               data-frt="0"
             />
-          </Grid>
+          </Grid> */}
           <Grid iten>
-            <Typography sx={{ fontSize: "28px" }}>Apple Inc</Typography>
-            <Typography sx={{ fontSize: "14px" }}>NASDAQ: AAPL</Typography>
+          {videoes.length > 0 ? (
+            <>
+            <Typography sx={{ fontSize: "28px" }}>{videoes[currentVideoIndex].companyName}</Typography>
+            <Typography sx={{ fontSize: "14px" }}>{videoes[currentVideoIndex].tickerName}</Typography>
+            </>
+          ) : ""}
           </Grid>
         </Grid>
 
-        <Grid container item xs={6} justifyContent='flex-end'>
+        {/* <Grid container item xs={6} justifyContent='flex-end'>
           <Grid item container justifyContent='flex-end' alignItems='flex-end'>
             <Typography sx={{ fontSize: '28px' }}>
               189.71
@@ -109,7 +115,7 @@ const VideoComponent = () => {
               </span>
             </Typography>
           </Grid>
-        </Grid>
+        </Grid> */}
 
       </Grid>
 
@@ -149,8 +155,8 @@ const VideoComponent = () => {
                   </IconButton>
                 </Tooltip>
 
-                <span>{videoes[currentVideoIndex].companyName}</span>
-                <span>ID {videoes[currentVideoIndex].idAnaylstVideo}</span>
+                {/* <span>{videoes[currentVideoIndex].companyName}</span>
+                <span>ID {videoes[currentVideoIndex].idAnaylstVideo}</span> */}
               </div>
             </>
           ) : (
