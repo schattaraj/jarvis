@@ -26,6 +26,12 @@ export default function Portfolio() {
     const [allStocks, setAllStocks] = useState([])
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
+    const [manageView,setManageView] = useState(false)
+    const [stockPortfolios, setStockportfolios] = useState(false)
+    const [filteredStockPortfolios,setfilteredStockPortfolios] = useState([])
+    const [currentPage2, setCurrentPage2] = useState(1);
+    const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null })
+    const [limit2, setLimit2] = useState(25)
     const [portfolioPayload, setPortfolioPayload] = useState({
         myArr: [],
         portfolioName: "",
@@ -33,6 +39,12 @@ export default function Portfolio() {
         purchaseDate: "",
         purchasePrice: ""
     })
+    const [formData, setFormData] = useState({
+        portfolioName: "",
+        allStocks: [
+            { stockName: "", share: "", purchaseDate: "", purchasePrice: "" }
+        ]
+    });
     const [countApiCall, setCountApiCall] = useState(0)
     //pagination
     const [totalItems, setTotalItems] = useState(0);
@@ -234,11 +246,59 @@ export default function Portfolio() {
         }
 
     }
-    const portfolioInputs = (e) => {
-        setPortfolioPayload({ ...portfolioPayload, [e.target.name]: e.target.value })
+    const portfolioInputs = (e, index) => {
+        // setPortfolioPayload({ ...portfolioPayload, [e.target.name]: e.target.value })
+        const { name, value } = e.target;
+
+        if (name === "portfolioName") {
+            // Update portfolio name
+            setFormData(prevData => ({
+                ...prevData,
+                portfolioName: value
+            }));
+        } else {
+            const updatedStocks = [...formData.allStocks];
+
+            // Update the specific stock at the given index
+            updatedStocks[index] = {
+                ...updatedStocks[index],
+                [name]: value
+            };
+    
+            // Set the updated array in state
+            setFormData(prevData => ({
+                ...prevData,
+                allStocks: updatedStocks
+            }));
+        }
     }
-    const createPortfolio = () => {
-        console.log("portfolioPayload", portfolioPayload)
+    const createPortfolio = async (e) => {
+        // console.log("portfolioPayload", portfolioPayload)
+        console.log("FormData", formData);
+
+        const stockFormData = new FormData();
+
+        formData.allStocks.forEach((stock, index) => {
+            const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+            stockFormData.append(`myArray[]`, formattedStock);
+        });
+
+        try {
+            const response = await fetch(`https://jharvis.com/JarvisV2/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
+                method: 'POST',
+                body: stockFormData
+            });
+            console.log('response:', response);
+            if (response.status == 200) {
+                const result = await response.json();
+                alert("Portfolio Stock set has been saved");
+                handleClose();
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Request failed', error);
+        }
     }
     const handlePage = async (action) => {
         switch (action) {
@@ -253,6 +313,21 @@ export default function Portfolio() {
                 break;
         }
     };
+
+    const handlePage2 = async (action) => {
+        switch (action) {
+            case 'prev':
+                setCurrentPage2(currentPage2 - 1)
+                break;
+            case 'next':
+                setCurrentPage2(currentPage2 + 1)
+                break;
+            default:
+                setCurrentPage2(currentPage2)
+                break;
+        }
+    };
+
     const handleSort = (key) => {
         let direction = 'asc';
         if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -260,9 +335,23 @@ export default function Portfolio() {
         }
         setSortConfig({ key, direction });
     };
+
+    const handleSort2 = (key) => {
+        let direction = 'asc';
+        if (sortConfig2 && sortConfig2.key === key && sortConfig2.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig2({ key, direction });
+    }
+
     const changeLimit = (e) => {
         setLimit(e.target.value)
     }
+
+    const changeLimit2 = (e)=>{
+        setLimit2(e.target.value)
+    }
+
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -302,11 +391,75 @@ export default function Portfolio() {
         }
     }, [countApiCall])
 
+    const getAllStockForPolios = async()=>{
+        setManageView(true)
+        context.setLoaderState(true)
+        try {
+            const allStockApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"getAllPortfolio?userId=2&_=1724828770117")
+            const allStockApiRes = await allStockApi.json()
+            setStockportfolios(allStockApiRes)
+        } catch (error) {
+            
+        }
+        context.setLoaderState(false)
+    }
+
+    const stockFilterData = () => {
+        if (stockPortfolios.length > 0) {
+            let items = [...stockPortfolios];
+            if (sortConfig2 !== null) {
+                items.sort((a, b) => {
+                    if (a[sortConfig2.key] < b[sortConfig2.key]) {
+                        return sortConfig2.direction === 'asc' ? -1 : 1;
+                    }
+                    if (a[sortConfig2.key] > b[sortConfig2.key]) {
+                        return sortConfig2.direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+            }
+            let dataLimit = limit2
+            if (dataLimit == "all") {
+                dataLimit = items?.length
+            }
+            const startIndex = (currentPage2 - 1) * dataLimit;
+            const endIndex = startIndex + dataLimit;
+            items = items.slice(startIndex, endIndex);
+            setfilteredStockPortfolios(items);
+        }
+    }
+
+    useEffect(()=>{
+        stockFilterData();
+    },[currentPage2, stockPortfolios, sortConfig2, limit2])
+
+    const stockFilter = (e) => {
+        const value = e.target.value;
+        setfilteredStockPortfolios(searchTable(stockPortfolios, value));
+    }
+
+    const deleteStockPortFolio = async (name) => {
+        try {
+            const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
+            console.log('response:', response);
+            if (response.status == 200) {
+                const result = await response.json();
+                alert("Portfolio Stock set has been deleted");
+                getAllStockForPolios();
+                stockFilterData();
+            } else {
+                console.error('Error:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Request failed', error);
+        }
+    }
+
     return (
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
-        <Breadcrumb />
+                <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -314,6 +467,10 @@ export default function Portfolio() {
                             </span>Stock Portfolio
                         </h3>
                     </div>
+                    {
+                        !manageView
+                        &&
+                        <>
                     <div className="selection-area mb-3">
                         <div className="row">
 
@@ -336,7 +493,7 @@ export default function Portfolio() {
                             <div className="col-md-8">
                                 <div className="actions">
                                     <button className='btn btn-primary' onClick={fetchData}>GO</button>
-                                    <button className='btn btn-primary' onClick={handleShow}>CREATE PORTFOLIO</button>
+                                    <button className='btn btn-primary' onClick={getAllStockForPolios}>MANAGE</button>
                                 </div>
                             </div>
                         </div>
@@ -460,6 +617,54 @@ export default function Portfolio() {
                         </table>
                     </div>
                     <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />
+                    </>
+                }
+                {
+                    manageView &&
+                        <div className="manage">
+                            <div className="d-flex justify-content-center"> 
+                                    <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
+                                    <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
+                            </div>
+                            <div className='d-flex justify-content-between'>
+                                <div className="dt-buttons mb-3">
+                                </div>
+                                <div className="form-group d-flex align-items-center">
+                                <div className="form-group d-flex align-items-center mb-0 me-3">
+                                        <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                        <select name="limit" className='form-select w-auto' onChange={changeLimit2} value={limit2}>
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="all">All</option>
+                                        </select>
+                                    </div>
+                                    <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={stockFilter} />
+                                </div>
+                            </div>
+                        <div className="table-responsive">
+                        
+                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                            <thead>
+                                <tr>
+                                     <th onClick={()=>{handleSort2("name")}}>PortFolio Name {getSortIcon("name",sortConfig2)}</th>
+                                     <th onClick={()=>{handleSort2("ticker")}}>Symbol {getSortIcon("ticker",sortConfig2)}</th>
+                                     <th className='sticky-action'>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               {
+                                filteredStockPortfolios.map((item,index)=>{
+                                    return <tr key={"portfolio"+index}><td>{item?.name}</td><td>{item?.ticker}</td><td className='sticky-action'><button className='px-4 btn btn-primary' onClick={()=>{handleEditModal(item?.name)}} title="Edit"><i className="mdi mdi-pen"></i></button><button className='px-4 btn btn-danger' onClick={() => { deleteStockPortFolio(item?.name) }} title="Delete"><i className="mdi mdi-delete"></i></button></td></tr>
+                                })
+                               }
+                            </tbody>
+                        </table>
+                        </div>
+                        <Pagination currentPage={currentPage2} totalItems={stockPortfolios} limit={limit2} setCurrentPage={setCurrentPage2} handlePage={handlePage2} />
+                    </div>
+                    } 
                 </div>
                 <Footer />
                 <Modal show={show} onHide={handleClose} className='portfolio-modal'>
@@ -490,7 +695,7 @@ export default function Portfolio() {
                                 <tbody>
                                     {
                                         allStocks.length > 0 && allStocks.map((item, index) => {
-                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
+                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockName' value={item?.stockName} onChange={(e) => portfolioInputs(e, index)} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td></tr>
                                         })
                                     }
                                 </tbody>
