@@ -20,7 +20,7 @@ import {
   ErrorMessage,
   useFormik,
 } from "formik";
-import { strocksValidationSchema } from "../../components/stocksValidationSchema";
+// import { strocksValidationSchema } from "../../components/stocksValidationSchema";
 export default function StocksPair() {
   const [stocks, setStocks] = useState([]);
   const [inputData, setInputData] = useState({
@@ -265,19 +265,19 @@ export default function StocksPair() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const formik = useFormik({
-    initialValues: {
-      stockA: "",
-      stockB: "",
-      stockC: "",
-      stockD: "",
-      startDate: "",
-      endDate: "",
-    },
-    validationSchema: strocksValidationSchema,
-    validateOnBlur: true,
-    validateOnChange: true,
-  });
+  // const formik = useFormik({
+  //   initialValues: {
+  //     stockA: "",
+  //     stockB: "",
+  //     stockC: "",
+  //     stockD: "",
+  //     startDate: "",
+  //     endDate: "",
+  //   },
+  //   validationSchema: strocksValidationSchema,
+  //   validateOnBlur: true,
+  //   validateOnChange: true,
+  // });
 
   return (
     <>
