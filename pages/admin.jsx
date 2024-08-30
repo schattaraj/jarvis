@@ -70,6 +70,20 @@ export default function Admin() {
                             </div>
                         </div>
                         <div className="col-lg-4 col-md-6 stretch-card grid-margin">
+                        <Card route="/MutualFund" bg="bg-green" img="/icons/Mutual Funds.png" title="Mutual Fund"/>
+                            <div className="d-none card bg-gradient-success  card-img-holder text-white">
+                                <Link href={"/MutualFund"}>
+                                    <div className="card-body">
+                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+
+
+                                        <h2 className="mb-5">Mutual Fund</h2>
+
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
                         <Card route="/UploadTickerReports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Upload Ticker Reports"/>
                             <div className="d-none card bg-green-gradient card-img-holder text-white">
                                 <Link href={"/UploadTickerReports"}>
@@ -121,20 +135,6 @@ export default function Admin() {
 
 
                                         <h2 className="mb-5">Change Password</h2>
-
-                                    </div>
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="col-lg-4 col-md-6 stretch-card grid-margin">
-                        <Card route="/MutualFund" bg="bg-green" img="/icons/Mutual Funds.png" title="Mutual Fund"/>
-                            <div className="d-none card bg-gradient-success  card-img-holder text-white">
-                                <Link href={"/MutualFund"}>
-                                    <div className="card-body">
-                                        <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-
-
-                                        <h2 className="mb-5">Mutual Fund</h2>
 
                                     </div>
                                 </Link>
