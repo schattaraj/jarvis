@@ -700,8 +700,6 @@ const handleReportData = (data)=>{
                                                                 content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
                                                             } 
                                                             else if (columnName.elementInternalName === 'element1') {
-                                                                // content = rowData[columnName.elementInternalName].split(" ")[0]
-                                                                // content = `<img src=https://jharvis.com/JarvisV2/downloadPDF?fileName=${rowData[columnName.elementInternalName].split(" ")[0]}/>${rowData[columnName.elementInternalName].split(" ")[2]}`
                                                                 content = extractAndConvert(rowData[columnName.elementInternalName])
                                                             } else {
                                                                 content = rowData[columnName.elementInternalName];

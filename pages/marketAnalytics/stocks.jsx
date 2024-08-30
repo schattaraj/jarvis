@@ -798,18 +798,62 @@ export default function Stocks() {
         }
     }
     const options2 = {
-        replace: (elememt) => {
+        replace (elememt){
             if (elememt?.name == 'img') {
                 return (
-                    <>
+                    <React.Fragment>
                         <img className="img-responsive" src={elememt?.attribs?.src} />
-                        <a onClick={() => { handleReportData(elememt?.next?.next?.children[0]?.data) }} href='#'>
-                            {typeof(elememt?.next?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.next?.children[0]?.data) : elememt?.next?.next?.children[0]?.data}
+                        <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }} href='#'>
+                            {typeof(elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
                         </a>
-                    </>
+                        </React.Fragment>
                 )
             }
         }
+    }
+    function extractAndConvert(inputString) {
+        // Define regex patterns to match both cases
+        const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
+        const onlyPathRegex = /(.*?\.jpg)/;
+        const onlyAnchorRegex = /(<a.*?<\/a>)/;
+    
+        // Try to match both path and anchor
+        const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
+        if (matchPathAndAnchor) {
+            const filePath = matchPathAndAnchor[1];
+            const anchorTag = matchPathAndAnchor[2];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
+            return parse(imgTag,options2);
+        }
+    
+        // Try to match only file path
+        const matchOnlyPath = inputString.match(onlyPathRegex);
+        if (matchOnlyPath) {
+            const filePath = matchOnlyPath[1];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            return parse(imgTag);
+        }
+    
+        // Try to match only anchor tag
+        const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
+        if (matchOnlyAnchor) {
+            return parse(matchOnlyAnchor[1],options);
+        }
+        const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
+        const matchPathAndText = inputString.match(pathAndTextRegex);
+        if (matchPathAndText) {
+            const filePath = matchPathAndText[1];
+            const additionalText = matchPathAndText[2];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            // Combine img tag with additional text
+            const resultHtml = `${imgTag} ${additionalText}`;
+            return parse(resultHtml); // Adjust parse function as needed
+        }
+        // If neither pattern is matched, return an empty array
+        return inputString;
     }
     const closeReportModal = () => {
         setReportModal(false)
@@ -957,12 +1001,14 @@ export default function Stocks() {
                                                             content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
                                                         }
                                                         else if (columnName.elementInternalName === 'element1') {
+                                                            content = extractAndConvert(rowData[columnName.elementInternalName])
+                                                        }
+                                                        else if (columnName.elementInternalName === 'element1') {
                                                             content = parse(rowData[columnName.elementInternalName], options2)
                                                         }
                                                         else {
                                                             content = rowData[columnName.elementInternalName];
                                                         }
-                                                        console.log("typeof (content)", typeof (content));
                                                         if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
                                                             content = parse(content, options)
                                                         }
