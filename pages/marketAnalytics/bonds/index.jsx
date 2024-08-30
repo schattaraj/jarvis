@@ -1,17 +1,17 @@
 import { useContext, useEffect, useState } from 'react'
-import Navigation from '../../components/navigation';
-import Sidebar from '../../components/sidebar';
-import Loader from '../../components/loader';
-import { Context } from '../../contexts/Context';
+import Navigation from '../../../components/navigation';
+import Sidebar from '../../../components/sidebar';
+import Loader from '../../../components/loader';
+import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, getSortIcon, searchTable } from '../../utils/utils';
-import { getImportsData } from '../../utils/staticData';
-import BondsHistoryModal from '../../components/BondHstoryModal';
+import { calculateAverage, getSortIcon, searchTable } from '../../../utils/utils';
+import { getImportsData } from '../../../utils/staticData';
+import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
-import BondChart from '../../components/charts';
-import { Pagination } from '../../components/Pagination';
-import SliceData from '../../components/SliceData';
-import HightChart from '../../components/HighChart';
+import BondChart from '../../../components/charts';
+import { Pagination } from '../../../components/Pagination';
+import SliceData from '../../../components/SliceData';
+import HightChart from '../../../components/HighChart';
 import { Form, Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
 import Swal from 'sweetalert2';
@@ -19,7 +19,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { FilterAlt } from '@mui/icons-material';
 import { useRouter } from 'next/router';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../../components/Breadcrumb';
 const extraColumns = [
     {
         "elementId": null,
@@ -187,7 +187,7 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
-            fetchData()
+            // fetchData()
         }
         catch (e) {
             console.log("error", e)

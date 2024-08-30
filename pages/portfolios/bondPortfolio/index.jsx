@@ -10,7 +10,8 @@ import { calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, 
 import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
-import { Box, TablePagination } from '@mui/material';
+import { Box, TablePagination, TextField } from '@mui/material';
+import PortfolioTable from '../../../components/porfolioTable';
 export default function BondPortfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -293,19 +294,20 @@ export default function BondPortfolio() {
           });
           return;
         }
-            const url = new URL("https://jharvis.com/JarvisV2/createBondPortfolio");
-            const params = {
-                name: portfolioName,
-                visiblePortFolio: "yes",
-                userId: 2 // Get userId dynamically if needed
-            };
+        const url = new URL(`https://jharvis.com/JarvisV2/createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`);
+            // const url = new URL("https://jharvis.com/JarvisV2/createBondPortfolio");
+            // const params = {
+            //     name: portfolioName,
+            //     visiblePortFolio: "yes",
+            //     userId: 2 // Get userId dynamically if needed
+            // };
     
             const formData = new FormData();
             selectedStocks.forEach(stock => {
                 const dataString = `${stock.name}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
                 formData.append("myArray[]", dataString);
             });
-            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+            // Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
             context.setLoaderState(true)
             try {
                 const response = await fetch(url, {
@@ -315,7 +317,7 @@ export default function BondPortfolio() {
                     headers: {
                         // 'Content-Type': 'multipart/form-data' is not needed for FormData; fetch will set the correct headers
                     },
-                    params: params // fetch does not support params directly; append them to URL if needed
+                    // params: params // fetch does not support params directly; append them to URL if needed
                 });
         
                 if (!response.ok) {
@@ -366,6 +368,9 @@ console.log("issuerName",issuerName,e.target.checked)
     const filteredPortfolio = allBondPortfoilo.filter((row) =>
         row.issuerName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    const closeEditModal = ()=>{
+        setEditModal(false)
+    }
     useEffect(() => {
         fetchPortfolioNames()
         fetchColumnNames()
@@ -520,7 +525,7 @@ useEffect(()=>{
                         manageView &&
 <div className="manage">
     <div className="d-flex"> 
-            <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
+            <button className="btn btn-primary mx-2 mb-3 ms-0" onClick={handleShow}>Create New Portfolio</button>
             <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
     </div>
     <div className='d-flex justify-content-between align-items-center'>
@@ -571,6 +576,16 @@ useEffect(()=>{
                                     <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={(e) => setPortfolioName(e.target.value)}/>
                                     <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
                                 </div>
+                            </div>
+                            <div className="col-md-6">
+                            <TextField
+                    label="Search"
+                    variant="outlined"
+                    fullWidth
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ marginBottom: 2 }}
+                />
                             </div>
                         </div>
 
@@ -642,7 +657,7 @@ useEffect(()=>{
                         </Box>
                     </Modal.Body>
                 </Modal>
-                <Modal show={editModal} onHide={()=>{setEditModal(false)}} className='portfolio-modal'>
+                {/* <Modal show={editModal} onHide={()=>{setEditModal(false)}} className='portfolio-modal'>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit Portfolio</Modal.Title>
                     </Modal.Header>
@@ -677,7 +692,8 @@ useEffect(()=>{
                             </table>
                         </div>
                     </Modal.Body>
-                </Modal>
+                </Modal> */}
+                <PortfolioTable url={`${process.env.NEXT_PUBLIC_BASE_URL_V2}getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`} open={editModal} heading={"Edit Portfolio"} handleCloseModal={closeEditModal} editPortfolioName={editPortfolioName} getAllBondForPolios={getAllBondForPolios}/>
             </div>
         </>
     )

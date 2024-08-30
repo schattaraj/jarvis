@@ -623,7 +623,7 @@ export default function Portfolio() {
                     manageView &&
                         <div className="manage">
                             <div className="d-flex"> 
-                                    <button className="btn btn-primary mx-2 mb-3" onClick={handleShow}>Create New Portfolio</button>
+                                    <button className="btn btn-primary mx-2 mb-3 ms-0" onClick={handleShow}>Create New Portfolio</button>
                                     <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
                             </div>
                             <div className='d-flex justify-content-between align-items-center'>
