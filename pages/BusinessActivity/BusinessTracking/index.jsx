@@ -54,6 +54,30 @@ export default function BusinessTracking() {
     const [timeFrame, setTimeFrame] = useState("");
     const [isDate,setIsDate] = useState(false)
     const [dateRange,setDateRange] = useState({startdate:"",enddate:""})
+    const [formData, setFormData] = useState({
+        advisorName: '',
+        assetBroughtIn: '',
+        outBoundId: '',
+        date: '',
+        totalAssetManagement: '',
+        firstMeeting: '',
+        firstMeetingWhom: '',
+        secondMeeting: '',
+        secondMeetingWhom: '',
+        clientReview: '',
+        reviewMeetingWhom: '',
+        newClientId: '',
+        newClientName: '',
+    });
+
+    const [assetBroughtFrom, setAssetBroughtFrom] = useState([]);
+    const [firstMeetingWhom, setFirstMeetingWhom] = useState([]);
+    const [reviewMeetingWhom, setReviewMeetingWhom] = useState([]);
+    const [newClientName, setNewClientName] = useState([]);
+    const [currentInput, setCurrentInput] = useState('');
+    const [currentInput2, setCurrentInput2] = useState('');
+    const [currentInput3, setCurrentInput3] = useState('');
+    const [currentInput4, setCurrentInput4] = useState('');
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -130,6 +154,12 @@ export default function BusinessTracking() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
+
+            jsonObject.assetBroughtFrom = assetBroughtFrom.join(', ');
+            jsonObject.firstMeetingWhom = firstMeetingWhom.join(', ');
+            jsonObject.reviewMeetingWhom = reviewMeetingWhom.join(', ');
+            jsonObject.newClientName = newClientName.join(', ');
+
             const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+'addBusinessTracking', {
                 method: 'POST',
                 headers: {
@@ -327,6 +357,79 @@ export default function BusinessTracking() {
         }
         run();
     }, [currentPage, tableData, sortConfig]);
+
+        // Handle input change
+        const handleInputChange = (e) => {
+            const { name, value } = e.target;
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        };
+    
+    // Handle input change
+    const handleAssetInputChange = (e) => {
+        if (e.target.name === "assetBroughtFrom") {
+            setCurrentInput(e.target.value);
+        }
+        if (e.target.name === "firstMeetingWhom") {
+            setCurrentInput2(e.target.value);
+        }
+        if (e.target.name === "reviewMeetingWhom") {
+            setCurrentInput3(e.target.value);
+        }
+        if (e.target.name === "newClientName") {
+            setCurrentInput4(e.target.value);
+        }
+    };
+
+    // Handle Enter key press
+    const handleAssetKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (e.target.name === "assetBroughtFrom" && currentInput.trim()) {
+                if (!assetBroughtFrom.includes(currentInput.trim())) {
+                    setAssetBroughtFrom([...assetBroughtFrom, currentInput.trim()]);
+                }
+                setCurrentInput('');
+            }
+            if (e.target.name === "firstMeetingWhom" && currentInput2.trim()) {
+                if (!firstMeetingWhom.includes(currentInput2.trim())) {
+                    setFirstMeetingWhom([...firstMeetingWhom, currentInput2.trim()]);
+                }
+                setCurrentInput2('');
+            }
+            if (e.target.name === "reviewMeetingWhom" && currentInput3.trim()) {
+                if (!reviewMeetingWhom.includes(currentInput3.trim())) {
+                    setReviewMeetingWhom([...reviewMeetingWhom, currentInput3.trim()]);
+                }
+                setCurrentInput3('');
+            }
+            if (e.target.name === "newClientName" && currentInput4.trim()) {
+                if (!newClientName.includes(currentInput4.trim())) {
+                    setNewClientName([...newClientName, currentInput4.trim()]);
+                }
+                setCurrentInput4('');
+            }
+        }
+    };
+
+    // Remove asset from the correct list
+    const removeAsset = (asset, listType) => {
+        console.log("Remove",listType);
+        if (listType === "assetBroughtFrom") {
+            setAssetBroughtFrom(assetBroughtFrom.filter((item) => item !== asset));
+        } 
+        if (listType === "firstMeetingWhom") {
+            setFirstMeetingWhom(firstMeetingWhom.filter((item) => item !== asset));
+        }
+        if (listType === "reviewMeetingWhom") {
+            setReviewMeetingWhom(reviewMeetingWhom.filter((item) => item !== asset));
+        }
+        if (listType === "newClientName") {
+            setNewClientName(newClientName.filter((item) => item !== asset));
+        }
+    };
     return (
         <>
             <div className="main-panel">
@@ -456,7 +559,30 @@ export default function BusinessTracking() {
     <div className="col-md-6">
     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
             <Form.Label>Which client was assets brought in from?</Form.Label>
-            <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required />
+            {/* <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required /> */}
+            <Form.Control
+                type="text"
+                name="assetBroughtFrom"
+                value={currentInput}
+                onChange={handleAssetInputChange}
+                onKeyDown={handleAssetKeyDown}
+                placeholder="Type and press Enter to add"
+            />
+            <div className="asset-list">
+                {assetBroughtFrom.map((asset, index) => (
+                    <div className="asset-item" key={index}>
+                        {asset}
+                        <button
+                            type="button"
+                            className="close"
+                            aria-label="Close"
+                            onClick={() => removeAsset(asset, "assetBroughtFrom")}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ))}
+            </div>
         </Form.Group>
     </div>
     <div className="col-md-6">
@@ -476,7 +602,29 @@ export default function BusinessTracking() {
     <div className="col-md-6">
     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
             <Form.Label>1st meeting with whom</Form.Label>
-            <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required />
+            {/* <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required /> */}
+            <Form.Control
+                type="text"
+                name="firstMeetingWhom"
+                value={currentInput2}
+                onChange={handleAssetInputChange}
+                onKeyDown={handleAssetKeyDown}
+            />
+            <div className="asset-list">
+                {firstMeetingWhom.map((asset, index) => (
+                    <div className="asset-item" key={index}>
+                        {asset}
+                        <button
+                            type="button"
+                            className="close"
+                            aria-label="Close"
+                            onClick={() => removeAsset(asset, "firstMeetingWhom")}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ))}
+            </div>
         </Form.Group>
     </div>
 </div>
@@ -504,7 +652,29 @@ export default function BusinessTracking() {
     <div className="col-md-6">
     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
             <Form.Label>Review meetings with whom</Form.Label>
-            <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required />
+            {/* <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required /> */}
+            <Form.Control
+                type="text"
+                name="reviewMeetingWhom"
+                value={currentInput3}
+                onChange={handleAssetInputChange}
+                onKeyDown={handleAssetKeyDown}
+            />
+            <div className="asset-list">
+                {reviewMeetingWhom.map((asset, index) => (
+                    <div className="asset-item" key={index}>
+                        {asset}
+                        <button
+                            type="button"
+                            className="close"
+                            aria-label="Close"
+                            onClick={() => removeAsset(asset, "reviewMeetingWhom")}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ))}
+            </div>
         </Form.Group>
     </div>
 </div>
@@ -518,7 +688,29 @@ export default function BusinessTracking() {
     <div className="col-md-6">
         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
             <Form.Label>New Client Name</Form.Label>
-            <Form.Control type="text" name='newClientName' onChange={() => { }} required />
+            {/* <Form.Control type="text" name='newClientName' onChange={() => { }} required /> */}
+            <Form.Control
+                type="text"
+                name="newClientName"
+                value={currentInput4}
+                onChange={handleAssetInputChange}
+                onKeyDown={handleAssetKeyDown}
+            />
+            <div className="asset-list">
+                {newClientName.map((asset, index) => (
+                    <div className="asset-item" key={index}>
+                        {asset}
+                        <button
+                            type="button"
+                            className="close"
+                            aria-label="Close"
+                            onClick={() => removeAsset(asset, "newClientName")}
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ))}
+            </div>
         </Form.Group>
     </div>
 </div>
