@@ -164,8 +164,10 @@ export default function Sidebar() {
                     <Link className={router.pathname === '/BusinessActivity' ? 'nav-link active' : 'nav-link'} href="/BusinessActivity">Business Activity</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/SavedSecurities' ? 'nav-link active' : 'nav-link'} href="/SavedSecurities">Saved Securities</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/AddTicker' ? 'nav-link active' : 'nav-link'} href="/AddTicker">Add Ticker</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/MutualFund' ? 'nav-link active' : 'nav-link'} href="/MutualFund">Mutual Fund</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/UploadTickerReports' ? 'nav-link active' : 'nav-link'} href="/UploadTickerReports">Upload Ticker Reports</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/UploadAnalystVideos' ? 'nav-link active' : 'nav-link'} href="/UploadAnalystVideos">Upload Analyst Videos</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/ChangePassword' ? 'nav-link active' : 'nav-link'} href="/ChangePassword">Change Password</Link></li>
                 </ul> 
                 </div>
             </li>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Navigation from '../../../components/navigation';
 import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
@@ -20,6 +20,8 @@ import Tabs from 'react-bootstrap/Tabs';
 import { FilterAlt } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import Breadcrumb from '../../../components/Breadcrumb';
+import { elements } from 'chart.js';
+import ReportTable from '../../../components/ReportTable';
 const extraColumns = [
     {
         "elementId": null,
@@ -110,6 +112,7 @@ export default function Bonds() {
     const [dateModal, setDateModal] = useState(false)
     const [file, setFile] = useState(null);
     const [fileDate, setFileDate] = useState('');
+    const [reportTicker, setReportTicker] = useState("")
     const router = useRouter()
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -164,21 +167,40 @@ export default function Bonds() {
     const handleChartView = () => [
 
     ]
-
-
+const handleClick = (data)=>{
+console.log("handleClick",data)
+}
+const handleReportData = (data)=>{
+    const regex = /\(([^)]+)\)$/;
+    const match = data.match(regex);
+    setReportTicker(match ? match[1] : '')
+    setReportModal(true)
+}
     const options = {
         replace: (elememt) => {
-            if (elememt.name === 'a') {
-                // console.log("replace",JSON.stringify(parse(elememt.children.join(''))))
+            if (elememt?.name === 'a') {
                 return (
-                    <a onClick={() => { handleClick(elememt.children[0].data) }} href='#'>
-                        {parse(elememt.children[0].data)}
+                    <a onClick={() => { handleReportData(elememt?.children[0]?.data) }} href='#'>
+                        {typeof(elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
                     </a>
                 );
             }
         }
     }
-
+    const options2 = {
+        replace (elememt){
+            if (elememt?.name == 'img') {
+                return (
+                    <React.Fragment>
+                        <img className="img-responsive" src={elememt?.attribs?.src} />
+                        <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }} href='#'>
+                            {typeof(elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
+                        </a>
+                        </React.Fragment>
+                )
+            }
+        }
+    }
     // https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
@@ -187,7 +209,7 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
-            // fetchData()
+            fetchData()
         }
         catch (e) {
             console.log("error", e)
@@ -369,7 +391,6 @@ export default function Bonds() {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
-            console.log("fetchTickersRes", fetchTickersRes)
         }
         catch (e) {
             console.log("Error - 335", e);
@@ -424,6 +445,53 @@ export default function Bonds() {
       };
     const changeLimit = (e) => {
         setLimit(e.target.value)
+    }
+    function extractAndConvert(inputString) {
+        // Define regex patterns to match both cases
+        const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
+        const onlyPathRegex = /(.*?\.jpg)/;
+        const onlyAnchorRegex = /(<a.*?<\/a>)/;
+    
+        // Try to match both path and anchor
+        const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
+        if (matchPathAndAnchor) {
+            const filePath = matchPathAndAnchor[1];
+            const anchorTag = matchPathAndAnchor[2];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
+            return parse(imgTag,options2);
+        }
+    
+        // Try to match only file path
+        const matchOnlyPath = inputString.match(onlyPathRegex);
+        if (matchOnlyPath) {
+            const filePath = matchOnlyPath[1];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            return parse(imgTag);
+        }
+    
+        // Try to match only anchor tag
+        const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
+        if (matchOnlyAnchor) {
+            return parse(matchOnlyAnchor[1],options);
+        }
+        const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
+        const matchPathAndText = inputString.match(pathAndTextRegex);
+        if (matchPathAndText) {
+            const filePath = matchPathAndText[1];
+            const additionalText = matchPathAndText[2];
+            // Create img tag from file path
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            // Combine img tag with additional text
+            const resultHtml = `${imgTag} ${additionalText}`;
+            return parse(resultHtml); // Adjust parse function as needed
+        }
+        // If neither pattern is matched, return an empty array
+        return inputString;
+    }
+    const closeReportModal = () => {
+        setReportModal(false)
     }
     useEffect(() => {
         async function run() {
@@ -610,7 +678,7 @@ export default function Bonds() {
                                 </div>
 
                                 <div className="table-responsive">
-                                    <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <table className="table border display no-footer dataTable bond-table" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                                         <thead>
                                             <tr>
                                                 {columnNames.map((columnName, index) => (
@@ -630,12 +698,17 @@ export default function Bonds() {
                                                             } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
                                                                 content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                            } 
+                                                            else if (columnName.elementInternalName === 'element1') {
+                                                                // content = rowData[columnName.elementInternalName].split(" ")[0]
+                                                                // content = `<img src=https://jharvis.com/JarvisV2/downloadPDF?fileName=${rowData[columnName.elementInternalName].split(" ")[0]}/>${rowData[columnName.elementInternalName].split(" ")[2]}`
+                                                                content = extractAndConvert(rowData[columnName.elementInternalName])
                                                             } else {
                                                                 content = rowData[columnName.elementInternalName];
                                                             }
 
-                                                            if (typeof (content) == 'string') {
-                                                                content = parse(content)
+                                                            if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
+                                                                content = parse(content,options)
                                                             }
                                                             return <td key={colIndex}>{content}</td>;
                                                         })
@@ -980,6 +1053,7 @@ export default function Bonds() {
                     </Modal>
                 </div>
             </div>
+            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
         </>
     )
 }

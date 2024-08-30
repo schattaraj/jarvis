@@ -55,13 +55,13 @@ export default function Newsletter() {
                 <i className="mdi mdi-home"></i>
               </span>Newsletter
             </h3>
-            <nav aria-label="breadcrumb">
+            {/* <nav aria-label="breadcrumb">
               <ul className="breadcrumb">
                 <li className="breadcrumb-item active" aria-current="page">
                   <span></span>Overview <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle"></i>
                 </li>
               </ul>
-            </nav>
+            </nav> */}
           </div>
           {/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
           <p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>

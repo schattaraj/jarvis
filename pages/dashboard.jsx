@@ -23,9 +23,10 @@ export default function Admin() {
         <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
-                            <span className="page-title-icon bg-gradient-primary text-white me-2">
+                            {/* <span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
-                            </span> Dashboard
+                            </span> */}
+                            Dashboard
                         </h3>
 
                     </div>
@@ -40,7 +41,7 @@ export default function Admin() {
                         <Card route="/portfolio" bg="bg-orange" img="/icons/Portfolio.png" title="Portfolios" />
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-                        <Card route="/insights" bg="bg-red" img="/icons/Insights.png" title="Insights (PDF Reports and Videos on investment Research and more)" />
+                        <Card route="/insights" bg="bg-red" img="/icons/Insights.png" title="Insights (PDF Reports and Videos on Investment Research and more)" />
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/newsletter" bg="bg-green" img="/icons/Newsletter.png" title="Newsletter" />

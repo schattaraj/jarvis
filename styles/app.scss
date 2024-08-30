@@ -1234,3 +1234,12 @@ z-index: 999999 !important;
         min-width: 150px;
     }
 }
+.table.stock-table tbody td a:nth-child(2){
+display: none;
+}
+.table.bond-table tbody td img{
+    height: 60px;
+}
+.table.bond-table tbody td a:nth-child(3){
+display: none;
+}

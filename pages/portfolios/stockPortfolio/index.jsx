@@ -13,16 +13,19 @@ import SliceData from '../../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../../components/Pagination';
 import html2canvas from 'html2canvas';
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx';
+import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
 export default function Portfolio() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
     const [portfolioNames, setPortfolioNames] = useState([])
     const [selectedPortfolioId, setPortfolioId] = useState(false)
+    const [selectedPortfolioText, setSelectedPortfolioText] = useState("")
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
     const [show, setShow] = useState(false);
+    const [stockPortfolioShow, setStockPortfolioShow] = useState(false);
     const [allStocks, setAllStocks] = useState([])
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
@@ -30,8 +33,9 @@ export default function Portfolio() {
     const [stockPortfolios, setStockportfolios] = useState(false)
     const [filteredStockPortfolios,setfilteredStockPortfolios] = useState([])
     const [currentPage2, setCurrentPage2] = useState(1);
-    const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null })
+    const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null }) 
     const [limit2, setLimit2] = useState(25)
+    const [editStatus, setEditStatus] = useState(false)
     const [portfolioPayload, setPortfolioPayload] = useState({
         myArr: [],
         portfolioName: "",
@@ -120,7 +124,9 @@ export default function Portfolio() {
         context.setLoaderState(false)
     }
     const handleChange = (e) => {
-        setPortfolioId(e.target.value)
+        const selectedText = e.target.selectedOptions[0].text;
+        setPortfolioId(e.target.value);
+        setSelectedPortfolioText(selectedText);
     }
     const exportPdf = () => {
         if (tableData.length > 0) {
@@ -201,9 +207,19 @@ export default function Portfolio() {
         }
         context.setLoaderState(false)
     }
-    const handleClose = () => setShow(false);
+    const handleClose = () => {
+        setEditStatus(false);
+        formData.portfolioName = "";
+        setAllStocks([]);
+        setShow(false);
+    } 
     const handleShow = (path) => {
         setShow(true);
+    }
+
+    const handleProtfolioShow = () => {
+        getAllStock();
+        handleShow();
     }
     const filter = (e) => {
         console.log('search', e.target.value)
@@ -231,9 +247,8 @@ export default function Portfolio() {
             window.open(fetchReportRes.responseStr, '_blank')
         }
         catch (e) {
-
+            console.log("error", e);
         }
-
     }
     const deleteReport = async (reportName) => {
         try {
@@ -242,9 +257,8 @@ export default function Portfolio() {
             alert(deleteApiRes.msg)
         }
         catch (e) {
-
+            console.log("error", e);
         }
-
     }
     const portfolioInputs = (e, index) => {
         // setPortfolioPayload({ ...portfolioPayload, [e.target.name]: e.target.value })
@@ -279,8 +293,10 @@ export default function Portfolio() {
         const stockFormData = new FormData();
 
         formData.allStocks.forEach((stock, index) => {
-            const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
-            stockFormData.append(`myArray[]`, formattedStock);
+            if(stock?.stockName && stock?.share && stock?.purchaseDate && stock?.purchasePrice) {
+                const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+                stockFormData.append(`myArray[]`, formattedStock);
+            }
         });
 
         try {
@@ -383,7 +399,6 @@ export default function Portfolio() {
     useEffect(() => {
         fetchColumnNames()
         fetchPortfolioNames()
-        getAllStock()
     }, [])
     useEffect(() => {
         if (countApiCall == 1) {
@@ -439,21 +454,74 @@ export default function Portfolio() {
     }
 
     const deleteStockPortFolio = async (name) => {
-        try {
-            const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
-            console.log('response:', response);
-            if (response.status == 200) {
-                const result = await response.json();
-                alert("Portfolio Stock set has been deleted");
-                getAllStockForPolios();
-                stockFilterData();
-            } else {
-                console.error('Error:', response.statusText);
+        Swal.fire({
+            title:"Are you sure ?",
+            icon:"warning",
+            confirmButtonText:"Delete",
+            showCancelButton:true,
+            customClass: { confirmButton: 'btn-danger'}
+        }).then(async (result)=>{
+            if (result.isConfirmed) {
+                try {
+                    context.setLoaderState(true);
+                    const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
+                    console.log('response:', response);
+                    if (response.status == 200) {
+                        const result = await response.json();
+                        context.setLoaderState(false);
+                        alert("Portfolio Stock set has been deleted");
+                        getAllStockForPolios();
+                        stockFilterData();
+                    } else {
+                        console.error('Error:', response.statusText);
+                        context.setLoaderState(false);
+                    }
+                } catch (error) {
+                    console.error('Request failed', error);
+                    context.setLoaderState(false);
+                }
             }
-        } catch (error) {
-            console.error('Request failed', error);
-        }
+        })
     }
+
+    const handleEditModal = async (name) => {
+        context.setLoaderState(true);
+        try {
+            const allStocksApi = await fetch(`https://jharvis.com/JarvisV2/getAllPortfolioByName?name=${name}&_=1724917733195`);
+            const allStocksApiRes = await allStocksApi.json();
+            // allStocksApiRes.reverse();
+            setAllStocks(allStocksApiRes);
+            formData.portfolioName = name;
+            allStocksApiRes.map((item, index) => {
+                if(item.share || item.purchaseDate) {
+                    formData.allStocks[index] = { stockName: item.stockName, share: item.share, purchaseDate: item.purchaseDate, purchasePrice: item.purchasePrice };
+                }
+            });
+            setEditStatus(true);
+            handleShow();
+            context.setLoaderState(false);
+        }
+        catch (e) {
+            console.log("error", e);
+            context.setLoaderState(false);
+        }
+        context.setLoaderState(false)
+    }
+
+    const handleStockPortfolioStatus = () => {
+        stockPortfoliohandleShow();
+    }
+
+    const stockPortfoliohandleShow = () => {
+        setStockPortfolioShow(true);
+    }
+
+    const stockPortfoliohandleClose = () => {
+        setStockPortfolioShow(false);
+        setSelectedPortfolioText("");
+    }
+
+    console.log("Form Data", formData);
 
     return (
         <>
@@ -494,6 +562,7 @@ export default function Portfolio() {
                                 <div className="actions">
                                     <button className='btn btn-primary' onClick={fetchData}>GO</button>
                                     <button className='btn btn-primary' onClick={getAllStockForPolios}>MANAGE</button>
+                                    <button className='btn btn-primary' onClick={handleStockPortfolioStatus}>PORTFOLIO PROFIT AND LOSS</button>
                                 </div>
                             </div>
                         </div>
@@ -623,7 +692,7 @@ export default function Portfolio() {
                     manageView &&
                         <div className="manage">
                             <div className="d-flex"> 
-                                    <button className="btn btn-primary mx-2 mb-3 ms-0" onClick={handleShow}>Create New Portfolio</button>
+                                    <button className="btn btn-primary mx-2 mb-3" onClick={handleProtfolioShow}>Create New Portfolio</button>
                                     <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
                             </div>
                             <div className='d-flex justify-content-between align-items-center'>
@@ -649,7 +718,7 @@ export default function Portfolio() {
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
-                                     <th onClick={()=>{handleSort2("name")}}>PortFolio Name {getSortIcon("name",sortConfig2)}</th>
+                                     <th onClick={()=>{handleSort2("name")}}>Portfolio Name {getSortIcon("name",sortConfig2)}</th>
                                      <th onClick={()=>{handleSort2("ticker")}}>Symbol {getSortIcon("ticker",sortConfig2)}</th>
                                      <th className='sticky-action'>Action</th>
                                 </tr>
@@ -676,8 +745,8 @@ export default function Portfolio() {
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="form-group d-flex">
-                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={portfolioInputs} />
-                                    <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
+                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" value={formData.portfolioName} onChange={portfolioInputs} readOnly={editStatus ? true : false} />
+                                    <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>{!editStatus ? "Create Portfolio" : "Update Portfolio"}</button>
                                 </div>
                             </div>
                         </div>
@@ -696,7 +765,7 @@ export default function Portfolio() {
                                 <tbody>
                                     {
                                         allStocks.length > 0 && allStocks.map((item, index) => {
-                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockName' value={item?.stockName} onChange={(e) => portfolioInputs(e, index)} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td></tr>
+                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockName' value={item?.stockName} checked={item?.share || item?.purchaseDate} onChange={(e) => portfolioInputs(e, index)} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td></tr>
                                         })
                                     }
                                 </tbody>
@@ -741,6 +810,60 @@ export default function Portfolio() {
                             </table>
                         </div>
                         <p className="mt-2">Showing {reportData.length} entries</p>
+                    </Modal.Body>
+                </Modal>
+                <Modal show={stockPortfolioShow} onHide={stockPortfoliohandleClose} className='portfolio-modal'>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{selectedPortfolioText} Profit And Loss</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="table-responsive">
+                            <table className='table'>
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th>Company</th>
+                                        <th>Purchase Date</th>
+                                        <th>Purchase Price</th>
+                                        <th>Purchase Quantity</th>
+                                        <th>Invested Value</th>
+                                        <th>Current Date</th>
+                                        <th>Current Price</th>
+                                        <th>Merket Value</th>
+                                        <th>Profit/Loss</th>
+                                        <th>Profit/Loss%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TSLA</td>
+                                        <td>TESLA</td>
+                                        <td>01-01-2020</td>
+                                        <td>100</td>
+                                        <td>1</td>
+                                        <td>100</td>
+                                        <td>30-08-2024</td>
+                                        <td>180</td>
+                                        <td>180</td>
+                                        <td style={{color: "#00ff00"}}>80</td>
+                                        <td style={{color: "#00ff00"}}>80%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>NFLX</td>
+                                        <td>Netflix</td>
+                                        <td>01-01-2019</td>
+                                        <td>100</td>
+                                        <td>1</td>
+                                        <td>100</td>
+                                        <td>30-08-2024</td>
+                                        <td>80</td>
+                                        <td>80</td>
+                                        <td style={{color: "#ff0000"}}>20</td>
+                                        <td style={{color: "#ff0000"}}>20%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </Modal.Body>
                 </Modal>
             </div>
