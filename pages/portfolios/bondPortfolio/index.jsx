@@ -17,9 +17,11 @@ export default function BondPortfolio() {
     const [columnNames, setColumnNames] = useState([])
     const [portfolioNames, setPortfolioNames] = useState([])
     const [selectedPortfolioId, setPortfolioId] = useState("false")
+    const [selectedPortfolioText, setSelectedPortfolioText] = useState("")
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
     const [show, setShow] = useState(false);
+    const [bondPortfolioShow, setBondPortfolioShow] = useState(false);
     const [totalItems, setTotalItems] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPage2, setCurrentPage2] = useState(1);
@@ -61,7 +63,9 @@ export default function BondPortfolio() {
     }
     
     const handleChange = (e) => {
-        setPortfolioId(e.target.value)
+        const selectedText = e.target.selectedOptions[0].text;
+        setPortfolioId(e.target.value);
+        setSelectedPortfolioText(selectedText);
     }
     const fetchPortfolioNames = async () => {
         try {
@@ -432,6 +436,19 @@ useEffect(()=>{
         setfilteredBondportfolios(items);
     }
 },[currentPage2,bondPortfolios,sortConfig2,limit2])
+
+const handleBondPortfolioStatus = () => {
+    bondPortfoliohandleShow();
+}
+
+const bondPortfoliohandleShow = () => {
+    setBondPortfolioShow(true);
+}
+
+const bondPortfoliohandleClose = () => {
+    setBondPortfolioShow(false);
+    setSelectedPortfolioText("");
+}
     return (
         <>
             <div className="main-panel">
@@ -471,6 +488,7 @@ useEffect(()=>{
                                 <div className="actions">
                                     <button className='btn btn-primary' onClick={fetchData}>GO</button>
                                     <button className='btn btn-primary' onClick={getAllBondForPolios}>Manage</button>
+                                    <button className='btn btn-primary' onClick={handleBondPortfolioStatus}>Portfolio Profit And Loss</button>
                                 </div>
                             </div>
                         </div>
@@ -694,6 +712,60 @@ useEffect(()=>{
                     </Modal.Body>
                 </Modal> */}
                 <PortfolioTable url={`${process.env.NEXT_PUBLIC_BASE_URL_V2}getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`} open={editModal} heading={"Edit Portfolio"} handleCloseModal={closeEditModal} editPortfolioName={editPortfolioName} getAllBondForPolios={getAllBondForPolios}/>
+                <Modal show={bondPortfolioShow} onHide={bondPortfoliohandleClose} className='portfolio-modal'>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{selectedPortfolioText} Profit And Loss</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="table-responsive">
+                            <table className='table'>
+                                <thead>
+                                    <tr>
+                                        <th>Ticker</th>
+                                        <th>Company</th>
+                                        <th>Purchase Date</th>
+                                        <th>Purchase Price</th>
+                                        <th>Purchase Quantity (Lot)</th>
+                                        <th>Invested Value</th>
+                                        <th>Current Date</th>
+                                        <th>Current Price</th>
+                                        <th>Merket Value</th>
+                                        <th>Profit/Loss</th>
+                                        <th>Profit/Loss%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TSLA</td>
+                                        <td>TESLA</td>
+                                        <td>01-01-2020</td>
+                                        <td>100</td>
+                                        <td>1000</td>
+                                        <td>100000</td>
+                                        <td>30-08-2024</td>
+                                        <td>180000</td>
+                                        <td>180000</td>
+                                        <td style={{color: "#00ff00"}}>80</td>
+                                        <td style={{color: "#00ff00"}}>80%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>NFLX</td>
+                                        <td>Netflix</td>
+                                        <td>01-01-2019</td>
+                                        <td>100</td>
+                                        <td>1000</td>
+                                        <td>100000</td>
+                                        <td>30-08-2024</td>
+                                        <td>80000</td>
+                                        <td>80000</td>
+                                        <td style={{color: "#ff0000"}}>20</td>
+                                        <td style={{color: "#ff0000"}}>20%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </Modal.Body>
+                </Modal>
             </div>
         </>
     )
