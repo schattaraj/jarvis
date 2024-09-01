@@ -38,7 +38,7 @@ export default function Admin() {
                         <Card route="/compareStocks" bg="bg-blue" img="/icons/Compare Stocks.png" title="Compare Stocks, ETFs"  click={context.setCompareStocks(true)}/>
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-                        <Card route="/portfolio" bg="bg-orange" img="/icons/Portfolio.png" title="Portfolios" />
+                        <Card route="/portfolios" bg="bg-orange" img="/icons/Portfolio.png" title="Portfolios" />
                         </div>
                         <div className="col-md-6 col-lg-4 stretch-card grid-margin">
                         <Card route="/insights" bg="bg-red" img="/icons/Insights.png" title="Insights (PDF Reports and Videos on Investment Research and more)" />
