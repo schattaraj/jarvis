@@ -1239,6 +1239,8 @@ display: none;
 }
 .table tbody td img{
     height: 60px;
+    object-fit: contain;
+    border-radius: 0;
 }
 .table.bond-table tbody td a:nth-child(3){
 display: none;

@@ -298,30 +298,26 @@ export default function BondPortfolio() {
       });
       return;
     }
-    const url = new URL(`https://jharvis.com/JarvisV2/createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`);
-    // const url = new URL("https://jharvis.com/JarvisV2/createBondPortfolio");
-    // const params = {
-    //     name: portfolioName,
-    //     visiblePortFolio: "yes",
-    //     userId: 2 // Get userId dynamically if needed
-    // };
-
+    if(selectedStocks.length < 1){
+      Swal.fire({
+        title: 'You need to select minimum 1 Bond to create Portfolio',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: "var(--primary)"
+      });
+      return;
+    }
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`;
     const formData = new FormData();
     selectedStocks.forEach(stock => {
-      const dataString = `${stock.name}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
-      formData.append("myArray[]", dataString);
+      const dataString = `${stock?.name.split(" |")[0]}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+      formData.append(`myArray[]`, dataString);
     });
-    // Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
     context.setLoaderState(true)
     try {
       const response = await fetch(url, {
         method: 'POST',
         body: formData,
-        // Note: Fetch does not support query parameters directly; add them manually to the URL if needed
-        headers: {
-          // 'Content-Type': 'multipart/form-data' is not needed for FormData; fetch will set the correct headers
-        },
-        // params: params // fetch does not support params directly; append them to URL if needed
       });
 
       if (!response.ok) {
@@ -379,7 +375,7 @@ export default function BondPortfolio() {
     fetchPortfolioNames()
     fetchColumnNames()
     getAllStock()
-  }, [])
+  }, [manageView])
   useEffect(() => {
     if (countApiCall == 1) {
       fetchData()
@@ -591,7 +587,7 @@ export default function BondPortfolio() {
             <div className="row">
               <div className="col-md-6">
                 <div className="form-group d-flex">
-                  <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" onChange={(e) => setPortfolioName(e.target.value)} />
+                  <input type="text" className="form-control me-3" value={portfolioName || ""} placeholder='Portfolio Name' name="portfolioName" onChange={(e) => setPortfolioName(e.target.value)} />
                   <button className='btn btn-primary text-nowrap' onClick={() => { createPortfolio() }}>Create Portfolio</button>
                 </div>
               </div>
@@ -623,7 +619,8 @@ export default function BondPortfolio() {
                     allBondPortfoilo.length > 0 && filteredPortfolio.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => {
                       const isChecked = selectedStocks.some(stock => stock.name === item?.issuerName);
                       return <tr key={"stock" + index}><td>
-                        <input type="checkbox" name='stockChkBox' value={item?.idBond} onChange={(e) => { selectStock(e, item?.issuerName) }} checked={isChecked} /></td>
+                        <input type="checkbox" name='stockChkBox' value={item?.idBond || ''} onChange={(e) => { selectStock(e, item?.issuerName) }} checked={isChecked} />
+                        </td>
                         <td>{item?.issuerName}</td>
                         <td>
                           <input

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Footer from '../../components/footer';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
@@ -13,11 +13,17 @@ import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
 import Breadcrumb from '../../components/Breadcrumb';
+import { Context } from '../../contexts/Context';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
   const [currentPdf, setCurrentPdf] = useState(false);
   const [loader, setLoader] = useState(false)
+  const [orderType, setOrderType] = useState('Ticker Name');
+  const [sortOrder, setSortOrder] = useState('Asc');
+  const [categoryType, setCategoryType] = useState([]);
+  const [filterText, setFilterText] = useState('');
+  const context = useContext(Context)
   const fetchVideoes = async () => {
     setLoader(true)
     try {
@@ -40,7 +46,7 @@ export default function OnePageReport() {
     setCurrentPdf(path)
     console.log("path", path)
   }
-  const filter = (e) => {
+  const filter = async(e) => {
 
   }
   const [thumbsSwiper, setThumbsSwiper] = useState(null);

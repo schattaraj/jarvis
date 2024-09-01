@@ -298,7 +298,7 @@ export default function Portfolio() {
                 stockFormData.append(`myArray[]`, formattedStock);
             }
         });
-
+console.log("stockFormData",stockFormData);
         try {
             const response = await fetch(`https://jharvis.com/JarvisV2/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
                 method: 'POST',
