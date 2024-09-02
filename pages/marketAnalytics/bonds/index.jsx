@@ -459,7 +459,7 @@ const handleReportData = (data)=>{
             const filePath = matchPathAndAnchor[1];
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath.replace("&amp;","%26")}" alt="Image"  loading="lazy">`;
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
             return <>{parse(imgTag)}{parse(anchorTag,options)}</>
         }
     
