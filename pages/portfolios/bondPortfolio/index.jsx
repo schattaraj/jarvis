@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
 import { Box, TablePagination, TextField } from '@mui/material';
 import PortfolioTable from '../../../components/PorfolioTable';
+import ReportTable from '../../../components/ReportTable';
 export default function BondPortfolio() {
   const context = useContext(Context)
   const [columnNames, setColumnNames] = useState([])
@@ -49,6 +50,8 @@ export default function BondPortfolio() {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStocks, setSelectedStocks] = useState([])
+  const [reportModal, setReportModal] = useState(false)
+  const [reportTicker, setReportTicker] = useState("")
   const options = {
     replace: (elememt) => {
       if (elememt.name === 'a') {
@@ -186,8 +189,12 @@ export default function BondPortfolio() {
     const filtered = tableData.filter(elememt => elememt.element4.toLowerCase().includes(value.toLowerCase()))
     setFilterData(searchTable(tableData, value))
   }
-  const handleClick = (e) => {
+  const handleClick = (e,name) => {
     e.preventDefault()
+    const tickerName = name.slice(name.indexOf("(")+1,name.indexOf(")"))
+    setReportTicker(tickerName)
+    setReportModal(true)
+    console.log("Print",e,name,tickerName)
   }
   const changeLimit = (e) => {
     setLimit(e.target.value)
@@ -371,6 +378,9 @@ export default function BondPortfolio() {
   const closeEditModal = () => {
     setEditModal(false)
   }
+  const closeReportModal = () => {
+    setReportModal(false)
+}
   useEffect(() => {
     fetchPortfolioNames()
     fetchColumnNames()
@@ -763,6 +773,7 @@ export default function BondPortfolio() {
             </div>
           </Modal.Body>
         </Modal>
+        <ReportTable  name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
       </div>
     </>
   )

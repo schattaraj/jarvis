@@ -189,6 +189,7 @@ const handleReportData = (data)=>{
     }
     const options2 = {
         replace (elememt){
+            // return <></>
             if (elememt?.name == 'img') {
                 return (
                     <React.Fragment>
@@ -448,8 +449,8 @@ const handleReportData = (data)=>{
     }
     function extractAndConvert(inputString) {
         // Define regex patterns to match both cases
-        const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
-        const onlyPathRegex = /(.*?\.jpg)/;
+        const pathAndAnchorRegex = /(.*?\.jpg|.*?\.png|.*?\.svg)\s(<a.*?<\/a>)/;
+        const onlyPathRegex = /(.*?\.jpg|.*?\.png|.*?\.svg)/;
         const onlyAnchorRegex = /(<a.*?<\/a>)/;
     
         // Try to match both path and anchor
@@ -458,8 +459,8 @@ const handleReportData = (data)=>{
             const filePath = matchPathAndAnchor[1];
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
-            return parse(imgTag,options2);
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath.replace("&amp;","%26")}" alt="Image"  loading="lazy">`;
+            return <>{parse(imgTag)}{parse(anchorTag,options)}</>
         }
     
         // Try to match only file path

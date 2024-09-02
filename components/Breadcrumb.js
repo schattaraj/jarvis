@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 
 const Breadcrumb = ({parent = "Dashboard"}) => {
   const router = useRouter();
-  const pathArray = router.pathname.split('/').filter(path => path);
+  const pathArray = router.asPath.split('/').filter(path => path);
+  console.log("Path",pathArray[2],decodeURIComponent((pathArray[2] + '').replace(/\+/g, '%20')));
 
   const toNormalCase = (str) => {
     return str
@@ -23,6 +24,7 @@ const Breadcrumb = ({parent = "Dashboard"}) => {
         {pathArray.map((path, index) => {
           const href = '/' + pathArray.slice(0, index + 1).join('/');
           const isLast = index === pathArray.length - 1;
+          path = decodeURIComponent((path + '').replace(/\+/g, '%20'))
           return (
             <li
               key={index}
