@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 const Breadcrumb = ({parent = "Dashboard"}) => {
   const router = useRouter();
   const pathArray = router.asPath.split('/').filter(path => path);
-  console.log("Path",pathArray[2],decodeURIComponent((pathArray[2] + '').replace(/\+/g, '%20')));
+  //console.log("Path",pathArray[2],decodeURIComponent((pathArray[2] + '').replace(/\+/g, '%20')));
 
   const toNormalCase = (str) => {
     return str

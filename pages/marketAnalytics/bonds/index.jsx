@@ -113,6 +113,8 @@ export default function Bonds() {
     const [file, setFile] = useState(null);
     const [fileDate, setFileDate] = useState('');
     const [reportTicker, setReportTicker] = useState("")
+    const [selectedTickerName, setSelectedTickerName] = useState(false)
+    const [tickerModal, setTickerModal] = useState(false)
     const router = useRouter()
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -144,9 +146,9 @@ export default function Bonds() {
 
     const handleSelectClick = async () => {
         const payload = {
-            ticker: selectedBond.map(r => r.value.split('-')[1]).join(','),            
+            ticker: selectedBond.map(r => r.value.split('-')[1]).join(','),
             metadataName: 'Bondpricing_Master',
-            _: new Date().getTime() 
+            _: new Date().getTime()
         };
 
         const queryString = new URLSearchParams(payload).toString();
@@ -167,37 +169,37 @@ export default function Bonds() {
     const handleChartView = () => [
 
     ]
-const handleClick = (data)=>{
-console.log("handleClick",data)
-}
-const handleReportData = (data)=>{
-    const regex = /\(([^)]+)\)$/;
-    const match = data.match(regex);
-    setReportTicker(match ? match[1] : '')
-    setReportModal(true)
-}
+    const handleClick = (data) => {
+        console.log("handleClick", data)
+    }
+    const handleReportData = (data) => {
+        const regex = /\(([^)]+)\)$/;
+        const match = data.match(regex);
+        setReportTicker(match ? match[1] : '')
+        setReportModal(true)
+    }
     const options = {
         replace: (elememt) => {
             if (elememt?.name === 'a') {
                 return (
                     <a onClick={() => { handleReportData(elememt?.children[0]?.data) }} href='#'>
-                        {typeof(elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
+                        {typeof (elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
                     </a>
                 );
             }
         }
     }
     const options2 = {
-        replace (elememt){
+        replace(elememt) {
             // return <></>
             if (elememt?.name == 'img') {
                 return (
                     <React.Fragment>
                         <img className="img-responsive" src={elememt?.attribs?.src} />
                         <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }} href='#'>
-                            {typeof(elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
+                            {typeof (elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
                         </a>
-                        </React.Fragment>
+                    </React.Fragment>
                 )
             }
         }
@@ -387,14 +389,16 @@ const handleReportData = (data)=>{
         context.setLoaderState(false)
     }
     const fetchTickersFunc = async () => {
-        // context.setLoaderState(true)
+        context.setLoaderState(true)
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
+            fetchColumnNames()
         }
         catch (e) {
-            console.log("Error - 335", e);
+            console.log("Error: ", e);
+            context.setLoaderState(false)
         }
         // context.setLoaderState(false)
     }
@@ -421,7 +425,7 @@ const handleReportData = (data)=>{
             formData.append('metaDataName', 'Bondpricing_Master');
             formData.append('fileDate', fileDate);
             formData.append('myfile', file);
-            console.log("formData",formData)
+            console.log("formData", formData)
             const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileBondImport", {
                 method: "POST",
                 // headers: {
@@ -443,7 +447,7 @@ const handleReportData = (data)=>{
     const handleFileChange = (e) => {
         console.log(e.target.files)
         setFile(e.target.files[0]);
-      };
+    };
     const changeLimit = (e) => {
         setLimit(e.target.value)
     }
@@ -452,7 +456,7 @@ const handleReportData = (data)=>{
         const pathAndAnchorRegex = /(.*?\.jpg|.*?\.png|.*?\.svg)\s(<a.*?<\/a>)/;
         const onlyPathRegex = /(.*?\.jpg|.*?\.png|.*?\.svg)/;
         const onlyAnchorRegex = /(<a.*?<\/a>)/;
-    
+
         // Try to match both path and anchor
         const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
         if (matchPathAndAnchor) {
@@ -460,9 +464,9 @@ const handleReportData = (data)=>{
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
             const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
-            return <>{parse(imgTag)}{parse(anchorTag,options)}</>
+            return <>{parse(imgTag)}{parse(anchorTag, options)}</>
         }
-    
+
         // Try to match only file path
         const matchOnlyPath = inputString.match(onlyPathRegex);
         if (matchOnlyPath) {
@@ -471,11 +475,11 @@ const handleReportData = (data)=>{
             const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
             return parse(imgTag);
         }
-    
+
         // Try to match only anchor tag
         const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
         if (matchOnlyAnchor) {
-            return parse(matchOnlyAnchor[1],options);
+            return parse(matchOnlyAnchor[1], options);
         }
         const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
         const matchPathAndText = inputString.match(pathAndTextRegex);
@@ -493,6 +497,29 @@ const handleReportData = (data)=>{
     }
     const closeReportModal = () => {
         setReportModal(false)
+    }
+    const bondDetails = () => {
+        if (selectedBond.length < 1) {
+            Swal.fire({ title: "Please Select Bond", confirmButtonColor: "#719B5F" });
+            return
+        }if(selectedBond.length > 1){
+            setTickerModal(true)
+            return
+        }        
+        const redirectUri = `${router.pathname}/${encodeURIComponent(selectedBond.map(item => item.value))}`
+        router.push(redirectUri)
+    }
+    const bondDetailsGo = ()=>{
+        if(!selectedTickerName){
+            Swal.fire({ title: "Please Select a Bond first", confirmButtonColor: "#719B5F" });
+            return
+        }
+        const redirectUri = `${router.pathname}/${encodeURIComponent(selectedTickerName)}`
+        router.push(redirectUri)
+    }
+    const handleSelectedTicker = (e)=>{
+        setSelectedTickerName(e.target.value)
+        console.log("Selected Ticker",e.target.value);
     }
     useEffect(() => {
         async function run() {
@@ -524,7 +551,7 @@ const handleReportData = (data)=>{
 
     useEffect(() => {
         fetchTickersFunc()
-        fetchColumnNames()
+        // fetchColumnNames()
         // getTickerCartDtata()
     }, [])
     useEffect(() => {
@@ -553,7 +580,7 @@ const handleReportData = (data)=>{
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
-        <Breadcrumb />
+                    <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -627,13 +654,13 @@ const handleReportData = (data)=>{
                                 <div className="col-md-3">
                                     <div className="form-group">
                                         <label htmlFor="" className='form-label'>File Upload Date</label>
-                                        <input type="date" className="form-control" name='fileDate' required onChange={(e)=>{setFileDate(e.target.value)}}/>
+                                        <input type="date" className="form-control" name='fileDate' required onChange={(e) => { setFileDate(e.target.value) }} />
                                     </div>
                                 </div>
                                 <div className="col-md-6">
                                     <div className="form-group">
                                         <label htmlFor="uploadFile">Upload File</label>
-                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required  onChange={handleFileChange} />
+                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
                                     </div>
                                 </div>
                                 <div className="col-md-3">
@@ -651,7 +678,7 @@ const handleReportData = (data)=>{
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Grid View" ? ` active` : ''}`} type="button" title="Grid View" onClick={gridView}><span>Grid View</span></button>
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={bondHome}><span>Reset</span></button>
-                        {/* <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={() => { }}><span>Bond Details</span></button> */}
+                        <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={bondDetails}><span>Bond Details</span></button>
                     </div>
 
                     {
@@ -664,17 +691,17 @@ const handleReportData = (data)=>{
                                         <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                     </div>
                                     <div className="form-group d-flex align-items-center">
-                                    <div className="form-group d-flex align-items-center mb-0 me-3">
-                                        {/* <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /> */}
-                                <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                                <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                    <option value="all">All</option>
-                                </select>
-                            </div>
+                                        <div className="form-group d-flex align-items-center mb-0 me-3">
+                                            {/* <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /> */}
+                                            <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select>
+                                        </div>
                                         <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
                                 </div>
 
@@ -683,7 +710,7 @@ const handleReportData = (data)=>{
                                         <thead>
                                             <tr>
                                                 {columnNames.map((columnName, index) => (
-                                                    <th key={'column' + index} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
+                                                    <th key={'column' + index + columnName} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
                                                 ))}
                                             </tr>
                                         </thead>
@@ -699,7 +726,7 @@ const handleReportData = (data)=>{
                                                             } else if (columnName.elementInternalName === 'lastUpdatedAt') {
 
                                                                 content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                            } 
+                                                            }
                                                             else if (columnName.elementInternalName === 'element1') {
                                                                 content = extractAndConvert(rowData[columnName.elementInternalName])
                                                             } else {
@@ -707,7 +734,7 @@ const handleReportData = (data)=>{
                                                             }
 
                                                             if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
-                                                                content = parse(content,options)
+                                                                content = parse(content, options)
                                                             }
                                                             return <td key={colIndex}>{content}</td>;
                                                         })
@@ -726,7 +753,7 @@ const handleReportData = (data)=>{
                                                 {filterData.length ? columnNames.map((item, index) => {
                                                     {
                                                         if (item.elementInternalName === 'element3' || item.elementInternalName === 'element9') {
-                                                            return <th>
+                                                            return <th key={"thead" + index}>
                                                                 {calculateAverage(filterData, item.elementInternalName)} % <br />
                                                                 ({calculateAverage(tableData, item.elementInternalName)}) %
                                                             </th>
@@ -1052,6 +1079,33 @@ const handleReportData = (data)=>{
                     </Modal>
                 </div>
             </div>
+            <Modal show={tickerModal} onHide={() => { setTickerModal(false) }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Select a bond for Bond Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="row">
+                        <div className="col-md-12">
+                            {
+                                selectedBond.map((item, index) => {
+                                    return <>
+                                        <div className='form-check'>
+                                            <input className="form-check-input" name="selectedTicker" type="radio" value={item.value} id={"selectTicker"+index} onClick={handleSelectedTicker}/>
+                                            <label className="form-check-label" for={"selectTicker"+index}>
+                                                {item.value}
+                                            </label>
+                                        </div>
+                                    </>
+                                })
+                            }
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <button className="btn btn-secondary" onClick={() => { setTickerModal(false) }}>Cancel</button>
+                    <button className="btn btn-primary" onClick={bondDetailsGo}>Go</button>
+                </Modal.Footer>
+            </Modal>
             <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
         </>
     )

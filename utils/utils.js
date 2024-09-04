@@ -51,16 +51,17 @@ export const searchTable = (tableData, searchTerm) => {
 };
 
 export const formatDate = (dateStr)=>{
-    const date = new Date(dateStr);
-    // console.log(dateStr,date)
-    // Get the year, month, and day
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    // Format the date as yyyy-mm-dd
-    const formattedDate = `${year}-${month}-${day}`;
-    return formattedDate;
+    if(dateStr){
+        const date = new Date(dateStr);
+        // Get the year, month, and day
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() returns 0-11
+        const day = String(date.getDate()).padStart(2, '0');
+        
+        // Format the date as yyyy-mm-dd
+        const formattedDate = `${year}-${month}-${day}`;
+        return formattedDate;
+    }    
 }
 export const generatePDF = (id = 'my-table') => {
     //loader
