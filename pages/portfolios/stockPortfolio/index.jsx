@@ -31,11 +31,15 @@ export default function Portfolio() {
     const [reportModal, setReportModal] = useState(false)
     const [manageView,setManageView] = useState(false)
     const [stockPortfolios, setStockportfolios] = useState(false)
-    const [filteredStockPortfolios,setfilteredStockPortfolios] = useState([])
+    const [filteredStockPortfolios, setfilteredStockPortfolios] = useState([])
     const [currentPage2, setCurrentPage2] = useState(1);
     const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null }) 
     const [limit2, setLimit2] = useState(25)
     const [editStatus, setEditStatus] = useState(false)
+    const [filteredAllStockPortfolios, setfilteredAllStockPortfolios] = useState([])
+    const [currentPage3, setCurrentPage3] = useState(1);
+    const [sortConfig3, setSortConfig3] = useState({ key: null, direction: null }) 
+    const [limit3, setLimit3] = useState(25)
     const [portfolioPayload, setPortfolioPayload] = useState({
         myArr: [],
         portfolioName: "",
@@ -210,6 +214,8 @@ export default function Portfolio() {
     const handleClose = () => {
         setEditStatus(false);
         formData.portfolioName = "";
+        setfilteredAllStockPortfolios([]);
+        formData.allStocks = [{ stockName: "", share: "", purchaseDate: "", purchasePrice: "" }];
         setAllStocks([]);
         setShow(false);
     } 
@@ -521,7 +527,65 @@ console.log("stockFormData",stockFormData);
         setSelectedPortfolioText("");
     }
 
-    console.log("Form Data", formData);
+    const allStockFilterData = () => {
+        if (allStocks.length > 0) {
+            let items = [...allStocks];
+            if (sortConfig3 !== null) {
+                items.sort((a, b) => {
+                    if (a[sortConfig3.key] < b[sortConfig3.key]) {
+                        return sortConfig3.direction === 'asc' ? -1 : 1;
+                    }
+                    if (a[sortConfig3.key] > b[sortConfig3.key]) {
+                        return sortConfig3.direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
+                });
+            }
+            let dataLimit = limit3
+            if (dataLimit == "all") {
+                dataLimit = items?.length
+            }
+            const startIndex = (currentPage3 - 1) * dataLimit;
+            const endIndex = startIndex + dataLimit;
+            items = items.slice(startIndex, endIndex);
+            setfilteredAllStockPortfolios(items);
+        }
+    }
+
+    useEffect(()=>{
+        allStockFilterData();
+    },[currentPage3, allStocks, sortConfig3, limit3])
+
+    const allStockFilter = (e) => {
+        const value = e.target.value;
+        setfilteredAllStockPortfolios(searchTable(allStocks, value));
+    }
+
+    const handleSort3 = (key) => {
+        let direction = 'asc';
+        if (sortConfig3 && sortConfig3.key === key && sortConfig3.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig3({ key, direction });
+    }
+
+    const changeLimit3 = (e)=>{
+        setLimit3(e.target.value)
+    }
+
+    const handlePage3 = async (action) => {
+        switch (action) {
+            case 'prev':
+                setCurrentPage3(currentPage3 - 1)
+                break;
+            case 'next':
+                setCurrentPage3(currentPage3 + 1)
+                break;
+            default:
+                setCurrentPage3(currentPage3)
+                break;
+        }
+    };
 
     return (
         <>
@@ -750,13 +814,30 @@ console.log("stockFormData",stockFormData);
                                 </div>
                             </div>
                         </div>
+                        <div className='d-flex justify-content-between align-items-center'>
+                            <div className="dt-buttons mb-3">
+                            </div>
+                            <div className="form-group d-flex align-items-center">
+                                <div className="form-group d-flex align-items-center mb-0 me-3">
+                                    <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                    <select name="limit" className='form-select w-auto' onChange={changeLimit3} value={limit3}>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
+                                <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={allStockFilter} />
+                            </div>
+                        </div>
 
                         <div className="table-responsive">
                             <table className='table'>
                                 <thead>
                                     <tr>
-                                        <th>Select</th>
-                                        <th>Symbol</th>
+                                        <th onClick={()=>{handleSort3("stockName")}}>Select</th>
+                                        <th onClick={()=>{handleSort3("stockName")}}>Symbol</th>
                                         <th>Share</th>
                                         <th>Purchase Date</th>
                                         <th>Purchase Price</th>
@@ -764,13 +845,14 @@ console.log("stockFormData",stockFormData);
                                 </thead>
                                 <tbody>
                                     {
-                                        allStocks.length > 0 && allStocks.map((item, index) => {
-                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockName' value={item?.stockName} checked={item?.share || item?.purchaseDate} onChange={(e) => portfolioInputs(e, index)} /></td><td>{item?.stockName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td></tr>
+                                        filteredAllStockPortfolios.length > 0 && filteredAllStockPortfolios.map((item, index) => {
+                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockName' defaultValue={item?.stockName} defaultChecked={item?.share || item?.purchaseDate} onChange={(e) => portfolioInputs(e, index)} /></td><td>{item?.stockName}</td><td><input type="text" defaultValue={item?.share} name="share" placeholder="Share" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="date" defaultValue={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td><td><input type="text" defaultValue={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={(e) => portfolioInputs(e, index)} /></td></tr>
                                         })
                                     }
                                 </tbody>
                             </table>
                         </div>
+                        <Pagination currentPage={currentPage3} totalItems={allStocks} limit={limit3} setCurrentPage={setCurrentPage3} handlePage={handlePage3} />
                     </Modal.Body>
                 </Modal>
                 <Modal className="report-modal" show={reportModal} onHide={() => { setReportModal(false) }}>
