@@ -86,6 +86,7 @@ export default function Sidebar() {
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/etfs' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/etfs">ETFs</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/bond-reports' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/bond-reports">Bond Reports</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/pem-details' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/pem-details">PEM Details</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/pemNew' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/pemNew">PEM New</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/pem-rule' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/pem-rule">PEM Rule</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/Calls' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/Calls">Calls</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/puts' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/puts">PUTS</Link></li>

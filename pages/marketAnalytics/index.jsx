@@ -90,6 +90,19 @@ export default function MarketAnalytics() {
                                     </div> */}
             </div>
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
+              <Card route="/marketAnalytics/pemNew" bg="bg-yellow" img="/icons/Calls.png" title="PEM New" />
+              {/* <div className="card bg-red-gradient card-img-holder text-white">
+                                        <Link href={"/bond-reports"}>
+                                        <div className="card-body">
+                                            <img src="assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+ 
+                                            <h3 className="mb-5">Bond Reports</h3>
+
+                                        </div>
+                                        </Link>
+                                    </div> */}
+            </div>
+            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/marketAnalytics/pem-rule" bg="bg-gray" img="/icons/Bonds.png" title="PEM Rule" />
               {/* <div className="card bg-gradient-dark card-img-holder text-white">
                                         <Link href={"/pem-rule"}>
