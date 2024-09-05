@@ -14509,3 +14509,25 @@ font-size: 18px;
   cursor: pointer;
   color: #dc3545;
 }
+
+.pem-new-calculate-modal .modal-dialog {
+  max-width: 68%;
+}
+
+.dropdown-item .form-check .form-check-input {
+  float: left;
+  margin-left: 0px;
+}
+
+.columns-dropdown-item .selection-area label {
+  margin-bottom: 0px !important;
+}
+
+.columns-dropdown-item .form-check {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.dropdown .dropdown-menu .dropdown-item:hover {
+  background-color: #e7ede4 !important;
+}
