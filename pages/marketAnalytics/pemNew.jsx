@@ -196,10 +196,8 @@ export default function PemDetails() {
 
     const handleAllCheckToggle = () => {
         if (visibleColumns.length === columnNames.length) {
-            // If all columns are selected, deselect all
             setVisibleColumns([]);
         } else {
-            // If not all columns are selected, select all
             const allColumnNames = columnNames.map(col => col.elementInternalName);
             setVisibleColumns(allColumnNames);
         }

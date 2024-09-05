@@ -10,7 +10,7 @@ import { Pagination } from '../../components/Pagination';
 import parse from 'html-react-parser';
 import SliceData from '../../components/SliceData';
 import Swal from 'sweetalert2';
-import { Form, Modal } from 'react-bootstrap';
+import { Form, Modal, Dropdown } from 'react-bootstrap';
 import HightChart from '../../components/HighChart';
 import { FilterAlt } from '@mui/icons-material';
 import jsPDF from 'jspdf';
@@ -67,6 +67,7 @@ export default function Stocks() {
     const [limit, setLimit] = useState(25)
     const [calculateModal, setCalculate] = useState(false)
     const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023 })
+    const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
     const [ViewOptions, setViewOptions] = useState({
         element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
         element32: { name: "enterPriseValue", displayName: "Enterprise value($M)" },
@@ -196,7 +197,9 @@ export default function Stocks() {
             const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
-            setColumnNames(columnApiRes)
+            setColumnNames(columnApiRes);
+            const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
+            setVisibleColumns(defaultCheckedColumns);
             fetchData()
         }
         catch (e) {
@@ -576,6 +579,24 @@ export default function Stocks() {
             setRankingData(compareData)
         }
     }, [compareData, activeView])
+
+    const handleColumnToggle = (column) => {
+        setVisibleColumns(prevState => 
+            prevState.includes(column) 
+                ? prevState.filter(col => col !== column) 
+                : [...prevState, column]
+        );
+    };
+
+    const handleAllCheckToggle = () => {
+        if (visibleColumns.length === columnNames.length) {
+            setVisibleColumns([]);
+        } else {
+            const allColumnNames = columnNames.map(col => col.elementInternalName);
+            setVisibleColumns(allColumnNames);
+        }
+    };
+
     return (
         <>
             <StockHistoryModal open={historyModal} handleClose={handleCloseModal} setCompareData={setCompareData} setSelectedOption={setActiveView} filterBydate={filterBydate} />
@@ -625,6 +646,65 @@ export default function Stocks() {
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={() => { setHistoryModal(true) }}><span>History</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="PDF" onClick={pdfDownload}><span>PDF</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                        <div className="column-selector">
+                            <Dropdown>
+                                <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                    Columns
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu
+                                    style={{
+                                        width: "160px",
+                                        maxHeight: "400px", 
+                                        overflowY: "auto",
+                                        overflowX: "hidden",
+                                        marginTop: "1px",
+                                    }}
+                                >
+                                    <Dropdown.Item 
+                                        as="label" 
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{
+                                            whiteSpace: "normal", 
+                                            wordWrap: "break-word", 
+                                            display: "inline-block", 
+                                            width: "100%",
+                                            padding: "6px",
+                                            fontWeight: "bold",
+                                        }}
+                                        className="columns-dropdown-item"
+                                    >
+                                        <Form.Check
+                                            type="checkbox"
+                                            checked={visibleColumns.length === columnNames.length}
+                                            onChange={handleAllCheckToggle}
+                                            label="Select All"
+                                        />
+                                    </Dropdown.Item>
+                                    {columnNames.map((column, index) => (
+                                        <Dropdown.Item 
+                                            as="label" 
+                                            key={index}
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                whiteSpace: "normal", 
+                                                wordWrap: "break-word", 
+                                                display: "inline-block", 
+                                                width: "100%",
+                                                padding: "6px",
+                                            }}
+                                            className="columns-dropdown-item"
+                                        >
+                                            <Form.Check
+                                                type="checkbox"
+                                                checked={visibleColumns.includes(column.elementInternalName)}
+                                                onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                label={column.elementDisplayName}
+                                            />
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
                     </div>
                     {activeView == "Ticker Home" &&
                         <>
@@ -652,7 +732,9 @@ export default function Stocks() {
                                     <thead>
                                         <tr>
                                             {columnNames.map((columnName, index) => (
-                                                <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                visibleColumns.includes(columnName.elementInternalName) && (
+                                                    <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                )
                                             ))}
                                         </tr>
                                     </thead>
@@ -661,6 +743,7 @@ export default function Stocks() {
                                             <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                 {
                                                     columnNames.map((columnName, colIndex) => {
+                                                        if (!visibleColumns.includes(columnName.elementInternalName)) return null;
                                                         let content;
 
                                                         if (columnName.elementInternalName === 'element3') {

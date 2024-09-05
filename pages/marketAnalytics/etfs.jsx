@@ -13,7 +13,7 @@ import autoTable from 'jspdf-autotable'
 import { generatePDF } from '../../utils/utils';
 import HightChart from '../../components/HighChart';
 import Swal from 'sweetalert2';
-import { Form, Modal } from 'react-bootstrap';
+import { Form, Modal, Dropdown } from 'react-bootstrap';
 import { FilterAlt } from '@mui/icons-material';
 import Breadcrumb from '../../components/Breadcrumb';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -81,6 +81,7 @@ export default function Etfs() {
     const [selectedTicker, setSelectedTicker] = useState(false)
     const [chartView, setChartView] = useState(false)
     const [chartHistory, setChartHistory] = useState([])
+    const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
     const [ViewOptions, setViewOptions] = useState({
         element7: "Price vs 20-day Avg (%)",
         element8: "Price",
@@ -128,7 +129,9 @@ export default function Etfs() {
             const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Everything_List_New")
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
-            setColumnNames(columnApiRes)
+            setColumnNames(columnApiRes);
+            const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
+            setVisibleColumns(defaultCheckedColumns);
         }
         catch (e) {
             console.log("error", e)
@@ -417,6 +420,24 @@ if(compareData && activeView == "History"){
     setRankingData(compareData)
 }
     },[compareData,activeView])
+
+    const handleColumnToggle = (column) => {
+        setVisibleColumns(prevState => 
+            prevState.includes(column) 
+                ? prevState.filter(col => col !== column) 
+                : [...prevState, column]
+        );
+    };
+
+    const handleAllCheckToggle = () => {
+        if (visibleColumns.length === columnNames.length) {
+            setVisibleColumns([]);
+        } else {
+            const allColumnNames = columnNames.map(col => col.elementInternalName);
+            setVisibleColumns(allColumnNames);
+        }
+    };
+
     return (
         <>
             <div>
@@ -460,6 +481,65 @@ if(compareData && activeView == "History"){
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ranking" && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                        <div className="column-selector">
+                            <Dropdown>
+                                <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                    Columns
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu
+                                    style={{
+                                        width: "160px",
+                                        maxHeight: "400px", 
+                                        overflowY: "auto",
+                                        overflowX: "hidden",
+                                        marginTop: "1px",
+                                    }}
+                                >
+                                    <Dropdown.Item 
+                                        as="label" 
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{
+                                            whiteSpace: "normal", 
+                                            wordWrap: "break-word", 
+                                            display: "inline-block", 
+                                            width: "100%",
+                                            padding: "6px",
+                                            fontWeight: "bold",
+                                        }}
+                                        className="columns-dropdown-item"
+                                    >
+                                        <Form.Check
+                                            type="checkbox"
+                                            checked={visibleColumns.length === columnNames.length}
+                                            onChange={handleAllCheckToggle}
+                                            label="Select All"
+                                        />
+                                    </Dropdown.Item>
+                                    {columnNames.map((column, index) => (
+                                        <Dropdown.Item 
+                                            as="label" 
+                                            key={index}
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                whiteSpace: "normal", 
+                                                wordWrap: "break-word", 
+                                                display: "inline-block", 
+                                                width: "100%",
+                                                padding: "6px",
+                                            }}
+                                            className="columns-dropdown-item"
+                                        >
+                                            <Form.Check
+                                                type="checkbox"
+                                                checked={visibleColumns.includes(column.elementInternalName)}
+                                                onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                label={column.elementDisplayName}
+                                            />
+                                        </Dropdown.Item>
+                                    ))}
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </div>
                     </div>
                     {
                         activeView == "ETF Home" &&
@@ -599,7 +679,9 @@ if(compareData && activeView == "History"){
                                             <thead>
                                                 <tr>
                                                     {columnNames.map((columnName, index) => (
-                                                        <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                        visibleColumns.includes(columnName.elementInternalName) && (
+                                                            <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                        )
                                                     ))}
                                                 </tr>
                                             </thead>
@@ -608,6 +690,7 @@ if(compareData && activeView == "History"){
                                                     <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                         {
                                                             columnNames.map((columnName, colIndex) => {
+                                                                if (!visibleColumns.includes(columnName.elementInternalName)) return null;
                                                                 let content;
 
                                                                 if (columnName.elementInternalName === 'element3') {
