@@ -176,7 +176,7 @@ export default function MyStocks() {
                             </span>My Stocks
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
+                    <div className="selection-area mb-3 mt-3">
                         <div className="row">
                             <div className="col-md-12">
                                 <button className='btn btn-primary mb-3' onClick={stockSlections}>All Stocks</button>
@@ -196,8 +196,8 @@ export default function MyStocks() {
                             </div>
                             <div className="col-md-4">
                                 <div className="actions">
-                                    <button className='btn btn-primary' onClick={fetchStockByDate}>GO</button>
-                                    <button className='btn btn-primary'>RESET</button>
+                                    <button className='btn btn-primary mb-0' onClick={fetchStockByDate}>GO</button>
+                                    <button className='btn btn-primary mb-0'>RESET</button>
                                 </div>
                             </div>
                         </div>

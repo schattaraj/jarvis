@@ -471,7 +471,7 @@ export default function BondPortfolio() {
             !manageView
             &&
             <>
-              <div className="selection-area mb-3">
+              <div className="selection-area my-3">
                 <div className="row">
 
                   <div className="col-md-4">
@@ -547,7 +547,7 @@ export default function BondPortfolio() {
           }
           {
             manageView &&
-            <div className="manage">
+            <div className="manage mt-3">
               <div className="d-flex">
                 <button className="btn btn-primary mx-2 mb-3 ms-0" onClick={handleShow}>Create New Portfolio</button>
                 <button className="btn btn-primary mx-2 mb-3" onClick={() => { setManageView(false) }}>View Portfolio</button>

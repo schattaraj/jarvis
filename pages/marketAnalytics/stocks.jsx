@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Footer from '../../components/footer';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
@@ -104,6 +104,9 @@ export default function Stocks() {
     });
     const [file, setFile] = useState(null);
     const [reportTicker, setReportTicker] = useState("")
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [contentWidth, setContentWidth] = useState(0);
+    const contentRef = useRef(null);
     // Initial form values
     const initialFormValues = {
         isHighPerforming: '',
@@ -222,7 +225,7 @@ export default function Stocks() {
             console.log("error", e)
             context.setLoaderState(false)
         }
-        
+
     }
     const handleSort = (key) => {
         let direction = 'asc';
@@ -464,22 +467,22 @@ export default function Stocks() {
             if (elememt?.name === 'a') {
                 return (
                     <a onClick={() => { handleReportData(elememt?.children[0]?.data) }} href='#'>
-                        {typeof(elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
+                        {typeof (elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
                     </a>
                 );
             }
         }
     }
     const options2 = {
-        replace (elememt){
+        replace(elememt) {
             if (elememt?.name == 'img') {
                 return (
                     <React.Fragment>
                         <img className="img-responsive" src={elememt?.attribs?.src} />
                         <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }} href='#'>
-                            {typeof(elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
+                            {typeof (elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
                         </a>
-                        </React.Fragment>
+                    </React.Fragment>
                 )
             }
         }
@@ -489,7 +492,7 @@ export default function Stocks() {
         const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
         const onlyPathRegex = /(.*?\.jpg)/;
         const onlyAnchorRegex = /(<a.*?<\/a>)/;
-    
+
         // Try to match both path and anchor
         const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
         if (matchPathAndAnchor) {
@@ -497,9 +500,9 @@ export default function Stocks() {
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
             const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
-            return parse(imgTag,options2);
+            return parse(imgTag, options2);
         }
-    
+
         // Try to match only file path
         const matchOnlyPath = inputString.match(onlyPathRegex);
         if (matchOnlyPath) {
@@ -508,11 +511,11 @@ export default function Stocks() {
             const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
             return parse(imgTag);
         }
-    
+
         // Try to match only anchor tag
         const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
         if (matchOnlyAnchor) {
-            return parse(matchOnlyAnchor[1],options);
+            return parse(matchOnlyAnchor[1], options);
         }
         const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
         const matchPathAndText = inputString.match(pathAndTextRegex);
@@ -531,6 +534,45 @@ export default function Stocks() {
     const closeReportModal = () => {
         setReportModal(false)
     }
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
+    useEffect(() => {
+        if (screen.width < 576) {
+            if (isExpanded) {
+                let max = 0
+                Array.from(contentRef.current.children).map((item) => {
+                    if (max < item.getBoundingClientRect().width) {
+                        max = item.getBoundingClientRect().width
+                    }
+                });
+                setContentWidth(`${max + 8}px`);
+                return
+            }
+            else {
+                setContentWidth(`0px`);
+            }
+        }
+        if (isExpanded) {
+            if (contentRef.current) {
+                let count = 0
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    count = count + 6
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                // setContentWidth(`${totalWidth+count}px`);
+                setContentWidth(`${totalWidth + count}px`);
+            }
+        }
+        else {
+            if (contentRef.current) {
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${0}px`);
+            }
+        }
+    }, [isExpanded]);
     useEffect(() => {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
@@ -581,9 +623,9 @@ export default function Stocks() {
     }, [compareData, activeView])
 
     const handleColumnToggle = (column) => {
-        setVisibleColumns(prevState => 
-            prevState.includes(column) 
-                ? prevState.filter(col => col !== column) 
+        setVisibleColumns(prevState =>
+            prevState.includes(column)
+                ? prevState.filter(col => col !== column)
                 : [...prevState, column]
         );
     };
@@ -602,7 +644,23 @@ export default function Stocks() {
             <StockHistoryModal open={historyModal} handleClose={handleCloseModal} setCompareData={setCompareData} setSelectedOption={setActiveView} filterBydate={filterBydate} />
             <div className="main-panel">
                 <div className="content-wrapper">
-                    <Breadcrumb />
+                    <div className="d-flex justify-content-between align-items-center flex-wrap">
+                        <Breadcrumb />
+                        <div className={`collapsible-container ${isExpanded ? 'expanded' : ''}`}>
+                            <span>{activeView + " :"}</span><button className="main-button ms-2 btn-primary" onClick={toggleExpand}>
+                                <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+7 Action
+                            </button>
+                            <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
+                                <button className={`h-100 collapsible-item ${activeView == "History" ? ` active` : ''}`} type="button" title="History" onClick={(handleOpenModal) => { }}><span>History</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Ticker Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={tickerHome}><span>Ticker Home</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Ranking PDF" ? ` active` : ''}`} type="button" title="Ranking PDF" onClick={rankingPDF}><span>Ranking PDF</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Calculate" ? ` active` : ''}`} type="button" title="Calculate" onClick={() => { setCalculate(true), setIsExpanded(false) }}><span>Calculate</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -611,33 +669,29 @@ export default function Stocks() {
                         </h3>
 
                     </div>
-                    <div className="selection-area mb-3 d-flex align-items-center">
-                        <Select className='mb-0 me-2 col-md-3' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
-                            tickers && tickers.map((item, index) => (
-                                { value: item.element1, label: item.element1 }
-                            ))
-                        } />
-                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
-                        <Form onSubmit={uploadFile} encType="multipart/form-data">
+                    <div className="selection-area mb-3 d-flex align-items-end">
+                        <Form onSubmit={uploadFile} encType="multipart/form-data" className='w-100'>
                             <input type="hidden" name="metaDataName" value="Tickers_Watchlist" />
-                            <div className="row align-items-center">
-                                <div className="col-md-7">
-                                    <div className="form-group">
-                                        <label htmlFor="uploadFile">Upload File</label>
-                                        <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
-                                    </div>
-                                </div>
-                                <div className="col-md-3">
-                                    <div className="actions">
-                                        <button className='btn btn-primary mb-0' type='submit'>Upload</button>
-                                    </div></div>
+                            <div className="d-flex align-items-end flex-wrap mb-3">
+                            <Select className='mb-0 me-2 col-md-3' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px",flex:"2" }} options={
+                                tickers && tickers.map((item, index) => (
+                                    { value: item.element1, label: item.element1 }
+                                ))
+                            } />
+                            <div className="actions">
+                                <button className={"btn btn-primary mb-0"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
+                            </div>
+                            <div className="form-group me-2">
+                                <label htmlFor="uploadFile">Upload File</label>
+                                <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
+                            </div>
+                            <div className="actions">
+                                <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                            </div>
                             </div>
                         </Form>
                     </div>
-                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
-
-                    </div>
-                    <div className="d-flex mb-3">
+                    {/* <div className="d-flex mb-3">
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={() => { setCalculate(true) }}><span>Calculate</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Chart View" && " active")} type="button" onClick={charts}><span>Chart View</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ticker Home" && " active")} type="button" onClick={tickerHome}><span>Ticker Home</span></button>
@@ -646,72 +700,74 @@ export default function Stocks() {
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={() => { setHistoryModal(true) }}><span>History</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="PDF" onClick={pdfDownload}><span>PDF</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
-                        <div className="column-selector">
-                            <Dropdown>
-                                <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
-                                    Columns
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu
-                                    style={{
-                                        width: "160px",
-                                        maxHeight: "400px", 
-                                        overflowY: "auto",
-                                        overflowX: "hidden",
-                                        marginTop: "1px",
-                                    }}
-                                >
-                                    <Dropdown.Item 
-                                        as="label" 
-                                        onClick={(e) => e.stopPropagation()}
-                                        style={{
-                                            whiteSpace: "normal", 
-                                            wordWrap: "break-word", 
-                                            display: "inline-block", 
-                                            width: "100%",
-                                            padding: "6px",
-                                            fontWeight: "bold",
-                                        }}
-                                        className="columns-dropdown-item"
-                                    >
-                                        <Form.Check
-                                            type="checkbox"
-                                            checked={visibleColumns.length === columnNames.length}
-                                            onChange={handleAllCheckToggle}
-                                            label="Select All"
-                                        />
-                                    </Dropdown.Item>
-                                    {columnNames.map((column, index) => (
-                                        <Dropdown.Item 
-                                            as="label" 
-                                            key={index}
-                                            onClick={(e) => e.stopPropagation()}
-                                            style={{
-                                                whiteSpace: "normal", 
-                                                wordWrap: "break-word", 
-                                                display: "inline-block", 
-                                                width: "100%",
-                                                padding: "6px",
-                                            }}
-                                            className="columns-dropdown-item"
-                                        >
-                                            <Form.Check
-                                                type="checkbox"
-                                                checked={visibleColumns.includes(column.elementInternalName)}
-                                                onChange={() => handleColumnToggle(column.elementInternalName)}
-                                                label={column.elementDisplayName}
-                                            />
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </div>
-                    </div>
+                    </div> */}
                     {activeView == "Ticker Home" &&
                         <>
                             <div className='d-flex justify-content-between'>
-                                <div className="dt-buttons mb-3">
+                                <div className="dt-buttons mb-3 d-flex">
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" title='EXCEL' onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                    <div className="column-selector">
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                                Columns
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu
+                                                style={{
+                                                    width: "160px",
+                                                    maxHeight: "400px",
+                                                    overflowY: "auto",
+                                                    overflowX: "hidden",
+                                                    marginTop: "1px",
+                                                }}
+                                            >
+                                                <Dropdown.Item
+                                                    as="label"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        whiteSpace: "normal",
+                                                        wordWrap: "break-word",
+                                                        display: "inline-block",
+                                                        width: "100%",
+                                                        padding: "6px",
+                                                        fontWeight: "bold",
+                                                    }}
+                                                    className="columns-dropdown-item"
+                                                >
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={visibleColumns.length === columnNames.length}
+                                                        onChange={handleAllCheckToggle}
+                                                        label="Select All"
+                                                        id={`${activeView}-selectAll`}
+                                                    />
+                                                </Dropdown.Item>
+                                                {columnNames.map((column, index) => (
+                                                    <Dropdown.Item
+                                                        as="label"
+                                                        key={index}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            display: "inline-block",
+                                                            width: "100%",
+                                                            padding: "6px",
+                                                        }}
+                                                        className="columns-dropdown-item"
+                                                    >
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={visibleColumns.includes(column.elementInternalName)}
+                                                            onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                            label={column.elementDisplayName}
+                                                            id={`checkId${column.elementDisplayName}${index}`}
+                                                        />
+                                                    </Dropdown.Item>
+                                                ))}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </div>
                                 </div>
                                 <div className="form-group d-flex align-items-center">
                                     <div className="form-group d-flex align-items-center mb-0 me-3">
@@ -1108,6 +1164,7 @@ export default function Stocks() {
                 </Modal.Footer>
             </Modal>
             <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
+            {isExpanded && <div className='backdrop'></div>}
         </>
     )
 }

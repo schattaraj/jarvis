@@ -215,10 +215,10 @@ export default function PemDetails() {
                             </span>PEM NEW
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
+                    <div className="selection-area my-3">
                         <Form onSubmit={uploadFile} encType="multipart/form-data">
                         <input type="hidden" name="metaDataName" value="PEM"/>
-                        <div className="row align-items-center">
+                        <div className="row align-items-end">
                             <div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="uploadFile">Upload File</label>
@@ -229,6 +229,16 @@ export default function PemDetails() {
                                 <div className="actions">
                                     <button className='btn btn-primary mb-0' type='submit'>Upload</button>
                                     <button className='btn btn-primary mb-0' type='button' onClick={handleShow}>Calculate</button>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        </Form>
+                    </div>
+                    <div className='d-flex justify-content-between align-items-center'>
+                        <div className="dt-buttons mb-3">
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                     <div className="column-selector">
                                         <Dropdown>
                                             <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
@@ -261,6 +271,7 @@ export default function PemDetails() {
                                                         checked={visibleColumns.length === columnNames.length}
                                                         onChange={handleAllCheckToggle}
                                                         label="Select All"
+                                                        id={`pemNew-selectAll`}
                                                     />
                                                 </Dropdown.Item>
                                                 {columnNames.map((column, index) => (
@@ -282,21 +293,13 @@ export default function PemDetails() {
                                                             checked={visibleColumns.includes(column.elementInternalName)}
                                                             onChange={() => handleColumnToggle(column.elementInternalName)}
                                                             label={column.elementDisplayName}
+                                                            id={`${column.elementDisplayName}${index}`}
                                                         />
                                                     </Dropdown.Item>
                                                 ))}
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                        </Form>
-                    </div>
-                    <div className='d-flex justify-content-between align-items-center'>
-                        <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>

@@ -292,7 +292,7 @@ export default function StocksPair() {
               Pair of Stocks
             </h3>
           </div>
-          <div className="selection-area mb-3">
+          <div className="selection-area mb-3 mt-3">
             <div className="row">
               <div className="col-md-3">
                 {/* <select name="stockA" className='form-select' onChange={handleInput} value={inputData.stockA}>
@@ -401,16 +401,16 @@ export default function StocksPair() {
               <div className="col-md-6">
                 <div className="actions">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary mb-0"
                     onClick={() => submitData(false)}
                   >
                     GO
                   </button>
-                  <button className="btn btn-primary" onClick={reset}>
+                  <button className="btn btn-primary mb-0" onClick={reset}>
                     RESET
                   </button>
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary mb-0"
                     type="button"
                     onClick={() => submitData(true)}
                   >
@@ -521,7 +521,7 @@ export default function StocksPair() {
                       colspan="1"
                       aria-label=": activate to sort column ascending"
                     >
-                      {inputData?.stockD}
+                      {inputData?.stockC}
                     </th>
                     <th
                       className="sorting"

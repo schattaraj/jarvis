@@ -102,7 +102,7 @@ export default function PemRule() {
               PEM Rule
             </h3>
           </div>
-          <div className="d-flex justify-content-between">
+          <div className="d-flex justify-content-between mt-3">
             <div className="dt-buttons mb-3">
               <button
                 className="dt-button buttons-pdf buttons-html5 btn-primary"
@@ -235,15 +235,15 @@ export default function PemRule() {
               <button
                 type="button"
                 style={{ backgroundColor: "#357920", padding: "6px" }}
-                className="btn btn-info btn-sm"
+                className="btn btn-primary btn-info btn-sm"
               >
                 Submit
               </button>
               &nbsp;&nbsp;
               <button
                 type="button"
-                style={{ backgroundColor: "#357920", padding: "6px" }}
-                className="btn btn-info btn-sm"
+                style={{ backgroundColor: "#cd3434", padding: "6px" }}
+                className="btn btn-danger btn-info btn-sm"
               >
                 Reset
               </button>

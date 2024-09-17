@@ -211,10 +211,10 @@ export default function PemDetails() {
                             </span>PEM Details
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
+                    <div className="selection-area my-3">
                         <Form onSubmit={uploadFile} encType="multipart/form-data">
                         <input type="hidden" name="metaDataName" value="PEM"/>
-                        <div className="row align-items-center">
+                        <div className="row align-items-end">
                             <div className="col-md-6">
                                 <div className="form-group">
                                     <label htmlFor="uploadFile">Upload File</label>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Loader from '../../components/loader';
@@ -27,6 +27,9 @@ const BondReports = () => {
     const [selectedTicker, setSelectedTicker] = useState(false)
     const [historyModal, setHistoryModal] = useState(false)
     const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [contentWidth, setContentWidth] = useState(0);
+    const contentRef = useRef(null);
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
@@ -196,11 +199,12 @@ const BondReports = () => {
     }
     const history = () => {
         setHistoryModal(true)
+        setIsExpanded(false)
     }
     const calculate = () => {
 
     }
-    const uploadFile = async (e)=>{
+    const uploadFile = async (e) => {
         e.preventDefault()
         const form = e.target
         if (form.checkValidity() === false) {
@@ -210,23 +214,61 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-        const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFile", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: formData
-        })
-        const uploadRes = await upload.json()
-        if(upload.status == 400){
-        Swal.fire({title:uploadRes?.message,icon:"warning",confirmButtonColor:"var(--primary)"})
-        }
-        console.log("form",form,upload)
+            const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFile", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: formData
+            })
+            const uploadRes = await upload.json()
+            if (upload.status == 400) {
+                Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
+            }
+            console.log("form", form, upload)
         } catch (error) {
-         console.log("Error",error)   
-        }        
+            console.log("Error", error)
+        }
         context.setLoaderState(false)
     }
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
+    useEffect(() => {
+        if (screen.width < 576) {
+            if (isExpanded) {
+                let max = 0
+                Array.from(contentRef.current.children).map((item) => {
+                    if (max < item.getBoundingClientRect().width) {
+                        max = item.getBoundingClientRect().width
+                    }
+                });
+                setContentWidth(`${max + 8}px`);
+                return
+            }
+            else {
+                setContentWidth(`0px`);
+            }
+        }
+        if (isExpanded) {
+            if (contentRef.current) {
+                let count = 0
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    count = count + 6
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${totalWidth + count}px`);
+            }
+        }
+        else {
+            if (contentRef.current) {
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${0}px`);
+            }
+        }
+    }, [isExpanded]);
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -275,9 +317,9 @@ const BondReports = () => {
     ];
 
     const handleColumnToggle = (column) => {
-        setVisibleColumns(prevState => 
-            prevState.includes(column) 
-                ? prevState.filter(col => col !== column) 
+        setVisibleColumns(prevState =>
+            prevState.includes(column)
+                ? prevState.filter(col => col !== column)
                 : [...prevState, column]
         );
     };
@@ -290,13 +332,26 @@ const BondReports = () => {
             setVisibleColumns(allColumnNames);
         }
     };
-    
+
     return (
         <>
             <BondReportHistoryModal open={historyModal} handleClose={() => { setHistoryModal(false) }} />
             <div className="main-panel">
                 <div className="content-wrapper">
-        <Breadcrumb />
+                    <div className="d-flex justify-content-between align-items-center flex-wrap">
+                        <Breadcrumb />
+                        <div className={`collapsible-container ${isExpanded ? 'expanded' : ''}`}>
+                            <span>{ }</span><button className="main-button ms-2 btn-primary" onClick={toggleExpand}>
+                                <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+3 Action
+                            </button>
+                            <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
+                                {/* <button className={`h-100 collapsible-item ${activeView == `Chart View` ? `active` : ''}`} type="button" onClick={()=>{}}><span>Chart View</span></button> */}
+                                <button className="h-100  collapsible-item" type="button" title="Calculate" onClick={calculate}><span>Calculate</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="History" onClick={history}><span>History</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -304,12 +359,13 @@ const BondReports = () => {
                             </span>Bond Reports
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
-                        <div className="row align-items-center">
-                            <div className="col-md-4">
-                                <div className="form-group">
+                    <div className="selection-area mb-3 mt-2">
+                        <Form onSubmit={uploadFile} encType="multipart/form-data">
+                            <input type="hidden" name="metaDataName" value="Debt_Report_Matrices" />
+                            <div className="d-flex align-items-end flex-wrap">
+                                <div className="form-group" style={{ flex: "1" }}>
                                     <label htmlFor="">Select Ticker</label>
-                                    <select name="tickerName" className='form-select' onChange={(e) => { setSelectedTicker(e.target.value) }} required>
+                                    <select name="tickerName" className='form-select mb-0' onChange={(e) => { setSelectedTicker(e.target.value) }} required>
                                         <option value={""}>--Select Ticker--</option>
                                         {tickers.map((item, index) => (
                                             <option key={index} value={item?.element1}>
@@ -318,34 +374,44 @@ const BondReports = () => {
                                         ))}
                                     </select>
                                 </div>
+                                <div className="actions ps-2">
+                                    <button className='btn btn-primary mb-0' type='button' onClick={go}>Go</button>
+                                </div>
+                                <div className="form-group" style={{ flex: "1", paddingRight: "8px" }}>
+                                    <label htmlFor="">Upload File</label>
+                                    <input type="file" name="myfile" className='border-1 form-control' required />
+                                </div>
+                                <div className="actions">
+                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                </div>
                             </div>
-                            <div className="col-md-8">
+                        </Form>
+                        {/* <div className="col-md-8">
                                 <button className='btn btn-primary' type='button' onClick={go}>Go</button>
                                 <button className='btn btn-primary ms-3' type='button' onClick={reset}>Reset</button>
                                 <button className='btn btn-primary ms-3' type='button' onClick={history}>History</button>
                                 <button className='btn btn-primary ms-3' type='button' onClick={calculate}>Calculate</button>
-                            </div>
-                            </div>
-                            <Form onSubmit={uploadFile} encType="multipart/form-data">
-                            <input type="hidden" name="metaDataName" value="Debt_Report_Matrices"/>
+                            </div> */}
+                        {/* <Form onSubmit={uploadFile} encType="multipart/form-data">
+                            <input type="hidden" name="metaDataName" value="Debt_Report_Matrices" />
                             <div className="row align-items-center">
-                            <div className="col-md-6">
-                                <div className="form-group">
-                                    <label htmlFor="">Upload File</label>
-                                    <input type="file" name="myfile" className='border-1 form-control' required />
+                                <div className="col-md-6">
+                                    <div className="form-group">
+                                        <label htmlFor="">Upload File</label>
+                                        <input type="file" name="myfile" className='border-1 form-control' required />
+                                    </div>
                                 </div>
+                                <div className="col-md-6">
+                                    <div className="actions">
+                                        <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                    </div></div>
                             </div>
-                            <div className="col-md-6">
-                                <div className="actions">
-                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
-                                </div></div>
-                        </div>
-                        </Form>
+                        </Form> */}
                     </div>
                     <div className='d-flex justify-content-between'>
                         <div className="dt-buttons mb-3 d-flex align-items-center">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                             <div className="column-selector">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
@@ -354,19 +420,19 @@ const BondReports = () => {
                                     <Dropdown.Menu
                                         style={{
                                             width: "160px",
-                                            maxHeight: "400px", 
+                                            maxHeight: "400px",
                                             overflowY: "auto",
                                             overflowX: "hidden",
                                             marginTop: "1px",
                                         }}
                                     >
-                                        <Dropdown.Item 
-                                            as="label" 
+                                        <Dropdown.Item
+                                            as="label"
                                             onClick={(e) => e.stopPropagation()}
                                             style={{
-                                                whiteSpace: "normal", 
-                                                wordWrap: "break-word", 
-                                                display: "inline-block", 
+                                                whiteSpace: "normal",
+                                                wordWrap: "break-word",
+                                                display: "inline-block",
                                                 width: "100%",
                                                 padding: "6px",
                                                 fontWeight: "bold",
@@ -378,17 +444,18 @@ const BondReports = () => {
                                                 checked={visibleColumns.length === columnNames.length}
                                                 onChange={handleAllCheckToggle}
                                                 label="Select All"
+                                                id={`${"bond-reports"}-selectAll`}
                                             />
                                         </Dropdown.Item>
                                         {columnNames.map((column, index) => (
-                                            <Dropdown.Item 
-                                                as="label" 
+                                            <Dropdown.Item
+                                                as="label"
                                                 key={index}
                                                 onClick={(e) => e.stopPropagation()}
                                                 style={{
-                                                    whiteSpace: "normal", 
-                                                    wordWrap: "break-word", 
-                                                    display: "inline-block", 
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    display: "inline-block",
                                                     width: "100%",
                                                     padding: "6px",
                                                 }}
@@ -399,6 +466,7 @@ const BondReports = () => {
                                                     checked={visibleColumns.includes(column.elementInternalName)}
                                                     onChange={() => handleColumnToggle(column.elementInternalName)}
                                                     label={column.elementDisplayName}
+                                                    id={`checkId${column.elementDisplayName}${index}`}
                                                 />
                                             </Dropdown.Item>
                                         ))}
@@ -501,6 +569,7 @@ const BondReports = () => {
                     <p className="mt-2">Showing {reportData.length} entries</p>
                 </Modal.Body>
             </Modal>
+            {isExpanded && <div className='backdrop'></div>}
         </>
     )
 }

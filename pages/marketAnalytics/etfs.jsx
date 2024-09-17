@@ -97,12 +97,16 @@ export default function Etfs() {
     const [selectedView, setSelectedView] = useState('element7')
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const [dateModal, setDateModal] = useState(false)
-    const [bestStocksFiltered,setBestStocksFiltered] = useState([])
-    const [worstStocksFiltered,setWorstStocksFiltered] = useState([])
+    const [bestStocksFiltered, setBestStocksFiltered] = useState([])
+    const [worstStocksFiltered, setWorstStocksFiltered] = useState([])
     const [dates, setRankingDates] = useState({ date1: null, date2: null });
-    const [compareData,setCompareData] = useState(false)
-    const [activeView,setActiveView] = useState("ETF Home")
+    const [compareData, setCompareData] = useState(false)
+    const [activeView, setActiveView] = useState("ETF Home")
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [contentWidth, setContentWidth] = useState(0);
+    const contentRef = useRef(null);
     const handleOpenModal = () => {
+        setIsExpanded(false)
         setOpenModal(true);
     };
 
@@ -241,6 +245,7 @@ export default function Etfs() {
         context.setLoaderState(false)
     }
     const charts = async () => {
+        setIsExpanded(false)
         if (!selectedTicker) {
             Swal.fire({ title: "Please Select a ticker", confirmButtonColor: "#719B5F" });
             return;
@@ -260,6 +265,7 @@ export default function Etfs() {
         context.setLoaderState(false)
     }
     const etfHome = () => {
+        setIsExpanded(false)
         setChartView(false)
         setRankingData(false)
         setActiveView("ETF Home")
@@ -294,6 +300,7 @@ export default function Etfs() {
         setSelectedView(e.target.value)
     }
     const ranking = async () => {
+        setIsExpanded(false)
         context.setLoaderState(true)
         try {
             const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
@@ -345,15 +352,16 @@ export default function Etfs() {
     const handleDateRange = (e) => {
         setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) })
     }
-    const searchBestStocks = (e)=>{
+    const searchBestStocks = (e) => {
         const value = e.target.value;
         setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value))
     }
-    const searchWorstStocks = (e)=>{
+    const searchWorstStocks = (e) => {
         const value = e.target.value;
         setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value))
     }
-    const reset = ()=>{
+    const reset = () => {
+        setIsExpanded(false)
         setSelectedTicker(false)
         fetchData()
     }
@@ -370,6 +378,44 @@ export default function Etfs() {
         }
         context.setLoaderState(false)
     }
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
+    useEffect(() => {
+        if (screen.width < 576) {
+            if (isExpanded) {
+                let max = 0
+                Array.from(contentRef.current.children).map((item) => {
+                    if (max < item.getBoundingClientRect().width) {
+                        max = item.getBoundingClientRect().width
+                    }
+                });
+                setContentWidth(`${max + 8}px`);
+                return
+            }
+            else {
+                setContentWidth(`0px`);
+            }
+        }
+        if (isExpanded) {
+            if (contentRef.current) {
+                let count = 0
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    count = count + 6
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${totalWidth + count}px`);
+            }
+        }
+        else {
+            if (contentRef.current) {
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${0}px`);
+            }
+        }
+    }, [isExpanded]);
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -402,29 +448,29 @@ export default function Etfs() {
         setChartData(chartHistory.map(item => parseFloat(item[selectedView])))
         //console.log("data", [...new Set(chartHistory.map(item => Math.round(item.element7)))])
     }, [chartHistory, selectedView])
-    useEffect(()=>{
-        if(rankingData?.bestFiveStocks?.length > 0){
+    useEffect(() => {
+        if (rankingData?.bestFiveStocks?.length > 0) {
             setBestStocksFiltered(rankingData?.bestFiveStocks)
         }
-        if(rankingData?.worstFiveStocks?.length > 0){
+        if (rankingData?.worstFiveStocks?.length > 0) {
             setWorstStocksFiltered(rankingData?.worstFiveStocks)
         }
-    },[rankingData,activeView])
+    }, [rankingData, activeView])
     useEffect(() => {
         fetchTickersFunc()
         fetchColumnNames()
         fetchData()
     }, [])
-    useEffect(()=>{
-if(compareData && activeView == "History"){
-    setRankingData(compareData)
-}
-    },[compareData,activeView])
+    useEffect(() => {
+        if (compareData && activeView == "History") {
+            setRankingData(compareData)
+        }
+    }, [compareData, activeView])
 
     const handleColumnToggle = (column) => {
-        setVisibleColumns(prevState => 
-            prevState.includes(column) 
-                ? prevState.filter(col => col !== column) 
+        setVisibleColumns(prevState =>
+            prevState.includes(column)
+                ? prevState.filter(col => col !== column)
                 : [...prevState, column]
         );
     };
@@ -441,11 +487,25 @@ if(compareData && activeView == "History"){
     return (
         <>
             <div>
-                <EtfHistoryModal open={openModal} handleCloseModal={handleCloseModal} setCompareData={setCompareData} setRankingDates={setRankingDates} setActiveView={setActiveView} filterBydate={filterBydate}/>
+                <EtfHistoryModal open={openModal} handleCloseModal={handleCloseModal} setCompareData={setCompareData} setRankingDates={setRankingDates} setActiveView={setActiveView} filterBydate={filterBydate} />
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
-        <Breadcrumb />
+                    <div className="d-flex justify-content-between align-items-center flex-wrap">
+                        <Breadcrumb />
+                        <div className={`collapsible-container ${isExpanded ? 'expanded' : ''}`}>
+                            <span>{activeView + " :"}</span><button className="main-button ms-2 btn-primary" onClick={toggleExpand}>
+                                <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+4 Action
+                            </button>
+                            <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
+                                <button className={`h-100 collapsible-item ${activeView == `Chart View` ? `active` : ''}`} type="button" onClick={charts}><span>Chart View</span></button>
+                                <button className={`h-100 collapsible-item ${activeView == "History" ? ` active` : ''}`} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "ETF Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={etfHome}><span>ETF Home</span></button>
+                                <button className={`h-100 collapsible-item${activeView == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="Reset" onClick={reset}><span>Reset</span></button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -453,100 +513,101 @@ if(compareData && activeView == "History"){
                             </span>ETFs
                         </h3>
                     </div>
-                    <Form onSubmit={uploadFile}>
+                    <Form onSubmit={uploadFile} className='mt-2'>
                         <input type="hidden" name="metaDataName" value="Everything_List_New" />
-                        <div className="row align-items-center">
-                            <div className="col-md-6">
-                                <div className="form-group">
-                                    <label htmlFor="">Upload File</label>
-                                    <input type="file" name="myfile" className='border-1 form-control' required />
-                                </div>
-                            </div>
-                            <div className="col-md-6">
-                                <div className="actions">
-                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
-                                </div>
-                            </div>
-                        </div>
-                    </Form>
-                    <div className="selection-area mb-3 d-flex align-items-center">
-                        <Select className='mb-0 me-2 col-md-4' isMulti value={selectedTicker && selectedTicker.split(",").map((item)=>({value:item,label:item}))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px" }} options={
+                    <div className="selection-area mb-3 d-flex align-items-end flex-wrap">
+                        <div className="form-group" style={{flex:"1"}}>
+                        <Select className='mb-0 me-2' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect}  options={
                             tickers && tickers.map((item, index) => (
                                 { value: item.element1, label: item.element1 }
                             ))
                         } />
-                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
-                        <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
+                        </div>
+                        <button className={"btn btn-primary me-2"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
+                        {/* <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (chartView && " active")} type="button" onClick={charts}><span>Chart View</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "ETF Home" && " active")} type="button" onClick={etfHome}><span>ETF Home</span></button>
                         <button className={"dt-button h-100 buttons-excel buttons-html5 btn-primary" + (activeView == "Ranking" && " active")} type="button" onClick={ranking}><span>Ranking</span></button>
                         <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary" + (activeView == "History" && " active")} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
-                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button>
-                        <div className="column-selector">
-                            <Dropdown>
-                                <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
-                                    Columns
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu
-                                    style={{
-                                        width: "160px",
-                                        maxHeight: "400px", 
-                                        overflowY: "auto",
-                                        overflowX: "hidden",
-                                        marginTop: "1px",
-                                    }}
-                                >
-                                    <Dropdown.Item 
-                                        as="label" 
-                                        onClick={(e) => e.stopPropagation()}
-                                        style={{
-                                            whiteSpace: "normal", 
-                                            wordWrap: "break-word", 
-                                            display: "inline-block", 
-                                            width: "100%",
-                                            padding: "6px",
-                                            fontWeight: "bold",
-                                        }}
-                                        className="columns-dropdown-item"
-                                    >
-                                        <Form.Check
-                                            type="checkbox"
-                                            checked={visibleColumns.length === columnNames.length}
-                                            onChange={handleAllCheckToggle}
-                                            label="Select All"
-                                        />
-                                    </Dropdown.Item>
-                                    {columnNames.map((column, index) => (
-                                        <Dropdown.Item 
-                                            as="label" 
-                                            key={index}
-                                            onClick={(e) => e.stopPropagation()}
-                                            style={{
-                                                whiteSpace: "normal", 
-                                                wordWrap: "break-word", 
-                                                display: "inline-block", 
-                                                width: "100%",
-                                                padding: "6px",
-                                            }}
-                                            className="columns-dropdown-item"
-                                        >
-                                            <Form.Check
-                                                type="checkbox"
-                                                checked={visibleColumns.includes(column.elementInternalName)}
-                                                onChange={() => handleColumnToggle(column.elementInternalName)}
-                                                label={column.elementDisplayName}
-                                            />
-                                        </Dropdown.Item>
-                                    ))}
-                                </Dropdown.Menu>
-                            </Dropdown>
-                        </div>
+                        <button className={"h-100 dt-button buttons-pdf buttons-html5 btn-primary"} type="button" title="Reset" onClick={reset}><span>Reset</span></button> */}
+                        
+                        <div className="form-group me-2" style={{flex:"1"}}>
+                                    <label htmlFor="">Upload File</label>
+                                    <input type="file" name="myfile" className='border-1 form-control' required />
+                                </div>
+                          
+                                <div className="actions">
+                                    <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                                </div> 
                     </div>
+                    </Form>
+                    {/* </div> */}
                     {
                         activeView == "ETF Home" &&
                         <div className='d-flex justify-content-between'>
                             <div className="dt-buttons mb-3">
-                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                <div className="column-selector">
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                            Columns
+                                        </Dropdown.Toggle>
+                                        <Dropdown.Menu
+                                            style={{
+                                                width: "160px",
+                                                maxHeight: "400px",
+                                                overflowY: "auto",
+                                                overflowX: "hidden",
+                                                marginTop: "1px",
+                                            }}
+                                        >
+                                            <Dropdown.Item
+                                                as="label"
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{
+                                                    whiteSpace: "normal",
+                                                    wordWrap: "break-word",
+                                                    display: "inline-block",
+                                                    width: "100%",
+                                                    padding: "6px",
+                                                    fontWeight: "bold",
+                                                }}
+                                                className="columns-dropdown-item"
+                                            >
+                                                <Form.Check
+                                                    type="checkbox"
+                                                    checked={visibleColumns.length === columnNames.length}
+                                                    onChange={handleAllCheckToggle}
+                                                    label="Select All"
+                                                    id={`${activeView}-selectAll`}
+                                                />
+                                            </Dropdown.Item>
+                                            {columnNames.map((column, index) => (
+                                                <Dropdown.Item
+                                                    as="label"
+                                                    key={index}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        whiteSpace: "normal",
+                                                        wordWrap: "break-word",
+                                                        display: "inline-block",
+                                                        width: "100%",
+                                                        padding: "6px",
+                                                    }}
+                                                    className="columns-dropdown-item"
+                                                >
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={visibleColumns.includes(column.elementInternalName)}
+                                                        onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                        label={column.elementDisplayName}
+                                                        id={`checkId${column.elementDisplayName}${index}`}
+                                                    />
+                                                </Dropdown.Item>
+                                            ))}
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
                             </div>
                             {!chartView && <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                                 <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -562,172 +623,40 @@ if(compareData && activeView == "History"){
                     }
                     {
                         activeView == "Chart View" &&
-                            <>
-                                <div className="form-group d-flex align-items-center">
-                                    <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
-                                    <select className='form-select' style={{ maxWidth: "300px" }} onChange={handleChange}>
-                                        {
-                                            Object.entries(ViewOptions).map(([key, value]) => (
-                                                <option key={key} value={key}>
-                                                    {value}
-                                                </option>
-                                            ))
-                                        }
-                                    </select>
-                                    <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
-                                    <div className="d-flex align-items-center mx-2">
-                                        <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
-                                        <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
-                                    </div>
+                        <>
+                            <div className="form-group d-flex align-items-center">
+                                <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
+                                <select className='form-select' style={{ maxWidth: "300px" }} onChange={handleChange}>
+                                    {
+                                        Object.entries(ViewOptions).map(([key, value]) => (
+                                            <option key={key} value={key}>
+                                                {value}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                                <button className='ms-2 btn btn-primary' onClick={charts}>GO</button>
+                                <div className="d-flex align-items-center mx-2">
+                                    <label className='mb-0'><b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b></label>
+                                    <button className='ms-2 btn p-0 text-primary' onClick={() => { setDateModal(true) }} type='button'><FilterAlt /></button>
                                 </div>
-                                {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
-                                {/* <BarChart data={data} /> */}
-                                {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && `Chart View For ${ViewOptions[selectedView]}`} />}
-                            </>
-}
-{
-                            activeView == "Ranking" &&
-                                <>
-                                    <h3 className='mb-3'>Best Stocks</h3>
-                                    <div className='d-flex justify-content-between align-items-center'>
-                                        <div className="dt-buttons mb-3">
-                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                        </div>
-                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
-                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                                <option value="all">All</option>
-                                            </select> */}
-                                        </div>
-                                    </div>
-                                    <div className="table-responsive mb-4">
-                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                            <thead>
-                                                <tr>
-                                                    {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
-                                                        <th key={columnName}>{displayName}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {bestStocksFiltered.map((item, index) => {
-                                                    return <tr key={"best" + index}>
-                                                        {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
-                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
-                                                        ))}
-                                                    </tr>
-                                                })}
-                                                {bestStocksFiltered?.length == 0 &&
-                                                <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                     
-                                    <h3 className='mb-3'>Worst Stocks</h3>
-                                    <div className='d-flex justify-content-between align-items-center'>
-                                        <div className="dt-buttons mb-3">
-                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                        </div>
-                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
-                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                                <option value="all">All</option>
-                                            </select> */}
-                                        </div>
-                                    </div>
-                                    <div className="table-responsive mb-4">
-                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                            <thead>
-                                                <tr>
-                                                    {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
-                                                        <th key={columnName}>{displayName}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {worstStocksFiltered.map((item, index) => {
-                                                    return <tr key={"worst" + index}>
-                                                        {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
-                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
-                                                        ))}
-                                                    </tr>
-                                                })}
-                                                {worstStocksFiltered?.length == 0 &&
-                                                <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </>
-}
-{
-    activeView == "ETF Home" &&
-                                <>
-                                    <div className="table-responsive">
-                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                            <thead>
-                                                <tr>
-                                                    {columnNames.map((columnName, index) => (
-                                                        visibleColumns.includes(columnName.elementInternalName) && (
-                                                            <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
-                                                        )
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filterData.map((rowData, rowIndex) => (
-                                                    <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
-                                                        {
-                                                            columnNames.map((columnName, colIndex) => {
-                                                                if (!visibleColumns.includes(columnName.elementInternalName)) return null;
-                                                                let content;
-
-                                                                if (columnName.elementInternalName === 'element3') {
-                                                                    // content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                                    content = rowData[columnName.elementInternalName];
-                                                                } else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
-                                                                    content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
-                                                                } else {
-                                                                    content = rowData[columnName.elementInternalName];
-                                                                }
-
-                                                                return <td key={colIndex}>{content}</td>;
-                                                            })
-                                                        }
-                                                    </tr>
-                                                ))}
-                                                {filterData?.length == 0 && <tr><td colSpan={columnNames?.length}>No data available</td></tr>}
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-                                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-                                </>
+                            </div>
+                            {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
+                            {/* <BarChart data={data} /> */}
+                            {chartHistory.length > 0 && <HightChart data={chartHistory?.map((item) => [new Date(item['lastUpdatedAt']).getTime(), parseFloat(item[selectedView])])} title={ViewOptions[selectedView] && `Chart View For ${ViewOptions[selectedView]}`} />}
+                        </>
                     }
-{
-    activeView == "History" &&
-    <>
-                                    <h3 className='mb-3'>Best Stocks</h3>
-                                    <div className='d-flex justify-content-between align-items-center'>
-                                        <div className="dt-buttons mb-3">
-                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                        </div>
-                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
-                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                    {
+                        activeView == "Ranking" &&
+                        <>
+                            <h3 className='mb-3'>Best Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                                             <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
                                                 <option value="10">10</option>
                                                 <option value="25">25</option>
@@ -735,40 +664,40 @@ if(compareData && activeView == "History"){
                                                 <option value="100">100</option>
                                                 <option value="all">All</option>
                                             </select> */}
-                                        </div>
-                                    </div>
-                                    <div className="table-responsive mb-4">
-                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                                            <thead>
-                                                <tr>
-                                                    {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
-                                                        <th key={columnName}>{displayName}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {bestStocksFiltered.map((item, index) => {
-                                                    return <tr key={"best" + index}>
-                                                        {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
-                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
-                                                        ))}
-                                                    </tr>
-                                                })}
-                                                {bestStocksFiltered?.length == 0 &&
-                                                <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <HightChart data={compareData?.bestFiveStocks?.map((item) => [item['bestMovedStock'], parseFloat(item['percentageChangeRise'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={`Best Twenty`}/>
-                                    <h3 className='my-3'>Worst Stocks</h3>
-                                    <div className='d-flex justify-content-between align-items-center'>
-                                        <div className="dt-buttons mb-3">
-                                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF('worst-stock-table')}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                                        </div>
-                                        <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
-                                            {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {bestStocksFiltered.map((item, index) => {
+                                            return <tr key={"best" + index}>
+                                                {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {bestStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 className='mb-3'>Worst Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                                             <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
                                                 <option value="10">10</option>
                                                 <option value="25">25</option>
@@ -776,34 +705,166 @@ if(compareData && activeView == "History"){
                                                 <option value="100">100</option>
                                                 <option value="all">All</option>
                                             </select> */}
-                                        </div>
-                                    </div>
-                                    <div className="table-responsive mb-4">
-                                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="worst-stock-table">
-                                            <thead>
-                                                <tr>
-                                                    {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
-                                                        <th key={columnName}>{displayName}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {worstStocksFiltered.map((item, index) => {
-                                                    return <tr key={"worst" + index}>
-                                                        {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
-                                                            <td key={item[columnName] + index}>{item[columnName]}</td>
-                                                        ))}
-                                                    </tr>
-                                                })}
-                                                {worstStocksFiltered?.length == 0 &&
-                                                <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {worstStocksFiltered.map((item, index) => {
+                                            return <tr key={"worst" + index}>
+                                                {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {worstStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    }
+                    {
+                        activeView == "ETF Home" &&
+                        <>
+                            <div className="table-responsive">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            {columnNames.map((columnName, index) => (
+                                                visibleColumns.includes(columnName.elementInternalName) && (
+                                                    <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                )
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filterData.map((rowData, rowIndex) => (
+                                            <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                                {
+                                                    columnNames.map((columnName, colIndex) => {
+                                                        if (!visibleColumns.includes(columnName.elementInternalName)) return null;
+                                                        let content;
+
+                                                        if (columnName.elementInternalName === 'element3') {
+                                                            // content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
+                                                            content = rowData[columnName.elementInternalName];
+                                                        } else if (columnName.elementInternalName === 'lastUpdatedAt') {
+
+                                                            content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
+                                                        } else {
+                                                            content = rowData[columnName.elementInternalName];
+                                                        }
+
+                                                        return <td key={colIndex}>{content}</td>;
+                                                    })
                                                 }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <HightChart data={compareData?.worstFiveStocks?.map((item) => [item['worstMovedStock'], parseFloat(item['percentageChangeDrop'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Worst Twenty"} />
-                                </>
-}
+                                            </tr>
+                                        ))}
+                                        {filterData?.length == 0 && <tr><td colSpan={columnNames?.length}>No data available</td></tr>}
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                        </>
+                    }
+                    {
+                        activeView == "History" &&
+                        <>
+                            <h3 className='mb-3'>Best Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchBestStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {bestStocksFiltered.map((item, index) => {
+                                            return <tr key={"best" + index}>
+                                                {Object.entries(bestFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {bestStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(bestFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <HightChart data={compareData?.bestFiveStocks?.map((item) => [item['bestMovedStock'], parseFloat(item['percentageChangeRise'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={`Best Twenty`} />
+                            <h3 className='my-3'>Worst Stocks</h3>
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF('worst-stock-table') }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                </div>
+                                <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={searchWorstStocks} />
+                                    {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                                </div>
+                            </div>
+                            <div className="table-responsive mb-4">
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="worst-stock-table">
+                                    <thead>
+                                        <tr>
+                                            {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                <th key={columnName}>{displayName}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {worstStocksFiltered.map((item, index) => {
+                                            return <tr key={"worst" + index}>
+                                                {Object.entries(worstFiveStockColumn).map(([columnName, displayName]) => (
+                                                    <td key={item[columnName] + index}>{item[columnName]}</td>
+                                                ))}
+                                            </tr>
+                                        })}
+                                        {worstStocksFiltered?.length == 0 &&
+                                            <tr><td className='text-center' colSpan={Object.entries(worstFiveStockColumn)?.length}>No data available</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <HightChart data={compareData?.worstFiveStocks?.map((item) => [item['worstMovedStock'], parseFloat(item['percentageChangeDrop'])])} title={"Stock Performance"} typeCheck={{ categories: compareData?.bestFiveStocks?.map((item) => item?.bestMovedStock) }} yAxisTitle={"Risn in %"} titleAlign={"center"} subTitle={"Worst Twenty"} />
+                        </>
+                    }
                 </div>
             </div>
             <Modal show={dateModal} onHide={() => { setDateModal(false) }}>
@@ -852,6 +913,7 @@ if(compareData && activeView == "History"){
                     <button className="btn btn-primary" onClick={charts}>Apply</button>
                 </Modal.Footer>
             </Modal>
+            {isExpanded && <div className='backdrop'></div>}
         </>
     )
 }

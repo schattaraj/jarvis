@@ -191,7 +191,7 @@ export default function Calls() {
                             </span>CALLS
                         </h3>
                     </div>
-                    <div className="selection-area mb-3">
+                    <div className="selection-area my-3">
                         <div className="row">
                             <div className="col-md-4">
                                 <div className="form-group">

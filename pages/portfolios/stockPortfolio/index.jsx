@@ -603,7 +603,7 @@ console.log("stockFormData",stockFormData);
                         !manageView
                         &&
                         <>
-                    <div className="selection-area mb-3">
+                    <div className="selection-area my-3">
                         <div className="row">
 
                             <div className="col-md-4">
@@ -754,9 +754,9 @@ console.log("stockFormData",stockFormData);
                 }
                 {
                     manageView &&
-                        <div className="manage">
+                        <div className="manage mt-3">
                             <div className="d-flex"> 
-                                    <button className="btn btn-primary mx-2 mb-3" onClick={handleProtfolioShow}>Create New Portfolio</button>
+                                    <button className="btn btn-primary me-2 mb-3" onClick={handleProtfolioShow}>Create New Portfolio</button>
                                     <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
                             </div>
                             <div className='d-flex justify-content-between align-items-center'>

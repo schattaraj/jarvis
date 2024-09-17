@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Navigation from '../../../components/navigation';
 import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
@@ -7,12 +7,12 @@ import parse from 'html-react-parser';
 import { calculateAverage, getSortIcon, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Drawer, List, ListItem, ListItemButton, TextField } from '@mui/material';
 import BondChart from '../../../components/charts';
 import { Pagination } from '../../../components/Pagination';
 import SliceData from '../../../components/SliceData';
 import HightChart from '../../../components/HighChart';
-import { Form, Modal } from 'react-bootstrap';
+import { Dropdown, Form, Modal } from 'react-bootstrap';
 import ReactSelect from 'react-select';
 import Swal from 'sweetalert2';
 import Tab from 'react-bootstrap/Tab';
@@ -115,6 +115,11 @@ export default function Bonds() {
     const [reportTicker, setReportTicker] = useState("")
     const [selectedTickerName, setSelectedTickerName] = useState(false)
     const [tickerModal, setTickerModal] = useState(false)
+    const [open, setOpen] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [contentWidth, setContentWidth] = useState(0);
+    const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
+    const contentRef = useRef(null);
     const router = useRouter()
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
@@ -138,6 +143,7 @@ export default function Bonds() {
 
     const handleOpenModal = () => {
         setOpenModal(true);
+        setIsExpanded(false)
     };
 
     const handleCloseModal = () => {
@@ -212,6 +218,8 @@ export default function Bonds() {
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
+            const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
+            setVisibleColumns(defaultCheckedColumns);
             fetchData()
         }
         catch (e) {
@@ -320,6 +328,7 @@ export default function Bonds() {
             setRankingData(rankingApiRes)
             setCompareData(rankingApiRes)
             setSelectedOption("Ranking")
+            setIsExpanded(false)
         } catch (error) {
             console.log("Erorr 258", error)
         }
@@ -360,6 +369,7 @@ export default function Bonds() {
         context.setLoaderState(false)
     };
     const charts = async () => {
+        setIsExpanded(false)
         if (!selectedBond || selectedBond.length == 0) {
             Swal.fire({ title: "Please Select Bond", confirmButtonColor: "#719B5F" });
             return;
@@ -407,9 +417,11 @@ export default function Bonds() {
     }
     const gridView = () => {
         setSelectedOption("Grid View")
+        setIsExpanded(false)
     }
     const bondHome = () => {
         setSelectedOption("Bond Home")
+        setIsExpanded(false)
         fetchData()
     }
     const uploadFile = async (e) => {
@@ -499,28 +511,86 @@ export default function Bonds() {
         setReportModal(false)
     }
     const bondDetails = () => {
+        setIsExpanded(false)
         if (selectedBond.length < 1) {
             Swal.fire({ title: "Please Select Bond", confirmButtonColor: "#719B5F" });
             return
-        }if(selectedBond.length > 1){
+        } if (selectedBond.length > 1) {
             setTickerModal(true)
             return
-        }        
+        }
         const redirectUri = `${router.pathname}/${encodeURIComponent(selectedBond.map(item => item.value))}`
         router.push(redirectUri)
     }
-    const bondDetailsGo = ()=>{
-        if(!selectedTickerName){
+    const bondDetailsGo = () => {
+        if (!selectedTickerName) {
             Swal.fire({ title: "Please Select a Bond first", confirmButtonColor: "#719B5F" });
             return
         }
         const redirectUri = `${router.pathname}/${encodeURIComponent(selectedTickerName)}`
         router.push(redirectUri)
     }
-    const handleSelectedTicker = (e)=>{
+    const handleSelectedTicker = (e) => {
         setSelectedTickerName(e.target.value)
-        console.log("Selected Ticker",e.target.value);
+        console.log("Selected Ticker", e.target.value);
     }
+    const toggleDrawer = (newOpen) => () => {
+        setOpen(newOpen);
+    };
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
+    const handleColumnToggle = (column) => {
+        setVisibleColumns(prevState =>
+            prevState.includes(column)
+                ? prevState.filter(col => col !== column)
+                : [...prevState, column]
+        );
+    };
+    const handleAllCheckToggle = () => {
+        if (visibleColumns.length === columnNames.length) {
+            setVisibleColumns([]);
+        } else {
+            const allColumnNames = columnNames.map(col => col.elementInternalName);
+            setVisibleColumns(allColumnNames);
+        }
+    };
+    useEffect(() => {
+        if(screen.width < 576){
+            if (isExpanded) {
+            let max = 0
+            Array.from(contentRef.current.children).map((item) => {
+                if(max < item.getBoundingClientRect().width){
+                    max = item.getBoundingClientRect().width
+                }
+            });
+            setContentWidth(`${max+8}px`);
+            return
+        }
+        else{
+            setContentWidth(`0px`);
+        }
+        }
+        if (isExpanded) {
+            if (contentRef.current) {
+                let count = 0
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    count = count + 6
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                // setContentWidth(`${totalWidth+count}px`);
+                setContentWidth(`${totalWidth + count}px`);
+            }
+        }
+        else {
+            if (contentRef.current) {
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${0}px`);
+            }
+        }
+    }, [isExpanded]);
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -570,6 +640,7 @@ export default function Bonds() {
         container: (provided) => ({
             ...provided,
             zIndex: 4,
+            maxWidth:"300px"
         }),
     };
 
@@ -580,7 +651,25 @@ export default function Bonds() {
             </div>
             <div className="main-panel">
                 <div className="content-wrapper">
-                    <Breadcrumb />
+                    <div className="d-flex justify-content-between align-items-center flex-wrap">
+                        <Breadcrumb />
+                        <div className={`collapsible-container ${isExpanded ? 'expanded' : ''}`}>
+                            <span>{selectedOption + " :"}</span><button className="main-button ms-2 btn-primary" onClick={toggleExpand}>
+                                <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+8 Action
+                            </button>
+                            <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
+                                <button className={`h-100 collapsible-item ${selectedOption == "History" ? ` active` : ''}`} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
+                                <button className={`h-100 collapsible-item${selectedOption == "Bond Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={bondHome}><span>Bond Home</span></button>
+                                <button className={`h-100 collapsible-item${selectedOption == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
+                                <button className={`h-100 collapsible-item${selectedOption == "Calculate" ? ` active` : ''}`} type="button" title="Calculate" onClick={() => { setCalculateModal(true),setIsExpanded(false) }}><span>Calculate</span></button>
+                                <button className={`h-100 collapsible-item${selectedOption == "Grid View" ? ` active` : ''}`} type="button" title="Grid View" onClick={gridView}><span>Grid View</span></button>
+                                <button className={`h-100 collapsible-item${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="Reset" onClick={bondHome}><span>Reset</span></button>
+                                <button className="h-100  collapsible-item" type="button" title="Bond Details" onClick={bondDetails}><span>Bond Details</span></button>
+                            </div>
+                        </div>
+                        {/* <button className="btn btn-primary px-3 mb-0 me-3 d-flex align-items-center" style={{border:"0px solid var(--primary)"}} onClick={toggleDrawer(true)}><i className="mdi mdi-chevron-left"></i> <span>{selectedOption}</span></button> */}
+                    </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -590,64 +679,47 @@ export default function Bonds() {
                     </div>
                     <div className="selection-area mb-3">
                         <div className="row">
-                            {/* <div className="col-md-3">
-                                <div className="form-group">
-                                    <label htmlFor="">Options</label>
-                                    <select name="portfolio_name" className='form-select' onChange={handleChange}>
-                                        {option.map((option, index) => (
-                                            <option key={index} value={option}>
-                                                {option}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div> */}
-                            {(<div className="col-md-4">
-                                <div className="form-group">
-                                    {/* <label htmlFor="">Filter Bonds</label> */}
-                                    {/* <Autocomplete
-                                        multiple
-                                        id="tags-standard"
-                                        value={selectedBond}
-                                        onChange={(event, newValue) => {
-                                            setSelectedBond(newValue?.element1);
-                                        }}
-                                        options={tickers.map((item)=>({label:item?.elememt1,value:item?.elememt1}))}
-                                        getOptionLabel={(option) => option?.element1}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                label="Select Bond"
-                                            />
-                                        )}
-                                    /> */}
-                                    <ReactSelect className='mb-0 me-2' isMulti onChange={setSelectedBond} styles={customStyles} options={
-                                        tickers && tickers.map((item, index) => (
-                                            { value: item.element1, label: item.element1 }
-                                        ))
-                                    } />
-                                </div>
+                            {(<div className="col-md-12">
+                                <Form onSubmit={uploadFile} encType="multipart/form-data">
+                                    <input type="hidden" name="metaDataName" value="Bondpricing_Master" />
+                                    <div className="d-flex justify-content-between align-items-end flex-wrap mb-3">
+                                        <div className="form-group d-flex" style={{ flex: "2" }}>
+                                            <div style={{flex:"2"}}>
+                                            <ReactSelect className='mb-0 me-2' isMulti onChange={setSelectedBond} styles={customStyles} options={
+                                                tickers && tickers.map((item, index) => (
+                                                    { value: item.element1, label: item.element1 }
+                                                ))
+                                            } />
+                                            </div>
+                                             <div className="actions">
+                                            <button className='btn btn-primary mb-0' type='button' onClick={() => {
+                                                if (selectedBond.length && selectedOption === 'Chart View') {
+                                                    charts()
+                                                } else {
+
+                                                    handleSelectClick()
+                                                }
+                                            }}>GO</button>
+                                        </div>
+                                        </div>
+                                       
+                                        <div className="form-group">
+                                            <label htmlFor="" className='form-label'>File Upload Date</label>
+                                            <input type="date" className="form-control" name='fileDate' required onChange={(e) => { setFileDate(e.target.value) }} />
+                                        </div>
+                                        <div className="form-group px-sm-2">
+                                            <label htmlFor="uploadFile" className='form-label'>Upload File</label>
+                                            <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
+                                        </div>
+                                        <div className="actions">
+                                            <button className='btn btn-primary mb-0 px-4' type='submit'>Upload</button>
+                                        </div>
+                                    </div>
+                                </Form>
                             </div>)}
-
-                            <div className="col-md-3">
-                                <div className="actions">
-                                    <button className='btn btn-primary' onClick={() => {
-                                        if (selectedBond.length && selectedOption === 'Chart View') {
-                                            charts()
-                                        } else {
-
-                                            handleSelectClick()
-                                        }
-                                    }}>GO</button>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-
-                            </div>
                         </div>
                     </div>
-                    <div className="selection-area mb-3" style={{ zIndex: "1" }}>
+                    {/* <div className="selection-area mb-3" style={{ zIndex: "1" }}>
                         <Form onSubmit={uploadFile} encType="multipart/form-data">
                             <input type="hidden" name="metaDataName" value="Bondpricing_Master" />
                             <div className="row align-items-center">
@@ -669,8 +741,8 @@ export default function Bonds() {
                                     </div></div>
                             </div>
                         </Form>
-                    </div>
-                    <div className="d-flex">
+                    </div> */}
+                    {/* <div className="d-flex">
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "History" ? ` active` : ''}`} type="button" title="History" onClick={handleOpenModal}><span>History</span></button>
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Bond Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={bondHome}><span>Bond Home</span></button>
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
@@ -679,16 +751,77 @@ export default function Bonds() {
                         <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={bondHome}><span>Reset</span></button>
                         <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={bondDetails}><span>Bond Details</span></button>
-                    </div>
+                    </div> */}
 
                     {
                         (selectedOption === 'Bond Home' || selectedOption === 'Calculate' || selectedOption === 'Grid View') &&
                         (
                             <>
-                                <div className='d-flex justify-content-between'>
-                                    <div className="dt-buttons mb-3">
+                                <div className='d-flex justify-content-between flex-wrap'>
+                                    <div className="dt-buttons mb-3 d-flex">
                                         <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                         <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                        <div className="column-selector">
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                                Columns
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu
+                                                style={{
+                                                    width: "160px",
+                                                    maxHeight: "400px",
+                                                    overflowY: "auto",
+                                                    overflowX: "hidden",
+                                                    marginTop: "1px",
+                                                }}
+                                            >
+                                                <Dropdown.Item
+                                                    as="label"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        whiteSpace: "normal",
+                                                        wordWrap: "break-word",
+                                                        display: "inline-block",
+                                                        width: "100%",
+                                                        padding: "6px",
+                                                        fontWeight: "bold",
+                                                    }}
+                                                    className="columns-dropdown-item"
+                                                >
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={visibleColumns.length === columnNames.length}
+                                                        onChange={handleAllCheckToggle}
+                                                        label="Select All"
+                                                        id={`${selectedOption}-selectAll`}
+                                                    />
+                                                </Dropdown.Item>
+                                                {columnNames.map((column, index) => (
+                                                    <Dropdown.Item
+                                                        as="label"
+                                                        key={index}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{
+                                                            whiteSpace: "normal",
+                                                            wordWrap: "break-word",
+                                                            display: "inline-block",
+                                                            width: "100%",
+                                                            padding: "6px",
+                                                        }}
+                                                        className="columns-dropdown-item"
+                                                    >
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={visibleColumns.includes(column.elementInternalName)}
+                                                            onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                            label={column.elementDisplayName}
+                                                            id={`checkId${column.elementDisplayName}${index}`}
+                                                        />
+                                                    </Dropdown.Item>
+                                                ))}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </div>
                                     </div>
                                     <div className="form-group d-flex align-items-center">
                                         <div className="form-group d-flex align-items-center mb-0 me-3">
@@ -710,8 +843,9 @@ export default function Bonds() {
                                         <thead>
                                             <tr>
                                                 {columnNames.map((columnName, index) => (
+                                                    visibleColumns.includes(columnName.elementInternalName) && (
                                                     <th key={'column' + index + columnName} style={{ width: '10% !imporatant' }} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
-                                                ))}
+                                                )))}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1090,8 +1224,8 @@ export default function Bonds() {
                                 selectedBond.map((item, index) => {
                                     return <>
                                         <div className='form-check'>
-                                            <input className="form-check-input" name="selectedTicker" type="radio" value={item.value} id={"selectTicker"+index} onClick={handleSelectedTicker}/>
-                                            <label className="form-check-label" for={"selectTicker"+index}>
+                                            <input className="form-check-input" name="selectedTicker" type="radio" value={item.value} id={"selectTicker" + index} onClick={handleSelectedTicker} />
+                                            <label className="form-check-label" for={"selectTicker" + index}>
                                                 {item.value}
                                             </label>
                                         </div>
@@ -1107,6 +1241,50 @@ export default function Bonds() {
                 </Modal.Footer>
             </Modal>
             <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
+            <Drawer anchor={"right"} open={open} onClose={toggleDrawer(false)} className='bond-action-menu'>
+                <List>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "History" ? "text-primary" : ''}`} onClick={handleOpenModal}>History
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Bond Home" ? "text-primary" : ''}`} onClick={bondHome}>Bond Home
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Ranking" ? "text-primary" : ''}`} onClick={ranking}>Ranking
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Calculate" ? "text-primary" : ''}`} onClick={() => { setCalculateModal(true) }}>Calculate
+                        </ListItemButton>
+                        {/* <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Calculate" ? ` active` : ''}`} type="button" title="Calculate" onClick={() => { setCalculateModal(true) }}><span>Calculate</span></button> */}
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Grid View" ? "text-primary" : ''}`} onClick={gridView}>
+                            Grid View
+                        </ListItemButton>
+                        {/* <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Grid View" ? ` active` : ''}`} type="button" title="Grid View" onClick={gridView}><span>Grid View</span></button> */}
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Chart View" ? "text-primary" : ''}`} onClick={charts}>Chart View
+                            {/* <button className={`h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3${selectedOption == "Chart View" ? ` active` : ''}`} type="button" title="Chart View" onClick={charts}><span>Chart View</span></button> */}
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton onClick={bondHome}>Reset
+                            {/* <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Reset" onClick={bondHome}><span>Reset</span></button> */}
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem>
+                        <ListItemButton className={`${selectedOption == "Calculate" ? "text-primary" : ''}`} onClick={bondDetails}>Bond Details
+                            {/* <button className="h-100 dt-button buttons-pdf buttons-html5 btn-primary mb-3" type="button" title="Bond Details" onClick={bondDetails}><span>Bond Details</span></button> */}
+                        </ListItemButton>
+                    </ListItem>
+                    {/* </div> */}
+                </List>
+            </Drawer>
+            {isExpanded && <div className='backdrop'></div>}
         </>
     )
 }
