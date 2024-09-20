@@ -16,7 +16,14 @@ export default function PUTS() {
         expirationDate:"",
         addToDate:""
     })
+    const [tableData, setTableData] = useState([])
+    const [filterData, setFilterData] = useState([])
+    const [limit, setLimit] = useState(25)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
+    const context = useContext(Context)
     const fetchTickersFunc = async()=>{
+        context.setLoaderState(true)
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
             const fetchTickersRes = await fetchTickers.json() 
@@ -25,6 +32,7 @@ export default function PUTS() {
         catch (e) {
 
         }
+        context.setLoaderState(false)
     }
     const fetchDates = async()=>{
         try{
@@ -34,6 +42,9 @@ export default function PUTS() {
         }
         catch(e){
         }
+    }
+    const findAllPutsByTickerName = ()=>{
+        
     }
     const handleChange = ()=>{
         
@@ -73,7 +84,7 @@ export default function PUTS() {
                                     </span>PUTS
                                 </h3>
                             </div>
-                            <div className="selection-area mb-3">
+                            <div className="selection-area my-3">
                                 <div className="row">
                                     <div className="col-md-4">
                                         <div className="form-group">

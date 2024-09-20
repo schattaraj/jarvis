@@ -1485,3 +1485,34 @@ div:where(.swal2-container) {
 }
 }
 }
+.news-area{
+   padding-top: 20px;
+   border-top: 1px solid rgba(#000000, 0.2);
+   a{
+    color: var(--primary);
+    text-decoration: none;
+   }
+    h3{
+        color: #343a40;
+        font-size: 24px;
+        margin-bottom: 12px;
+        font-weight: bold;
+    }
+    h4{
+        font-size: 18px;
+    }
+    p{
+        color: #6F7173;
+        font-weight: 700;
+        margin-bottom: 10px;
+        .name{
+            color: var(--primary);
+        }
+    }
+    .image{
+        height: 200px;
+        object-fit: contain;
+        border: 1px solid rgba(#444,0.4);
+        margin-bottom: 16px;
+    }
+}

@@ -19,7 +19,73 @@ import StockHistoryModal from '../../components/StockHistoryModal';
 import Breadcrumb from '../../components/Breadcrumb';
 import { FaGlasses } from 'react-icons/fa';
 import ReportTable from '../../components/ReportTable';
+import { staticStocks } from '../../utils/staticStock';
 const extraColumns = [
+    {
+        "elementId": null,
+        "elementName": "OBV",
+        "elementInternalName": "element80",
+        "elementDisplayName": "OBV",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    },
+    {
+        "elementId": null,
+        "elementName": "MOM",
+        "elementInternalName": "element81",
+        "elementDisplayName": "MOM",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    },
+    {
+        "elementId": null,
+        "elementName": "RSI",
+        "elementInternalName": "element82",
+        "elementDisplayName": "RSI",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    },
+    {
+        "elementId": null,
+        "elementName": "EMA",
+        "elementInternalName": "element83",
+        "elementDisplayName": "EMA",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    },
+    {
+        "elementId": null,
+        "elementName": "SMA",
+        "elementInternalName": "element84",
+        "elementDisplayName": "SMA",
+        "elementType": null,
+        "metadataName": "Everything_List_New",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+    },
     {
         "elementId": null,
         "elementName": "Date",
@@ -146,6 +212,7 @@ export default function Stocks() {
         context.setLoaderState(false)
     }
     const charts = async () => {
+        setIsExpanded(false)
         if (!selectedTicker || selectedTicker.length == 0) {
             Swal.fire({ title: "Please Select a Ticker", confirmButtonColor: "#719B5F" });
             return;
@@ -187,6 +254,7 @@ export default function Stocks() {
         } catch (error) {
 
         }
+        setIsExpanded(false)
         context.setLoaderState(false)
     }
     const reset = () => {
@@ -204,6 +272,7 @@ export default function Stocks() {
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
             setVisibleColumns(defaultCheckedColumns);
             fetchData()
+            // context.setLoaderState(false)
         }
         catch (e) {
             console.log("error", e)
@@ -302,7 +371,7 @@ export default function Stocks() {
         setLimit(e.target.value)
     }
     const fetchTickersFunc = async () => {
-        context.setLoaderState(true)
+        // context.setLoaderState(true)
         try {
             const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
             const fetchTickersRes = await fetchTickers.json()
@@ -311,7 +380,7 @@ export default function Stocks() {
         catch (e) {
 
         }
-        context.setLoaderState(false)
+        // context.setLoaderState(false)
     }
     const handleChartView = (e) => {
         setSelectedView(e.target.value)
@@ -651,7 +720,7 @@ export default function Stocks() {
                                 <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+7 Action
                             </button>
                             <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
-                                <button className={`h-100 collapsible-item ${activeView == "History" ? ` active` : ''}`} type="button" title="History" onClick={(handleOpenModal) => { }}><span>History</span></button>
+                                <button className={`h-100 collapsible-item ${activeView == "History" ? ` active` : ''}`} type="button" title="History" onClick={() => { setHistoryModal(true),setIsExpanded(false) }}><span>History</span></button>
                                 <button className={`h-100 collapsible-item${activeView == "Ticker Home" ? ` active` : ''}`} type="button" title="Bond Home" onClick={tickerHome}><span>Ticker Home</span></button>
                                 <button className={`h-100 collapsible-item${activeView == "Ranking" ? ` active` : ''}`} type="button" title="Ranking" onClick={ranking}><span>Ranking</span></button>
                                 <button className={`h-100 collapsible-item${activeView == "Ranking PDF" ? ` active` : ''}`} type="button" title="Ranking PDF" onClick={rankingPDF}><span>Ranking PDF</span></button>
@@ -674,9 +743,10 @@ export default function Stocks() {
                             <input type="hidden" name="metaDataName" value="Tickers_Watchlist" />
                             <div className="d-flex align-items-end flex-wrap mb-3">
                             <Select className='mb-0 me-2 col-md-3' isMulti value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleSelect} style={{ minWidth: "200px", maxWidth: "300px",flex:"2" }} options={
-                                tickers && tickers.map((item, index) => (
+                                tickers ? tickers.map((item, index) => (
                                     { value: item.element1, label: item.element1 }
                                 ))
+                                : [{value:"Loading",label:"Loading..."}]
                             } />
                             <div className="actions">
                                 <button className={"btn btn-primary mb-0"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
@@ -1163,7 +1233,7 @@ export default function Stocks() {
                     <button className="btn btn-primary" onClick={charts}>Apply</button>
                 </Modal.Footer>
             </Modal>
-            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
+            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
             {isExpanded && <div className='backdrop'></div>}
         </>
     )

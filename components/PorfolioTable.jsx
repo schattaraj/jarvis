@@ -124,7 +124,7 @@ console.log("issuerName",issuerName,e.target.checked)
     
             const formData = new FormData();
             selectedStocks.forEach(stock => {
-                const dataString = `${stock.issuerName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+                const dataString = `${stock.issuerName.split(" |")[0]}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
                 formData.append("myArray[]", dataString);
             });
             // Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));

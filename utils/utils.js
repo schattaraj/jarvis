@@ -223,3 +223,26 @@ export const mmddyy = (inputDate)=>{
     // Return the formatted date string
     return `${formattedMonth}/${formattedDay}/${formattedYear}`;
 }
+export function formatPublishedDate(dateString) {
+    // Parse the input string into a Date object
+    const year = dateString.slice(0, 4);
+    const month = dateString.slice(4, 6) - 1; // JavaScript months are 0-indexed
+    const day = dateString.slice(6, 8);
+    const hour = dateString.slice(9, 11);
+    const minute = dateString.slice(11, 13);
+
+    const date = new Date(year, month, day, hour, minute);
+
+    // Options for formatting the date
+    const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    };
+
+    // Format the date into "Sep 20, 2024 at 6:45AM"
+    return date.toLocaleString('en-US', options).replace(',', ' at');
+}

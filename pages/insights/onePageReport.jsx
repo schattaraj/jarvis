@@ -14,6 +14,7 @@ import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
 import Breadcrumb from '../../components/Breadcrumb';
 import { Context } from '../../contexts/Context';
+import { formatDate } from '../../utils/utils';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -23,6 +24,8 @@ export default function OnePageReport() {
   const [sortOrder, setSortOrder] = useState('Asc');
   const [categoryType, setCategoryType] = useState([]);
   const [filterText, setFilterText] = useState('');
+  const [orderBy,setOrderBy] = useState('asc')
+  const [filteredReports,setFilterReports] = useState([])
   const context = useContext(Context)
   const fetchVideoes = async () => {
     setLoader(true)
@@ -50,6 +53,29 @@ export default function OnePageReport() {
 
   }
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  // Function to sort by newest to oldest
+function sortReportsNewestToOldest(reports) {
+  return reports.sort((a, b) => new Date(b.reportDate) - new Date(a.reportDate));
+}
+
+// Function to sort by oldest to newest
+function sortReportsOldestToNewest(reports) {
+  return reports.sort((a, b) => new Date(a.reportDate) - new Date(b.reportDate));
+}
+
+  const handleOrder = (e)=>{
+    setOrderBy(e.target.value)
+  }
+  useEffect(()=>{
+    if(reports.length > 0){
+      if(orderBy == "asc"){
+        setFilterReports(sortReportsNewestToOldest(reports))
+      }      
+      else{
+        setFilterReports(sortReportsOldestToNewest(reports))
+      }
+    }
+  },[reports,orderBy])
   useEffect(() => {
     fetchVideoes()
   }, [])
@@ -73,12 +99,19 @@ export default function OnePageReport() {
             </nav>
           </div>
           {/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
-          <p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
+          <p className='mb-4 mt-3'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
           <div className='d-flex justify-content-between align-items-center'>
             <div className="d-flex dt-buttons mb-3">
             <div className="d-flex align-items-center me-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
             <button className="dt-button buttons-html5 btn-primary h-auto" type="button" onClick="#"><span>Filter</span></button>
             </div>
+            <div className="d-flex align-items-center me-2">
+                  <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Sort By : </label>
+                  <select name="orderType" className='form-select' onChange={handleOrder} style={{ maxWidth: "200px", marginRight: "8px" }}>
+                    <option value="desc">Oldest to newest</option>
+                    <option value="asc">Newest to oldest</option>
+                  </select>
+                </div>
           </div>
           <div className="row">
             <div className="col-md-7">
@@ -122,7 +155,7 @@ export default function OnePageReport() {
                   }}
                 >
                   {
-                    reports.length > 0 && reports.map((item, index) => {
+                    reports.length > 0 && filteredReports.map((item, index) => {
                       return (
                         <SwiperSlide key={index}>
                           <div className="report me-0">
@@ -153,7 +186,7 @@ export default function OnePageReport() {
 
                 }
                 {
-                  reports.length > 0 && reports.map((item, index) => {
+                  reports.length > 0 && filteredReports.map((item, index) => {
                     return (
                       <div className="report" key={index}>
                         <img src="/images/ReportsTN.png" alt="" className='image' />
