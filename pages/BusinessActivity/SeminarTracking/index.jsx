@@ -261,7 +261,7 @@ export default function SeminarTracking() {
                             </span></Link>Seminar Tracking
                         </h3>
                     </div>
-                    <div className='d-md-flex justify-content-between'>
+                    <div className='d-md-flex justify-content-between mt-3'>
                         <div className="dt-buttons">
                             {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
