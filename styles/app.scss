@@ -989,7 +989,9 @@ input[type="range"] {
     display: flex;
     color: var(--primary);
 }
-
+.main-panel .content-wrapper nav{
+    margin-bottom: 16px;
+}
 .main-panel .content-wrapper .breadcrumb .breadcrumb-item{ 
     a {
     font-weight: bold;
