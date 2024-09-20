@@ -7,7 +7,7 @@ import parse from 'html-react-parser';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
-import { Form } from 'react-bootstrap';
+import { Form, Dropdown } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../components/Breadcrumb';
 export default function PemDetails() {
@@ -20,6 +20,7 @@ export default function PemDetails() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
+    const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
 
     const fetchColumnNames = async () => {
         try {
@@ -28,7 +29,9 @@ export default function PemDetails() {
             // columnApiRes.push(...extraColumns)
             columnApiRes.splice(0, 0, extraColumns[0])
             columnApiRes.push(...extraColumns.slice(1))
-            setColumnNames(columnApiRes)
+            setColumnNames(columnApiRes);
+            const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
+            setVisibleColumns(defaultCheckedColumns);
         }
         catch (e) {
             console.log("error", e)
@@ -199,6 +202,24 @@ export default function PemDetails() {
             "isCurrencyField": 0
         }
     ];
+
+    const handleColumnToggle = (column) => {
+        setVisibleColumns(prevState => 
+            prevState.includes(column) 
+                ? prevState.filter(col => col !== column) 
+                : [...prevState, column]
+        );
+    };
+
+    const handleAllCheckToggle = () => {
+        if (visibleColumns.length === columnNames.length) {
+            setVisibleColumns([]);
+        } else {
+            const allColumnNames = columnNames.map(col => col.elementInternalName);
+            setVisibleColumns(allColumnNames);
+        }
+    };
+
     return (
         <>
             <div className="main-panel">
@@ -232,6 +253,67 @@ export default function PemDetails() {
                         <div className="dt-buttons mb-3">
                             <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                    <div className="column-selector">
+                                        <Dropdown>
+                                            <Dropdown.Toggle variant="btn btn-primary mb-0" id="dropdown-basic">
+                                                Columns
+                                            </Dropdown.Toggle>
+                                            <Dropdown.Menu
+                                                style={{
+                                                    width: "160px",
+                                                    maxHeight: "400px", 
+                                                    overflowY: "auto",
+                                                    overflowX: "hidden",
+                                                    marginTop: "1px",
+                                                }}
+                                            >
+                                                <Dropdown.Item 
+                                                    as="label" 
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                        whiteSpace: "normal", 
+                                                        wordWrap: "break-word", 
+                                                        display: "inline-block", 
+                                                        width: "100%",
+                                                        padding: "6px",
+                                                        fontWeight: "bold",
+                                                    }}
+                                                    className="columns-dropdown-item"
+                                                >
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        checked={visibleColumns.length === columnNames.length}
+                                                        onChange={handleAllCheckToggle}
+                                                        label="Select All"
+                                                        id={`pemNew-selectAll`}
+                                                    />
+                                                </Dropdown.Item>
+                                                {columnNames.map((column, index) => (
+                                                    <Dropdown.Item 
+                                                        as="label" 
+                                                        key={index}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{
+                                                            whiteSpace: "normal", 
+                                                            wordWrap: "break-word", 
+                                                            display: "inline-block", 
+                                                            width: "100%",
+                                                            padding: "6px",
+                                                        }}
+                                                        className="columns-dropdown-item"
+                                                    >
+                                                        <Form.Check
+                                                            type="checkbox"
+                                                            checked={visibleColumns.includes(column.elementInternalName)}
+                                                            onChange={() => handleColumnToggle(column.elementInternalName)}
+                                                            label={column.elementDisplayName}
+                                                            id={`${column.elementDisplayName}${index}`}
+                                                        />
+                                                    </Dropdown.Item>
+                                                ))}
+                                            </Dropdown.Menu>
+                                        </Dropdown>
+                                    </div>
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -249,7 +331,9 @@ export default function PemDetails() {
                             <thead>
                                 <tr>
                                     {columnNames.map((columnName, index) => (
-                                        <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
+                                        visibleColumns.includes(columnName.elementInternalName) && (
+                                            <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName}{getSortIcon(columnName.elementInternalName, sortConfig)}</th>
+                                        )
                                     ))}
                                 </tr>
                             </thead>
@@ -258,6 +342,7 @@ export default function PemDetails() {
                                     <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                         {
                                             columnNames.map((columnName, colIndex) => {
+                                                if (!visibleColumns.includes(columnName.elementInternalName)) return null;
                                                 let content;
 
                                                 if (columnName.elementInternalName === 'element3') {

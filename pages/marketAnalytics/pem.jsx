@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
+import Link from 'next/link';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import Loader from '../../components/loader';
@@ -11,6 +12,7 @@ import { Form, Dropdown } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../components/Breadcrumb';
+import ReportTable from '../../components/ReportTable';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -21,7 +23,9 @@ export default function PemDetails() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null })
-    const [show, setShow] = useState(false)
+    const [reportTicker, setReportTicker] = useState("");
+    const [reportModal, setReportModal] = useState(false);
+    const [show, setShow] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
 
     const fetchColumnNames = async () => {
@@ -203,6 +207,31 @@ export default function PemDetails() {
         }
     };
 
+    const handleReportData = (data) => {
+        setReportTicker(data)
+        setReportModal(true)
+    }
+    
+    const anchorOptions = {
+        replace: (elememt) => {
+            if (elememt?.data) {
+                return (
+                    <a onClick={() => { handleReportData(elememt?.data) }} href="javascript:void(0)">
+                        {typeof (elememt?.data) == "string" ? parse(elememt?.data) : elememt?.data}
+                    </a>
+                );
+            }
+        }
+    }
+
+    function extractAndConvert(inputString) {
+            return parse(inputString, anchorOptions);
+    }
+
+    const closeReportModal = () => {
+        setReportModal(false);
+    }
+
     return (
         <>
             <div className="main-panel">
@@ -300,6 +329,16 @@ export default function PemDetails() {
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
+                                    <div>
+                                        <Link href="/marketAnalytics/pem-details">
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary mx-3" type="button"><span>PEM Details</span></button>
+                                        </Link>
+                                    </div>
+                                    <div>
+                                        <Link href="/marketAnalytics/pem-rule">
+                                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>PEM Rule</span></button>
+                                        </Link>
+                                    </div>
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -337,9 +376,9 @@ export default function PemDetails() {
                                                     content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
                                                 } else if (columnName.elementInternalName === 'element10') {
                                                     content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
-                                                }
-                                                else if (columnName.elementInternalName === 'lastUpdatedAt') {
-
+                                                } else if (columnName.elementInternalName === 'element2') {
+                                                    content = extractAndConvert(rowData[columnName.elementInternalName])
+                                                } else if (columnName.elementInternalName === 'lastUpdatedAt') {
                                                     content = new Date(rowData[columnName.elementInternalName]).toLocaleDateString();
                                                 }
                                                 else if (columnName.elementInternalName === "idMarketData") {
@@ -713,6 +752,7 @@ export default function PemDetails() {
                         </button>
                     </Modal.Footer>
                 </Modal>
+                <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
             </div>
         </>
     )

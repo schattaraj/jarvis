@@ -44,8 +44,7 @@ export default function SeminarTracking() {
     
     const [errors, setErrors] = useState({})
     const [validated, setValidated] = useState(false);
-    const [editModal, setEditModal] = useState(false)
-    const [editData, setEditData] = useState({})
+    const [editData, setEditData] = useState({});
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -112,6 +111,7 @@ export default function SeminarTracking() {
     };
     const handleClose = () => {
         setOpenModal(false);
+        setEditData("");
     }
     const handleOpen = () => {
         setOpenModal(true);
@@ -136,14 +136,27 @@ export default function SeminarTracking() {
                 }
                 jsonObject[key] = value;
             });
-            setErrors(errors)
-            const addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "addSeminarTracking", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(jsonObject)
-            })
+            setErrors(errors);
+
+            let addPipeline = null;
+
+            if(!jsonObject.idSeminarTracking){
+                addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "addSeminarTracking", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonObject)
+                })
+            } else {
+                addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "editSeminarTracking", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonObject)
+                })
+            }
             const addPipelineRes = await addPipeline.json()
             Swal.fire({
                 title: addPipelineRes?.msg,
@@ -152,8 +165,8 @@ export default function SeminarTracking() {
                 background: "green"
             });
             //alert(addPipelineRes?.msg)
-            fetchData()
-            setOpenModal(false)
+            fetchData();
+            handleClose();
             //console.log("json", jsonObject)
         } catch (error) {
             console.log(error)
@@ -170,21 +183,20 @@ export default function SeminarTracking() {
             customClass: { confirmButton: 'btn-danger', }
         }).then(async (result) => {
             if (result.isConfirmed) {
-                console.log("id", id);
                 context.setLoaderState(true)
                 try {
-                    // const formData = new FormData();
-                    // formData.append("idBusinessPipelineg", id)
-                    // const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteSeminarTracking", {
-                    //     method: 'DELETE',
-                    //     body: formData
-                    // })
-                    // if (rowDelete.ok) {
-                    //     const rowDeleteRes = await rowDelete.json()
-                    //     Swal.fire("Deleted!", "", "success");
-                    //     alert(rowDeleteRes.msg)
-                    //     fetchData()
-                    // }
+                    const formData = new FormData();
+                    formData.append("idSeminarTracking", id)
+                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteSeminarTracking", {
+                        method: 'DELETE',
+                        body: formData
+                    })
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire("Deleted!", "", "success");
+                        alert(rowDeleteRes.msg)
+                        fetchData()
+                    }
                 } catch (error) {
                     console.log(error)
                 }
@@ -228,6 +240,15 @@ export default function SeminarTracking() {
         }
         run();
     }, [currentPage, tableData, sortConfig, limit]);
+
+    const handleEditModal = async (id) => {
+        const getSeminarData = await fetch(`https://jharvis.com/JarvisV2/getSeminarTrackingByID?idSeminarTracking=${id}`);
+        const getSemeniarRes = await getSeminarData.json();
+        console.log("Response", getSemeniarRes);
+        setEditData(getSemeniarRes);
+        setOpenModal(true);
+    }
+
     return (
         <>
             <div className="main-panel">
@@ -279,7 +300,7 @@ export default function SeminarTracking() {
                                                 content = rowData[columnName.data]
                                                 if (columnName.data == "action") {
                                                     return <td key={colIndex} className='sticky-action'>
-                                                        {/* <button className='px-4 btn btn-primary' title="Edit" onClick={() => { handleEditModal("open", rowData?.idSeminarTracking) }}><i className="mdi mdi-pen"></i></button> */}
+                                                        <button className='px-4 btn btn-primary' title="Edit" onClick={() => { handleEditModal(rowData?.idSeminarTracking) }}><i className="mdi mdi-pen"></i></button>
                                                         <button className='px-4 ms-2 btn btn-danger' title='Delete' onClick={() => { deleteSeminarTracking(rowData?.idSeminarTracking) }}><i className="mdi mdi-delete"></i></button>
                                                     </td>;
                                                 }
@@ -296,21 +317,22 @@ export default function SeminarTracking() {
             </div>
             <Modal show={openModal} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add Seminar Tracking</Modal.Title>
+                    <Modal.Title>{!editData ? "Add" : "Edit"} Seminar Tracking</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={submitForm}>
+                        {editData ? (<Form.Control type="hidden" name='idSeminarTracking' value={editData.idSeminarTracking} />) : ""}
                         <div className="row">
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Date</Form.Label>
-                                    <Form.Control type="date" name='date' required />
+                                    <Form.Control type="date" name='date' defaultValue={editData.date} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Total Cost ($)</Form.Label>
-                                    <Form.Control type="number" step="0.01" name='totalCost' required />
+                                    <Form.Control type="number" step="0.01" name='totalCost' defaultValue={editData.totalCost} required />
                                 </Form.Group>
                             </div>
                         </div>
@@ -318,13 +340,13 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Venue</Form.Label>
-                                    <Form.Control type="text" name='venue' required />
+                                    <Form.Control type="text" name='venue' defaultValue={editData.venue} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Seminar Type</Form.Label>
-                                    <Form.Select required>
+                                    <Form.Select name="seminarType" required defaultValue={editData.seminarType}>
                                         <option value={""}>--Select--</option>
                                         <option value={"Dinner"}>Dinner</option>
                                         <option value={"Library"}>Library</option>
@@ -336,13 +358,13 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Geographic Location</Form.Label>
-                                    <Form.Control type="text" name='geographicLocation' required />
+                                    <Form.Control type="text" name='geographicLocation' defaultValue={editData.geographicLocation} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Registered for Seminar</Form.Label>
-                                    <Form.Control type="number" name='registeredForSeminar' required />
+                                    <Form.Control type="number" name='registeredForSeminar' defaultValue={editData.registeredForSeminar} required />
                                 </Form.Group>
                             </div>
                         </div>
@@ -350,13 +372,13 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Came to Seminar</Form.Label>
-                                    <Form.Control type="number" name='cameToSeminar' required />
+                                    <Form.Control type="number" name='cameToSeminar' defaultValue={editData.cameToSeminar} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Appointments Set</Form.Label>
-                                    <Form.Control type="number" name='appointmentsSet' required />
+                                    <Form.Control type="number" name='appointmentsSet' defaultValue={editData.appointmentsSet} required />
                                 </Form.Group>
                             </div>
                         </div>
@@ -364,13 +386,13 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Appointments Set Post Seminar</Form.Label>
-                                    <Form.Control type="number" name='appointmentsSetPostSeminar' required />
+                                    <Form.Control type="number" name='appointmentsSetPostSeminar' defaultValue={editData.appointmentsSetPostSeminar} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>First Meeting</Form.Label>
-                                    <Form.Control type="text" name='firstMeeting' required />
+                                    <Form.Control type="text" name='firstMeeting' defaultValue={editData.firstMeeting} required />
                                 </Form.Group>
                             </div>
                         </div>
@@ -378,13 +400,13 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Second Meeting</Form.Label>
-                                    <Form.Control type="text" name='secondMeeting' required />
+                                    <Form.Control type="text" name='secondMeeting' defaultValue={editData.secondMeeting} required />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>New Client</Form.Label>
-                                    <Form.Control type="number" name='newClient' required />
+                                    <Form.Control type="number" name='newClient' defaultValue={editData.newClient} required />
                                 </Form.Group>
                             </div>
                         </div>
@@ -392,7 +414,7 @@ export default function SeminarTracking() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>New AUM</Form.Label>
-                                    <Form.Control type="number" name='newAUM' required />
+                                    <Form.Control type="number" name='newAUM' defaultValue={editData.newAUM} required />
                                 </Form.Group>
                             </div>
                         </div>

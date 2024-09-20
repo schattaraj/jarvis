@@ -76,8 +76,8 @@ export default function MarketAnalytics() {
                                         </Link>
                                     </div> */}
             </div>
-            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/marketAnalytics/pem-details" bg="bg-blue" img="/icons/PEM Details.png" title="PEM Details" />
+            {/* <div className="col-md-6 col-lg-4 stretch-card grid-margin">
+              <Card route="/marketAnalytics/pem-details" bg="bg-blue" img="/icons/PEM Details.png" title="PEM Details" /> */}
               {/* <div className="card bg-gradient-primary card-img-holder text-white">
                                         <Link href={"/pem-details"}>
                                         <div className="card-body">
@@ -88,9 +88,9 @@ export default function MarketAnalytics() {
                                         </div>
                                         </Link>
                                     </div> */}
-            </div>
+            {/* </div> */}
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/marketAnalytics/pemNew" bg="bg-yellow" img="/icons/Calls.png" title="PEM New" />
+              <Card route="/marketAnalytics/pem" bg="bg-blue" img="/icons/Calls.png" title="PEM" />
               {/* <div className="card bg-red-gradient card-img-holder text-white">
                                         <Link href={"/bond-reports"}>
                                         <div className="card-body">
@@ -102,8 +102,8 @@ export default function MarketAnalytics() {
                                         </Link>
                                     </div> */}
             </div>
-            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/marketAnalytics/pem-rule" bg="bg-gray" img="/icons/Bonds.png" title="PEM Rule" />
+            {/* <div className="col-md-6 col-lg-4 stretch-card grid-margin">
+              <Card route="/marketAnalytics/pem-rule" bg="bg-gray" img="/icons/Bonds.png" title="PEM Rule" /> */}
               {/* <div className="card bg-gradient-dark card-img-holder text-white">
                                         <Link href={"/pem-rule"}>
                                         <div className="card-body">
@@ -114,7 +114,7 @@ export default function MarketAnalytics() {
                                         </div>
                                         </Link>
                                     </div> */}
-            </div>
+            {/* </div> */}
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/marketAnalytics/Calls" bg="bg-red" img="/icons/Calls.png" title="CALLS" />
               {/* <div className="card bg-gradient-success card-img-holder text-white">
