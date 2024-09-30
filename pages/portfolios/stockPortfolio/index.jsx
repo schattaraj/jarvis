@@ -297,7 +297,7 @@ export default function Portfolio() {
         console.log("FormData", formData);
 
         const stockFormData = new FormData();
-
+        const formJSON = Object.fromEntries(stockFormData.entries())
         formData.allStocks.forEach((stock, index) => {
             if(stock?.stockName && stock?.share && stock?.purchaseDate && stock?.purchasePrice) {
                 const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
@@ -306,9 +306,13 @@ export default function Portfolio() {
         });
 console.log("stockFormData",stockFormData);
         try {
-            const response = await fetch(`https://jharvis.com/JarvisV2/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}portfolio/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
                 method: 'POST',
-                body: stockFormData
+                headers:{
+                    'content-type': 'application/json',
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImlzUmVwb3J0VXBsb2FkQWxsb3dlZCI6bnVsbCwibWVudURldGFpbHNMaXN0IjpbXSwiaXNVcGxvYWRBbGxvd2VkIjoiWSIsInNlc3Npb25JZCI6MTcyNzY5NzE3MDg1OCwidXNlck5hbWUiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsInVzZXJJRCI6MiwiQVVUSE9SSVRJRVNfS0VZIjpbXSwiaXNFeHRVc2VyIjpudWxsLCJuYW1lIjoiTm9sYW5kTEBMZWZ0YnJhaW53bS5jb20iLCJ1c2VyRW1haWwiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImV4cCI6MTcyNzcwMzE3MCwiaWF0IjoxNzI3Njk3MTcwfQ.uKK8eJu7A83Odf5UWNMs55eAnLN1DoOIx1T8yvGnfjo'
+                },
+                body: JSON.stringify(formJSON)
             });
             console.log('response:', response);
             if (response.status == 200) {
