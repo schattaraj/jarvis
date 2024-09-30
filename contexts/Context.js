@@ -2,6 +2,8 @@ import { createContext, useEffect, useState, useContext,useRef } from "react";
 import {useRouter} from 'next/router'
 import Layout from "../components/Layout";
 import Loader from "../components/loader";
+import { decodeJWT } from "../utils/utils";
+import Swal from "sweetalert2";
 
 export const Context = createContext()
 
@@ -15,6 +17,7 @@ export const ContextProvider = ({ children }) =>{
   const [businessActivity,setBusinessActivity] = useState(false)
   const [background,setBackground] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [accessToken,setAccessToken] = useState(false)
   const router = useRouter();
   const toggleMarketAnalytics = ()=>{
     if(marketAnalytics){
@@ -59,9 +62,20 @@ else{
   const checkLoginStatus = ()=>{
     let token = localStorage.getItem("access_token")
     if(token){
-      if(router.route == '/login'){
-        router.push('/admin') 
+      const {userID,exp} = decodeJWT(token)
+      const time = new Date()
+      const expDate = new Date(exp * 1000)
+      if(expDate > time){
+        setAccessToken(token)
+        if(router.route == '/login'){
+          router.push('/admin') 
+        }
       }
+      else{
+        Swal.fire("Your session has been expired")
+       localStorage.setItem("access_token","") 
+       router.push('/login') 
+      }      
     }
     else{
       localStorage.setItem("route",router.route)
@@ -116,7 +130,7 @@ else{
   const noLayoutRoutes = ['/login','/register'];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
     return (
-        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,setCompareStocks,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut,background,setBackground,openDropdown,setOpenDropdown,handleDropdownClick}}>
+        <Context.Provider value={{collapse,setMarketAnalytics,marketAnalytics,setCompareStocks,toggleMarketAnalytics,stockMenu,setStockMenu,toggleStockMenu,compareStocks,toggleCompareStock,loaderState,setLoaderState,insights,setInsights,toggleInsights,toggleBusinessActivity,businessActivity,setBusinessActivity,logOut,background,setBackground,openDropdown,setOpenDropdown,handleDropdownClick,accessToken}}>
           {isNoLayoutRoute ?
           children
         :  
