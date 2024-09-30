@@ -246,3 +246,10 @@ export function formatPublishedDate(dateString) {
     // Format the date into "Sep 20, 2024 at 6:45AM"
     return date.toLocaleString('en-US', options).replace(',', ' at');
 }
+export function formatCurrency(value) {
+    value = Number(value)
+    const parts = value.toFixed(2).split('.');
+    const wholePart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const decimalPart = parts[1];
+    return `$ ${wholePart}.${decimalPart}`;
+}

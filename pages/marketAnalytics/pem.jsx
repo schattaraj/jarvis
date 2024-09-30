@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import Link from 'next/link';
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
@@ -7,12 +7,13 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
-import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { amountSeperator, calculateAverage, exportToExcel, formatCurrency, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Form, Dropdown } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../components/Breadcrumb';
 import ReportTable from '../../components/ReportTable';
+import { useRouter } from 'next/router';
 export default function PemDetails() {
     const context = useContext(Context)
     const [columnNames, setColumnNames] = useState([])
@@ -27,7 +28,10 @@ export default function PemDetails() {
     const [reportModal, setReportModal] = useState(false);
     const [show, setShow] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
-
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [contentWidth, setContentWidth] = useState(0);
+    const contentRef = useRef(null);
+    const router = useRouter()
     const fetchColumnNames = async () => {
         try {
             const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344")
@@ -150,6 +154,9 @@ export default function PemDetails() {
         }        
         context.setLoaderState(false)
     }
+    const toggleExpand = () => {
+        setIsExpanded(!isExpanded);
+    };
     useEffect(() => {
         async function run() {
             if (tableData.length > 0) {
@@ -182,7 +189,42 @@ export default function PemDetails() {
         fetchColumnNames()
         fetchData()
     }, []);
-
+    useEffect(() => {
+        if(screen.width < 576){
+            if (isExpanded) {
+            let max = 0
+            Array.from(contentRef.current.children).map((item) => {
+                if(max < item.getBoundingClientRect().width){
+                    max = item.getBoundingClientRect().width
+                }
+            });
+            setContentWidth(`${max+8}px`);
+            return
+        }
+        else{
+            setContentWidth(`0px`);
+        }
+        }
+        if (isExpanded) {
+            if (contentRef.current) {
+                let count = 0
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    count = count + 6
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                // setContentWidth(`${totalWidth+count}px`);
+                setContentWidth(`${totalWidth + count}px`);
+            }
+        }
+        else {
+            if (contentRef.current) {
+                const totalWidth = Array.from(contentRef.current.children).reduce((acc, child) => {
+                    return acc + child.getBoundingClientRect().width;
+                }, 0);
+                setContentWidth(`${0}px`);
+            }
+        }
+    }, [isExpanded]);
     const handleClose = () => {
         setShow(false);
     } 
@@ -236,7 +278,18 @@ export default function PemDetails() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
+                <div className="d-flex justify-content-between align-items-center flex-wrap">
                     <Breadcrumb />
+                    <div className={`collapsible-container ${isExpanded ? 'expanded' : ''}`}>
+                            <span></span><button className="main-button ms-2 btn-primary" onClick={toggleExpand}>
+                                <i className={isExpanded ? "mdi mdi-chevron-right" : "mdi mdi-chevron-left"}></i>+2 Action
+                            </button>
+                            <div className="collapsible-content" style={{ maxWidth: "max-content", width: contentWidth }} ref={contentRef}>
+                                <button className={`h-100 collapsible-item`} type="button" title="PEM Details" onClick={()=>{router.push("/marketAnalytics/pem-details")}}><span>PEM Details</span></button>
+                                <button className={`h-100 collapsible-item`} type="button" title="PEM Rule"  onClick={()=>{router.push("/marketAnalytics/pem-rule")}}><span>PEM Rule</span></button>
+                            </div>
+                        </div>
+                </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -329,7 +382,7 @@ export default function PemDetails() {
                                             </Dropdown.Menu>
                                         </Dropdown>
                                     </div>
-                                    <div>
+                                    {/* <div>
                                         <Link href="/marketAnalytics/pem-details">
                                             <button className="dt-button buttons-excel buttons-html5 btn-primary mx-3" type="button"><span>PEM Details</span></button>
                                         </Link>
@@ -338,7 +391,7 @@ export default function PemDetails() {
                                         <Link href="/marketAnalytics/pem-rule">
                                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>PEM Rule</span></button>
                                         </Link>
-                                    </div>
+                                    </div> */}
                         </div>
                         <div className="form-group d-flex align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -372,6 +425,10 @@ export default function PemDetails() {
 
                                                 if (columnName.elementInternalName === 'element3') {
                                                     content = (Number.parseFloat(rowData[columnName.elementInternalName] * 1000) || 0).toFixed(2);
+                                                    content = formatCurrency(content)
+                                                }
+                                                else if (columnName.elementInternalName === 'element5') {
+                                                    content = (Number.parseFloat(rowData[columnName.elementInternalName])*100 || 0).toFixed(2);
                                                 } else if (columnName.elementInternalName === 'element9') {
                                                     content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
                                                 } else if (columnName.elementInternalName === 'element10') {
@@ -392,6 +449,10 @@ export default function PemDetails() {
 
                                                 if (typeof (content) == 'string') {
                                                     content = parse(content, options)
+                                                }
+                                                const numericValue = parseFloat(content);
+                                                if (!isNaN(numericValue)) {
+                                                    content = numericValue.toFixed(2)
                                                 }
                                                 // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                                                 return <td key={colIndex}>{content}</td>;

@@ -859,7 +859,9 @@ export default function Stocks() {
                                         <tr>
                                             {columnNames.map((columnName, index) => (
                                                 visibleColumns.includes(columnName.elementInternalName) && (
-                                                    <th key={index} onClick={() => handleSort(columnName.elementInternalName)}>{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                    <th key={index} onClick={() => handleSort(columnName.elementInternalName)}
+                                                    className={columnName.elementInternalName === "element1" ? "sticky-left" : ""}
+                                                    >{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
                                                 )
                                             ))}
                                         </tr>
@@ -890,6 +892,9 @@ export default function Stocks() {
                                                         }
                                                         if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
                                                             content = parse(content, options)
+                                                        }
+                                                        if(columnName.elementInternalName === 'element1'){
+                                                            return <td key={colIndex} className='sticky-left'>{content}</td>;
                                                         }
                                                         return <td key={colIndex}>{content}</td>;
                                                     })

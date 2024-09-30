@@ -1233,6 +1233,18 @@ div:where(.swal2-container) {
                 margin-bottom: 0;
             }
         }
+        .btn{
+            height: fit-content;
+            flex:0;
+        }
+        .form-floating{
+            flex: 1;
+            width: 30%;
+        }
+        .form-floating > label{
+            font-size: 14px;
+            line-height: 1.5;
+        }
     }
     .selection-area {
         position: relative;

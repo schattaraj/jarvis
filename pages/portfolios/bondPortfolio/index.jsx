@@ -114,6 +114,32 @@ export default function BondPortfolio() {
       },
       {
         "elementId": null,
+        "elementName": "Average Years to Maturity",
+        "elementInternalName": "averageYearToMaturity",
+        "elementDisplayName": "Average Years to Maturity",
+        "elementType": null,
+        "metadataName": "Bondpricing_Master",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+      },
+      {
+        "elementId": null,
+        "elementName": "Current Yield",
+        "elementInternalName": "element95",
+        "elementDisplayName": "Current Yield",
+        "elementType": null,
+        "metadataName": "Bondpricing_Master",
+        "isAmountField": 0,
+        "isUniqueField": 0,
+        "isSearchCriteria": 0,
+        "isVisibleInDashboard": 0,
+        "isCurrencyField": 0
+      },
+      {
+        "elementId": null,
         "elementName": "Date",
         "elementInternalName": "lastUpdatedAt",
         "elementDisplayName": "Date",
@@ -533,7 +559,20 @@ export default function BondPortfolio() {
                           {
                             columnNames.map((inner, keyid) => {
                               // return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
-                              return <td key={"keyid" + keyid}>{inner['elementInternalName'] == 'lastUpdatedAt' ? formatDate(item['lastUpdatedAt']) : typeof (item['element' + (keyid + 1)]) == "string" ? parse(item['element' + (keyid + 1)], options) : item['element' + (keyid + 1)]}</td>
+                              if(inner['elementInternalName'] == 'averageYearToMaturity'){
+                                const today = new Date();
+                                const maturityDate = new Date(item['element7']);
+                                // Calculate the difference in milliseconds
+const diffInMilliseconds = maturityDate - today;
+
+// Convert milliseconds to days
+const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
+                              return <td key={"keyid" + keyid}>{diffInDays}</td>
+                              }
+                              if(inner['elementInternalName'] == 'element95'){
+                              return <td key={"keyid" + keyid}>{Number(item[inner['elementInternalName']]).toFixed(2)}%</td>
+                              }
+                              return <td key={"keyid" + keyid}>{inner['elementInternalName'] == 'lastUpdatedAt' ? formatDate(item['lastUpdatedAt']) : typeof (item[inner['elementInternalName']]) == "string" ? parse(item[inner['elementInternalName']], options) : item[inner['elementInternalName']]}</td>
                             })
                           }
                         </tr>
