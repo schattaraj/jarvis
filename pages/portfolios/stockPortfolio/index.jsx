@@ -125,7 +125,7 @@ export default function Portfolio() {
         context.setLoaderState(true)
         try {
             if (selectedPortfolioId) {
-                const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
+                const baseUrl = `/api/proxy?api=portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
                 const {payload} = await fetchWithInterceptor(baseUrl,false)
                 const getPortfolioRes = payload
                 setTableData(getPortfolioRes)
