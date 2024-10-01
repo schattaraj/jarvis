@@ -254,7 +254,8 @@ export function formatCurrency(value) {
     return `$ ${wholePart}.${decimalPart}`;
 }
 export const decodeJWT = (token) => {
-    const base64Url = token.split('.')[1];
+    if(token){
+        const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -264,4 +265,56 @@ export const decodeJWT = (token) => {
     );
   
     return JSON.parse(jsonPayload);
+    }
+    return ""    
   };
+ export const buildQueryString = (params) => {
+    const queryString = new URLSearchParams(params).toString();
+    return queryString ? `?${queryString}` : '';
+};
+
+export const fetchWithInterceptor = async (url,userId,queries, options = {}) => {
+    const accessToken = localStorage.getItem("access_token")
+    if(userId){        
+        const {userID} = decodeJWT(accessToken)
+        url = url+buildQueryString({userId:userID})
+    }
+    const queryParams = {
+        ...queries
+    };
+    url = url + buildQueryString(queryParams)
+    // Add default headers or modify existing ones
+    const defaultHeaders = {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+    };
+
+    options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+    };
+
+    // Show loader or any other pre-request logic
+    // context.setLoaderState(true);
+
+    try {
+        const response = await fetch(url, options);
+
+        // Handle non-200 responses
+        if (!response.ok) {
+            const errorText = await response.json(); // Parse error response as JSON
+            throw new Error(`Error: ${response.status} - ${JSON.stringify(errorText)}`);
+        }
+
+        // Parse the response as JSON
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Fetch error:", error);
+        throw error; // Propagate the error to be handled by the calling function
+    } finally {
+        // Hide loader or any other post-request logic
+        // context.setLoaderState(false);
+    }
+};
+
