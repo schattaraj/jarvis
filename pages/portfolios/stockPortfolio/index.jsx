@@ -8,7 +8,7 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
-import { calculateAverage, calculateAveragePercentage, formatDate, getSortIcon, searchTable } from '../../../utils/utils';
+import { buildQueryString, calculateAverage, calculateAveragePercentage, decodeJWT, fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../../utils/utils';
 import SliceData from '../../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../../components/Pagination';
@@ -29,16 +29,16 @@ export default function Portfolio() {
     const [allStocks, setAllStocks] = useState([])
     const [reportData, setReportData] = useState([])
     const [reportModal, setReportModal] = useState(false)
-    const [manageView,setManageView] = useState(false)
+    const [manageView, setManageView] = useState(false)
     const [stockPortfolios, setStockportfolios] = useState(false)
     const [filteredStockPortfolios, setfilteredStockPortfolios] = useState([])
     const [currentPage2, setCurrentPage2] = useState(1);
-    const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null }) 
+    const [sortConfig2, setSortConfig2] = useState({ key: null, direction: null })
     const [limit2, setLimit2] = useState(25)
     const [editStatus, setEditStatus] = useState(false)
     const [filteredAllStockPortfolios, setfilteredAllStockPortfolios] = useState([])
     const [currentPage3, setCurrentPage3] = useState(1);
-    const [sortConfig3, setSortConfig3] = useState({ key: null, direction: null }) 
+    const [sortConfig3, setSortConfig3] = useState({ key: null, direction: null })
     const [limit3, setLimit3] = useState(25)
     const [portfolioPayload, setPortfolioPayload] = useState({
         myArr: [],
@@ -97,8 +97,22 @@ export default function Portfolio() {
     }
     const fetchPortfolioNames = async () => {
         try {
-            const portfolioApi = await fetch("https://www.jharvis.com/JarvisV2/getAllPortFolioTicker?userId=2")
-            const portfolioApiRes = await portfolioApi.json()
+        //     const getPortfolio = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}common/getAllPortFolioTicker?userId=2`,
+        //     {
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImlzUmVwb3J0VXBsb2FkQWxsb3dlZCI6bnVsbCwibWVudURldGFpbHNMaXN0IjpbXSwiaXNVcGxvYWRBbGxvd2VkIjoiWSIsInNlc3Npb25JZCI6MTcyNzcwMzkzNjIxNywidXNlck5hbWUiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsInVzZXJJRCI6MiwiQVVUSE9SSVRJRVNfS0VZIjpbXSwiaXNFeHRVc2VyIjpudWxsLCJuYW1lIjoiTm9sYW5kTEBMZWZ0YnJhaW53bS5jb20iLCJ1c2VyRW1haWwiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImV4cCI6MTcyNzcwOTkzNiwiaWF0IjoxNzI3NzAzOTM2fQ.Uan1uWWbWWLljg-YVREFr76PgPSUZYM_ylEObecsXK0`
+        //         }
+        //     }
+        // )
+        // const { payload } = await getPortfolio.json()
+        // console.log("Result",payload);
+            const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}common/getAllPortFolioTicker`;
+            const {payload} = await fetchWithInterceptor(baseUrl,true)
+            const portfolioApiRes = payload
+            // const portfolioApi = await fetch("https://www.jharvis.com/JarvisV2/getAllPortFolioTicker?userId=2")
+            // const portfolioApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}getAllPortFolioTicker?userId=${userID}`)
+            // const portfolioApiRes = await portfolioApi.json()
             setPortfolioNames(portfolioApiRes)
             setPortfolioId(portfolioApiRes[0]?.idPortfolio)
             setCountApiCall(countApiCall + 1)
@@ -111,8 +125,9 @@ export default function Portfolio() {
         context.setLoaderState(true)
         try {
             if (selectedPortfolioId) {
-                const getPortfolio = await fetch("https://www.jharvis.com/JarvisV2/getPortFolioStockSet?idPortfolio=" + selectedPortfolioId)
-                const getPortfolioRes = await getPortfolio.json()
+                const baseUrl = `/api/proxy?api=portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
+                const {payload} = await fetchWithInterceptor(baseUrl,false)
+                const getPortfolioRes = payload
                 setTableData(getPortfolioRes)
                 setFilterData(getPortfolioRes)
                 const totalItems = getPortfolioRes.length
@@ -218,7 +233,7 @@ export default function Portfolio() {
         formData.allStocks = [{ stockName: "", share: "", purchaseDate: "", purchasePrice: "" }];
         setAllStocks([]);
         setShow(false);
-    } 
+    }
     const handleShow = (path) => {
         setShow(true);
     }
@@ -284,7 +299,7 @@ export default function Portfolio() {
                 ...updatedStocks[index],
                 [name]: value
             };
-    
+
             // Set the updated array in state
             setFormData(prevData => ({
                 ...prevData,
@@ -299,12 +314,12 @@ export default function Portfolio() {
         const stockFormData = new FormData();
         const formJSON = Object.fromEntries(stockFormData.entries())
         formData.allStocks.forEach((stock, index) => {
-            if(stock?.stockName && stock?.share && stock?.purchaseDate && stock?.purchasePrice) {
+            if (stock?.stockName && stock?.share && stock?.purchaseDate && stock?.purchasePrice) {
                 const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
                 stockFormData.append(`myArray[]`, formattedStock);
             }
         });
-console.log("stockFormData",stockFormData);
+        console.log("stockFormData", stockFormData);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}portfolio/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
                 method: 'POST',
@@ -374,7 +389,7 @@ console.log("stockFormData",stockFormData);
         setLimit(e.target.value)
     }
 
-    const changeLimit2 = (e)=>{
+    const changeLimit2 = (e) => {
         setLimit2(e.target.value)
     }
 
@@ -416,15 +431,15 @@ console.log("stockFormData",stockFormData);
         }
     }, [countApiCall])
 
-    const getAllStockForPolios = async()=>{
+    const getAllStockForPolios = async () => {
         setManageView(true)
         context.setLoaderState(true)
         try {
-            const allStockApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+"getAllPortfolio?userId=2&_=1724828770117")
+            const allStockApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getAllPortfolio?userId=2&_=${new Date().getTime()}`)
             const allStockApiRes = await allStockApi.json()
             setStockportfolios(allStockApiRes)
         } catch (error) {
-            
+
         }
         context.setLoaderState(false)
     }
@@ -454,9 +469,9 @@ console.log("stockFormData",stockFormData);
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         stockFilterData();
-    },[currentPage2, stockPortfolios, sortConfig2, limit2])
+    }, [currentPage2, stockPortfolios, sortConfig2, limit2])
 
     const stockFilter = (e) => {
         const value = e.target.value;
@@ -465,12 +480,12 @@ console.log("stockFormData",stockFormData);
 
     const deleteStockPortFolio = async (name) => {
         Swal.fire({
-            title:"Are you sure ?",
-            icon:"warning",
-            confirmButtonText:"Delete",
-            showCancelButton:true,
-            customClass: { confirmButton: 'btn-danger'}
-        }).then(async (result)=>{
+            title: "Are you sure ?",
+            icon: "warning",
+            confirmButtonText: "Delete",
+            showCancelButton: true,
+            customClass: { confirmButton: 'btn-danger' }
+        }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     context.setLoaderState(true);
@@ -503,7 +518,7 @@ console.log("stockFormData",stockFormData);
             setAllStocks(allStocksApiRes);
             formData.portfolioName = name;
             allStocksApiRes.map((item, index) => {
-                if(item.share || item.purchaseDate) {
+                if (item.share || item.purchaseDate) {
                     formData.allStocks[index] = { stockName: item.stockName, share: item.share, purchaseDate: item.purchaseDate, purchasePrice: item.purchasePrice };
                 }
             });
@@ -556,9 +571,9 @@ console.log("stockFormData",stockFormData);
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         allStockFilterData();
-    },[currentPage3, allStocks, sortConfig3, limit3])
+    }, [currentPage3, allStocks, sortConfig3, limit3])
 
     const allStockFilter = (e) => {
         const value = e.target.value;
@@ -573,7 +588,7 @@ console.log("stockFormData",stockFormData);
         setSortConfig3({ key, direction });
     }
 
-    const changeLimit3 = (e)=>{
+    const changeLimit3 = (e) => {
         setLimit3(e.target.value)
     }
 
@@ -595,7 +610,7 @@ console.log("stockFormData",stockFormData);
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
-                <Breadcrumb />
+                    <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -607,41 +622,41 @@ console.log("stockFormData",stockFormData);
                         !manageView
                         &&
                         <>
-                    <div className="selection-area my-3">
-                        <div className="row">
+                            <div className="selection-area my-3">
+                                <div className="row">
 
-                            <div className="col-md-4">
+                                    <div className="col-md-4">
 
 
-                                <div className="form-group">
-                                    <label htmlFor="">Portfolio Name</label>
-                                    <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
-                                        <option>Select Portfolio</option>
-                                        {
-                                            portfolioNames.length > 0 && portfolioNames.map((item, index) => {
-                                                return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
-                                            })
-                                        }
-                                    </select>
+                                        <div className="form-group">
+                                            <label htmlFor="">Portfolio Name</label>
+                                            <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
+                                                <option>Select Portfolio</option>
+                                                {
+                                                    portfolioNames.length > 0 && portfolioNames.map((item, index) => {
+                                                        return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
+                                                    })
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="col-md-8">
+                                        <div className="actions">
+                                            <button className='btn btn-primary' onClick={fetchData}>GO</button>
+                                            <button className='btn btn-primary' onClick={getAllStockForPolios}>MANAGE</button>
+                                            <button className='btn btn-primary' onClick={handleStockPortfolioStatus}>PORTFOLIO PROFIT AND LOSS</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="col-md-8">
-                                <div className="actions">
-                                    <button className='btn btn-primary' onClick={fetchData}>GO</button>
-                                    <button className='btn btn-primary' onClick={getAllStockForPolios}>MANAGE</button>
-                                    <button className='btn btn-primary' onClick={handleStockPortfolioStatus}>PORTFOLIO PROFIT AND LOSS</button>
+                            <div className='d-flex justify-content-between'>
+                                <div className="dt-buttons mb-3">
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='d-flex justify-content-between'>
-                        <div className="dt-buttons mb-3">
-                            <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
-                        </div>
-                        <div className="form-group d-flex align-items-center">
-                        <div className="form-group d-flex align-items-center mb-0 me-3">
+                                <div className="form-group d-flex align-items-center">
+                                    <div className="form-group d-flex align-items-center mb-0 me-3">
                                         <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                                         <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
                                             <option value="10">10</option>
@@ -651,124 +666,124 @@ console.log("stockFormData",stockFormData);
                                             <option value="all">All</option>
                                         </select>
                                     </div>
-                            <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
-                        </div>
-                    </div>
-                    <div className="table-responsive">
-                        <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                            <thead>
-                                <tr>
-                                    {
-                                        columnNames.length > 0 && columnNames.map((item, index) => {
-                                            return <th key={index}  onClick={() => handleSort(item.elementInternalName)}>{item?.elementDisplayName} {getSortIcon(item, sortConfig)}</th>
-                                        })
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    filterData.map((item, index) => {
-                                        return <tr key={"tr" + index}>
+                                    <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} />
+                                </div>
+                            </div>
+                            <div className="table-responsive">
+                                <table ref={tableRef} className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
                                             {
-
-                                                columnNames.map((inner, keyid) => {
-                                                    const percentColumns = ["element31", "element34", "element35", "element7", "element8", "element9", "element11", "element13"]
-                                                    if (percentColumns.includes(inner['elementInternalName'], 0)) {
-                                                        return <td key={"keyid" + keyid}>{(parse(item[inner['elementInternalName']], options) * 100).toFixed(2)}</td>
-                                                    }
-                                                    else {
-                                                        return <td key={"keyid" + keyid}>{parse(item[inner['elementInternalName']], options)}</td>
-                                                    }
-
-
-
+                                                columnNames.length > 0 && columnNames.map((item, index) => {
+                                                    return <th key={index} onClick={() => handleSort(item.elementInternalName)}>{item?.elementDisplayName} {getSortIcon(item, sortConfig)}</th>
                                                 })
                                             }
                                         </tr>
-                                    })
-                                }
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            filterData.map((item, index) => {
+                                                return <tr key={"tr" + index}>
+                                                    {
 
-                            </tbody>
-                            <thead>
-                                <tr>
-                                    {
+                                                        columnNames.map((inner, keyid) => {
+                                                            const percentColumns = ["element31", "element34", "element35", "element7", "element8", "element9", "element11", "element13"]
+                                                            if (percentColumns.includes(inner['elementInternalName'], 0)) {
+                                                                return <td key={"keyid" + keyid}>{(parse(item[inner['elementInternalName']], options) * 100).toFixed(2)}</td>
+                                                            }
+                                                            else {
+                                                                return <td key={"keyid" + keyid}>{parse(item[inner['elementInternalName']], options)}</td>
+                                                            }
 
-                                        filterData.length ? columnNames.map((item, index) => {
-                                            if (item.elementInternalName === 'element31') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element31')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element31')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element33') {
-                                                return <th key={index}>
-                                                    {calculateAverage(filterData, 'element33')} % <br />
-                                                    ({calculateAverage(tableData, 'element33')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element34') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element34')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element34')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element35') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element35')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element35')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element9') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element9')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element9')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element11') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element11')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element11')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element12') {
-                                                return <th key={index}>
-                                                    {calculateAveragePercentage(filterData, 'element12')} % <br />
-                                                    ({calculateAveragePercentage(tableData, 'element12')}) %
-                                                </th>
-                                            }
-                                            if (item.elementInternalName === 'element22') {
-                                                return <th key={index}>
-                                                    {calculateAverage(filterData, 'element22')} % <br />
-                                                    ({calculateAverage(tableData, 'element22')}) %
-                                                </th>
-                                            }
-                                            else {
-                                                return <th key={index}></th>
-                                            }
 
-                                        }) : null
-                                    }
-                                </tr>
-                            </thead>
 
-                        </table>
-                    </div>
-                    <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />
-                    </>
-                }
-                {
-                    manageView &&
+                                                        })
+                                                    }
+                                                </tr>
+                                            })
+                                        }
+
+                                    </tbody>
+                                    <thead>
+                                        <tr>
+                                            {
+
+                                                filterData.length ? columnNames.map((item, index) => {
+                                                    if (item.elementInternalName === 'element31') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element31')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element31')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element33') {
+                                                        return <th key={index}>
+                                                            {calculateAverage(filterData, 'element33')} % <br />
+                                                            ({calculateAverage(tableData, 'element33')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element34') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element34')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element34')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element35') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element35')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element35')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element9') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element9')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element9')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element11') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element11')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element11')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element12') {
+                                                        return <th key={index}>
+                                                            {calculateAveragePercentage(filterData, 'element12')} % <br />
+                                                            ({calculateAveragePercentage(tableData, 'element12')}) %
+                                                        </th>
+                                                    }
+                                                    if (item.elementInternalName === 'element22') {
+                                                        return <th key={index}>
+                                                            {calculateAverage(filterData, 'element22')} % <br />
+                                                            ({calculateAverage(tableData, 'element22')}) %
+                                                        </th>
+                                                    }
+                                                    else {
+                                                        return <th key={index}></th>
+                                                    }
+
+                                                }) : null
+                                            }
+                                        </tr>
+                                    </thead>
+
+                                </table>
+                            </div>
+                            <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />
+                        </>
+                    }
+                    {
+                        manageView &&
                         <div className="manage mt-3">
-                            <div className="d-flex"> 
-                                    <button className="btn btn-primary me-2 mb-3" onClick={handleProtfolioShow}>Create New Portfolio</button>
-                                    <button className="btn btn-primary mx-2 mb-3" onClick={()=>{setManageView(false)}}>View Portfolio</button>
+                            <div className="d-flex">
+                                <button className="btn btn-primary me-2 mb-3" onClick={handleProtfolioShow}>Create New Portfolio</button>
+                                <button className="btn btn-primary mx-2 mb-3" onClick={() => { setManageView(false) }}>View Portfolio</button>
                             </div>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div className="dt-buttons mb-3">
-                                <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                 </div>
                                 <div className="form-group d-flex align-items-center">
-                                <div className="form-group d-flex align-items-center mb-0 me-3">
+                                    <div className="form-group d-flex align-items-center mb-0 me-3">
                                         <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
                                         <select name="limit" className='form-select w-auto' onChange={changeLimit2} value={limit2}>
                                             <option value="10">10</option>
@@ -781,28 +796,28 @@ console.log("stockFormData",stockFormData);
                                     <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2 mb-0'>Search : </label><input type="search" placeholder='' className='form-control' onChange={stockFilter} />
                                 </div>
                             </div>
-                        <div className="table-responsive">
-                        
-                        <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
-                            <thead>
-                                <tr>
-                                     <th onClick={()=>{handleSort2("name")}}>Portfolio Name {getSortIcon("name",sortConfig2)}</th>
-                                     <th onClick={()=>{handleSort2("ticker")}}>Symbol {getSortIcon("ticker",sortConfig2)}</th>
-                                     <th className='sticky-action'>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                               {
-                                filteredStockPortfolios.map((item,index)=>{
-                                    return <tr key={"portfolio"+index}><td>{item?.name}</td><td>{item?.ticker}</td><td className='sticky-action'><button className='px-4 btn btn-primary' onClick={()=>{handleEditModal(item?.name)}} title="Edit"><i className="mdi mdi-pen"></i></button><button className='px-4 btn btn-danger' onClick={() => { deleteStockPortFolio(item?.name) }} title="Delete"><i className="mdi mdi-delete"></i></button></td></tr>
-                                })
-                               }
-                            </tbody>
-                        </table>
+                            <div className="table-responsive">
+
+                                <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
+                                    <thead>
+                                        <tr>
+                                            <th onClick={() => { handleSort2("name") }}>Portfolio Name {getSortIcon("name", sortConfig2)}</th>
+                                            <th onClick={() => { handleSort2("ticker") }}>Symbol {getSortIcon("ticker", sortConfig2)}</th>
+                                            <th className='sticky-action'>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            filteredStockPortfolios.map((item, index) => {
+                                                return <tr key={"portfolio" + index}><td>{item?.name}</td><td>{item?.ticker}</td><td className='sticky-action'><button className='px-4 btn btn-primary' onClick={() => { handleEditModal(item?.name) }} title="Edit"><i className="mdi mdi-pen"></i></button><button className='px-4 btn btn-danger' onClick={() => { deleteStockPortFolio(item?.name) }} title="Delete"><i className="mdi mdi-delete"></i></button></td></tr>
+                                            })
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <Pagination currentPage={currentPage2} totalItems={stockPortfolios} limit={limit2} setCurrentPage={setCurrentPage2} handlePage={handlePage2} />
                         </div>
-                        <Pagination currentPage={currentPage2} totalItems={stockPortfolios} limit={limit2} setCurrentPage={setCurrentPage2} handlePage={handlePage2} />
-                    </div>
-                    } 
+                    }
                 </div>
                 <Footer />
                 <Modal show={show} onHide={handleClose} className='portfolio-modal'>
@@ -840,8 +855,8 @@ console.log("stockFormData",stockFormData);
                             <table className='table'>
                                 <thead>
                                     <tr>
-                                        <th onClick={()=>{handleSort3("stockName")}}>Select</th>
-                                        <th onClick={()=>{handleSort3("stockName")}}>Symbol</th>
+                                        <th onClick={() => { handleSort3("stockName") }}>Select</th>
+                                        <th onClick={() => { handleSort3("stockName") }}>Symbol</th>
                                         <th>Share</th>
                                         <th>Purchase Date</th>
                                         <th>Purchase Price</th>
@@ -931,8 +946,8 @@ console.log("stockFormData",stockFormData);
                                         <td>30-08-2024</td>
                                         <td>180</td>
                                         <td>180</td>
-                                        <td style={{color: "#00ff00"}}>80</td>
-                                        <td style={{color: "#00ff00"}}>80%</td>
+                                        <td style={{ color: "#00ff00" }}>80</td>
+                                        <td style={{ color: "#00ff00" }}>80%</td>
                                     </tr>
                                     <tr>
                                         <td>NFLX</td>
@@ -944,8 +959,8 @@ console.log("stockFormData",stockFormData);
                                         <td>30-08-2024</td>
                                         <td>80</td>
                                         <td>80</td>
-                                        <td style={{color: "#ff0000"}}>20</td>
-                                        <td style={{color: "#ff0000"}}>20%</td>
+                                        <td style={{ color: "#ff0000" }}>20</td>
+                                        <td style={{ color: "#ff0000" }}>20%</td>
                                     </tr>
                                 </tbody>
                             </table>
