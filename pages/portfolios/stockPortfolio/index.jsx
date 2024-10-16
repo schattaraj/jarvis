@@ -8,7 +8,7 @@ import parse from 'html-react-parser';
 import Modal from 'react-bootstrap/Modal';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
-import { buildQueryString, calculateAverage, calculateAveragePercentage, decodeJWT, fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../../utils/utils';
+import { buildQueryString, calculateAverage, calculateAveragePercentage, decodeJWT, fetchWithInterceptor, formDataToJSON, formatDate, getSortIcon, searchTable } from '../../../utils/utils';
 import SliceData from '../../../components/SliceData';
 import * as Icon from "react-icons/fa";
 import { Pagination } from '../../../components/Pagination';
@@ -97,22 +97,9 @@ export default function Portfolio() {
     }
     const fetchPortfolioNames = async () => {
         try {
-        //     const getPortfolio = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}common/getAllPortFolioTicker?userId=2`,
-        //     {
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImlzUmVwb3J0VXBsb2FkQWxsb3dlZCI6bnVsbCwibWVudURldGFpbHNMaXN0IjpbXSwiaXNVcGxvYWRBbGxvd2VkIjoiWSIsInNlc3Npb25JZCI6MTcyNzcwMzkzNjIxNywidXNlck5hbWUiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsInVzZXJJRCI6MiwiQVVUSE9SSVRJRVNfS0VZIjpbXSwiaXNFeHRVc2VyIjpudWxsLCJuYW1lIjoiTm9sYW5kTEBMZWZ0YnJhaW53bS5jb20iLCJ1c2VyRW1haWwiOiJOb2xhbmRMQExlZnRicmFpbndtLmNvbSIsImV4cCI6MTcyNzcwOTkzNiwiaWF0IjoxNzI3NzAzOTM2fQ.Uan1uWWbWWLljg-YVREFr76PgPSUZYM_ylEObecsXK0`
-        //         }
-        //     }
-        // )
-        // const { payload } = await getPortfolio.json()
-        // console.log("Result",payload);
-            const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}common/getAllPortFolioTicker`;
+            const baseUrl = `/api/proxy?api=common/getAllPortFolioTicker`;
             const {payload} = await fetchWithInterceptor(baseUrl,true)
             const portfolioApiRes = payload
-            // const portfolioApi = await fetch("https://www.jharvis.com/JarvisV2/getAllPortFolioTicker?userId=2")
-            // const portfolioApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}getAllPortFolioTicker?userId=${userID}`)
-            // const portfolioApiRes = await portfolioApi.json()
             setPortfolioNames(portfolioApiRes)
             setPortfolioId(portfolioApiRes[0]?.idPortfolio)
             setCountApiCall(countApiCall + 1)
@@ -308,28 +295,25 @@ export default function Portfolio() {
         }
     }
     const createPortfolio = async (e) => {
-        // console.log("portfolioPayload", portfolioPayload)
-        console.log("FormData", formData);
-
-        const stockFormData = new FormData();
-
-        formData.allStocks.forEach((stock, index) => {
+        const stockArray = formData.allStocks.map(stock => {
             if (stock?.stockName && stock?.share && stock?.purchaseDate && stock?.purchasePrice) {
-                const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
-                stockFormData.append(`myArray[]`, formattedStock);
+                return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
             }
-        });
-        console.log("stockFormData", stockFormData);
+            return null; // Return null for invalid stocks
+        }).filter(Boolean); // Filter out null values
+        const jsonObject = {
+            name: formData.portfolioName,
+            stockNames: stockArray,
+            visiblePortFolio: 'yes',
+        };  
         try {
-            const response = await fetch(`https://jharvis.com/JarvisV2/createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=2`, {
-                method: 'POST',
-                body: stockFormData
-            });
-            console.log('response:', response);
-            if (response.status == 200) {
-                const result = await response.json();
-                alert("Portfolio Stock set has been saved");
+                const apiEndpoint = `/api/proxy?api=portfolio/createPortfolio`;
+                const options = {body: JSON.stringify(jsonObject),method:'POST'}
+                const response = await fetchWithInterceptor(apiEndpoint,true,{},options)
+            if (response?.statusCode == 0) {
+                Swal.fire({title:response?.payload?.msg,confirmButtonColor:"var(--primary)"});
                 handleClose();
+                getAllStockForPolios()
             } else {
                 console.error('Error:', response.statusText);
             }
@@ -485,18 +469,24 @@ export default function Portfolio() {
             if (result.isConfirmed) {
                 try {
                     context.setLoaderState(true);
-                    const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
+                    const baseUrl = `/api/proxy?api=portfolio/deletePortfolioByName?name=${name}`;
+                    const response = await fetchWithInterceptor(baseUrl,false)
+                    Swal.fire({title:response?.payload?.msg,confirmButtonColor:"var(--primary)"})
+                    // const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
                     console.log('response:', response);
-                    if (response.status == 200) {
-                        const result = await response.json();
-                        context.setLoaderState(false);
-                        alert("Portfolio Stock set has been deleted");
-                        getAllStockForPolios();
-                        stockFilterData();
-                    } else {
-                        console.error('Error:', response.statusText);
-                        context.setLoaderState(false);
-                    }
+                    context.setLoaderState(false);
+                    getAllStockForPolios();
+                    stockFilterData();
+                    // if (response.status == 200) {
+                    //     const result = await response.json();
+                    //     context.setLoaderState(false);
+                    //     alert("Portfolio Stock set has been deleted");
+                    //     getAllStockForPolios();
+                    //     stockFilterData();
+                    // } else {
+                    //     console.error('Error:', response.statusText);
+                    //     context.setLoaderState(false);
+                    // }
                 } catch (error) {
                     console.error('Request failed', error);
                     context.setLoaderState(false);
@@ -508,8 +498,13 @@ export default function Portfolio() {
     const handleEditModal = async (name) => {
         context.setLoaderState(true);
         try {
-            const allStocksApi = await fetch(`https://jharvis.com/JarvisV2/getAllPortfolioByName?name=${name}&_=1724917733195`);
-            const allStocksApiRes = await allStocksApi.json();
+            // const allStocksApi = await fetch(`https://jharvis.com/JarvisV2/getAllPortfolioByName?name=${name}&_=1724917733195`);
+            // const allStocksApiRes = await allStocksApi.json();
+            const apiEndpoint = `/api/proxy?api=portfolio/getAllPortfolioByName?name=${name}`;
+                const options = {method:'GET'}
+                const response = await fetchWithInterceptor(apiEndpoint,false,{},options)
+                allStocksApiRes = response.payload
+                console.log("response",response);
             // allStocksApiRes.reverse();
             setAllStocks(allStocksApiRes);
             formData.portfolioName = name;

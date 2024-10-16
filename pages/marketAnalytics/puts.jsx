@@ -6,7 +6,7 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import Breadcrumb from '../../components/Breadcrumb';
 import SliceData from '../../components/SliceData';
-import { convertToReadableString, getSortIcon, roundToTwoDecimals } from '../../utils/utils';
+import { convertToReadableString, getSortIcon, jsonToFormData, roundToTwoDecimals } from '../../utils/utils';
 import Swal from 'sweetalert2';
 import { Pagination } from '../../components/Pagination';
 import PutChart from '../../components/PutChart';
@@ -109,6 +109,7 @@ export default function PUTS() {
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
             setSelectedTicker(fetchTickersRes[0]?.element1)
+            setInputData({...inputData,tickername:fetchTickersRes[0]?.element1})
         }
         catch (e) {
 
@@ -174,7 +175,7 @@ export default function PUTS() {
     }
     const handleTicker = (e) => {
         setSelectedTicker(e.target.value)
-        console.log("e", e.target.value);
+        setInputData({ ...inputData, tickername: e.target.value })
     }
     const handleSelectClick = () => {
         findAllPutsByTickerName()
@@ -189,15 +190,63 @@ export default function PUTS() {
     const formReset = () => {
         setInputData({ ...inputData, putStrikePrice: "", putPrice: "", expirationDate: "", addToDate: "" })
     }
-    const addData = () => {
-        console.log("inputData",Object.entries(inputData));
-        // const hasEmptyValue = Object.values(inputData).some(value => value === "");
-        // Object.entries(inputData).forEach(([key, value]) => {
-        //     if (value === "") {
-        //         key = key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase())
-        //         Swal.fire({title:`The key ${key} has an empty value.`,icon: 'warning',confirmButtonColor:"var(--primary)"});
-        //     }
-        // });
+    const addData = async() => {
+    for (const [key, value] of Object.entries(inputData)) {
+        if (value === "") {
+            // Specific warning for 'tickername'
+            if (key === "tickername") {
+                Swal.fire({
+                    title: `Please select Ticker`,
+                    icon: 'warning',
+                    confirmButtonColor: "var(--primary)"
+                });
+                return;
+            }
+
+            // Format the key for the warning message
+            const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
+            Swal.fire({
+                title: `The key ${formattedKey} has an empty value.`,
+                icon: 'warning',
+                confirmButtonColor: "var(--primary)"
+            });
+            return;
+        }
+    }
+    const formData = jsonToFormData(inputData);
+    try {
+        context.setLoaderState(true)
+        // Send the FormData to your API
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedPutData`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        // Check if the response is successful
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        let prev = tableData
+        setTableData([...prev, result]);
+        console.log("API Response", result,prev);
+        context.setLoaderState(false)
+        // Handle success (e.g., show a success message)
+        Swal.fire({
+            title: `Data submitted successfully!`,
+            icon: 'success',
+            confirmButtonColor: "var(--primary)"
+        });
+    } catch (error) {
+        context.setLoaderState(false)
+        console.error("Error submitting data:", error);
+        Swal.fire({
+            title: `Error submitting data: ${error.message}`,
+            icon: 'error',
+            confirmButtonColor: "var(--primary)"
+        });
+    }
     }
     const handleClick = () => {
 
@@ -234,11 +283,10 @@ export default function PUTS() {
         }
     };
     const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
+        }));
     };
     const getChartData = () => {
         setChartData(tableData)
@@ -276,7 +324,7 @@ export default function PUTS() {
         run()
     }, [currentPage, tableData, sortConfig, limit])
     useEffect(() => {
-        // fetchTickersFunc()
+        fetchTickersFunc()
         fetchDates()
     }, [])
     return (

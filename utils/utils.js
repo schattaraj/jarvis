@@ -5,6 +5,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { useContext } from 'react';
 import { Context } from '../contexts/Context';
+import { useRouter } from 'next/router';
 export const calculateAveragePercentage = (tableData, columnName) => {
     const columnValues = tableData.map((row) => row[columnName]);
 
@@ -275,46 +276,91 @@ export const decodeJWT = (token) => {
 
 export const fetchWithInterceptor = async (url,userId,queries, options = {}) => {
     const accessToken = localStorage.getItem("access_token")
-    if(userId){        
+    if(accessToken){
         const {userID} = decodeJWT(accessToken)
-        url = url+buildQueryString({userId:userID})
-    }
-    const queryParams = {
-        ...queries
-    };
-    url = url + buildQueryString(queryParams)
-    // Add default headers or modify existing ones
-    const defaultHeaders = {
-        'Content-Type': 'application/json',
-        ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-    };
-
-    options.headers = {
-        ...defaultHeaders,
-        ...options.headers,
-    };
-
-    // Show loader or any other pre-request logic
-    // context.setLoaderState(true);
-
-    try {
-        const response = await fetch(url, options);
-
-        // Handle non-200 responses
-        if (!response.ok) {
-            const errorText = await response.json(); // Parse error response as JSON
-            throw new Error(`Error: ${response.status} - ${JSON.stringify(errorText)}`);
+        if (options.method !== 'POST' && userId) {
+            url = url + buildQueryString({ userId: userID });
         }
-
-        // Parse the response as JSON
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Fetch error:", error);
-        throw error; // Propagate the error to be handled by the calling function
-    } finally {
-        // Hide loader or any other post-request logic
-        // context.setLoaderState(false);
+        const queryParams = {
+            ...queries
+        };
+        url = url + buildQueryString(queryParams)
+        // Add default headers or modify existing ones
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+            ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        };
+    
+        options.headers = {
+            ...defaultHeaders,
+            ...options.headers,
+        };
+     // If the method is POST, include userId in the body
+     if (options.method === 'POST' && userId) {
+        const body = JSON.parse(options.body || '{}');
+        body.userId = userID; // Add userId to the body
+        options.body = JSON.stringify(body); // Convert back to string
     }
+
+        // Show loader or any other pre-request logic
+        // context.setLoaderState(true);
+    
+        try {
+            console.log("options",options);
+            const response = await fetch(url, options);
+            if (response.status === 403) {
+                window.open("/login","_self")
+                return;
+            }
+            // Handle non-200 responses
+            if (!response.ok) {
+                const errorText = await response.json(); // Parse error response as JSON
+                throw new Error(`Error: ${response.status} - ${JSON.stringify(errorText)}`);
+            }
+    
+            // Parse the response as JSON
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Fetch error:", error);
+            throw error; // Propagate the error to be handled by the calling function
+        } finally {
+            // Hide loader or any other post-request logic
+            // context.setLoaderState(false);
+        }
+    }
+    else{
+        return {payload:[]}
+    }   
 };
 
+export const formDataToJSON = (formData) => {
+    const json = {};
+    formData.forEach((value, key) => {
+        if (!json[key]) {
+            json[key] = [];
+        }
+        json[key].push(value);
+    });
+    return json;
+};
+
+export function jsonToFormData(json) {
+    const formData = new FormData();
+    
+    function appendData(data, parentKey) {
+        for (const key in data) {
+            const value = data[key];
+            const formKey = parentKey ? `${parentKey}.${key}` : key;
+
+            if (typeof value === 'object' && value !== null) {
+                appendData(value, formKey);
+            } else {
+                formData.append(formKey, value);
+            }
+        }
+    }
+
+    appendData(json, '');
+    return formData;
+}

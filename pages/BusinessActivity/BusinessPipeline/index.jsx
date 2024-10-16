@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { amountSeperator, calculateAverage, searchTable } from '../../../utils/utils';
+import { amountSeperator, calculateAverage, fetchWithInterceptor, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -92,8 +92,10 @@ export default function BusinessPipeline() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessPipeline?_=1710158570127")
-            const getBondsRes = await getBonds.json()
+            const apiEndpoint = `/api/proxy?api=getAllBusinessPipeline`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            console.log("getBondsRes",response);
+            return
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             if (searchRef.current && searchRef.current.value) {

@@ -1,16 +1,25 @@
 export default async function handler(req, res) {
 
-    const loginDetails = req?.body;
+    const reqBody = req?.body;
     const query = req?.query
     const headers = req?.headers
 
     try {
         const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL+query?.api}`;
-        const response = await fetch(baseUrl, {
-            method: 'GET',
+        const fetchOptions = {
+            method: req.method,
             headers: headers,
-        });
+        };
 
+        // Include the body only for POST requests
+        if (req.method === 'POST') {
+            fetchOptions.body = JSON.stringify(reqBody);
+        }
+
+        const response = await fetch(baseUrl,fetchOptions);
+        if (response.status === 403) {
+            return res.status(403).json({ message: "403 Forbidden" });
+        }
         // Check if the response is OK
         if (!response.ok) {
             const errorText = await response.text(); // Get error response as text
@@ -20,7 +29,6 @@ export default async function handler(req, res) {
          if (response.status === 204) {
             return res.status(204).json({ message: 'No content' });
         }
-
         // Attempt to parse JSON if the response is not empty
         const contentType = response.headers.get("content-type");
         let data;
