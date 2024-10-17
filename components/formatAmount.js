@@ -1,4 +1,8 @@
 function formatAmount(amount) {
+  if (amount === "") {
+    return "";
+}
+
     // Convert amount to number if it's not already
     amount = parseFloat(amount);
   

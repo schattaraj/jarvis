@@ -143,7 +143,7 @@ export default function Login() {
                 </div>
                 <div className="text-center">
               <h3>Sign in</h3>
-               <p>Don't have an account? Create One</p> 
+               {/* <p>Don't have an account? Create One</p>  */}
                </div>
                {error && <div className="alert alert-danger">{error}</div>}
                 <Form className="pt-3" onSubmit={formSubmit} noValidate>
@@ -189,10 +189,10 @@ export default function Login() {
                   </div> */}
                 </Form>
                 </div>
-                <div className="bottom mt-3">
+                {/* <div className="bottom mt-3">
                   <Link href="#">Forgot Username / password ?</Link>
                   <label htmlFor="checkbox" className='d-flex justify-content-center align-items-center'><input type="checkbox" id="checkbox" className='me-2'/>Keep Me Sign in</label>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="col-lg-4 d-none d-lg-block animate__animated animate__fadeInRight">

@@ -188,7 +188,7 @@ export default function PUTS() {
         setInputData({ ...inputData, [e.target.name]: e.target.value })
     }
     const formReset = () => {
-        setInputData({ ...inputData, putStrikePrice: "", putPrice: "", expirationDate: "", addToDate: "" })
+        setInputData({ ...inputData, strikeprice: "", putprice: "", expirationDate: "", addToDate: "" })
     }
     const addData = async() => {
     for (const [key, value] of Object.entries(inputData)) {

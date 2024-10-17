@@ -18,7 +18,6 @@ export default async function handler(req, res) {
                 baseUrl.searchParams.append(key, query[key]);
             }
         });
-        console.log("baseUrl",baseUrl.toString(),query);
         const fetchOptions = {
             method: req.method,
             headers: headers,
