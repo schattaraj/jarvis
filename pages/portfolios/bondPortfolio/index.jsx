@@ -482,6 +482,11 @@ export default function BondPortfolio() {
     setBondPortfolioShow(false);
     setSelectedPortfolioText("");
   }
+  const totalElement24 = tableData.reduce((sum, item) => {
+    const value = parseFloat(item.element24);
+    return sum + (isNaN(value) ? 0 : value); // Avoid NaN
+  }, 0);
+
   return (
     <>
       <div className="main-panel">
@@ -583,6 +588,40 @@ const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
                       })
                     }
                   </tbody>
+                  {/* <tfoot className='fixed'>
+                                <tr>
+                                    <td colSpan={2}>Total Amount</td>
+                                    <td>{formatAmount(totalAssests)}</td>
+                                    <td></td>
+                                    <td>{formatAmount(totalAssestsManagement)}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot> */}
+                  <tfoot>
+                    <tr>
+                  {columnNames.map((inner, index) => {
+                    if(inner['elementInternalName'] == 'element24'){
+                          return <td key={index}>{totalElement24.toFixed(2)}</td>
+                    }
+                    else{
+                      return <td></td>
+                    }
+                        })
+                      
+                      }
+                        </tr>
+        {/* <tr>
+          <td>Total</td>
+          <td>{totalElement24.toFixed(2)}</td>
+        </tr> */}
+      </tfoot>
                 </table>
               </div>
               <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />
