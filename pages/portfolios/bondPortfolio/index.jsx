@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import { Pagination } from '../../../components/Pagination';
-import { calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
+import { ValueDisplay, calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
 import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
@@ -569,6 +569,9 @@ const diffInMilliseconds = maturityDate - today;
 // Convert milliseconds to days
 const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
                               return <td key={"keyid" + keyid}>{diffInDays}</td>
+                              }
+                              if(inner['elementInternalName'] == "element24"){
+                                return <td key={"keyid" + keyid}><ValueDisplay value={item[inner['elementInternalName']]}/></td>  
                               }
                               if(inner['elementInternalName'] == 'element95'){
                               return <td key={"keyid" + keyid}>{Number(item[inner['elementInternalName']]).toFixed(2)}%</td>
