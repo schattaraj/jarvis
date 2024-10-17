@@ -5,7 +5,20 @@ export default async function handler(req, res) {
     const headers = req?.headers
 
     try {
-        const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL+query?.api}`;
+         // Validate the base URL
+         const baseUrlString = `${process.env.NEXT_PUBLIC_BASE_URL}${query.api}`;
+        
+         if (!query.api) {
+             return res.status(400).json({ message: "Missing 'api' parameter in query." });
+         }
+        const baseUrl = new URL(baseUrlString);
+        // Append query parameters to the URL
+        Object.keys(query).forEach(key => {
+            if (key !== 'api') { // Exclude the 'api' key from being added to the query
+                baseUrl.searchParams.append(key, query[key]);
+            }
+        });
+        console.log("baseUrl",baseUrl.toString(),query);
         const fetchOptions = {
             method: req.method,
             headers: headers,
@@ -16,7 +29,7 @@ export default async function handler(req, res) {
             fetchOptions.body = JSON.stringify(reqBody);
         }
 
-        const response = await fetch(baseUrl,fetchOptions);
+        const response = await fetch(baseUrl.toString(),fetchOptions);
         if (response.status === 403) {
             return res.status(403).json({ message: "403 Forbidden" });
         }
