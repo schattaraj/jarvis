@@ -5,7 +5,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
 import Select from 'react-select'
 import { Context } from '../../contexts/Context';
-import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import parse from 'html-react-parser';
 import SliceData from '../../components/SliceData';
@@ -199,12 +199,15 @@ export default function Stocks() {
         }
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-            const getBondsRes = await getBonds.json()
-            setTableData(getBondsRes)
-            setFilterData(getBondsRes)
+            // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+            // const getBondsRes = await getBonds.json()
+            const apiEndpoint = `/api/proxy?api=stock/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            
+            let allStocksApiRes = response?.payload
+            setTableData(allStocksApiRes)
+            setFilterData(allStocksApiRes)
             setActiveView("Ticker Home")
-
         }
         catch (e) {
             console.log("error", e)
@@ -226,14 +229,18 @@ export default function Stocks() {
                 metadataName: 'Tickers_Watchlist',
                 _: new Date().getTime() // This will generate a unique timestamp
             };
-            const queryString = new URLSearchParams(payload).toString();
-            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-            const getChartHistroryRes = await getChartHistrory.json()
-            console.log("getChartHistroryRes", getChartHistroryRes)
-            setChartHistory(getChartHistroryRes)
+            const queryString = new URLSearchParams(payload).toString();            
+            // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            // const getChartHistroryRes = await getChartHistrory.json()
+            const apiEndpoint = `/api/proxy?api=common/getChartForHistoryByTicker?${queryString}`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            
+            let allStocksApiRes = response?.payload
+            console.log("getChartHistroryRes", allStocksApiRes)
+            setChartHistory(allStocksApiRes)
             setActiveView("Chart View")
-            setTableData(getChartHistroryRes)
-            setFilterData(getChartHistroryRes)
+            setTableData(allStocksApiRes)
+            setFilterData(allStocksApiRes)
             setDateModal(false)
         }
         catch (e) {
@@ -247,9 +254,20 @@ export default function Stocks() {
     const ranking = async () => {
         context.setLoaderState(true)
         try {
-            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-            const rankingApiRes = await rankingApi.json()
-            setRankingData(rankingApiRes)
+            // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+            // const rankingApiRes = await rankingApi.json()
+            const payload = {
+                date1: dates?.date1 == null ? '1900-01-01' : dates?.date1,
+                date2: dates?.date2 == null ? '1900-01-01' : dates?.date2,
+                metadataName: 'Tickers_Watchlist',
+                _: new Date().getTime() // This will generate a unique timestamp
+            };
+            const queryString = new URLSearchParams(payload).toString();
+            const apiEndpoint = `/api/proxy?api=common/getImportHistorySheetCompare?${queryString}`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            
+            let allStocksApiRes = response?.payload
+            setRankingData(allStocksApiRes)
             setActiveView("Ranking")
         } catch (error) {
 
@@ -265,8 +283,11 @@ export default function Stocks() {
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
-            const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
-            const columnApiRes = await columnApi.json()
+            // const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
+            // const columnApiRes = await columnApi.json()
+            const apiEndpoint = `/api/proxy?api=common/getColumns?metaDataName=Tickers_Watchlist`
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            const columnApiRes = response?.payload
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes);
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -284,10 +305,14 @@ export default function Stocks() {
         context.setLoaderState(true)
         try {
 
-            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
-            const getStocksRes = await getStocks.json()
-            setTableData(getStocksRes)
-            setFilterData(getStocksRes)
+            // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
+            // const allStocksApiRes = await getStocks.json()
+            const apiEndpoint = `/api/proxy?api=common/getImportsData?metaDataName=Tickers_Watchlist`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)
+            
+            let allStocksApiRes = response?.payload
+            setTableData(allStocksApiRes)
+            setFilterData(allStocksApiRes)
             context.setLoaderState(false)
         }
         catch (e) {
@@ -373,9 +398,13 @@ export default function Stocks() {
     const fetchTickersFunc = async () => {
         // context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
-            const fetchTickersRes = await fetchTickers.json()
-            setTickers(fetchTickersRes)
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+            // const fetchTickersRes = await fetchTickers.json()
+            const apiEndpoint = `/api/proxy?api=common/getAllTicker?metaDataName=Tickers_Watchlist`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)            
+            let allStocksApiRes = response?.payload
+            setTickers(allStocksApiRes)
+            // setTickers(fetchTickersRes)
         }
         catch (e) {
 
@@ -411,7 +440,10 @@ export default function Stocks() {
             const formData = new FormData();
             formData.append('metaDataName', 'Tickers_Watchlist');
             formData.append('myfile', file);
-            console.log("formData", formData)
+            console.log("formData", formData, 'file', file)
+            // const apiEndpoint = `/api/proxy?api=stock/uploadFileTickerImport?metaDataName=Tickers_Watchlist`
+            // const options = {body: formData, method:'POST'}
+            // const response = await fetchWithInterceptor(apiEndpoint,false,{}, options)
             const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileTickerImport", {
                 method: "POST",
                 // headers: {
@@ -422,7 +454,7 @@ export default function Stocks() {
                 body: formData
             })
             const uploadRes = await upload.json()
-            if (upload.status == 400) {
+            if (response.statusCode == 0) {
                 Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
             }
         } catch (error) {
@@ -433,10 +465,13 @@ export default function Stocks() {
     const filterBydate = async (date) => {
         context.setLoaderState(true)
         try {
-            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`)
-            const getStocksRes = await getStocks.json()
-            setTableData(getStocksRes)
-            setFilterData(getStocksRes)
+            // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`)
+            // const getStocksRes = await getStocks.json()
+            const apiEndpoint = `/api/proxy?api=common/getDataByWeek?metadataName=Tickers_Watchlist&date=${date}`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)            
+            let allStocksApiRes = response?.payload
+            setTableData(allStocksApiRes)
+            setFilterData(allStocksApiRes)
             setHistoryModal(false)
         } catch (error) {
             console.log("Error: ", error)
@@ -446,9 +481,12 @@ export default function Stocks() {
     const rankingPDF = async () => {
         context.setLoaderState(true)
         try {
-            const getPDF = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`)
-            const getPDFRes = await getPDF.json()
-            window.open(getPDFRes?.responseStr, "_blank")
+            // const getPDF = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`)
+            // const getPDFRes = await getPDF.json()
+            const apiEndpoint = `/api/proxy?api=stock/generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)            
+            let allStocksApiRes = response?.payload
+            window.open(allStocksApiRes?.responseStr, "_blank")
         } catch (error) {
             console.log("Error: ", error)
         }
@@ -457,9 +495,12 @@ export default function Stocks() {
     const pdfDownload = async () => {
         context.setLoaderState(true)
         try {
-            const getPDF = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`)
-            const getPDFRes = await getPDF.json()
-            window.open(getPDFRes?.responseStr, "_blank")
+            // const getPDF = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`)
+            // const getPDFRes = await getPDF.json()
+            const apiEndpoint = `/api/proxy?api=common/generateTickerPDF?metadataName=Tickers_Watchlist`;
+            const response = await fetchWithInterceptor(apiEndpoint,false)            
+            let allStocksApiRes = response?.payload
+            window.open(allStocksApiRes?.responseStr, "_blank")
         } catch (error) {
             console.log("Error: ", error)
         }
@@ -489,7 +530,8 @@ export default function Stocks() {
             priceFreeW,
         } = formValues;
 
-        const url = new URL('https://jharvis.com/JarvisV2/getCalculateTicker');
+        // const url = new URL('https://jharvis.com/JarvisV2/getCalculateTicker');
+        const url = new URL('/api/proxy?api=stock/getCalculateTicker')
         url.searchParams.append('metadataName', 'Tickers_Watchlist');
         url.searchParams.append('date', '');
         url.searchParams.append('rankWithinTable', rankWithinTableW || '10');
