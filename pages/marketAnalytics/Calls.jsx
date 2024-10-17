@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../../utils/staticData'
 import Select from 'react-select'
-import { convertToReadableString, exportToExcel, generatePDF, getSortIcon, roundToTwoDecimals } from '../../utils/utils';
+import { convertToReadableString, exportToExcel, formatDate, generatePDF, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import CallChart from '../../components/CallChart';
 import Swal from 'sweetalert2';
@@ -32,7 +32,16 @@ export default function Calls() {
     const [chartView, setChartView] = useState(false)
     const [chartData, setChartData] = useState(false)
     const [viewBy, setViewBy] = useState("callPrice")
-    const [meanColumn,setMeanColumn] = useState("callPrice")
+    const [meanColumn, setMeanColumn] = useState("callPrice")
+    const [inputData, setInputData] = useState({
+        tickername: "",
+        strikeprice: "",
+        callprice: "",
+        expdate: "",
+        addToDate: ""
+    })
+    const [calculateData, setCalculateData] = useState([])
+    const [isFirstSubmission,setIsFirstSubmission] = useState(true)
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
@@ -52,10 +61,32 @@ export default function Calls() {
             setDates(fetchDateRes)
         }
         catch (e) {
+            context.setLoaderState(false)
         }
         context.setLoaderState(false)
     }
     const fetchHistoryFuc = async () => {
+        formReset()
+        setCalculateData([])
+        setTableData([])
+        setIsFirstSubmission(true)
+        if (!selectedTicker) {
+            Swal.fire({ title: "Please select ticker first", confirmButtonColor: "var(--primary)" })
+            return
+        }
+        context.setLoaderState(true)
+        try {
+            const fetchHistory = await fetch(`https://jharvis.com/JarvisV2/findAllCallsByTickerName?tickername=${selectedTicker}`)
+            const fetchHistoryRes = await fetchHistory.json()
+            setTableData(fetchHistoryRes)
+            fetchMeanCalls()
+        }
+        catch (e) {
+            context.setLoaderState(false)
+        }
+        context.setLoaderState(false)
+    }
+    const fetchMeanCalls = async () => {
         context.setLoaderState(true)
         try {
             const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
@@ -63,6 +94,7 @@ export default function Calls() {
             setMeanCalls(fetchHistoryRes)
         }
         catch (e) {
+            context.setLoaderState(false)
         }
         context.setLoaderState(false)
     }
@@ -75,12 +107,13 @@ export default function Calls() {
             setTableData(fetchByDateRes)
         }
         catch (e) {
+            context.setLoaderState(false)
         }
         context.setLoaderState(false)
     }
     const handleChange = (e) => {
-        console.log("Ticker", e.target.value)
-        setSelectedTicker(e.target.value)
+        setSelectedTicker(e.value)
+        setInputData({ ...inputData, tickername: e.value })
     }
     const changeDate = (e) => {
         setSelectedDate(e.target.value)
@@ -148,8 +181,150 @@ export default function Calls() {
                 break;
         }
     };
-    const handleMeanColumn = (e)=>{
+    const handleMeanColumn = (e) => {
         setMeanColumn(e.target.value)
+    }
+    const inputDataHandler = (e) => {
+        setInputData({ ...inputData, [e.target.name]: e.target.value })
+
+    }
+    const addData = async () => {
+        for (const [key, value] of Object.entries(inputData)) {
+            if (value === "") {
+                // Specific warning for 'tickername'
+                if (key === "tickername") {
+                    Swal.fire({
+                        title: `Please select Ticker`,
+                        icon: 'warning',
+                        confirmButtonColor: "var(--primary)"
+                    });
+                    return;
+                }
+
+                // Format the key for the warning message
+                const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
+                Swal.fire({
+                    title: `The key ${formattedKey} has an empty value.`,
+                    icon: 'warning',
+                    confirmButtonColor: "var(--primary)"
+                });
+                return;
+            }
+        }
+        console.log("inputData",inputData);
+        const inputObj = {...inputData}
+        inputObj.addToDate = mmddyy(inputObj.addToDate)
+        inputObj.expdate = mmddyy(inputObj.expdate)
+        const formData = jsonToFormData(inputObj);
+        console.log("formatData", inputObj);
+        try {
+            context.setLoaderState(true)
+            // Send the FormData to your API
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedData`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            // Check if the response is successful
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log("API Response", result);    
+            // Update the state based on whether it's the first submission
+            if (isFirstSubmission) {
+                setTableData([result]); // Clear and set new data on first submission
+                setCalculateData([result]); // Clear and set new data on first submission
+                setIsFirstSubmission(false); // Set the flag to false after first submission
+            } else {
+                let prev = tableData
+            setTableData([...prev, result]);
+            let prevData = calculateData
+            setCalculateData([...prevData, result])
+            }
+            context.setLoaderState(false)
+            // Handle success (e.g., show a success message)
+            Swal.fire({
+                title: `Data submitted successfully!`,
+                icon: 'success',
+                confirmButtonColor: "var(--primary)"
+            });
+        } catch (error) {
+            context.setLoaderState(false)
+            console.error("Error submitting data:", error);
+            Swal.fire({
+                title: `Error submitting data: ${error.message}`,
+                icon: 'error',
+                confirmButtonColor: "var(--primary)"
+            });
+        }
+    }
+    const saveData = async () => {
+        console.log("save", calculateData);
+        if (calculateData.length < 1) {
+            Swal.fire({
+                title: `Please add data first`,
+                icon: 'warning',
+                confirmButtonColor: "var(--primary)"
+            });
+            return
+        }
+        try {
+            context.setLoaderState(true)
+            // Send the FormData to your API
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}saveCalls`, {
+                method: 'POST',
+                body: JSON.stringify(calculateData),
+            });
+
+            // Check if the response is successful
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+        }
+        catch (error) {
+            context.setLoaderState(false)
+            console.error("Error submitting data:", error);
+            Swal.fire({
+                title: `Error submitting data: ${error.message}`,
+                icon: 'error',
+                confirmButtonColor: "var(--primary)"
+            });
+        }
+    }
+    const formReset = () => {
+        setInputData({ ...inputData, strikeprice: "", callprice: "", expdate: "", addToDate: "" })
+    }
+    const deleteCall = async (id) => {
+        let text = "Are you sure ?";
+        Swal.fire({
+            title: text,
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const rowDelete = await fetch(`https://jharvis.com/JarvisV2/deleteCallBy?tickerid=${id}`)
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire({
+                            title: rowDeleteRes?.msg,
+                            icon: "success",
+                            confirmButtonColor: "#719B5F"
+                        })
+                        fetchByDateFunc()
+
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+                context.setLoaderState(false)
+            }
+        })
     }
     useEffect(() => {
         if (tableData.length > 0) {
@@ -183,7 +358,7 @@ export default function Calls() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
-        <Breadcrumb />
+                    <Breadcrumb />
                     <div className="page-header">
                         <h3 className="page-title">
                             <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -196,14 +371,20 @@ export default function Calls() {
                             <div className="col-md-4">
                                 <div className="form-group">
                                     <label htmlFor="">Select Ticker</label>
-                                    <select name="portfolio_name" className='form-select' onChange={handleChange}>
+                                    <Select className='mb-0 me-2' value={selectedTicker && selectedTicker.split(",").map((item) => ({ value: item, label: item }))} onChange={handleChange} style={{ minWidth: "200px", maxWidth: "300px", width: "100%", flex: "2" }} options={
+                                        tickers ? tickers.map((item, index) => (
+                                            { value: item.element1, label: item.element1 }
+                                        ))
+                                            : [{ value: "Loading", label: "Loading..." }]
+                                    } />
+                                    {/* <select name="portfolio_name" className='form-select' onChange={handleChange}>
                                         <option value="">--Select Ticker--</option>
                                         {tickers.map((item, index) => (
                                             <option key={index} value={item.element1}>
                                                 {item.element1}
                                             </option>
                                         ))}
-                                    </select>
+                                    </select> */}
                                 </div>
                             </div>
 
@@ -232,22 +413,39 @@ export default function Calls() {
                             </div>
                         </div>
                     </div>
-                    <div className='d-flex justify-content-between mb-4'>
-                        <input type="text" className="form-control me-2" placeholder='Call Strike Price' />
-                        <input type="text" className="form-control me-2" placeholder='Call Price' />
+                    <div className='d-flex justify-content-between align-items-center mb-4'>
+                        <div className="form-floating">
+                            <input type="number" id="strikeprice" className="form-control me-2" placeholder='Call Strike Price' value={inputData?.strikeprice} name="strikeprice" onChange={inputDataHandler} />
+                            <label htmlFor="strikeprice" className="">Call Strike Price</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="number" className="form-control me-2" placeholder='Call Price' value={inputData?.callprice} name="callprice" onChange={inputDataHandler} />
+                            <label htmlFor="" className="form-label">Call Price</label>
+                        </div>
+
                         {/* <input type="date" className="form-control me-2" placeholder='Expiration Date'/> */}
-                        <DatePicker className="form-control" selected={expirationDate}
-                            onChange={(date) => setExpiration(date)}
+                        {/* <DatePicker className="form-control"
+                            // onChange={(date) => setExpiration(date)}
                             placeholderText="Expiration Date"
-                        />
-                        <DatePicker className="form-control" selected={addToDate}
-                            onChange={(date) => setAddToDate(date)}
+                            value={inputData?.expdate} name="expdate" onChange={inputDataHandler}
+                        /> */}
+                        <div className="form-floating">
+                            <input type="date" className="form-control me-2" placeholder='Expiration Date' value={inputData?.expdate} name="expdate" onChange={inputDataHandler} />
+                            <label htmlFor="" className="form-label">Expiration Date</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="date" className="form-control me-2" placeholder='Add To Date' value={inputData?.addToDate} name="addToDate" onChange={inputDataHandler} />
+                            <label htmlFor="" className="form-label">Add To Date</label>
+                        </div>
+                        {/* <DatePicker className="form-control"
+                            // onChange={(date) => setAddToDate(date)}
                             placeholderText="Add To Date"
-                        />
+                            value={inputData?.addToDate} name="addToDate" onChange={inputDataHandler}
+                        /> */}
                         {/* <input type="text" className="form-control me-2" placeholder='Add To Date'/> */}
-                        <button className='btn btn-primary me-2'>Add</button>
-                        <button className='btn btn-primary me-2'>Save</button>
-                        <button className='btn btn-primary me-2'>Reset</button>
+                        <button className='btn btn-primary ms-2 me-2' onClick={addData}>Add</button>
+                        <button className='btn btn-primary me-2' onClick={saveData}>Save</button>
+                        <button className='btn btn-primary me-2' onClick={formReset}>Reset</button>
                         {/* <div className="dt-buttons mb-3">
                                     <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button"><span>Create New Rule</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span>View All Rule</span></button>
@@ -293,8 +491,8 @@ export default function Calls() {
                             {!chartView
                                 &&
                                 <>
-                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={()=>{generatePDF()}}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
-                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={()=>{exportToExcel()}}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                                    <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                                    <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
                                 </>
                             }
                             <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={findCallDataByDate}><span>Chart View</span></button>
@@ -318,63 +516,63 @@ export default function Calls() {
                         !chartView
                             ?
                             <>
-                            <div className="table-responsive">
-                                <table id="example" className="table display">
-                                    <thead>
-                                        <tr>
-                                            <th onClick={() => { handleSort("stockNameTicker") }}>Ticker {getSortIcon("stockNameTicker", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("stockPrice") }}>Current Ticker Price {getSortIcon("stockPrice", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("strikePrice") }}>Call Strike Price {getSortIcon("strikePrice", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("callPrice") }}>Call Price {getSortIcon("callPrice", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("expirationDate") }}>Expiration Date {getSortIcon("expirationDate", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("daysExpiration") }}>Days To Expire {getSortIcon("daysExpiration", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("reqIncrease") }}>Required If Exercised {getSortIcon("reqIncrease", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("breakEven") }}>Break Even {getSortIcon("breakEven", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("percentage") }}>Percentage(%) {getSortIcon("percentage", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("leverageRatio") }}>Leverage Ratio {getSortIcon("leverageRatio", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("costofTenCalls") }}>Cost Of 10 Calls {getSortIcon("costofTenCalls", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("incomePerDay") }}>Income Per Day {getSortIcon("incomePerDay", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("annualPremium") }}>Annualized premium {getSortIcon("annualPremium", sortConfig)}</th>
-                                            <th onClick={() => { handleSort("rank") }}>Rank {getSortIcon("rank", sortConfig)}</th>
-                                            <th>Date</th>
-                                            <th>Action</th>
+                                <div className="table-responsive">
+                                    <table id="example" className="table display">
+                                        <thead>
+                                            <tr>
+                                                <th onClick={() => { handleSort("stockNameTicker") }}>Ticker {getSortIcon("stockNameTicker", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("stockPrice") }}>Current Ticker Price {getSortIcon("stockPrice", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("strikePrice") }}>Call Strike Price {getSortIcon("strikePrice", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("callPrice") }}>Call Price {getSortIcon("callPrice", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("expirationDate") }}>Expiration Date {getSortIcon("expirationDate", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("daysExpiration") }}>Days To Expire {getSortIcon("daysExpiration", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("reqIncrease") }}>Required If Exercised {getSortIcon("reqIncrease", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("breakEven") }}>Break Even {getSortIcon("breakEven", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("percentage") }}>Percentage(%) {getSortIcon("percentage", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("leverageRatio") }}>Leverage Ratio {getSortIcon("leverageRatio", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("costofTenCalls") }}>Cost Of 10 Calls {getSortIcon("costofTenCalls", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("incomePerDay") }}>Income Per Day {getSortIcon("incomePerDay", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("annualPremium") }}>Annualized premium {getSortIcon("annualPremium", sortConfig)}</th>
+                                                <th onClick={() => { handleSort("rank") }}>Rank {getSortIcon("rank", sortConfig)}</th>
+                                                <th>Date</th>
+                                                <th>Action</th>
 
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            filterData.map((item, index) => {
-                                                return (
-                                                    <tr key={index + 'tr'}>
-                                                        <td>{
-                                                            typeof (item?.stockNameTicker) == 'string' ?
-                                                                parse(item?.stockNameTicker, options)
-                                                                :
-                                                                ""
-                                                        }</td>
-                                                        <td>{item?.stockPrice}</td>
-                                                        <td>{item?.strikePrice}</td>
-                                                        <td>{item?.callPrice}</td>
-                                                        <td>{item?.expirationDate}</td>
-                                                        <td>{item?.daysExpiration}</td>
-                                                        <td>{item?.reqIncrease}</td>
-                                                        <td>{item?.breakEven}</td>
-                                                        <td>{item?.percentage}</td>
-                                                        <td>{item?.leverageRatio}</td>
-                                                        <td>{item?.costofTenCalls}</td>
-                                                        <td>{item?.incomePerDay}</td>
-                                                        <td>{item?.annualPremium}</td>
-                                                        <td>{item?.rank}</td>
-                                                        <td>{selectedDate}</td>
-                                                        <td><button className='btn btn-danger'><i className="mdi mdi-delete"></i></button></td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                filterData.map((item, index) => {
+                                                    return (
+                                                        <tr key={index + 'tr'}>
+                                                            <td>{
+                                                                typeof (item?.stockNameTicker) == 'string' ?
+                                                                    parse(item?.stockNameTicker, options)
+                                                                    :
+                                                                    ""
+                                                            }</td>
+                                                            <td>{item?.stockPrice}</td>
+                                                            <td>{item?.strikePrice}</td>
+                                                            <td>{item?.callPrice}</td>
+                                                            <td>{item?.expirationDate}</td>
+                                                            <td>{item?.daysExpiration}</td>
+                                                            <td>{item?.reqIncrease}</td>
+                                                            <td>{item?.breakEven}</td>
+                                                            <td>{item?.percentage}</td>
+                                                            <td>{item?.leverageRatio}</td>
+                                                            <td>{item?.costofTenCalls}</td>
+                                                            <td>{item?.incomePerDay}</td>
+                                                            <td>{item?.annualPremium}</td>
+                                                            <td>{item?.rank}</td>
+                                                            <td>{formatDate(item?.lastUpdatedAt)}</td>
+                                                            <td><button className='btn btn-danger' title="delete" onClick={() => { deleteCall(item?.idCall) }}><i className="mdi mdi-delete"></i></button></td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                             </>
                             :
                             chartData &&

@@ -84,7 +84,8 @@ export default function BondPortfolio() {
   }
   const fetchColumnNames = async () => {
     try {
-      const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1716356733282")
+      // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1716356733282")
+      const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumnsBondPortfolio?metaDataName=Bondpricing_Master")
       const columnApiRes = await columnApi.json()
       const extraColumns = [{
         "elementId": null,
@@ -775,7 +776,7 @@ const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
                     <th>Invested Value</th>
                     <th>Current Date</th>
                     <th>Current Price</th>
-                    <th>Merket Value</th>
+                    <th>Market Value</th>
                     <th>Profit/Loss</th>
                     <th>Profit/Loss%</th>
                   </tr>

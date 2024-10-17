@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../../../utils/utils';
+import { calculateAverage, exportToExcel, generatePDF, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -50,10 +50,10 @@ export default function BusinessTracking() {
     const [editModal, setEditModal] = useState(false)
     const [filterModal, setFilterModal] = useState(false)
     const [advisorData, setAdvisorData] = useState(false)
-    const [advisorName,setAdvisorName] = useState(false)
+    const [advisorName, setAdvisorName] = useState(false)
     const [timeFrame, setTimeFrame] = useState("");
-    const [isDate,setIsDate] = useState(false)
-    const [dateRange,setDateRange] = useState({startdate:"",enddate:""})
+    const [isDate, setIsDate] = useState(false)
+    const [dateRange, setDateRange] = useState({ startdate: "", enddate: "" })
     const [formData, setFormData] = useState({
         advisorName: '',
         assetBroughtIn: '',
@@ -85,6 +85,7 @@ export default function BusinessTracking() {
         setFilterData(searchTable(tableData, value))
     }
     const fetchData = async () => {
+        context.setLoaderState(true)
         try {
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessTracking?_=1710413237817")
             const getBondsRes = await getBonds.json()
@@ -94,7 +95,9 @@ export default function BusinessTracking() {
         }
         catch (e) {
             console.log("error", e)
+            context.setLoaderState(false)
         }
+        context.setLoaderState(false)
     }
     const handlePage = async (action) => {
         switch (action) {
@@ -160,7 +163,7 @@ export default function BusinessTracking() {
             jsonObject.reviewMeetingWhom = reviewMeetingWhom.join(', ');
             jsonObject.newClientName = newClientName.join(', ');
 
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+'addBusinessTracking', {
+            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + 'addBusinessTracking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Set the content type to JSON
@@ -280,8 +283,8 @@ export default function BusinessTracking() {
     const changeLimit = (e) => {
         setLimit(e.target.value)
     }
-    const selectAdvisors = (e)=>{
-        setAdvisorName(e) 
+    const selectAdvisors = (e) => {
+        setAdvisorName(e)
     }
     const fetchAdvisorWise = async (e) => {
         e.preventDefault()
@@ -297,9 +300,9 @@ export default function BusinessTracking() {
             let url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}getDetailsByAdvisor?advisorName=${advisorName}`;
             if (timeFrame) {
                 url += `&timeFrame=${timeFrame}`;
-              } else {
+            } else {
                 url += `&startdate=${startdate}&enddate=${enddate}`;
-              }          
+            }
             const fetchAdvisor = await fetch(url + "&_=1720608071572=")
             const fetchAdvisorRes = await fetchAdvisor.json()
             setAdvisorData(fetchAdvisorRes?.msg)
@@ -308,16 +311,16 @@ export default function BusinessTracking() {
         }
         context.setLoaderState(false)
     }
-    const handleDate = (e)=>{
-        let selectedDate = {...dateRange,[e.target.name]:e.target.value}
-        if(selectedDate?.startdate || selectedDate?.enddate){
+    const handleDate = (e) => {
+        let selectedDate = { ...dateRange, [e.target.name]: e.target.value }
+        if (selectedDate?.startdate || selectedDate?.enddate) {
             setIsDate(true)
-            console.log("selectedDate",selectedDate);
+            console.log("selectedDate", selectedDate);
         }
-        else{
+        else {
             setIsDate(false)
         }
-        setDateRange({...dateRange,[e.target.name]:e.target.value})
+        setDateRange({ ...dateRange, [e.target.name]: e.target.value })
     }
     useEffect(() => {
         fetchData()
@@ -358,15 +361,15 @@ export default function BusinessTracking() {
         run();
     }, [currentPage, tableData, sortConfig]);
 
-        // Handle input change
-        const handleInputChange = (e) => {
-            const { name, value } = e.target;
-            setFormData({
-                ...formData,
-                [name]: value,
-            });
-        };
-    
+    // Handle input change
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    };
+
     // Handle input change
     const handleAssetInputChange = (e) => {
         if (e.target.name === "assetBroughtFrom") {
@@ -416,10 +419,10 @@ export default function BusinessTracking() {
 
     // Remove asset from the correct list
     const removeAsset = (asset, listType) => {
-        console.log("Remove",listType);
+        console.log("Remove", listType);
         if (listType === "assetBroughtFrom") {
             setAssetBroughtFrom(assetBroughtFrom.filter((item) => item !== asset));
-        } 
+        }
         if (listType === "firstMeetingWhom") {
             setFirstMeetingWhom(firstMeetingWhom.filter((item) => item !== asset));
         }
@@ -434,16 +437,22 @@ export default function BusinessTracking() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
-                <Breadcrumb parent={"Admin"}/>
+                    <Breadcrumb parent={"Admin"} />
                     <div className="page-header">
                         <h3 className="page-title">
-                        <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
+                            <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">
                                 <i className="mdi mdi-home"></i>
                             </span></Link>Business Tracking
                         </h3>
                     </div>
+                    <div className="dt-buttons mb-3">
+                        <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                        <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button>
+                    </div>
                     <div className='d-md-flex justify-content-between'>
                         <div className="dt-buttons">
+                            {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={() => { generatePDF() }}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
+                            <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button" onClick={() => { exportToExcel() }}><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                             {/* <button className="dt-button buttons-pdf buttons-html5 btn-primary" type="button" title="PDF" onClick={exportPdf}><span className="mdi mdi-file-pdf-box me-2"></span><span>PDF</span></button>
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpen}><span>Add Business Tracking</span></button>
@@ -481,6 +490,9 @@ export default function BusinessTracking() {
                                             columnNames.map((columnName, colIndex) => {
                                                 let content;
                                                 content = rowData[columnName.data]
+                                                if (columnName.data == "assetBroughtIn" || columnName.data == "totalAssetManagement") {
+                                                    content = formatAmount(content)
+                                                }
                                                 if (columnName.data == "advisorName") {
                                                     return <td key={colIndex} className='sticky-left'>{content}</td>;
                                                 }
@@ -495,7 +507,7 @@ export default function BusinessTracking() {
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot className='fixed'>
+                            {/* <tfoot className='fixed'>
                                 <tr>
                                     <td colSpan={2}>Total Amount</td>
                                     <td>{formatAmount(totalAssests)}</td>
@@ -510,7 +522,7 @@ export default function BusinessTracking() {
                                     <td></td>
                                     <td></td>
                                 </tr>
-                            </tfoot>
+                            </tfoot> */}
                         </table>
                     </div>
                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
@@ -522,198 +534,198 @@ export default function BusinessTracking() {
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={addBusinessTracking} autoComplete={"true"} method='POST' encType='multipart/form-data'>
-                    <div className="row">
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Advisor Name</Form.Label>
-            <Form.Select aria-label="Default select example" name='advisorName' onChange={() => { }} required>
-                <option value={""}>--Select--</option>
-                <option value="Noland">Noland</option>
-                <option value="Freddy">Freddy</option>
-                <option value="Brian">Brian</option>
-            </Form.Select>
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Assets Brought In ($)</Form.Label>
-            <Form.Control type="number" name='assetBroughtIn' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
-            <Form.Control type="text" name='outBoundId' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Date</Form.Label>
-            <Form.Control type="date" name="date" onChange={() => { }} required />
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Which client was assets brought in from?</Form.Label>
-            {/* <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required /> */}
-            <Form.Control
-                type="text"
-                name="assetBroughtFrom"
-                value={currentInput}
-                onChange={handleAssetInputChange}
-                onKeyDown={handleAssetKeyDown}
-                placeholder="Type and press Enter to add"
-            />
-            <div className="asset-list">
-                {assetBroughtFrom.map((asset, index) => (
-                    <div className="asset-item" key={index}>
-                        {asset}
-                        <button
-                            type="button"
-                            className="close"
-                            aria-label="Close"
-                            onClick={() => removeAsset(asset, "assetBroughtFrom")}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Total Assets Under Management ($)</Form.Label>
-            <Form.Control type="number" name='totalAssetManagement' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>No. Of 1st Meetings</Form.Label>
-            <Form.Control type="number" name='firstMeeting' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>1st meeting with whom</Form.Label>
-            {/* <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required /> */}
-            <Form.Control
-                type="text"
-                name="firstMeetingWhom"
-                value={currentInput2}
-                onChange={handleAssetInputChange}
-                onKeyDown={handleAssetKeyDown}
-            />
-            <div className="asset-list">
-                {firstMeetingWhom.map((asset, index) => (
-                    <div className="asset-item" key={index}>
-                        {asset}
-                        <button
-                            type="button"
-                            className="close"
-                            aria-label="Close"
-                            onClick={() => removeAsset(asset, "firstMeetingWhom")}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>No. Of 2nd Meetings</Form.Label>
-            <Form.Control type="number" name='secondMeeting' onChange={() => { }} />
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>2nd meeting with whom</Form.Label>
-            <Form.Control type="text" name='secondMeetingWhom' onChange={() => { }} />
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>No. of client review meetings</Form.Label>
-            <Form.Control type="number" name='clientReview' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>Review meetings with whom</Form.Label>
-            {/* <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required /> */}
-            <Form.Control
-                type="text"
-                name="reviewMeetingWhom"
-                value={currentInput3}
-                onChange={handleAssetInputChange}
-                onKeyDown={handleAssetKeyDown}
-            />
-            <div className="asset-list">
-                {reviewMeetingWhom.map((asset, index) => (
-                    <div className="asset-item" key={index}>
-                        {asset}
-                        <button
-                            type="button"
-                            className="close"
-                            aria-label="Close"
-                            onClick={() => removeAsset(asset, "reviewMeetingWhom")}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </Form.Group>
-    </div>
-</div>
-<div className="row">
-    <div className="col-md-6">
-    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>No. of new clients</Form.Label>
-            <Form.Control type="number" name='newClientId' onChange={() => { }} required />
-        </Form.Group>
-    </div>
-    <div className="col-md-6">
-        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-            <Form.Label>New Client Name</Form.Label>
-            {/* <Form.Control type="text" name='newClientName' onChange={() => { }} required /> */}
-            <Form.Control
-                type="text"
-                name="newClientName"
-                value={currentInput4}
-                onChange={handleAssetInputChange}
-                onKeyDown={handleAssetKeyDown}
-            />
-            <div className="asset-list">
-                {newClientName.map((asset, index) => (
-                    <div className="asset-item" key={index}>
-                        {asset}
-                        <button
-                            type="button"
-                            className="close"
-                            aria-label="Close"
-                            onClick={() => removeAsset(asset, "newClientName")}
-                        >
-                            &times;
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </Form.Group>
-    </div>
-</div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Advisor Name</Form.Label>
+                                    <Form.Select aria-label="Default select example" name='advisorName' onChange={() => { }} required>
+                                        <option value={""}>--Select--</option>
+                                        <option value="Noland">Noland</option>
+                                        <option value="Freddy">Freddy</option>
+                                        <option value="Brian">Brian</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Assets Brought In ($)</Form.Label>
+                                    <Form.Control type="number" name='assetBroughtIn' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of Outbound prospect/client engagement requests sent</Form.Label>
+                                    <Form.Control type="text" name='outBoundId' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Date</Form.Label>
+                                    <Form.Control type="date" name="date" onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Which client was assets brought in from?</Form.Label>
+                                    {/* <Form.Control type="text" name='assetBroughtFrom' onChange={() => { }} required /> */}
+                                    <Form.Control
+                                        type="text"
+                                        name="assetBroughtFrom"
+                                        value={currentInput}
+                                        onChange={handleAssetInputChange}
+                                        onKeyDown={handleAssetKeyDown}
+                                        placeholder="Type and press Enter to add"
+                                    />
+                                    <div className="asset-list">
+                                        {assetBroughtFrom.map((asset, index) => (
+                                            <div className="asset-item" key={index}>
+                                                {asset}
+                                                <button
+                                                    type="button"
+                                                    className="close"
+                                                    aria-label="Close"
+                                                    onClick={() => removeAsset(asset, "assetBroughtFrom")}
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Total Assets Under Management ($)</Form.Label>
+                                    <Form.Control type="number" name='totalAssetManagement' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. Of 1st Meetings</Form.Label>
+                                    <Form.Control type="number" name='firstMeeting' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>1st meeting with whom</Form.Label>
+                                    {/* <Form.Control type="text" name='firstMeetingWhom' onChange={() => { }} required /> */}
+                                    <Form.Control
+                                        type="text"
+                                        name="firstMeetingWhom"
+                                        value={currentInput2}
+                                        onChange={handleAssetInputChange}
+                                        onKeyDown={handleAssetKeyDown}
+                                    />
+                                    <div className="asset-list">
+                                        {firstMeetingWhom.map((asset, index) => (
+                                            <div className="asset-item" key={index}>
+                                                {asset}
+                                                <button
+                                                    type="button"
+                                                    className="close"
+                                                    aria-label="Close"
+                                                    onClick={() => removeAsset(asset, "firstMeetingWhom")}
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. Of 2nd Meetings</Form.Label>
+                                    <Form.Control type="number" name='secondMeeting' onChange={() => { }} />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>2nd meeting with whom</Form.Label>
+                                    <Form.Control type="text" name='secondMeetingWhom' onChange={() => { }} />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of client review meetings</Form.Label>
+                                    <Form.Control type="number" name='clientReview' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Review meetings with whom</Form.Label>
+                                    {/* <Form.Control type="text" name='reviewMeetingWhom' onChange={() => { }} required /> */}
+                                    <Form.Control
+                                        type="text"
+                                        name="reviewMeetingWhom"
+                                        value={currentInput3}
+                                        onChange={handleAssetInputChange}
+                                        onKeyDown={handleAssetKeyDown}
+                                    />
+                                    <div className="asset-list">
+                                        {reviewMeetingWhom.map((asset, index) => (
+                                            <div className="asset-item" key={index}>
+                                                {asset}
+                                                <button
+                                                    type="button"
+                                                    className="close"
+                                                    aria-label="Close"
+                                                    onClick={() => removeAsset(asset, "reviewMeetingWhom")}
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>No. of new clients</Form.Label>
+                                    <Form.Control type="number" name='newClientId' onChange={() => { }} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>New Client Name</Form.Label>
+                                    {/* <Form.Control type="text" name='newClientName' onChange={() => { }} required /> */}
+                                    <Form.Control
+                                        type="text"
+                                        name="newClientName"
+                                        value={currentInput4}
+                                        onChange={handleAssetInputChange}
+                                        onKeyDown={handleAssetKeyDown}
+                                    />
+                                    <div className="asset-list">
+                                        {newClientName.map((asset, index) => (
+                                            <div className="asset-item" key={index}>
+                                                {asset}
+                                                <button
+                                                    type="button"
+                                                    className="close"
+                                                    aria-label="Close"
+                                                    onClick={() => removeAsset(asset, "newClientName")}
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Form.Group>
+                            </div>
+                        </div>
 
                         <div className="d-flex justify-content-end">
                             <button className='btn btn-primary me-2'>Submit</button>
@@ -814,21 +826,21 @@ export default function BusinessTracking() {
                                 <Form.Group className="mb-3" controlId="advisorName">
                                     <Form.Label>Advisor Name</Form.Label>
                                     <ReactSelect onChange={selectAdvisors}
-                                     isMulti options={[
-                                        { value: "Noland", label: "Noland" },
-                                        { value: "Freddy", label: "Freddy" },
-                                        { value: "Brian", label: "Brian" },
-                                    ]
-                                    } required value={advisorName}/>
-                                    <input type="hidden" name='advisorName' value={advisorName && advisorName.map((item)=>item.value).join(",")}/>
+                                        isMulti options={[
+                                            { value: "Noland", label: "Noland" },
+                                            { value: "Freddy", label: "Freddy" },
+                                            { value: "Brian", label: "Brian" },
+                                        ]
+                                        } required value={advisorName} />
+                                    <input type="hidden" name='advisorName' value={advisorName && advisorName.map((item) => item.value).join(",")} />
                                 </Form.Group>
                             </div>
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="timeFrame">
                                     <Form.Label>Time Frame</Form.Label>
-                                    <Form.Select name='timeFrame' defaultValue={editData?.timeFrame} onChange={(e) => setTimeFrame(e.target.value)} 
-                                    disabled={isDate}
-                                    required>
+                                    <Form.Select name='timeFrame' defaultValue={editData?.timeFrame} onChange={(e) => setTimeFrame(e.target.value)}
+                                        disabled={isDate}
+                                        required>
                                         <option value={""}>--Select--</option>
                                         <option value="lastweek">Last Week</option>
                                         <option value="week">Current Week</option>
