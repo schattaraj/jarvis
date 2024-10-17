@@ -78,6 +78,9 @@ export default function BusinessTracking() {
     const [currentInput2, setCurrentInput2] = useState('');
     const [currentInput3, setCurrentInput3] = useState('');
     const [currentInput4, setCurrentInput4] = useState('');
+    const [dateRangeModal,setDateRangeModal] = useState(false)
+    const [dates,setDates] = useState({ startdate: "", enddate: "" })
+    const [isDate2, setIsDate2] = useState(false)
     const context = useContext(Context)
     const searchRef = useRef()
     const filter = (e) => {
@@ -86,6 +89,7 @@ export default function BusinessTracking() {
     }
     const fetchData = async () => {
         context.setLoaderState(true)
+        setDates({ startdate: "", enddate: "" })
         try {
             const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessTracking?_=1710413237817")
             const getBondsRes = await getBonds.json()
@@ -286,6 +290,15 @@ export default function BusinessTracking() {
     const selectAdvisors = (e) => {
         setAdvisorName(e)
     }
+    function filterDataByDateRange(data, startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+    
+        return data.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate >= start && itemDate <= end;
+        });
+    }
     const fetchAdvisorWise = async (e) => {
         e.preventDefault()
         context.setLoaderState(true)
@@ -311,6 +324,28 @@ export default function BusinessTracking() {
         }
         context.setLoaderState(false)
     }
+    const fetchDateRangeWise = async (e) => {
+        e.preventDefault()
+        context.setLoaderState(true)
+        try {
+            const form = e.target;
+            const formData = new FormData(form);
+            let jsonObject = {}
+            formData.forEach((value, key) => {
+                jsonObject[key] = value;
+            });
+            console.log("jsonObject",jsonObject);
+            const {startdate, enddate } = jsonObject;
+            const filteredData = filterDataByDateRange(tableData, startdate, enddate);
+            setFilterData(filteredData)
+            setDateRangeModal(false)
+            context.setLoaderState(false)
+            console.log("filteredData",filteredData);
+        } catch (error) {
+
+        }
+        context.setLoaderState(false)
+    }
     const handleDate = (e) => {
         let selectedDate = { ...dateRange, [e.target.name]: e.target.value }
         if (selectedDate?.startdate || selectedDate?.enddate) {
@@ -321,6 +356,17 @@ export default function BusinessTracking() {
             setIsDate(false)
         }
         setDateRange({ ...dateRange, [e.target.name]: e.target.value })
+    }
+    const handleDateRange = (e) => {
+        let selectedDate = { ...dates, [e.target.name]: e.target.value }
+        if (selectedDate?.startdate || selectedDate?.enddate) {
+            setIsDate2(true)
+            console.log("selectedDate", selectedDate);
+        }
+        else {
+            setIsDate2(false)
+        }
+        setDates({ ...dates, [e.target.name]: e.target.value })
     }
     useEffect(() => {
         fetchData()
@@ -457,6 +503,8 @@ export default function BusinessTracking() {
                                     <button className="dt-button buttons-excel buttons-html5 btn-primary" type="button"><span className="mdi mdi-file-excel me-2"></span><span>EXCEL</span></button> */}
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={handleOpen}><span>Add Business Tracking</span></button>
                             <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={() => { setFilterModal(true) }}><span>Advisor Wise</span></button>
+                            <button className="dt-button buttons-html5 btn-primary mb-3" type="button" onClick={() => { setDateRangeModal(true) }}><i className="mdi mdi-calendar-range"></i><span className='d-none'>Select Date Range</span></button>
+                            
                         </div>
                         <div className="form-group d-flex flex-wrap flex-sm-nowrap align-items-center"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input ref={searchRef} type="search" placeholder='' className='form-control mb-2 mb-sm-0' onChange={filter} />
                             <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
@@ -469,6 +517,7 @@ export default function BusinessTracking() {
                             </select>
                         </div>
                     </div>
+                    {dates?.startdate &&  dates?.enddate && <span style={{fontSize:"14px",marginBottom:"16px",display:"block"}}>From <b>{dates?.startdate}</b> to <b>{dates?.enddate}</b></span>}
                     <div className="table-responsive">
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
@@ -506,6 +555,9 @@ export default function BusinessTracking() {
                                         }
                                     </tr>
                                 ))}
+                                {
+                                    filterData.length == 0 && <tr><td>No Data Available</td></tr>
+                                }
                             </tbody>
                             {/* <tfoot className='fixed'>
                                 <tr>
@@ -525,7 +577,7 @@ export default function BusinessTracking() {
                             </tfoot> */}
                         </table>
                     </div>
-                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                    {filterData.length > 0 && <Pagination currentPage={currentPage} totalItems={filterData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
             <Modal show={openModal} onHide={handleClose}>
@@ -872,6 +924,33 @@ export default function BusinessTracking() {
                         </div>
                         <div className="d-flex justify-content-end">
                             <button className='btn btn-secondary' onClick={() => { setFilterModal(false) }}>Close</button>
+                        </div>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+            <Modal show={dateRangeModal} onHide={() => { setDateRangeModal(false) }} className='big-modal'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Date Range</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className='mw-100'>
+                    <Form onSubmit={fetchDateRangeWise}>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <Form.Group className='mb-3'>
+                                    <Form.Label>Start Date</Form.Label>
+                                    <Form.Control type='date' name='startdate' onChange={handleDateRange} value={dates?.startdate} required />
+                                </Form.Group>
+                            </div>
+                            <div className="col-md-6">
+                                <Form.Group className='mb-3'>
+                                    <Form.Label>End Date</Form.Label>
+                                    <Form.Control type='date' name='enddate' onChange={handleDateRange} value={dates?.enddate} required />
+                                </Form.Group>
+                            </div>
+                        </div>
+                        <button className='btn btn-primary me-2'>Fetch Details</button>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-secondary' onClick={() => { setDateRangeModal(false) }}>Close</button>
                         </div>
                     </Form>
                 </Modal.Body>

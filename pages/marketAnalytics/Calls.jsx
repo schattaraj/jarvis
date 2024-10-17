@@ -78,6 +78,9 @@ export default function Calls() {
         try {
             const fetchHistory = await fetch(`https://jharvis.com/JarvisV2/findAllCallsByTickerName?tickername=${selectedTicker}`)
             const fetchHistoryRes = await fetchHistory.json()
+            if(fetchHistoryRes?.length == 0){
+                Swal.fire({title:"No Data Available for this Ticker",icon:"warning",confirmButtonColor:"var(--primary)"})
+            }
             setTableData(fetchHistoryRes)
             fetchMeanCalls()
         }
@@ -211,12 +214,10 @@ export default function Calls() {
                 return;
             }
         }
-        console.log("inputData",inputData);
         const inputObj = {...inputData}
         inputObj.addToDate = mmddyy(inputObj.addToDate)
         inputObj.expdate = mmddyy(inputObj.expdate)
         const formData = jsonToFormData(inputObj);
-        console.log("formatData", inputObj);
         try {
             context.setLoaderState(true)
             // Send the FormData to your API

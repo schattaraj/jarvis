@@ -521,7 +521,7 @@ export default function BondPortfolio() {
                     <div className="actions">
                       <button className='btn btn-primary' onClick={fetchData}>GO</button>
                       <button className='btn btn-primary' onClick={getAllBondForPolios}>Manage</button>
-                      <button className='btn btn-primary' onClick={handleBondPortfolioStatus}>Portfolio Profit And Loss</button>
+                      {/* <button className='btn btn-primary' onClick={handleBondPortfolioStatus}>Portfolio Profit And Loss</button> */}
                     </div>
                   </div>
                 </div>
