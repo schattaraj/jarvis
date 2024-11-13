@@ -284,6 +284,7 @@ export default function Calls() {
             }
 
             const result = await response.json();
+            context.setLoaderState(true)
         }
         catch (error) {
             context.setLoaderState(false)

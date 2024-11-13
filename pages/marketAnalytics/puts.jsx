@@ -6,7 +6,7 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import Breadcrumb from '../../components/Breadcrumb';
 import SliceData from '../../components/SliceData';
-import { convertToReadableString, getSortIcon, jsonToFormData, roundToTwoDecimals } from '../../utils/utils';
+import { convertToReadableString, formatDate, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals } from '../../utils/utils';
 import Swal from 'sweetalert2';
 import { Pagination } from '../../components/Pagination';
 import PutChart from '../../components/PutChart';
@@ -83,12 +83,14 @@ export default function PUTS() {
     const [dates, setDates] = useState([])
     const [selectedOption, setSelectedOption] = useState('');
     const [inputData, setInputData] = useState({
-        tickername:"",
+        tickername: "",
         strikeprice: "",
         putprice: "",
         expdate: "",
         addToDate: ""
     })
+    const [calculateData, setCalculateData] = useState([])
+    const [isFirstSubmission, setIsFirstSubmission] = useState(true)
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
     const [limit, setLimit] = useState(25)
@@ -109,7 +111,7 @@ export default function PUTS() {
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
             setSelectedTicker(fetchTickersRes[0]?.element1)
-            setInputData({...inputData,tickername:fetchTickersRes[0]?.element1})
+            setInputData({ ...inputData, tickername: fetchTickersRes[0]?.element1 })
         }
         catch (e) {
 
@@ -190,63 +192,142 @@ export default function PUTS() {
     const formReset = () => {
         setInputData({ ...inputData, strikeprice: "", putprice: "", expirationDate: "", addToDate: "" })
     }
-    const addData = async() => {
-    for (const [key, value] of Object.entries(inputData)) {
-        if (value === "") {
-            // Specific warning for 'tickername'
-            if (key === "tickername") {
+    const addData = async () => {
+        for (const [key, value] of Object.entries(inputData)) {
+            if (value === "") {
+                // Specific warning for 'tickername'
+                if (key === "tickername") {
+                    Swal.fire({
+                        title: `Please select Ticker`,
+                        icon: 'warning',
+                        confirmButtonColor: "var(--primary)"
+                    });
+                    return;
+                }
+
+                // Format the key for the warning message
+                const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
                 Swal.fire({
-                    title: `Please select Ticker`,
+                    title: `The key ${formattedKey} has an empty value.`,
                     icon: 'warning',
                     confirmButtonColor: "var(--primary)"
                 });
                 return;
             }
+        }
+        const inputObj = {...inputData}
+        inputObj.addToDate = mmddyy(inputObj.addToDate)
+        inputObj.expdate = mmddyy(inputObj.expdate)
+        const formData = jsonToFormData(inputObj);
+        try {
+            context.setLoaderState(true)
+            // Send the FormData to your API
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedPutData`, {
+                method: 'POST',
+                body: formData,
+            });
 
-            // Format the key for the warning message
-            const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
+            // Check if the response is successful
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log("API Response", result);
+            if (isFirstSubmission) {
+                setTableData([result]); // Clear and set new data on first submission
+                setCalculateData([result]); // Clear and set new data on first submission
+                setIsFirstSubmission(false); // Set the flag to false after first submission
+            } else {
+                let prev = tableData
+                setTableData([...prev, result]);
+                let prevData = calculateData
+                setCalculateData([...prevData, result])
+            }
+            context.setLoaderState(false)
+            // Handle success (e.g., show a success message)
             Swal.fire({
-                title: `The key ${formattedKey} has an empty value.`,
+                title: `Data submitted successfully!`,
+                icon: 'success',
+                confirmButtonColor: "var(--primary)"
+            });
+        } catch (error) {
+            context.setLoaderState(false)
+            console.error("Error submitting data:", error);
+            Swal.fire({
+                title: `Error submitting data: ${error.message}`,
+                icon: 'error',
+                confirmButtonColor: "var(--primary)"
+            });
+        }
+    }
+    const saveData = async () => {
+        console.log("save", calculateData);
+        if (calculateData.length < 1) {
+            Swal.fire({
+                title: `Please add data first`,
                 icon: 'warning',
                 confirmButtonColor: "var(--primary)"
             });
-            return;
+            return
+        }
+        try {
+            context.setLoaderState(true)
+            // Send the FormData to your API
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}savePuts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Add this line
+                },
+                body: JSON.stringify(calculateData),
+            });
+
+            // Check if the response is successful
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            context.setLoaderState(true)
+        }
+        catch (error) {
+            context.setLoaderState(false)
+            console.error("Error submitting data:", error);
+            Swal.fire({
+                title: `Error submitting data: ${error.message}`,
+                icon: 'error',
+                confirmButtonColor: "var(--primary)"
+            });
         }
     }
-    const formData = jsonToFormData(inputData);
-    try {
-        context.setLoaderState(true)
-        // Send the FormData to your API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedPutData`, {
-            method: 'POST',
-            body: formData,
-        });
-
-        // Check if the response is successful
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        let prev = tableData
-        setTableData([...prev, result]);
-        console.log("API Response", result,prev);
-        context.setLoaderState(false)
-        // Handle success (e.g., show a success message)
+    const deletePut = async (id) => {
+        let text = "Are you sure ?";
         Swal.fire({
-            title: `Data submitted successfully!`,
-            icon: 'success',
-            confirmButtonColor: "var(--primary)"
-        });
-    } catch (error) {
-        context.setLoaderState(false)
-        console.error("Error submitting data:", error);
-        Swal.fire({
-            title: `Error submitting data: ${error.message}`,
-            icon: 'error',
-            confirmButtonColor: "var(--primary)"
-        });
-    }
+            title: text,
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+            customClass: { confirmButton: 'btn-danger', }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                context.setLoaderState(true)
+                try {
+                    const rowDelete = await fetch(`https://jharvis.com/JarvisV2/deletePutBy?tickerid=${id}`)
+                    if (rowDelete.ok) {
+                        const rowDeleteRes = await rowDelete.json()
+                        Swal.fire({
+                            title: rowDeleteRes?.msg,
+                            icon: "success",
+                            confirmButtonColor: "#719B5F"
+                        })
+                        findAllPutsByTickerName()
+                        fetchByDateFunc()
+
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+                context.setLoaderState(false)
+            }
+        })
     }
     const handleClick = () => {
 
@@ -379,24 +460,24 @@ export default function PUTS() {
                         </div>
                     </div>
                     <div className='d-flex justify-content-between align-items-center'>
-                    <div className="form-floating">
-                        <input type="number" id="putStrikePrice" className="form-control me-2" placeholder='Put Strike Price' value={inputData?.strikeprice} name="strikeprice" onChange={inputDataHandler} />
-                        <label htmlFor="putStrikePrice" className="">Put Strike Price</label>
+                        <div className="form-floating">
+                            <input type="number" id="putStrikePrice" className="form-control me-2" placeholder='Put Strike Price' value={inputData?.strikeprice} name="strikeprice" onChange={inputDataHandler} />
+                            <label htmlFor="putStrikePrice" className="">Put Strike Price</label>
                         </div>
                         <div className="form-floating">
-                        <input type="number" className="form-control me-2" placeholder='Put Price' value={inputData?.putprice} name="putprice" onChange={inputDataHandler} />
-                        <label htmlFor="" className="form-label">Put Price</label>
+                            <input type="number" className="form-control me-2" placeholder='Put Price' value={inputData?.putprice} name="putprice" onChange={inputDataHandler} />
+                            <label htmlFor="" className="form-label">Put Price</label>
                         </div>
                         <div className="form-floating">
                             <input type="date" className="form-control me-2" placeholder='Expiration Date' value={inputData?.expdate} name="expdate" onChange={inputDataHandler} />
                             <label htmlFor="" className="form-label">Expiration Date</label>
                         </div>
                         <div className="form-floating">
-                        <input type="date" className="form-control me-2" placeholder='Add To Date' value={inputData?.addToDate} name="addToDate" onChange={inputDataHandler} />
-                        <label htmlFor="" className="form-label">Add To Date</label>
+                            <input type="date" className="form-control me-2" placeholder='Add To Date' value={inputData?.addToDate} name="addToDate" onChange={inputDataHandler} />
+                            <label htmlFor="" className="form-label">Add To Date</label>
                         </div>
                         <button className='btn btn-primary ms-2 me-2' onClick={addData}>Add</button>
-                        <button className='btn btn-primary me-2'>Save</button>
+                        <button className='btn btn-primary me-2' onClick={saveData}>Save</button>
                         <button className='btn btn-primary me-2' onClick={formReset}>Reset</button>
                     </div>
                     <div className='d-flex justify-content-between align-items-center'>
@@ -463,48 +544,54 @@ export default function PUTS() {
                         </div>
                     }
                     {
-                    !chartView
-                    &&
-                    <>
-<div className="table-responsive mt-2">
-                        <table id="example" className="table display">
-                            <thead>
-                                <tr>
-                                    {
-                                        columns.map((item, index) => {
-                                            <th onClick={() => { handleSort("stockNameTicker") }}>Ticker {getSortIcon("stockNameTicker", sortConfig)}</th>
-                                            return <th key={"column-" + index} onClick={() => { handleSort(item.elementName) }}>{item.displayName}{getSortIcon(item.elementName, sortConfig)}</th>
-                                        })
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    filterData.map((item, index) => (
-                                        <tr key={"tr-" + index}>{
-                                            columns.map(({ elementName, displayName }, index) => {
-                                                return <td key={"td-" + index}>{typeof (item[elementName]) == "string" ? parse(item[elementName], options) : item[elementName]}</td>
-                                            })}
+                        !chartView
+                        &&
+                        <>
+                            <div className="table-responsive mt-2">
+                                <table id="example" className="table display">
+                                    <thead>
+                                        <tr>
+                                            {
+                                                columns.map((item, index) => {
+                                                    <th onClick={() => { handleSort("stockNameTicker") }}>Ticker {getSortIcon("stockNameTicker", sortConfig)}</th>
+                                                    return <th key={"column-" + index} onClick={() => { handleSort(item.elementName) }}>{item.displayName}{getSortIcon(item.elementName, sortConfig)}</th>
+                                                })
+                                            }
                                         </tr>
-                                    ))
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                    {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
-                    </>
-                    }                    
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            filterData.map((item, index) => (
+                                                <tr key={"tr-" + index}>{
+                                                    columns.map(({ elementName, displayName }, index) => {
+                                                        if(elementName == "lastUpdatedAt"){
+                                                            return <td key={elementName+displayName}>{formatDate(item[elementName])}</td>
+                                                        }
+                                                        if(elementName == "action"){
+                                                            return <td key={elementName+displayName}><button className='btn btn-danger' title="delete" onClick={() => { deletePut(item?.idPut) }}><i className="mdi mdi-delete"></i></button></td>
+                                                        }
+                                                        return <td key={"td-" + index}>{typeof (item[elementName]) == "string" ? parse(item[elementName], options) : item[elementName]}</td>
+                                                    })}
+                                                </tr>
+                                            ))
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                        </>
+                    }
                     {chartView && chartData &&
                         <><div className="form-group d-flex align-items-center">
                             <label htmlFor="" className='me-2 mb-0 form-label'>Chart View:</label>
                             <select className='form-select' style={{ maxWidth: "300px" }} onChange={handleChart}>
-                            <option value="putPrice" selected="">Put Price</option>
-					<option value="currentTickerPrice">Current Ticker Price</option>
-					<option value="strikePrice">Put Strike Price</option>
-					<option value="reqIncrease">Required If Exercised</option>
-					<option value="leverageRatio">Leverage Ratio</option>
-					<option value="incomePerDay">Income Per Day</option>
-					<option value="annualPremium">Annualized premium</option>
+                                <option value="putPrice" selected="">Put Price</option>
+                                <option value="currentTickerPrice">Current Ticker Price</option>
+                                <option value="strikePrice">Put Strike Price</option>
+                                <option value="reqIncrease">Required If Exercised</option>
+                                <option value="leverageRatio">Leverage Ratio</option>
+                                <option value="incomePerDay">Income Per Day</option>
+                                <option value="annualPremium">Annualized premium</option>
                             </select>
                         </div>
                             <PutChart data={chartData} view={viewBy} title={convertToReadableString(viewBy)} />
