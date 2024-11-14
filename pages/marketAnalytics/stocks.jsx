@@ -861,7 +861,10 @@ export default function Stocks() {
                                                 visibleColumns.includes(columnName.elementInternalName) && (
                                                     <th key={index} onClick={() => handleSort(columnName.elementInternalName)}
                                                     className={columnName.elementInternalName === "element1" ? "sticky-left" : ""}
-                                                    >{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                    >
+                                                        {columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}
+                                                        
+                                                    </th>
                                                 )
                                             ))}
                                         </tr>
@@ -886,6 +889,23 @@ export default function Stocks() {
                                                         }
                                                         else if (columnName.elementInternalName === 'element1') {
                                                             content = parse(rowData[columnName.elementInternalName], options2)
+                                                        }else if(columnName.elementInternalName === 'element31' ||
+                                                            columnName.elementInternalName ==='element34' ||
+                                                            columnName.elementInternalName ==='element35' ||
+                                                            columnName.elementInternalName ==='element7' ||
+                                                            columnName.elementInternalName ==='element8' ||
+                                                            columnName.elementInternalName ==='element9' ||
+                                                            columnName.elementInternalName ==='element11' ||
+                                                            columnName.elementInternalName ==='element12' ||
+                                                            columnName.elementInternalName ==='element13' ||
+                                                            columnName.elementInternalName ==='element15' ||
+                                                            columnName.elementInternalName ==='element16' ||
+                                                            columnName.elementInternalName ==='element17'||
+                                                            columnName.elementInternalName ==='element30'){
+                                                            content = (Number.parseFloat(rowData[columnName.elementInternalName])*100 || 0).toFixed(2)
+                                                        }
+                                                        else if(columnName.elementInternalName === 'element19'){
+                                                            content = (rowData[columnName.elementInternalName] / 1000000000)
                                                         }
                                                         else {
                                                             content = rowData[columnName.elementInternalName];

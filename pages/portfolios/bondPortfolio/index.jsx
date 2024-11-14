@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import { Pagination } from '../../../components/Pagination';
-import { ValueDisplay, calculateAverage, exportToExcel, formatDate, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
+import { ValueDisplay, calculateAverage, exportToExcel, formatDate, formatWithSeparator, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
 import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
@@ -52,6 +52,7 @@ export default function BondPortfolio() {
   const [selectedStocks, setSelectedStocks] = useState([])
   const [reportModal, setReportModal] = useState(false)
   const [reportTicker, setReportTicker] = useState("")
+  const [profitValue, setProfitValue] = useState([])
   const options = {
     replace: (elememt) => {
       if (elememt.name === 'a') {
@@ -482,10 +483,58 @@ export default function BondPortfolio() {
     setBondPortfolioShow(false);
     setSelectedPortfolioText("");
   }
-  const totalElement24 = tableData.reduce((sum, item) => {
-    const value = parseFloat(item.element24);
+  const totalElement24 = profitValue?.reduce((sum, item) => {
+    const value = parseFloat(item);
     return sum + (isNaN(value) ? 0 : value); // Avoid NaN
   }, 0);
+  const totalYearMatyrity = tableData.reduce((acc, item)=>{
+    const purchaseVolume = parseFloat(item.element22)
+    const value = purchaseVolume * parseFloat(item.element95);
+    acc.totalValue += (isNaN(value) ? 0 : value);
+    acc.totalPV += (isNaN(purchaseVolume) ? 0 : purchaseVolume)
+    return acc
+  },  { totalValue: parseFloat(0), totalPV: parseFloat(0) })
+
+  const totalPurchasePrice = tableData.reduce((acc, item)=>{
+    const purchaseVolume = parseFloat(item.element22)
+    const value = purchaseVolume * parseFloat(item.element21);
+    acc.totalValue += (isNaN(value) ? 0 : value);
+    acc.totalPV += (isNaN(purchaseVolume) ? 0 : purchaseVolume)
+    return acc
+  },  { totalValue: parseFloat(0), totalPV: parseFloat(0) })
+
+  const totalPrice = tableData.reduce((acc, item)=>{
+    const purchaseVolume = parseFloat(item.element22)
+    const value = purchaseVolume * parseFloat(item.element9);
+    acc.totalValue += (isNaN(value) ? 0 : value);
+    acc.totalPV += (isNaN(purchaseVolume) ? 0 : purchaseVolume)
+    return acc
+  },  { totalValue: parseFloat(0), totalPV: parseFloat(0) })
+  
+  const totalAvgYearsToMaturity = filterData.reduce((acc, item)=>{
+    const purchaseVolume = parseFloat(item.element22)
+    const today = new Date();
+    const maturityDate = new Date(item['element7']);
+    // Calculate the difference in milliseconds
+    const diffInMilliseconds = maturityDate - today;
+    // Convert milliseconds to days
+    const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
+    const value = purchaseVolume * parseFloat(diffInDays);
+    acc.totalValue += (isNaN(value) ? 0 : value);
+    acc.totalPV += (isNaN(purchaseVolume) ? 0 : purchaseVolume)
+    return acc
+  }, { totalValue: parseFloat(0), totalPV: parseFloat(0) })
+
+  const getProfitValue = (price, purchasePrice, purchaseVolume)=>{
+    const value = (parseFloat(price) - parseFloat(purchasePrice)) * (parseFloat(purchaseVolume) * 1000)
+    return Number(value).toFixed(2)
+  }
+  useEffect(() => {
+    const calculatedProfits = filterData.map(item =>
+      getProfitValue(item['element9'], item['element21'], item['element22'])
+    );
+    setProfitValue(calculatedProfits);
+  }, [filterData]);
 
   return (
     <>
@@ -553,7 +602,9 @@ export default function BondPortfolio() {
                     <tr>
                       {
                         columnNames.length > 0 && columnNames.map((item, index) => {
-                          return <th key={index} onClick={() => handleSort(item?.elementInternalName)}>{item?.elementName} {getSortIcon(item?.elementInternalName, sortConfig)}</th>
+                          const columnClass = index === 0 ? "sticky-column" :  "";
+                          const wrapText = item['elementInternalName'] == 'element11'||item['elementInternalName'] == 'element21'|| item['elementInternalName'] == 'element22' || item['elementInternalName'] == 'averageYearToMaturity'||item['elementInternalName'] == 'element95' || item['elementInternalName'] == 'element23' ? "text-wrap my-0 d-flex gap-2" : ""
+                          return <th key={index} className={columnClass} style={{left: 0}} onClick={() => handleSort(item?.elementInternalName)}><p className={wrapText}>{item?.elementName} {getSortIcon(item?.elementInternalName, sortConfig)}</p></th>
                         })
                       }
                     </tr>
@@ -561,27 +612,38 @@ export default function BondPortfolio() {
                   <tbody>
                     {
                       filterData.map((item, index) => {
+                        const profit = getProfitValue(item['element9'], item['element21'], item['element22']);
+
                         return <tr key={"tr" + index}>
                           {
                             columnNames.map((inner, keyid) => {
                               // return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
+                              const columnClass = keyid === 0 ? "sticky-column" : "";
+                              
+                              
+                              // if(keyid === 0){
+                              //   return <td key={"keyid" + keyid} className={columnClass} style={{left: 0}}>{item[inner['elementInternalName']]}</td>
+                              // }
                               if(inner['elementInternalName'] == 'averageYearToMaturity'){
                                 const today = new Date();
                                 const maturityDate = new Date(item['element7']);
                                 // Calculate the difference in milliseconds
-const diffInMilliseconds = maturityDate - today;
+                                const diffInMilliseconds = maturityDate - today;
 
-// Convert milliseconds to days
-const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
-                              return <td key={"keyid" + keyid}>{diffInDays}</td>
+                                // Convert milliseconds to days
+                                const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
+                                return <td key={"keyid" + keyid}>{diffInDays}</td>
+                              }
+                              if(inner['elementInternalName'] == 'element3'){
+                                return <td key={"keyid" + keyid}>{Number(Math.ceil(item[inner['elementInternalName']] * 100) / 100).toFixed(2)}</td>
                               }
                               if(inner['elementInternalName'] == "element24"){
-                                return <td key={"keyid" + keyid}><ValueDisplay value={item[inner['elementInternalName']]}/></td>  
+                                return <td key={"keyid" + keyid}><ValueDisplay value={formatWithSeparator(profit)}/></td>  
                               }
                               if(inner['elementInternalName'] == 'element95'){
                               return <td key={"keyid" + keyid}>{Number(item[inner['elementInternalName']]).toFixed(2)}%</td>
                               }
-                              return <td key={"keyid" + keyid}>{inner['elementInternalName'] == 'lastUpdatedAt' ? formatDate(item['lastUpdatedAt']) : typeof (item[inner['elementInternalName']]) == "string" ? parse(item[inner['elementInternalName']], options) : item[inner['elementInternalName']]}</td>
+                              return <td key={"keyid" + keyid} className={columnClass} style={{left: keyid === 0 ? 0 : "auto"}}>{inner['elementInternalName'] == 'lastUpdatedAt' ? formatDate(item['lastUpdatedAt']) : typeof (item[inner['elementInternalName']]) == "string" ? parse(item[inner['elementInternalName']], options) : item[inner['elementInternalName']]}</td>
                             })
                           }
                         </tr>
@@ -608,14 +670,27 @@ const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24) / 360);
                     <tr>
                   {columnNames.map((inner, index) => {
                     if(inner['elementInternalName'] == 'element24'){
-                          return <td key={index}>{totalElement24.toFixed(2)}</td>
+                          return <td key={index}>{formatWithSeparator(totalElement24)}</td>
+                    }
+                    else if(inner['elementInternalName'] ==='element21'){
+                      return <td key={index}>{Number(totalPurchasePrice.totalValue / totalPurchasePrice.totalPV).toFixed(2)}</td>
+                    }
+                    else if(inner['elementInternalName'] ==='element9'){
+                      return <td key={index}>{Number(totalPrice.totalValue / totalPrice.totalPV).toFixed(2)}</td>
+                    }
+                    else if(inner['elementInternalName'] ==='averageYearToMaturity'){
+                      return <td key={index}>{Number(totalAvgYearsToMaturity.totalValue / totalAvgYearsToMaturity.totalPV).toFixed(2)}</td>
+                    }
+                    else if(inner['elementInternalName'] ==='element95'){
+                      return <td key={index}>{Number(totalYearMatyrity.totalValue / totalYearMatyrity.totalPV).toFixed(2)}</td>
                     }
                     else{
                       return <td></td>
                     }
-                        })
+                   
+                    })
                       
-                      }
+                  }
                         </tr>
         {/* <tr>
           <td>Total</td>

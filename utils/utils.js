@@ -377,3 +377,9 @@ export const ValueDisplay = ({ value }) => {
       </div>
     );
   };
+
+  export const formatWithSeparator = (number) => {
+    let [integerPart, decimalPart] = Number(number).toFixed(2).split(".");
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${integerPart}.${decimalPart}`;
+  }

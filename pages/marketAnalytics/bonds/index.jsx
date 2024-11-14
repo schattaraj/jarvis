@@ -915,7 +915,7 @@ export default function Bonds() {
                                             <tr>
                                                 <th>Most Risen Stock</th>
                                                 <th>Price Risen By</th>
-                                                <th>% In Rise</th>
+                                                <th>YTD Return</th>
                                                 <th>Current Price</th>
                                                 <th>Previous Price</th>
                                                 <th>Current YTM</th>
