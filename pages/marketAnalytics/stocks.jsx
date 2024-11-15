@@ -187,7 +187,14 @@ export default function Stocks() {
         priceEarningW: '',
         priceFreeW: '',
     };
+    const firstColRef = useRef(null);
+    const [firstColWidth, setFirstColWidth] = useState(0);
     const context = useContext(Context)
+    useEffect(() => {
+        if (firstColRef.current) {
+          setFirstColWidth(firstColRef.current.offsetWidth);
+        }
+      }, [firstColRef, filterData, visibleColumns]);
     const handleSelect = (inputs) => {
         let arr = inputs.map((item) => item.value)
         setSelectedTicker(arr.join(","))
@@ -860,7 +867,16 @@ export default function Stocks() {
                                             {columnNames.map((columnName, index) => (
                                                 visibleColumns.includes(columnName.elementInternalName) && (
                                                     <th key={index} onClick={() => handleSort(columnName.elementInternalName)}
-                                                    className={columnName.elementInternalName === "element1" ? "sticky-left" : ""}
+                                                    className={columnName.elementInternalName === "element1" || columnName.elementInternalName === "element4" ? "sticky-column" : ""}
+                                                    style={{
+                                                        left:
+                                                          columnName.elementInternalName === "element1"
+                                                            ? 0
+                                                            : columnName.elementInternalName === "element4"
+                                                            ? firstColWidth
+                                                            : "auto",
+                                                      }}
+                                                      ref={columnName.elementInternalName === "element1" ? firstColRef : null}
                                                     >
                                                         {columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}
                                                         
@@ -913,10 +929,24 @@ export default function Stocks() {
                                                         if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
                                                             content = parse(content, options)
                                                         }
-                                                        if(columnName.elementInternalName === 'element1'){
-                                                            return <td key={colIndex} className='sticky-left'>{content}</td>;
-                                                        }
-                                                        return <td key={colIndex}>{content}</td>;
+                                                        // if(columnName.elementInternalName === 'element1'){
+                                                        //     return <td key={colIndex} className={}>{content}</td>;
+                                                        // }
+                                                        return (
+                                                            <td 
+                                                                key={colIndex} 
+                                                                className={columnName.elementInternalName === "element1" || columnName.elementInternalName === "element4" ? "sticky-column" : ""} 
+                                                                style={{
+                                                                    left:
+                                                                    columnName.elementInternalName === "element1"
+                                                                        ? 0
+                                                                        : columnName.elementInternalName === "element4"
+                                                                        ? firstColWidth
+                                                                        : "auto",
+                                                                }}
+                                                            >
+                                                                {content}
+                                                            </td>);
                                                     })
                                                 }
                                             </tr>

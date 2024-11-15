@@ -602,7 +602,7 @@ export default function BondPortfolio() {
                     <tr>
                       {
                         columnNames.length > 0 && columnNames.map((item, index) => {
-                          const columnClass = index === 0 ? "sticky-column" :  "";
+                          const columnClass = item.elementInternalName === "element1" ? "sticky-column" :  "";
                           const wrapText = item['elementInternalName'] == 'element11'||item['elementInternalName'] == 'element21'|| item['elementInternalName'] == 'element22' || item['elementInternalName'] == 'averageYearToMaturity'||item['elementInternalName'] == 'element95' || item['elementInternalName'] == 'element23' ? "text-wrap my-0 d-flex gap-2" : ""
                           return <th key={index} className={columnClass} style={{left: 0}} onClick={() => handleSort(item?.elementInternalName)}><p className={wrapText}>{item?.elementName} {getSortIcon(item?.elementInternalName, sortConfig)}</p></th>
                         })
@@ -618,7 +618,7 @@ export default function BondPortfolio() {
                           {
                             columnNames.map((inner, keyid) => {
                               // return <td key={"keyid" + keyid}>{parse(item['element' + (keyid + 1)], options)}</td>
-                              const columnClass = keyid === 0 ? "sticky-column" : "";
+                              const columnClass = inner.elementInternalName === "element1" ? "sticky-column" : "";
                               
                               
                               // if(keyid === 0){

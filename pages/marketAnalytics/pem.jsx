@@ -564,20 +564,20 @@ export default function PemDetails() {
                 <tr>
                   {columnNames.map((columnName, index) => {
                     const columnClass =
-                      index === 0 || index === 1 ? "sticky-column" : "";
+                      columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
                     return (
                       visibleColumns.includes(
                         columnName.elementInternalName
                       ) && (
                         <th
                           key={index}
-                          ref={index === 0 ? firstColRef : null}
+                          ref={columnName.elementInternalName === "element1" ? firstColRef : null}
                           className={columnClass}
                           style={{
                             left:
-                              index === 0
+                              columnName.elementInternalName === "element1"
                                 ? 0
-                                : index === 1
+                                : columnName.elementInternalName === "element2"
                                 ? firstColWidth
                                 : "auto",
                           }}
@@ -705,16 +705,16 @@ export default function PemDetails() {
                       }
                       // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                       const columnClass =
-                        colIndex === 0 || colIndex === 1 ? "sticky-column" : "";
+                        columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
                       return (
                         <td
                           key={colIndex}
                           className={columnClass}
                           style={{
                             left:
-                              colIndex === 0
+                              columnName.elementInternalName === "element1"
                                 ? 0
-                                : colIndex === 1
+                                : columnName.elementInternalName === "element2"
                                 ? firstColWidth
                                 : "auto",
                           }}
