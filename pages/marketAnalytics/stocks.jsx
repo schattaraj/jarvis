@@ -906,7 +906,7 @@ export default function Stocks() {
                                                         }
                                                         else if(columnName.elementInternalName === 'element19'){
                                                             // content = (rowData[columnName.elementInternalName] / 1000000000)
-                                                            content = (rowData[columnName.elementInternalName] / 1000)
+                                                            content = rowData[columnName.elementInternalName] && (rowData[columnName.elementInternalName] / 1000).toFixed(2)
                                                         }
                                                         else {
                                                             content = rowData[columnName.elementInternalName];
