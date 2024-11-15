@@ -604,7 +604,7 @@ export default function BondPortfolio() {
                         columnNames.length > 0 && columnNames.map((item, index) => {
                           const columnClass = item.elementInternalName === "element1" ? "sticky-column" :  "";
                           const wrapText = item['elementInternalName'] == 'element11'||item['elementInternalName'] == 'element21'|| item['elementInternalName'] == 'element22' || item['elementInternalName'] == 'averageYearToMaturity'||item['elementInternalName'] == 'element95' || item['elementInternalName'] == 'element23' ? "text-wrap my-0 d-flex gap-2" : ""
-                          return <th key={index} className={columnClass} style={{left: 0}} onClick={() => handleSort(item?.elementInternalName)}><p className={wrapText}>{item?.elementName} {getSortIcon(item?.elementInternalName, sortConfig)}</p></th>
+                          return <th key={index} className={columnClass} style={{left: 0}} onClick={() => handleSort(item?.elementInternalName)}><p className={wrapText}>{item?.elementDisplayName} {getSortIcon(item?.elementInternalName, sortConfig)}</p></th>
                         })
                       }
                     </tr>
