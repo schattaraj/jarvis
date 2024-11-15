@@ -65,7 +65,7 @@ export default function BusinessPipeline() {
         "dateAdded": "",
         "lastContact": "",
         "followUpAction": "",
-        "connections": "",
+        "connections": [],
         "autoFinding": "",
         "otherOpportunities": "",
         "investorLifecycle": "",
@@ -76,6 +76,7 @@ export default function BusinessPipeline() {
     const [errors, setErrors] = useState({})
     const [validated, setValidated] = useState(false);
     const [selectedOpportunity, setSelectedOpportunity] = useState([])
+    const [selectedConnections, setSelectedConnections] = useState([])
     const [selectedOpportunityComeAbout, setSelectedOpportunityComeAbout] = useState([])
     const [editModal, setEditModal] = useState(false)
     const [editData, setEditData] = useState({})
@@ -223,6 +224,9 @@ export default function BusinessPipeline() {
     const selectOpportunity = (e) => {
         setSelectedOpportunity(e.map((item) => item.value))
     }
+    const selectConnections = (e) => {
+        setSelectedConnections(e.map((item) => item.value))
+    }
     const selecteOpportunityComeAbout = (e) => {
         setSelectedOpportunityComeAbout(e.map((item) => item.value))
     }
@@ -312,10 +316,26 @@ export default function BusinessPipeline() {
         }
         return arr.map(item => ({ value: item, label: item }))
     };
+    const formatConnectionsValue = (value) => {
+        let arr;
+        if (Array.isArray(value)) {
+            arr = value;
+        } else {
+            arr = value.slice(1, -1).split(',').map(item => item.trim());
+        }
+        return arr.map(item => ({ value: item, label: item }))
+    };
     const editOpportunity = (e) => {
         const updatedObj = {
             ...editData,
             opportunity: e.map((item) => item.value)
+        };
+        setEditData(updatedObj);
+    };
+    const editConnections = (e) => {
+        const updatedObj = {
+            ...editData,
+            connections: e.map((item) => item.value)
         };
         setEditData(updatedObj);
     };
@@ -755,13 +775,20 @@ export default function BusinessPipeline() {
                             <div className="col-md-6">
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='connections'>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={selectConnections} isMulti options={[
+                                        { value: "Youtube", label: "Youtube" },
+                                        { value: "Jarvis Letter", label: "Jarvis Letter" },
+                                        { value: "LinkedIn", label: "LinkedIn" },
+                                    ]
+                                    } required />
+                                    <input type="hidden" name="connections" value={JSON.stringify(selectedConnections)} />
+                                    {/* <Form.Select aria-label="Default select example" name='connections'>
                                         <option value="">--Select --</option>
                                         <option value="Youtube">Youtube</option>
                                         <option value="Jarvis Letter">Jarvis Letter</option>
                                         <option value="LinkedIn"> LinkedIn</option>
                                         <option value="In Review">In Review</option>
-                                    </Form.Select>
+                                    </Form.Select> */}
                                 </Form.Group>
                             </div>
                         </div>
@@ -904,13 +931,22 @@ export default function BusinessPipeline() {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Connections</Form.Label>
-                                    <Form.Select aria-label="Default select example" name='connections' onChange={handleEditData} value={editData?.connections}>
+                                    <Select className='w-100 mb-0 me-2 col-md-4' onChange={editConnections} isMulti options={[
+                                        { value: "Youtube", label: "Youtube" },
+                                        { value: "Jarvis Letter", label: "Jarvis Letter" },
+                                        { value: "LinkedIn", label: "LinkedIn" },
+                                    ]
+                                    }
+                                        value={editData?.connections ? formatConnectionsValue(editData.connections) : ''}
+                                        required />
+                                    <input type="hidden" name="connections" value={typeof (editData.connections) == "string" ? editData.connections : JSON.stringify(editData.connections)} onChange={() => { }} />
+                                    {/* <Form.Select aria-label="Default select example" name='connections' onChange={handleEditData} value={editData?.connections}>
                                         <option value="">--Select --</option>
                                         <option value="Youtube">Youtube</option>
                                         <option value="Jarvis Letter">Jarvis Letter</option>
                                         <option value="LinkedIn"> LinkedIn</option>
                                         <option value="In Review">In Review</option>
-                                    </Form.Select>
+                                    </Form.Select> */}
                                 </Form.Group>
                             </div>
                         </div>
