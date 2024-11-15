@@ -905,7 +905,8 @@ export default function Stocks() {
                                                             content = (Number.parseFloat(rowData[columnName.elementInternalName])*100 || 0).toFixed(2)
                                                         }
                                                         else if(columnName.elementInternalName === 'element19'){
-                                                            content = (rowData[columnName.elementInternalName] / 1000000000)
+                                                            // content = (rowData[columnName.elementInternalName] / 1000000000)
+                                                            content = (rowData[columnName.elementInternalName] / 1000)
                                                         }
                                                         else {
                                                             content = rowData[columnName.elementInternalName];
