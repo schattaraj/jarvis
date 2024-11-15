@@ -914,9 +914,9 @@ export default function Stocks() {
                                                             columnName.elementInternalName ==='element11' ||
                                                             columnName.elementInternalName ==='element12' ||
                                                             columnName.elementInternalName ==='element13' ||
-                                                            columnName.elementInternalName ==='element15' ||
-                                                            columnName.elementInternalName ==='element16' ||
-                                                            columnName.elementInternalName ==='element17'||
+                                                            // columnName.elementInternalName ==='element15' ||
+                                                            // columnName.elementInternalName ==='element16' ||
+                                                            // columnName.elementInternalName ==='element17'||
                                                             columnName.elementInternalName ==='element30'){
                                                             content = (Number.parseFloat(rowData[columnName.elementInternalName])*100 || 0).toFixed(2)
                                                         }
