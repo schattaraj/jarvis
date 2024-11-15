@@ -711,10 +711,13 @@ export default function BusinessPipeline() {
                                     <Form.Label>Follow Up Action</Form.Label>
                                     <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} required>
                                         <option>--Select--</option>
-                                        <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
+                                        {/* <option value="Will invest money once the check shows up">Transfer in Process</option> */}
                                         <option value="Closed">Closed</option>
-                                        <option value="Discussed"> Discussed</option>
-                                        <option value="In Review">In Review</option>
+                                        <option value="Client Action Required">Client Action Required</option>
+                                        <option value="Documents Outstanding">Documents Outstanding</option>
+                                        <option value="Need To Schedule a Follow Up Meeting">Need To Schedule a Follow Up Meeting</option>
+                                        <option value="Transfer in Process">Transfer in Process</option>
+                                        <option value="Under Review">Under Review</option>
                                     </Form.Select>
                                 </Form.Group>
                             </div>
@@ -859,10 +862,12 @@ export default function BusinessPipeline() {
                                     <Form.Label>Follow Up Action</Form.Label>
                                     <Form.Select aria-label="Default select example" name="followUpAction" isInvalid={!!errors.followUpAction} onChange={() => { }} value={editData?.followUpAction} required>
                                         <option>--Select--</option>
-                                        <option value="Will invest money once the check shows up">Will invest money once the check shows up</option>
                                         <option value="Closed">Closed</option>
-                                        <option value="Discussed"> Discussed</option>
-                                        <option value="In Review">In Review</option>
+                                        <option value="Client Action Required">Client Action Required</option>
+                                        <option value="Documents Outstanding">Documents Outstanding</option>
+                                        <option value="Need To Schedule a Follow Up Meeting">Need To Schedule a Follow Up Meeting</option>
+                                        <option value="Transfer in Process">Transfer in Process</option>
+                                        <option value="Under Review">Under Review</option>
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3 form-group radio">
