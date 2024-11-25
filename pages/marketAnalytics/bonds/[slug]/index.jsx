@@ -8,6 +8,8 @@ import HighchartsReact from "highcharts-react-official";
 import { Context } from "../../../../contexts/Context";
 import Exporting from 'highcharts/modules/exporting';
 import Link from "next/link";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 export default function BondDetails() {
     const [bondData, setBondData] = useState([])
     const [bondDataFiltered, setBondDataFiltered] = useState([])
@@ -25,6 +27,38 @@ export default function BondDetails() {
     const tickerName = slug?.split("-")[1]
     const context = useContext(Context)
     // Exporting(Highcharts);
+
+
+    const downloadPageAsPDF = async () => {
+        const element = document.querySelector(".main-panel"); // Select the page content
+
+        // Clone the element to manipulate styles without affecting the original
+        const clonedElement = element.cloneNode(true);
+        clonedElement.style.width = "auto"; // Ensure full-width elements are captured
+        clonedElement.style.overflow = "visible"; // Make scrollable areas visible
+        clonedElement.style.position = "absolute"; // Remove constraints like flex/grid
+        document.body.appendChild(clonedElement); // Temporarily append the cloned element to the body
+    
+        const canvas = await html2canvas(clonedElement, { scale: 2 }); // Capture full content
+        const imgData = canvas.toDataURL("image/png");
+    
+        // Remove the cloned element from the DOM
+        document.body.removeChild(clonedElement);
+    
+        // Convert canvas dimensions from pixels to millimeters
+        const pdfWidth = canvas.width * 0.264583; // px to mm
+        const pdfHeight = canvas.height * 0.264583; // px to mm
+    
+        // Create a dynamically sized PDF
+        const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight]);
+    
+        // Add the canvas as an image to the PDF
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    
+        // Save the PDF
+        pdf.save("page.pdf");
+    };
+
     const bondTable = async () => {
         context.setLoaderState(true)
         try {
@@ -460,7 +494,16 @@ export default function BondDetails() {
         <>
             <div className="main-panel">
                 <div className="content-wrapper">
-                    <Breadcrumb />
+                    <div className="d-flex align-items-center">
+                        <div className="flex-grow-1">
+                            <Breadcrumb />
+                        </div>
+                        <div>
+                            <button className="btn btn-primary mb-4" onClick={downloadPageAsPDF}>
+                                Download Page as PDF
+                            </button>
+                        </div>
+                    </div>
                     <div className="page-header">
                         <h3 className="page-title">
                             <Link href={"/"}><span className="page-title-icon bg-gradient-primary text-white me-2">

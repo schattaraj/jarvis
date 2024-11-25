@@ -718,6 +718,7 @@ export default function BusinessPipeline() {
                                         <option value="Need To Schedule a Follow Up Meeting">Need To Schedule a Follow Up Meeting</option>
                                         <option value="Transfer in Process">Transfer in Process</option>
                                         <option value="Under Review">Under Review</option>
+                                        <option value="Not Required">Not Required</option>
                                     </Form.Select>
                                 </Form.Group>
                             </div>
@@ -868,6 +869,7 @@ export default function BusinessPipeline() {
                                         <option value="Need To Schedule a Follow Up Meeting">Need To Schedule a Follow Up Meeting</option>
                                         <option value="Transfer in Process">Transfer in Process</option>
                                         <option value="Under Review">Under Review</option>
+                                        <option value="Not Required">Not Required</option>
                                     </Form.Select>
                                 </Form.Group>
                                 <Form.Group className="mb-3 form-group radio">

@@ -495,6 +495,14 @@ export default function BondPortfolio() {
     return acc
   },  { totalValue: parseFloat(0), totalPV: parseFloat(0) })
 
+  const totalYTW= tableData.reduce((acc, item)=>{
+    const purchaseVolume = parseFloat(item.element22)
+    const value = purchaseVolume * parseFloat(item.element3);
+    acc.totalValue += (isNaN(value) ? 0 : value);
+    acc.totalPV += (isNaN(purchaseVolume) ? 0 : purchaseVolume)
+    return acc
+  },  { totalValue: parseFloat(0), totalPV: parseFloat(0) })
+
   const totalPurchasePrice = tableData.reduce((acc, item)=>{
     const purchaseVolume = parseFloat(item.element22)
     const value = purchaseVolume * parseFloat(item.element21);
@@ -683,6 +691,9 @@ export default function BondPortfolio() {
                     }
                     else if(inner['elementInternalName'] ==='element95'){
                       return <td key={index}>{Number(totalYearMatyrity.totalValue / totalYearMatyrity.totalPV).toFixed(2)}</td>
+                    }
+                    else if(inner['elementInternalName'] ==='element3'){
+                      return <td key={index}>{Number(totalYTW.totalValue / totalYTW.totalPV).toFixed(2)}</td>
                     }
                     else{
                       return <td></td>

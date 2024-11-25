@@ -24,6 +24,11 @@ export default function Calls() {
     const [meanCalls, setMeanCalls] = useState(false)
     const [selectedTicker, setSelectedTicker] = useState('')
     const [selectedDate, setSelectedDate] = useState("")
+
+    const [filteredToDates, setFilteredToDates] = useState([]);
+    const [selectedFromDate, setSelectedFromDate] = useState('');
+    const [selectedToDate, setSelectedToDate] = useState('');
+
     const [tableData, setTableData] = useState([])
     const [filterData, setFilterData] = useState([])
     const [limit, setLimit] = useState(25)
@@ -59,6 +64,7 @@ export default function Calls() {
             const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
             const fetchDateRes = await fetchDates.json()
             setDates(fetchDateRes)
+            setFilteredToDates(fetchDateRes);
         }
         catch (e) {
             context.setLoaderState(false)
@@ -103,11 +109,30 @@ export default function Calls() {
     }
     const fetchByDateFunc = async () => {
         context.setLoaderState(true)
-        let date = selectedDate ? selectedDate : ""
+        let date = ""
         try {
             const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date=" + date)
             const fetchByDateRes = await fetchByDate.json()
-            setTableData(fetchByDateRes)
+
+            let filteredData = fetchByDateRes;
+            if (selectedFromDate && selectedToDate) {
+                filteredData = fetchByDateRes.filter(item => {
+                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
+                    return lastUpdatedAt>=new Date(selectedFromDate) && lastUpdatedAt <= new Date(selectedToDate);
+                });
+            }else if(selectedFromDate){
+                filteredData = fetchByDateRes.filter(item => {
+                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
+                    return lastUpdatedAt>=new Date(selectedFromDate);
+                });
+            }else if(selectedToDate){
+                filteredData = fetchByDateRes.filter(item => {
+                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
+                    return lastUpdatedAt<=new Date(selectedToDate);
+                });
+            }
+    
+            setTableData(filteredData);
         }
         catch (e) {
             context.setLoaderState(false)
@@ -121,6 +146,22 @@ export default function Calls() {
     const changeDate = (e) => {
         setSelectedDate(e.target.value)
     }
+
+    const changeFromDate = (event) => {
+        setSelectedFromDate(event.target.value);
+        if(!event.target.value){
+            setFilteredToDates(dates);
+        }else{
+            // Filter "to" dates to include only dates >= selected "from" date
+            const filtered = dates.filter(date => new Date(date) >= new Date(event.target.value));
+            setFilteredToDates(filtered);
+        }
+
+    };
+    const changeToDate = (event) => {
+        setSelectedToDate(event.target.value);
+    };
+
     const handleClick = () => {
 
     }
@@ -152,13 +193,13 @@ export default function Calls() {
         setSortConfig({ key, direction });
     };
     const findCallDataByDate = async () => {
-        if (!selectedDate) {
+        if (!selectedFromDate) {
             Swal.fire({ title: "Please select date", icon: "warning", confirmButtonColor: "var(--primary)" })
         }
-        if (selectedDate) {
+        if (selectedFromDate) {
             context.setLoaderState(true)
             try {
-                const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedDate + "&_=1721911430743")
+                const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
                 const fetchDataRes = await fetchData.json()
                 setChartData(fetchDataRes)
             } catch (error) {
@@ -398,14 +439,33 @@ export default function Calls() {
                             <div className="col-md-4">
                                 <div className="form-group">
                                     <label htmlFor="">Select Date</label>
-                                    <select name="portfolio_name" className='form-select' onChange={changeDate}>
+                                    <div className="input-group gap-2">
+                                        <select name='portfolio_name_from' className="form-select portfolio-name" id="inputGroupSelect02" onChange={changeFromDate}>
+                                            <option value="">--From--</option>
+                                            {dates.map((option, index) => (
+                                            <option key={index} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                        </select>
+                                        
+                                            <select name='portfolio_name_to' className="form-select" id="inputGroupSelect02" onChange={changeToDate}>
+                                            <option value="">--To--</option>
+                                            {filteredToDates.map((option, index) => (
+                                            <option key={index} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                        </select>
+                                    </div>
+                                    {/* <select name="portfolio_name" className='form-select' onChange={changeDate}>
                                         <option value="">--Select Date--</option>
                                         {dates.map((option, index) => (
                                             <option key={index} value={option}>
                                                 {option}
                                             </option>
                                         ))}
-                                    </select>
+                                    </select> */}
                                 </div>
                             </div>
                             <div className="col-md-2">
