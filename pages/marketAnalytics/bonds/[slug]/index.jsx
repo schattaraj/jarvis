@@ -31,6 +31,13 @@ export default function BondDetails() {
 
     const downloadPageAsPDF = async () => {
         const element = document.querySelector(".main-panel"); // Select the page content
+        const downloadButton = document.querySelector(".download-btn"); // Select the download button
+
+        // Temporarily hide the download button
+        if (downloadButton) {
+            downloadButton.style.display = "none";
+        }
+    
 
         // Clone the element to manipulate styles without affecting the original
         const clonedElement = element.cloneNode(true);
@@ -499,7 +506,7 @@ export default function BondDetails() {
                             <Breadcrumb />
                         </div>
                         <div>
-                            <button className="btn btn-primary mb-4" onClick={downloadPageAsPDF}>
+                            <button className="btn btn-primary mb-4 download-btn" onClick={downloadPageAsPDF}>
                                 Download Page as PDF
                             </button>
                         </div>
