@@ -911,9 +911,9 @@ export default function Stocks() {
                                                             columnName.elementInternalName ==='element7' ||
                                                             columnName.elementInternalName ==='element8' ||
                                                             columnName.elementInternalName ==='element9' ||
-                                                            // columnName.elementInternalName ==='element11' ||
+                                                            columnName.elementInternalName ==='element11' ||
                                                             columnName.elementInternalName ==='element12' ||
-                                                            // columnName.elementInternalName ==='element13' ||
+                                                            columnName.elementInternalName ==='element13' ||
                                                             // columnName.elementInternalName ==='element15' ||
                                                             // columnName.elementInternalName ==='element16' ||
                                                             // columnName.elementInternalName ==='element17'||
