@@ -704,7 +704,7 @@ export default function BusinessPipeline() {
                 </tr>
               </thead>
               <tbody>
-                {filterData.map((rowData, rowIndex) => (
+                {tableData.length > 0 && filterData.map((rowData, rowIndex) => (
                   <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
                     {columnNames.map((columnName, colIndex) => {
                       let content;

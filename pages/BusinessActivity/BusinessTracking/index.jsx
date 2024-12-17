@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, exportToExcel, generatePDF, searchTable } from '../../../utils/utils';
+import { calculateAverage, exportToExcel, fetchWithInterceptor, generatePDF, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -91,10 +91,12 @@ export default function BusinessTracking() {
         context.setLoaderState(true)
         setDates({ startdate: "", enddate: "" })
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessTracking?_=1710413237817")
-            const getBondsRes = await getBonds.json()
-            setTableData(getBondsRes)
-            setFilterData(getBondsRes)
+            // const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllBusinessTracking?_=1710413237817")
+            // const getBondsRes = await getBonds.json()
+            const apiEndpoint = `/api/proxy?api=getAllBusinessTracking`;
+            const response = await fetchWithInterceptor(apiEndpoint, false);
+            setTableData(response)
+            setFilterData(response)
             searchRef.current.value = ""
         }
         catch (e) {

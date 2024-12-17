@@ -27,7 +27,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx'; // For Excel export
 import jsPDF from 'jspdf'; // For PDF export
 import 'jspdf-autotable'; // For PDF table auto-generation
-import { formatDate, formatPublishedDate } from '../utils/utils';
+import { fetchWithInterceptor, formatDate, formatPublishedDate } from '../utils/utils';
 import { Download } from '@mui/icons-material';
 import Link from 'next/link';
 function ReportTable({name, open, handleCloseModal,news }) {
@@ -43,8 +43,10 @@ function ReportTable({name, open, handleCloseModal,news }) {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getTickerReportsByTickerName?tickerName=${name}&_=${new Date().getTime()}`);
-            const result = await response.json();
+            // const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getTickerReportsByTickerName?tickerName=${name}&_=${new Date().getTime()}`);
+            // const result = await response.json();
+            const api = `/api/proxy?api=getTickerReportsByTickerName?tickerName=${name}&_=${new Date().getTime()}`
+            const result = await fetchWithInterceptor(api,false)
             setData(result);
         } catch (error) {
             console.error('Error fetching data:', error);

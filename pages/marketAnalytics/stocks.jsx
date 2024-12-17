@@ -5,7 +5,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
 import Select from 'react-select'
 import { Context } from '../../contexts/Context';
-import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import parse from 'html-react-parser';
 import SliceData from '../../components/SliceData';
@@ -206,8 +206,10 @@ export default function Stocks() {
         }
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-            const getBondsRes = await getBonds.json()
+            // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+            // const getBondsRes = await getBonds.json()
+            const getBonds = `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`
+            const getBondsRes = await fetchWithInterceptor(getBonds,false)
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setActiveView("Ticker Home")
@@ -234,8 +236,10 @@ export default function Stocks() {
                 _: new Date().getTime() // This will generate a unique timestamp
             };
             const queryString = new URLSearchParams(payload).toString();
-            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-            const getChartHistroryRes = await getChartHistrory.json()
+            // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            // const getChartHistroryRes = await getChartHistrory.json()
+            const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`
+            const getChartHistroryRes = await fetchWithInterceptor(api,false)
             console.log("getChartHistroryRes", getChartHistroryRes)
             setChartHistory(getChartHistroryRes)
             setActiveView("Chart View")
@@ -254,8 +258,10 @@ export default function Stocks() {
     const ranking = async () => {
         context.setLoaderState(true)
         try {
-            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-            const rankingApiRes = await rankingApi.json()
+            // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+            // const rankingApiRes = await rankingApi.json()
+            const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`
+            const rankingApiRes = await fetchWithInterceptor(api,false)
             setRankingData(rankingApiRes)
             setActiveView("Ranking")
         } catch (error) {
@@ -272,8 +278,10 @@ export default function Stocks() {
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
-            const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
-            const columnApiRes = await columnApi.json()
+            // const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
+            // const columnApiRes = await columnApi.json()
+            const columnApi = `/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist`
+            const columnApiRes = await fetchWithInterceptor(columnApi,false)
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes);
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -291,8 +299,10 @@ export default function Stocks() {
         context.setLoaderState(true)
         try {
 
-            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
-            const getStocksRes = await getStocks.json()
+            // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
+            // const getStocksRes = await getStocks.json()
+            const getStocks =`/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`
+            const getStocksRes = await fetchWithInterceptor(getStocks,false)
             setTableData(getStocksRes)
             setFilterData(getStocksRes)
             context.setLoaderState(false)
@@ -380,8 +390,10 @@ export default function Stocks() {
     const fetchTickersFunc = async () => {
         // context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
-            const fetchTickersRes = await fetchTickers.json()
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+            // const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`
+            const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -886,7 +898,7 @@ export default function Stocks() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filterData.map((rowData, rowIndex) => (
+                                        {filterData?.map((rowData, rowIndex) => (
                                             <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                 {
                                                     columnNames.map((columnName, colIndex) => {
