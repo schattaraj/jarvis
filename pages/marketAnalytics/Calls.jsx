@@ -108,35 +108,61 @@ export default function Calls() {
         context.setLoaderState(false)
     }
     const fetchByDateFunc = async () => {
-        context.setLoaderState(true)
-        let date = ""
-        try {
-            const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date=" + date)
-            const fetchByDateRes = await fetchByDate.json()
-
-            let filteredData = fetchByDateRes;
-            if (selectedFromDate && selectedToDate) {
-                filteredData = fetchByDateRes.filter(item => {
-                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
-                    return lastUpdatedAt>=new Date(selectedFromDate) && lastUpdatedAt <= new Date(selectedToDate);
-                });
-            }else if(selectedFromDate){
-                filteredData = fetchByDateRes.filter(item => {
-                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
-                    return lastUpdatedAt>=new Date(selectedFromDate);
-                });
-            }else if(selectedToDate){
-                filteredData = fetchByDateRes.filter(item => {
-                    const lastUpdatedAt = new Date(item.lastUpdatedAt);
-                    return lastUpdatedAt<=new Date(selectedToDate);
-                });
-            }
-    
-            setTableData(filteredData);
+        if(!selectedFromDate){
+            Swal.fire({ title: "From date is not selected", icon: "warning", confirmButtonColor: "var(--primary)" })
+            return
         }
-        catch (e) {
+        if(!selectedToDate){
+            Swal.fire({title: "To Date is not selected", icon: "warning", confirmButtonColor: "var(--primary)" })
+            return
+        }
+        if (new Date(selectedToDate) < new Date(selectedFromDate)) {
+            Swal.fire({ title: "To date must be greater than From date", icon: "warning", confirmButtonColor: "var(--primary)" });
+            return;
+        }
+        context.setLoaderState(true)
+        try {
+            const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
+            const fetchByDateRes = await fetchByDate.json()
+            console.log("fetchByDateRes",fetchByDateRes);
+            setCurrentPage(1)
+            setTableData(fetchByDateRes)
+            
+        } catch (error) {
             context.setLoaderState(false)
         }
+        finally{
+            context.setLoaderState(false)  
+        }
+        // let date = ""
+        // context.setLoaderState(true)
+        // try {
+        //     const fetchByDate = await fetch("https://jharvis.com/JarvisV2/findCallDataByDate?date=" + date)
+        //     const fetchByDateRes = await fetchByDate.json()
+
+        //     let filteredData = fetchByDateRes;
+        //     if (selectedFromDate && selectedToDate) {
+        //         filteredData = fetchByDateRes.filter(item => {
+        //             const lastUpdatedAt = new Date(item.lastUpdatedAt);
+        //             return lastUpdatedAt>=new Date(selectedFromDate) && lastUpdatedAt <= new Date(selectedToDate);
+        //         });
+        //     }else if(selectedFromDate){
+        //         filteredData = fetchByDateRes.filter(item => {
+        //             const lastUpdatedAt = new Date(item.lastUpdatedAt);
+        //             return lastUpdatedAt>=new Date(selectedFromDate);
+        //         });
+        //     }else if(selectedToDate){
+        //         filteredData = fetchByDateRes.filter(item => {
+        //             const lastUpdatedAt = new Date(item.lastUpdatedAt);
+        //             return lastUpdatedAt<=new Date(selectedToDate);
+        //         });
+        //     }
+    
+        //     setTableData(filteredData);
+        // }
+        // catch (e) {
+        //     context.setLoaderState(false)
+        // }
         context.setLoaderState(false)
     }
     const handleChange = (e) => {
@@ -392,7 +418,7 @@ export default function Calls() {
             items = SliceData(page, dataLimit, items);
             setFilterData(items)
         }
-    }, [tableData, sortConfig, limit])
+    }, [tableData, sortConfig, limit,currentPage])
     useEffect(() => {
         fetchTickersFunc()
         fetchDates()
