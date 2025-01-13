@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, getSortIcon, searchTable } from '../../../utils/utils';
+import { calculateAverage, fetchWithInterceptor, getSortIcon, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, Drawer, List, ListItem, ListItemButton, TextField } from '@mui/material';
@@ -160,8 +160,10 @@ export default function Bonds() {
         const queryString = new URLSearchParams(payload).toString();
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch(`/api/proxy?api=getHistoryByTickerBond?${queryString}`)
-            const getBondsRes = await getBonds.json()
+            // const getBonds = await fetch(`/api/proxy?api=getHistoryByTickerBond?${queryString}`)
+            const getBonds = `/api/proxy?api=getHistoryByTickerBond?${queryString}`
+            // const getBondsRes = await getBonds.json()
+            const getBondsRes = await fetchWithInterceptor(getBonds,false)
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setSelectedOption("Bond Home")
@@ -214,8 +216,10 @@ export default function Bonds() {
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
-            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
-            const columnApiRes = await columnApi.json()
+            // const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
+            // const columnApiRes = await columnApi.json()
+            const columnApi = `/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517`
+            const columnApiRes = await fetchWithInterceptor(columnApi,false)
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -232,8 +236,10 @@ export default function Bonds() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
-            const getBondsRes = await getBonds.json()
+            // const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
+            const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`
+            // const getBondsRes = await getBonds.json()
+            const getBondsRes = await fetchWithInterceptor(getBonds,false)
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setStocks(getBondsRes)
@@ -407,8 +413,10 @@ export default function Bonds() {
         context.setLoaderState(true)
         try {
             // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
-            const fetchTickersRes = await fetchTickers.json()
+            // const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
+            const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=${new Date().getTime()}`
+            // const fetchTickersRes = await fetchTickers.json()
+            const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
             setTickers(fetchTickersRes)
             fetchColumnNames()
         }
