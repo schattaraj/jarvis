@@ -30,7 +30,7 @@ export default function OnePageReport() {
   const fetchVideoes = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerOnePageReports?filterText=&_=1706882102005")
+      const apiCall = await fetch("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005")
       const response = await apiCall.json()
       setReports(response)
       setCurrentPdf(response[0])
@@ -126,7 +126,7 @@ function sortReportsOldestToNewest(reports) {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.companyName}</p>
-                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
+                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`/api/proxy?api=playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
                 {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
                 {/* <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/> */}
                 {/* {console.log("pDF url",`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`)} */}
@@ -265,7 +265,7 @@ function sortReportsOldestToNewest(reports) {
             <Modal.Title>Report</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+            <iframe className="embed-responsive-item" src={"/api/proxy?api=playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
           </Modal.Body>
         </Modal>
         <Footer />

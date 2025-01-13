@@ -24,7 +24,7 @@ export default function MyStocks() {
     const context = useContext(Context)
     const fecthStocks = async () => {
         try {
-            const stocksApi = await fetch("https://jharvis.com/JarvisV2/getAllFavStocks")
+            const stocksApi = await fetch("/api/proxy?api=getAllFavStocks")
             const stocksRes = await stocksApi.json()
             setFavStocks(stocksRes)
         }
@@ -87,7 +87,7 @@ export default function MyStocks() {
         const formattedEndDate = mmddyy(inputData?.endDate);
 
         // Construct URL with query parameters
-        const url = new URL(`https://jharvis.com/JarvisV2/findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}`);
+        const url = new URL(`/api/proxy?api=findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}`);
         // url.searchParams.append("startDate", formattedStartDate);
         // url.searchParams.append("endDate", formattedEndDate);
 

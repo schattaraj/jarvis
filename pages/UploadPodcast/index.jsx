@@ -25,7 +25,7 @@ export default function UploadPodcast() {
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
         }
@@ -43,7 +43,7 @@ export default function UploadPodcast() {
     const fetchAllPodcastVideos = async () => {
         context.setLoaderState(true)
         try {
-            const getAllAnalyst = await fetch("https://jharvis.com/JarvisV2/getAllPodCasts?_=1716548464958")
+            const getAllAnalyst = await fetch("/api/proxy?api=getAllPodCasts?_=1716548464958")
             const getAllAnalystRes = await getAllAnalyst.json()
             setallPodcastData(getAllAnalystRes)
             setallPodcastDataFiltered([...getAllAnalystRes])
@@ -81,7 +81,7 @@ export default function UploadPodcast() {
             e.preventDefault()
             const form = e.target;
             const formData = new FormData(form);
-            const response = await fetch('https://jharvis.com/JarvisV2/uploadPodCast', {
+            const response = await fetch('/api/proxy?api=uploadPodCast', {
                 method: 'POST',
                 body: formData
             });
@@ -117,7 +117,7 @@ export default function UploadPodcast() {
                 try {
                     const formData = new FormData();
                     formData.append("idPodCast", id)
-                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deletePodCast", {
+                    const rowDelete = await fetch("/api/proxy?api=deletePodCast", {
                         method: 'DELETE',
                         body: formData
                     })
@@ -187,7 +187,7 @@ export default function UploadPodcast() {
                     </div>
                     <div className="selection-area mb-3">
                         {/* <form action="https://jharvis.com/JarvisV2/uploadPodCast" method='post' encType='multipart/form-data'> */}
-                        <form action="https://jharvis.com/JarvisV2/uploadPodCast" onSubmit={uploadPodcast} method='post' encType='multipart/form-data'>
+                        <form action="/api/proxy?api=uploadPodCast" onSubmit={uploadPodcast} method='post' encType='multipart/form-data'>
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="form-group">
@@ -278,7 +278,7 @@ export default function UploadPodcast() {
                 </Modal.Header>
                 <Modal.Body className='text-center'>
                     <video playsInline="" autoPlay="" muted="" loop="" height="240" controls={true}>
-                        <source id="videoSource" src={"https://jharvis.com/JarvisV2/playVideo?fileName=" + analystVideo} type="video/mp4" />
+                        <source id="videoSource" src={"/api/proxy?api=playVideo?fileName=" + analystVideo} type="video/mp4" />
                     </video>
                 </Modal.Body>
             </Modal>

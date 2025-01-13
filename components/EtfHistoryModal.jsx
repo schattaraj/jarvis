@@ -39,7 +39,7 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch('https://jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127');
+            const response = await fetch('/api/proxy?api=findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127');
             const result = await response.json();
             setData(result);
         } catch (error) {
@@ -51,7 +51,7 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
         console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
                 method: 'DELETE',
             });
 
@@ -151,7 +151,7 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
         //   return
           context.setLoaderState(true)
           try {
-            const historyCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`)
+            const historyCompare = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`)
             const historyCompareRes = await historyCompare.json()
             setCompareData(historyCompareRes)
             setActiveView("History")

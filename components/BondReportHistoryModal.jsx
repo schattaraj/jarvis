@@ -32,7 +32,7 @@ function BondReportHistoryModal({ open, handleClose }) {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2+'findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567');
+            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL+'findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567');
             const result = await response.json();
             setData(result);
         } catch (error) {
@@ -44,7 +44,7 @@ function BondReportHistoryModal({ open, handleClose }) {
         console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
                 method: 'DELETE',
             });
 

@@ -110,7 +110,7 @@ function ReportTable({name, open, handleCloseModal,news }) {
             if (result.isConfirmed) {
                 context.setLoaderState(true)
                 try {
-                    const deleteApi = await fetch(`https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
+                    const deleteApi = await fetch(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
                 const deleteApiRes = deleteApi.json()
                 console.log("Success",deleteApiRes)
                 } catch (error) {
@@ -121,7 +121,7 @@ function ReportTable({name, open, handleCloseModal,news }) {
         })
     }
     const handleDownload = async(reportfileDetails)=>{
-        const url = process.env.NEXT_PUBLIC_BASE_URL_V2+"downloadPDF?fileName="+reportfileDetails
+        const url = process.env.NEXT_PUBLIC_BASE_URL+"downloadPDF?fileName="+reportfileDetails
         window.open(url,"_blank")
     }
     // Filter the data based on the search query

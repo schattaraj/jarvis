@@ -53,7 +53,7 @@ export default function Prospects() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllProspect?_=1711707171694")
+            const getBonds = await fetch("/api/proxy?api=getAllProspect?_=1711707171694")
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
@@ -135,7 +135,7 @@ export default function Prospects() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "editProspect", {
+            const response = await fetch("/api/proxy?api=editProspect", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -177,7 +177,7 @@ export default function Prospects() {
                 try {
                     const formData = new FormData();
                     formData.append("idProspect", id)
-                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteProspect", {
+                    const rowDelete = await fetch("/api/proxy?api=deleteProspect", {
                         method: 'DELETE',
                         body: formData
                     })
@@ -208,7 +208,7 @@ export default function Prospects() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + 'addProspect', {
+            const response = await fetch('/api/proxy?api=addProspect', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Set the content type to JSON
@@ -257,7 +257,7 @@ export default function Prospects() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             }); 
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + 'getSearchProspects?mostRecentActivity=' + jsonObject.mostRecentActivity + '&referredBy=' + jsonObject.referredBy + '&name=' + jsonObject.name + '&startDate=' + jsonObject.startDate + '&endDate=' + jsonObject.endDate + '&_=1720684658500');
+            const response = await fetch('/api/proxy?api=getSearchProspects?mostRecentActivity=' + jsonObject.mostRecentActivity + '&referredBy=' + jsonObject.referredBy + '&name=' + jsonObject.name + '&startDate=' + jsonObject.startDate + '&endDate=' + jsonObject.endDate + '&_=1720684658500');
             if (response.ok) {
                 const result = await response.json();
                 if (result.length > 0) {

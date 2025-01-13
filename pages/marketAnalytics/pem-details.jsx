@@ -24,7 +24,8 @@ export default function PemDetails() {
 
     const fetchColumnNames = async () => {
         try {
-            const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM&_=1706681174127")
+            // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM&_=1706681174127")
+            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=PEM&_=1706681174127")
             const columnApiRes = await columnApi.json()
             // columnApiRes.push(...extraColumns)
             columnApiRes.splice(0, 0, extraColumns[0])
@@ -42,7 +43,8 @@ export default function PemDetails() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM&_=1706681174128")
+            // const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM&_=1706681174128")
+            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=PEM&_=1706681174128")
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
@@ -112,7 +114,7 @@ export default function PemDetails() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-        const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFilePEM", {
+        const upload = await fetch("/api/proxy?api=uploadFilePEM", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'

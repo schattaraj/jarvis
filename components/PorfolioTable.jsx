@@ -115,7 +115,7 @@ console.log("issuerName",issuerName,e.target.checked)
           });
           return;
         }
-            const url = new URL(`https://jharvis.com/JarvisV2/createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2`);
+            const url = new URL(`/api/proxy?api=createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2`);
             // const params = {
             //     name: editPortfolioName,
             //     visiblePortFolio: "yes",

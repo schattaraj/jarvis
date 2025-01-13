@@ -24,7 +24,7 @@ export default function UploadAnalystVideos() {
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
         }
@@ -41,7 +41,7 @@ export default function UploadAnalystVideos() {
     const fetchAllAnalystVideos = async () => {
         context.setLoaderState(true)
         try {
-            const getAllAnalyst = await fetch("https://jharvis.com/JarvisV2/getAllAnalystVideo?_=1716538528362")
+            const getAllAnalyst = await fetch("/api/proxy?api=getAllAnalystVideo?_=1716538528362")
             const getAllAnalystRes = await getAllAnalyst.json()
             setAllAnalystData([...getAllAnalystRes])
         }
@@ -97,7 +97,7 @@ export default function UploadAnalystVideos() {
             return;
         }
         try {
-            const response = await fetch('https://jharvis.com/JarvisV2/uploadAnalystVideo', {
+            const response = await fetch('/api/proxy?api=uploadAnalystVideo', {
                 method: 'POST',
                 body: formData
             });
@@ -133,7 +133,7 @@ export default function UploadAnalystVideos() {
                 try {
                     const formData = new FormData();
                     formData.append("idAnaylstVideo", id)
-                    const analystDelete = await fetch("https://jharvis.com/JarvisV2/deleteAnalystVideo", {
+                    const analystDelete = await fetch("/api/proxy?api=deleteAnalystVideo", {
                         method: 'DELETE',
                         body: formData
                     })
@@ -300,7 +300,7 @@ export default function UploadAnalystVideos() {
                 </Modal.Header>
                 <Modal.Body className='text-center'>
                     <video playsInline="" autoPlay="" muted="" loop="" height="240" controls={true}>
-                        <source id="videoSource" src={"https://jharvis.com/JarvisV2/playVideo?fileName=" + analystVideo} type="video/mp4" />
+                        <source id="videoSource" src={"/api/proxy?api=playVideo?fileName=" + analystVideo} type="video/mp4" />
                     </video>
                 </Modal.Body>
             </Modal>

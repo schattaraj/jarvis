@@ -193,7 +193,7 @@ export default function BusinessPipeline() {
     context.setLoaderState(true);
     try {
       const getAllAmount = await fetch(
-        "https://jharvis.com/JarvisV2/getAmountsByAdvisor?_=1714645928468"
+        "/api/proxy?api=getAmountsByAdvisor?_=1714645928468"
       );
       const getAllAmountRes = await getAllAmount.json();
       setAllAmountString(getAllAmountRes.msg);
@@ -277,7 +277,7 @@ export default function BusinessPipeline() {
       });
       setErrors(errors);
       const addPipeline = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "addBusinessPipeline",
+        "/api/proxy?api=addBusinessPipeline",
         {
           method: "POST",
           headers: {
@@ -317,7 +317,7 @@ export default function BusinessPipeline() {
           const formData = new FormData();
           formData.append("idBusinessPipelineg", id);
           const rowDelete = await fetch(
-            process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteBusinessPipeline",
+            "/api/proxy?api=deleteBusinessPipeline",
             {
               method: "DELETE",
               body: formData,
@@ -421,7 +421,7 @@ export default function BusinessPipeline() {
       setErrors(errors);
 
       const updatePipeline = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "editBusinessPipeline",
+        "/api/proxy?api=editBusinessPipeline",
         {
           method: "POST",
           headers: {
@@ -490,7 +490,7 @@ export default function BusinessPipeline() {
       });
       setErrors(errors);
       const addPipeline = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 +
+        process.env.NEXT_PUBLIC_BASE_URL +
           "getSearchBusinessPipeline?searchAdvisorName=" +
           jsonObject?.searchAdvisorName +
           "&searchStatus=" +
@@ -532,7 +532,7 @@ export default function BusinessPipeline() {
     context.setLoaderState(true);
     try {
       const fetchAnalysis = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 +
+        process.env.NEXT_PUBLIC_BASE_URL +
           "getCountsByOpportunity?_=1720549352011"
       );
       const fetchAnalysisRes = await fetchAnalysis.json();
@@ -704,68 +704,69 @@ export default function BusinessPipeline() {
                 </tr>
               </thead>
               <tbody>
-                {tableData.length > 0 && filterData.map((rowData, rowIndex) => (
-                  <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
-                    {columnNames.map((columnName, colIndex) => {
-                      let content;
-                      content = rowData[columnName.data];
-                      if (columnName.data == "name") {
-                        return (
-                          <td key={colIndex} className="sticky-left">
-                            {content}
-                          </td>
-                        );
-                      }
-                      if (columnName.data == "advisorName") {
-                        return (
-                          <td key={colIndex}>
-                            <a
-                              href="#"
-                              onClick={() => {
-                                totalAmountByPerson(content);
-                              }}
-                            >
+                {tableData.length > 0 &&
+                  filterData.map((rowData, rowIndex) => (
+                    <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
+                      {columnNames.map((columnName, colIndex) => {
+                        let content;
+                        content = rowData[columnName.data];
+                        if (columnName.data == "name") {
+                          return (
+                            <td key={colIndex} className="sticky-left">
                               {content}
-                            </a>
-                          </td>
-                        );
-                      }
-                      if (columnName.data == "amounts") {
-                        content = amountSeperator(rowData[columnName.data]);
-                      }
-                      if (columnName.data == "action") {
-                        return (
-                          <td key={colIndex} className="sticky-action">
-                            <button
-                              className="px-4 btn btn-primary"
-                              title="Edit"
-                              onClick={() => {
-                                handleEditModal(
-                                  "open",
-                                  rowData?.idBusinessPipelineg
-                                );
-                              }}
-                            >
-                              <i className="mdi mdi-pen"></i>
-                            </button>
-                            <button
-                              className="px-4 ms-2 btn btn-danger"
-                              title="Delete"
-                              onClick={() => {
-                                deleteBusinessPipeline(
-                                  rowData?.idBusinessPipelineg
-                                );
-                              }}
-                            >
-                              <i className="mdi mdi-delete"></i>
-                            </button>
-                          </td>
-                        );
-                      }
-                      return <td key={colIndex}>{content}</td>;
-                    })}
-                  </tr>
-                ))}
+                            </td>
+                          );
+                        }
+                        if (columnName.data == "advisorName") {
+                          return (
+                            <td key={colIndex}>
+                              <a
+                                href="#"
+                                onClick={() => {
+                                  totalAmountByPerson(content);
+                                }}
+                              >
+                                {content}
+                              </a>
+                            </td>
+                          );
+                        }
+                        if (columnName.data == "amounts") {
+                          content = amountSeperator(rowData[columnName.data]);
+                        }
+                        if (columnName.data == "action") {
+                          return (
+                            <td key={colIndex} className="sticky-action">
+                              <button
+                                className="px-4 btn btn-primary"
+                                title="Edit"
+                                onClick={() => {
+                                  handleEditModal(
+                                    "open",
+                                    rowData?.idBusinessPipelineg
+                                  );
+                                }}
+                              >
+                                <i className="mdi mdi-pen"></i>
+                              </button>
+                              <button
+                                className="px-4 ms-2 btn btn-danger"
+                                title="Delete"
+                                onClick={() => {
+                                  deleteBusinessPipeline(
+                                    rowData?.idBusinessPipelineg
+                                  );
+                                }}
+                              >
+                                <i className="mdi mdi-delete"></i>
+                              </button>
+                            </td>
+                          );
+                        }
+                        return <td key={colIndex}>{content}</td>;
+                      })}
+                    </tr>
+                  ))}
               </tbody>
               <tfoot className="fixed">
                 <tr>

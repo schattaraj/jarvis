@@ -107,7 +107,7 @@ export default function PUTS() {
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
             setSelectedTicker(fetchTickersRes[0]?.element1)
@@ -120,7 +120,7 @@ export default function PUTS() {
     }
     const fetchDates = async () => {
         try {
-            const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDatesPut?_=1706850539768")
+            const fetchDates = await fetch("/api/proxy?api=findAllDatesPut?_=1706850539768")
             const fetchDateRes = await fetchDates.json()
             setDates(fetchDateRes)
             setSelectedDate(fetchDateRes[0])
@@ -135,7 +135,7 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findAllPutsByTickerName?tickername=${selectedTicker}`)
+            const apiCall = await fetch(`/api/proxy?api=findAllPutsByTickerName?tickername=${selectedTicker}`)
             const apiCallRes = await apiCall.json()
             setTableData(apiCallRes)
             findMeanPutByTickerName()
@@ -151,7 +151,7 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findPutDataByDate?date=${selectedDate}`)
+            const apiCall = await fetch(`/api/proxy?api=findPutDataByDate?date=${selectedDate}`)
             const apiCallRes = await apiCall.json()
             setTableData(apiCallRes)
             setMeanData(false)
@@ -167,7 +167,7 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`)
+            const apiCall = await fetch(`/api/proxy?api=findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`)
             const apiCallRes = await apiCall.json()
             setMeanData(apiCallRes)
         } catch (error) {
@@ -222,7 +222,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedPutData`, {
+            const response = await fetch(`/api/proxy?api=getCalculatedPutData`, {
                 method: 'POST',
                 body: formData,
             });
@@ -273,7 +273,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}savePuts`, {
+            const response = await fetch(`/api/proxy?api=savePuts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Add this line
@@ -310,7 +310,7 @@ export default function PUTS() {
             if (result.isConfirmed) {
                 context.setLoaderState(true)
                 try {
-                    const rowDelete = await fetch(`https://jharvis.com/JarvisV2/deletePutBy?tickerid=${id}`)
+                    const rowDelete = await fetch(`/api/proxy?api=deletePutBy?tickerid=${id}`)
                     if (rowDelete.ok) {
                         const rowDeleteRes = await rowDelete.json()
                         Swal.fire({

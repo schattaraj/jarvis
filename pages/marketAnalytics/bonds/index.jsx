@@ -160,7 +160,7 @@ export default function Bonds() {
         const queryString = new URLSearchParams(payload).toString();
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch(`https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`)
+            const getBonds = await fetch(`/api/proxy?api=getHistoryByTickerBond?${queryString}`)
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
@@ -214,7 +214,7 @@ export default function Bonds() {
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
-            const columnApi = await fetch("https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
+            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517")
             const columnApiRes = await columnApi.json()
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes)
@@ -232,7 +232,7 @@ export default function Bonds() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
+            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518")
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
@@ -258,7 +258,8 @@ export default function Bonds() {
     }
     const downloadReport = async (reportName) => {
         try {
-            const fetchReport = await fetch("https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" + reportName)
+            // const fetchReport = await fetch("https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" + reportName)
+            const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
             const fetchReportRes = await fetchReport.json()
             window.open(fetchReportRes.responseStr, '_blank')
         }
@@ -269,7 +270,8 @@ export default function Bonds() {
     }
     const deleteReport = async (reportName) => {
         try {
-            const deleteApi = await fetch("https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName)
+            // const deleteApi = await fetch("https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName)
+            const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
             const deleteApiRes = await deleteApi.json()
             alert(deleteApiRes.msg)
         }
@@ -282,7 +284,7 @@ export default function Bonds() {
     const getTickerCartDtata = async () => {
         try {
             const tickerName = selectedBond.map(item => item.element1)
-            const apiUrl = `https://www.jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(tickerName)}&year=2023&year2=2023`;
+            const apiUrl = `/api/proxy?api=getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(tickerName)}&year=2023&year2=2023`;
 
             const response = await fetch(apiUrl);
             const data = await response.json();
@@ -323,7 +325,8 @@ export default function Bonds() {
     const ranking = async () => {
         context.setLoaderState(true)
         try {
-            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
+            // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
+            const rankingApi = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
             const rankingApiRes = await rankingApi.json()
             setRankingData(rankingApiRes)
             setCompareData(rankingApiRes)
@@ -353,7 +356,8 @@ export default function Bonds() {
 
         const queryString = new URLSearchParams(payload).toString();
         console.log("queryString", queryString)
-        const url = `https://jharvis.com/JarvisV2/getCalculateBond?${queryString}`;
+        // const url = `https://jharvis.com/JarvisV2/getCalculateBond?${queryString}`;
+        const url = `/api/proxy?api=getCalculateBond?${queryString}`;
         context.setLoaderState(true)
         try {
             const response = await fetch(url);
@@ -384,7 +388,8 @@ export default function Bonds() {
                 _: new Date().getTime() // This will generate a unique timestamp
             };
             const queryString = new URLSearchParams(payload).toString();
-            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            const getChartHistrory = await fetch(`/api/proxy?api=getChartForHistoryByTicker?${queryString}`)
             const getChartHistroryRes = await getChartHistrory.json()
             console.log("getChartHistroryRes", getChartHistroryRes)
             setChartHistory(getChartHistroryRes)
@@ -401,7 +406,8 @@ export default function Bonds() {
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
+            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=" + new Date().getTime())
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
             fetchColumnNames()
@@ -438,7 +444,7 @@ export default function Bonds() {
             formData.append('fileDate', fileDate);
             formData.append('myfile', file);
             console.log("formData", formData)
-            const upload = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileBondImport", {
+            const upload = await fetch("/api/proxy?api=uploadFileBondImport", {
                 method: "POST",
                 // headers: {
                 //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -475,7 +481,8 @@ export default function Bonds() {
             const filePath = matchPathAndAnchor[1];
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
+            // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
+            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
             return <>{parse(imgTag)}{parse(anchorTag, options)}</>
         }
 
@@ -484,7 +491,8 @@ export default function Bonds() {
         if (matchOnlyPath) {
             const filePath = matchOnlyPath[1];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image">`;
             return parse(imgTag);
         }
 
@@ -499,7 +507,8 @@ export default function Bonds() {
             const filePath = matchPathAndText[1];
             const additionalText = matchPathAndText[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image"></br>`;
             // Combine img tag with additional text
             const resultHtml = `${imgTag} ${additionalText}`;
             return parse(resultHtml); // Adjust parse function as needed

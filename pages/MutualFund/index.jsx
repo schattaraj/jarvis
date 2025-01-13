@@ -19,7 +19,7 @@ export default function MutualFund() {
     const fetchMutualFund = async () => {
         context.setLoaderState(true)
         try {
-            const getMutualFund = await fetch("https://jharvis.com/JarvisV2/getAllMutualFund?_=1716649829527")
+            const getMutualFund = await fetch("/api/proxy?api=getAllMutualFund?_=1716649829527")
             const getMutualFundRes = await getMutualFund.json()
             setMutualFund(getMutualFundRes)
             setMutualFundFiltered(getMutualFundRes)
@@ -48,7 +48,7 @@ export default function MutualFund() {
     };
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1716787665088")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716787665088")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
         }
@@ -58,7 +58,7 @@ export default function MutualFund() {
     }
     const fetchAllNav = async () => {
         try {
-            const getAllNav = await fetch("https://jharvis.com/JarvisV2/getAllNav?_=1716873949438")
+            const getAllNav = await fetch("/api/proxy?api=getAllNav?_=1716873949438")
             const getAllNavRes = await getAllNav.json()
             setNavValue(getAllNavRes.nav)
         }
@@ -72,7 +72,7 @@ export default function MutualFund() {
     const getStockPriceCheck = async () => {
         context.setLoaderState(true)
         try {
-            const stockPrice = await fetch("https://jharvis.com/JarvisV2/getStockPriceCheck?_=1716883270435")
+            const stockPrice = await fetch("/api/proxy?api=getStockPriceCheck?_=1716883270435")
             const stockPriceRes = await stockPrice.json()
             Swal.fire({title:stockPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
@@ -84,7 +84,7 @@ export default function MutualFund() {
     const getBondPriceCheck = async () => {
         context.setLoaderState(true)
         try {
-            const bondPrice = await fetch("https://jharvis.com/JarvisV2/getBondPriceCheck?_=1716883270437")
+            const bondPrice = await fetch("/api/proxy?api=getBondPriceCheck?_=1716883270437")
             const bondPriceRes = await bondPrice.json()
             Swal.fire({title:bondPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
@@ -98,7 +98,7 @@ export default function MutualFund() {
         const form = e.target;
         const formData = new FormData(form);
         try {
-            const response = await fetch('https://jharvis.com/JarvisV2/createNav', {
+            const response = await fetch('/api/proxy?api=createNav', {
                 method: 'POST',
                 body: formData
             });
@@ -124,7 +124,7 @@ export default function MutualFund() {
         const formData = new FormData(form);
         context.setLoaderState(true)
         try {
-            const response = await fetch('https://jharvis.com/JarvisV2/createMutualFund', {
+            const response = await fetch('/api/proxy?api=createMutualFund', {
                 method: 'POST',
                 body: formData
             });

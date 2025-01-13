@@ -43,7 +43,7 @@ export default function StocksPair() {
     context.setLoaderState(true);
     try {
       const stocksApi = await fetch(
-        `https://jharvis.com/JarvisV2/getAllStocks?_=${new Date().getTime()}`
+        `/api/proxy?api=getAllStocks?_=${new Date().getTime()}`
       );
       const stocksRes = await stocksApi.json();
       setStocks(stocksRes);
@@ -65,7 +65,7 @@ export default function StocksPair() {
     context.setLoaderState(true);
     try {
       const dataApi = await fetch(
-        "https://jharvis.com/JarvisV2/getHistoricalDataByStockAndDate?stockA=" +
+        "/api/proxy?api=getHistoricalDataByStockAndDate?stockA=" +
           inputData?.stockA +
           "&stockB=" +
           inputData?.stockB +

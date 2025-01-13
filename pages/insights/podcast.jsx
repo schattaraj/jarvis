@@ -14,7 +14,7 @@ export default function Podcast() {
   const fetchPodcasts = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllPodCasts?filterText=&_=1707116098092")
+      const apiCall = await fetch("/api/proxy?api=getAllPodCasts?filterText=&_=1707116098092")
       const response = await apiCall.json()
       setPodcasts(response)
     }
@@ -69,7 +69,7 @@ export default function Podcast() {
               <h4 className='ps-3'>{currentPodcast.description}</h4>
               <AudioPlayer
                 autoPlay={false}
-                src={"https://jharvis.com/JarvisV2/playVideo?fileName=" + currentPodcast.podCastsDetails}
+                src={"/api/proxy?api=playVideo?fileName=" + currentPodcast.podCastsDetails}
                 onPlay={e => console.log("onPlay", currentPodcast)}
                 // other props here
                 ref={audioRef}

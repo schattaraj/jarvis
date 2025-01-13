@@ -12,7 +12,7 @@ export default function AddTicker() {
             e.preventDefault()
         const form = e.target;
         const formData = new FormData(form);
-        const response = await fetch('https://jharvis.com/JarvisV2/addTicker', {
+        const response = await fetch('/api/proxy?api=addTicker', {
                 method: 'POST',
                 body: formData
             });

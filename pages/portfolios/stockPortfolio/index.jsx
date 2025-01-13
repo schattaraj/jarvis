@@ -76,7 +76,7 @@ export default function Portfolio() {
     const handleClick = async (name) => {
         setReportModal(true)
         try {
-            const fetchReport = await fetch("https://jharvis.com/JarvisV2/getTickerReportsByTickerName?tickerName=" + name)
+            const fetchReport = await fetch("/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name)
             const fetchReportRes = await fetchReport.json()
             console.log("fetchReportRes", fetchReportRes)
             setReportData(fetchReportRes)
@@ -87,7 +87,7 @@ export default function Portfolio() {
     }
     const fetchColumnNames = async () => {
         try {
-            const columnApi = await fetch("https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Tickers_Watchlist&_=170004124669")
+            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist&_=170004124669")
             const columnApiRes = await columnApi.json()
             setColumnNames(columnApiRes)
         }
@@ -204,7 +204,7 @@ export default function Portfolio() {
     const getAllStock = async () => {
         context.setLoaderState(true)
         try {
-            const allStocksApi = await fetch("https://jharvis.com/JarvisV2/getAllStocksForPolio")
+            const allStocksApi = await fetch("/api/proxy?api=getAllStocksForPolio")
             const allStocksApiRes = await allStocksApi.json()
             setAllStocks(allStocksApiRes)
         }
@@ -250,7 +250,7 @@ export default function Portfolio() {
     }
     const downloadReport = async (reportName) => {
         try {
-            const fetchReport = await fetch("https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" + reportName)
+            const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
             const fetchReportRes = await fetchReport.json()
             window.open(fetchReportRes.responseStr, '_blank')
         }
@@ -260,7 +260,7 @@ export default function Portfolio() {
     }
     const deleteReport = async (reportName) => {
         try {
-            const deleteApi = await fetch("https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName)
+            const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
             const deleteApiRes = await deleteApi.json()
             alert(deleteApiRes.msg)
         }
@@ -415,7 +415,7 @@ export default function Portfolio() {
         setManageView(true)
         context.setLoaderState(true)
         try {
-            const allStockApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getAllPortfolio?userId=2&_=${new Date().getTime()}`)
+            const allStockApi = await fetch(`/api/proxy?api=getAllPortfolio?userId=2&_=${new Date().getTime()}`)
             const allStockApiRes = await allStockApi.json()
             setStockportfolios(allStockApiRes)
         } catch (error) {

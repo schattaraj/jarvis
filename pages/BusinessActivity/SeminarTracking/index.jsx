@@ -54,7 +54,7 @@ export default function SeminarTracking() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllSeminarTracking")
+            const getBonds = await fetch("/api/proxy?api=getAllSeminarTracking")
             const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
@@ -141,7 +141,7 @@ export default function SeminarTracking() {
             let addPipeline = null;
 
             if(!jsonObject.idSeminarTracking){
-                addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "addSeminarTracking", {
+                addPipeline = await fetch("/api/proxy?api=addSeminarTracking", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json'
@@ -149,7 +149,7 @@ export default function SeminarTracking() {
                     body: JSON.stringify(jsonObject)
                 })
             } else {
-                addPipeline = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "editSeminarTracking", {
+                addPipeline = await fetch("/api/proxy?api=editSeminarTracking", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ export default function SeminarTracking() {
                 try {
                     const formData = new FormData();
                     formData.append("idSeminarTracking", id)
-                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteSeminarTracking", {
+                    const rowDelete = await fetch("/api/proxy?api=deleteSeminarTracking", {
                         method: 'DELETE',
                         body: formData
                     })
@@ -242,7 +242,7 @@ export default function SeminarTracking() {
     }, [currentPage, tableData, sortConfig, limit]);
 
     const handleEditModal = async (id) => {
-        const getSeminarData = await fetch(`https://jharvis.com/JarvisV2/getSeminarTrackingByID?idSeminarTracking=${id}`);
+        const getSeminarData = await fetch(`/api/proxy?api=getSeminarTrackingByID?idSeminarTracking=${id}`);
         const getSemeniarRes = await getSeminarData.json();
         console.log("Response", getSemeniarRes);
         setEditData(getSemeniarRes);

@@ -31,7 +31,7 @@ export default function Reports() {
   const fetchVideoes = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144")
+      const apiCall = await fetch("/api/proxy?api=getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144")
       const response = await apiCall.json()
       setReports(response)
       setCurrentPdf(response[0])
@@ -73,7 +73,7 @@ export default function Reports() {
       params.append('_', new Date().getTime());
   
       // Example GET request URL with payload
-      const url = `${process.env.NEXT_PUBLIC_BASE_URL_V2+"getAllTickerReports?"+params.toString()}`;
+      const url = `${process.env.NEXT_PUBLIC_BASE_URL+"getAllTickerReports?"+params.toString()}`;
   context.setLoaderState(true)
       // Make the API request
     await  fetch(url)
@@ -172,7 +172,7 @@ export default function Reports() {
                 }
                 <h5 className='card-title'>{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.companyName}</p>
-                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`} />}
+                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`/api/proxy?api=playPdf?fileName=${currentPdf.reportfileDetails}`} />}
                 {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
               </div>
             </div>
@@ -248,7 +248,7 @@ export default function Reports() {
             <Modal.Title>Report</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+            <iframe className="embed-responsive-item" src={"/api/proxy?api=playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
           </Modal.Body>
         </Modal>
         <Footer />

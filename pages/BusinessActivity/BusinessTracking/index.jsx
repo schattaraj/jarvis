@@ -169,7 +169,7 @@ export default function BusinessTracking() {
             jsonObject.reviewMeetingWhom = reviewMeetingWhom.join(', ');
             jsonObject.newClientName = newClientName.join(', ');
 
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + 'addBusinessTracking', {
+            const response = await fetch('/api/proxy?api=addBusinessTracking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Set the content type to JSON
@@ -216,7 +216,7 @@ export default function BusinessTracking() {
                 try {
                     const formData = new FormData();
                     formData.append("idBusinessTracking", id)
-                    const rowDelete = await fetch("https://jharvis.com/JarvisV2/deleteBusinessTracking", {
+                    const rowDelete = await fetch("/api/proxy?api=deleteBusinessTracking", {
                         method: 'DELETE',
                         body: formData
                     })
@@ -253,7 +253,7 @@ export default function BusinessTracking() {
             formData.forEach((value, key) => {
                 jsonObject[key] = value;
             });
-            const response = await fetch('https://jharvis.com/JarvisV2/editBusinessTracking', {
+            const response = await fetch('/api/proxy?api=editBusinessTracking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -312,7 +312,7 @@ export default function BusinessTracking() {
                 jsonObject[key] = value;
             });
             const { advisorName, timeFrame, startdate, enddate } = jsonObject;
-            let url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}getDetailsByAdvisor?advisorName=${advisorName}`;
+            let url = `/api/proxy?api=getDetailsByAdvisor?advisorName=${advisorName}`;
             if (timeFrame) {
                 url += `&timeFrame=${timeFrame}`;
             } else {

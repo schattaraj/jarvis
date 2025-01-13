@@ -50,7 +50,8 @@ export default function Calls() {
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
         }
@@ -61,7 +62,8 @@ export default function Calls() {
     const fetchDates = async () => {
         context.setLoaderState(true)
         try {
-            const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
+            // const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
+            const fetchDates = await fetch("/api/proxy?api=findAllDates?_=1706798577725")
             const fetchDateRes = await fetchDates.json()
             setDates(fetchDateRes)
             setFilteredToDates(fetchDateRes);
@@ -82,7 +84,7 @@ export default function Calls() {
         }
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch(`https://jharvis.com/JarvisV2/findAllCallsByTickerName?tickername=${selectedTicker}`)
+            const fetchHistory = await fetch(`/api/proxy?api=findAllCallsByTickerName?tickername=${selectedTicker}`)
             const fetchHistoryRes = await fetchHistory.json()
             if(fetchHistoryRes?.length == 0){
                 Swal.fire({title:"No Data Available for this Ticker",icon:"warning",confirmButtonColor:"var(--primary)"})
@@ -98,7 +100,7 @@ export default function Calls() {
     const fetchMeanCalls = async () => {
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
+            const fetchHistory = await fetch("/api/proxy?api=findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
             const fetchHistoryRes = await fetchHistory.json()
             setMeanCalls(fetchHistoryRes)
         }
@@ -122,7 +124,8 @@ export default function Calls() {
         }
         context.setLoaderState(true)
         try {
-            const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
+            // const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
+            const fetchByDate = await fetch(`/api/proxy?api=findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
             const fetchByDateRes = await fetchByDate.json()
             console.log("fetchByDateRes",fetchByDateRes);
             setCurrentPage(1)
@@ -225,7 +228,7 @@ export default function Calls() {
         if (selectedFromDate) {
             context.setLoaderState(true)
             try {
-                const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
+                const fetchData = await fetch("/api/proxy?api=findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
                 const fetchDataRes = await fetchData.json()
                 setChartData(fetchDataRes)
             } catch (error) {
@@ -288,7 +291,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedData`, {
+            const response = await fetch(`/api/proxy?api=getCalculatedData`, {
                 method: 'POST',
                 body: formData,
             });
@@ -340,7 +343,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}saveCalls`, {
+            const response = await fetch(`/api/proxy?api=saveCalls`, {
                 method: 'POST',
                 body: JSON.stringify(calculateData),
             });

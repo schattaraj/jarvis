@@ -21,7 +21,7 @@ export default function UploadTickerReports() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerByAdmin?_=1716533190772")
+            const fetchTickers = await fetch("/api/proxy?api=getAllTickerByAdmin?_=1716533190772")
             const fetchTickersRes = await fetchTickers.json()
             setTickers(fetchTickersRes)
         }
@@ -35,7 +35,7 @@ export default function UploadTickerReports() {
     const fetchTickerReports = async () => {
         context.setLoaderState(true)
         try {
-            const fetchAllTickerReports = await fetch("https://jharvis.com/JarvisV2/getAllTickerReports?_=1716974778979");
+            const fetchAllTickerReports = await fetch("/api/proxy?api=getAllTickerReports?_=1716974778979");
             const fetchAllTickerReportsRes = await fetchAllTickerReports.json()
             setTableData(fetchAllTickerReportsRes)
         } catch (error) {
@@ -49,7 +49,7 @@ export default function UploadTickerReports() {
             e.preventDefault()
             const form = e.target;
             const formData = new FormData(form);
-            const response = await fetch('https://jharvis.com/JarvisV2/uploadReportTicker', {
+            const response = await fetch('/api/proxy?api=uploadReportTicker', {
                 method: 'POST',
                 body: formData
             });
@@ -72,7 +72,7 @@ export default function UploadTickerReports() {
     const downloadReport = async (fileName) => {
         context.setLoaderState(true)
         try {
-            const downloadApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "downloadTickerReport?fileName=" + fileName)
+            const downloadApi = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + fileName)
             const downloadApiRes = await downloadApi.json()
             window.open(downloadApiRes?.responseStr, '_blank')
         }
@@ -95,7 +95,7 @@ export default function UploadTickerReports() {
                 try {
                     const formData = new FormData();
                     formData.append("idTickerReports", id)
-                    const rowDelete = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteTickerReport", {
+                    const rowDelete = await fetch("/api/proxy?api=deleteTickerReport", {
                         method: 'DELETE',
                         body: formData
                     })

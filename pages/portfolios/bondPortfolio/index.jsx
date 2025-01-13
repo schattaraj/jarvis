@@ -73,7 +73,7 @@ export default function BondPortfolio() {
   }
   const fetchPortfolioNames = async () => {
     try {
-      const portfolioApi = await fetch("https://jharvis.com/JarvisV2/getAllBondPortFolioTicker?userId=2&_=1716292770931")
+      const portfolioApi = await fetch("/api/proxy?api=getAllBondPortFolioTicker?userId=2&_=1716292770931")
       const portfolioApiRes = await portfolioApi.json()
       setPortfolioNames(portfolioApiRes)
       setPortfolioId(portfolioApiRes[0]?.idBondPortfolio)
@@ -86,7 +86,7 @@ export default function BondPortfolio() {
   const fetchColumnNames = async () => {
     try {
       // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1716356733282")
-      const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumnsBondPortfolio?metaDataName=Bondpricing_Master")
+      const columnApi = await fetch("/api/proxy?api=getColumnsBondPortfolio?metaDataName=Bondpricing_Master")
       const columnApiRes = await columnApi.json()
       const extraColumns = [{
         "elementId": null,
@@ -163,7 +163,7 @@ export default function BondPortfolio() {
     context.setLoaderState(true)
     try {
       if (selectedPortfolioId) {
-        const getPortfolio = await fetch("https://jharvis.com/JarvisV2/getBondPortFolioSet?idPortfolio=" + selectedPortfolioId)
+        const getPortfolio = await fetch("/api/proxy?api=getBondPortFolioSet?idPortfolio=" + selectedPortfolioId)
         const getPortfolioRes = await getPortfolio.json()
         setTableData(getPortfolioRes)
         setFilterData(getPortfolioRes)
@@ -182,7 +182,7 @@ export default function BondPortfolio() {
   const getAllStock = async () => {
     context.setLoaderState(true)
     try {
-      const allStocksApi = await fetch("https://jharvis.com/JarvisV2/getAllBondForPolio?_=1716357445057")
+      const allStocksApi = await fetch("/api/proxy?api=getAllBondForPolio?_=1716357445057")
       const allStocksApiRes = await allStocksApi.json()
       setAllBondPortfolio(allStocksApiRes)
     }
@@ -247,7 +247,7 @@ export default function BondPortfolio() {
     setManageView(true)
     context.setLoaderState(true)
     try {
-      const allBondApi = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getAllBondPortfolio?userId=2&_=1721819897846")
+      const allBondApi = await fetch("/api/proxy?api=getAllBondPortfolio?userId=2&_=1721819897846")
       const allBondApiRes = await allBondApi.json()
       setBondportfolios(allBondApiRes)
     } catch (error) {
@@ -288,7 +288,7 @@ export default function BondPortfolio() {
       if (result.isConfirmed) {
         context.setLoaderState(true)
         try {
-          const deleteApi = await fetch(`https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
+          const deleteApi = await fetch(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
           const deleteApiRes = deleteApi.json()
           console.log("Success", deleteApiRes)
           getAllBondForPolios()
@@ -342,7 +342,7 @@ export default function BondPortfolio() {
       });
       return;
     }
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`;
+    const url = `/api/proxy?api=createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`;
     const formData = new FormData();
     selectedStocks.forEach(stock => {
       const dataString = `${stock?.name.split(" |")[0]}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
@@ -886,7 +886,7 @@ export default function BondPortfolio() {
                         </div>
                     </Modal.Body>
                 </Modal> */}
-        <PortfolioTable url={`${process.env.NEXT_PUBLIC_BASE_URL_V2}getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`} open={editModal} heading={"Edit Portfolio"} handleCloseModal={closeEditModal} editPortfolioName={editPortfolioName} getAllBondForPolios={getAllBondForPolios} />
+        <PortfolioTable url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`} open={editModal} heading={"Edit Portfolio"} handleCloseModal={closeEditModal} editPortfolioName={editPortfolioName} getAllBondForPolios={getAllBondForPolios} />
         <Modal show={bondPortfolioShow} onHide={bondPortfoliohandleClose} className='portfolio-modal'>
           <Modal.Header closeButton>
             <Modal.Title>{selectedPortfolioText} Profit And Loss</Modal.Title>

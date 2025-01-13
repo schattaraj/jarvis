@@ -45,7 +45,7 @@ export default function SaveSecurities() {
     const fetchAllStockData = async () => {
         context.setLoaderState(true)
         try {
-            const findAllStocks = await fetch("https://jharvis.com/JarvisV2/findAllStocks")
+            const findAllStocks = await fetch("/api/proxy?api=findAllStocks")
             const findAllStocksRes = await findAllStocks.json()
             setStockData(findAllStocksRes)
         } catch (error) {
@@ -56,7 +56,7 @@ export default function SaveSecurities() {
     const fetchAllFavoriteStockData = async () => {
         context.setLoaderState(true)
         try {
-            const findAllFavoriteStocks = await fetch("https://jharvis.com/JarvisV2/findAllFavoriteStocks?userid=2")
+            const findAllFavoriteStocks = await fetch("/api/proxy?api=findAllFavoriteStocks?userid=2")
             const findAllFavoriteStocksRes = await findAllFavoriteStocks.json()
             setFavoriteStockData(findAllFavoriteStocksRes)
         } catch (error) {
@@ -67,7 +67,7 @@ export default function SaveSecurities() {
     const fetchAllBonds = async () => {
         context.setLoaderState(true)
         try {
-            const findAllBonds = await fetch("https://jharvis.com/JarvisV2/findAllBonds")
+            const findAllBonds = await fetch("/api/proxy?api=findAllBonds")
             const findAllBondsRes = await findAllBonds.json()
             setAllBonds(findAllBondsRes)
             setAllBondsFiltered(SliceData(bondCurrentPage, allBondLimit, findAllBondsRes))
@@ -79,7 +79,7 @@ export default function SaveSecurities() {
     const fetchAllFavoriteBonds = async () => {
         context.setLoaderState(true)
         try {
-            const findAllFavoriteBonds = await fetch("https://jharvis.com/JarvisV2/findAllFavoriteBonds?userid=2")
+            const findAllFavoriteBonds = await fetch("/api/proxy?api=findAllFavoriteBonds?userid=2")
             const findAllFavoriteBondsRes = await findAllFavoriteBonds.json()
             setAllFavoriteBonds(findAllFavoriteBondsRes)
             setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds, favBondCurrentPage))

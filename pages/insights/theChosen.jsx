@@ -20,7 +20,7 @@ export default function TheChosen() {
     const fetchVideoes = async()=>{
         setLoader(true)
         try{
-            const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerOnePageReports?filterText=&_=1706882102005")
+            const apiCall = await fetch("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005")
             const response = await apiCall.json()
             setReports(response)
             setCurrentPdf(response[0])
@@ -81,7 +81,7 @@ export default function TheChosen() {
       }
       <h5 className='card-title'>{currentPdf?.tickerName}</h5>
       <p className ="card-text">{currentPdf?.companyName}</p>
-  <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
+  <iframe className="embed-responsive-item report-iframe" src={"/api/proxy?api=playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
   </div>
   </div>
   <div className="col-md-5">
@@ -217,7 +217,7 @@ export default function TheChosen() {
           <Modal.Title>Report</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
+        <iframe className="embed-responsive-item" src={"/api/proxy?api=playPdf?fileName="+currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{width:"100%"}}></iframe>
         </Modal.Body>
       </Modal>
 <Footer/>

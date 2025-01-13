@@ -37,7 +37,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
     const context = useContext(Context)
     const fetchData = async () => {
         try {
-            const response = await fetch('https://www.jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Bondpricing_Master&_=1705052752528');
+            const response = await fetch('/api/proxy?api=findImportDatesByMonth?metaDataName=Bondpricing_Master&_=1705052752528');
             const result = await response.json();
             setData(result);
         } catch (error) {
@@ -63,7 +63,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
         // console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
                 method: 'DELETE',
             });
 
@@ -136,7 +136,7 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
           }
           context.setLoaderState(true)
           try {
-            const bondHistoryCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=${dates.date1}&date2=${dates.date2}`)
+            const bondHistoryCompare = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=${dates.date1}&date2=${dates.date2}`)
             const bondHistoryCompareRes = await bondHistoryCompare.json()
             setCompareData(bondHistoryCompareRes)
             setSelectedOption("History")

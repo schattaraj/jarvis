@@ -52,8 +52,11 @@ export default function PemDetails() {
   }, [firstColRef, filterData, visibleColumns]);
   const fetchColumnNames = async () => {
     try {
+      // const columnApi = await fetch(
+      //   "https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344"
+      // );
       const columnApi = await fetch(
-        "https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344"
+        "/api/proxy?api=getColumns?metaDataName=PEM_NEW&_=1725280625344"
       );
       const columnApiRes = await columnApi.json();
       columnApiRes.push(...extraColumns);
@@ -89,8 +92,11 @@ export default function PemDetails() {
     context.setLoaderState(true);
     try {
       const getBonds = await fetch(
-        "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
+        "/api/proxy?api=getImportsData?metaDataName=PEM_NEW&_=1725280825673"
       );
+      // const getBonds = await fetch(
+      //   "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
+      // );
       const getBondsRes = await getBonds.json();
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
@@ -169,7 +175,7 @@ export default function PemDetails() {
     try {
       const formData = new FormData(form);
       const upload = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFilePEM",
+        "/api/proxy?api=uploadFilePEM",
         {
           method: "POST",
           headers: {
