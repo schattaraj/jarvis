@@ -6,7 +6,7 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import Breadcrumb from '../../components/Breadcrumb';
 import SliceData from '../../components/SliceData';
-import { convertToReadableString, formatDate, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals } from '../../utils/utils';
+import { convertToReadableString, fetchWithInterceptor, formatDate, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals } from '../../utils/utils';
 import Swal from 'sweetalert2';
 import { Pagination } from '../../components/Pagination';
 import PutChart from '../../components/PutChart';
@@ -107,9 +107,10 @@ export default function PUTS() {
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
+            // setTableData(fetchTickersRes)
             setSelectedTicker(fetchTickersRes[0]?.element1)
             setInputData({ ...inputData, tickername: fetchTickersRes[0]?.element1 })
         }
@@ -120,8 +121,8 @@ export default function PUTS() {
     }
     const fetchDates = async () => {
         try {
-            const fetchDates = await fetch("/api/proxy?api=findAllDatesPut?_=1706850539768")
-            const fetchDateRes = await fetchDates.json()
+            const fetchDates = await fetchWithInterceptor("/api/proxy?api=findAllDatesPut?_=1706850539768", false)
+            const fetchDateRes = fetchDates
             setDates(fetchDateRes)
             setSelectedDate(fetchDateRes[0])
         }
@@ -135,8 +136,8 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`/api/proxy?api=findAllPutsByTickerName?tickername=${selectedTicker}`)
-            const apiCallRes = await apiCall.json()
+            const apiCall = await fetchWithInterceptor(`/api/proxy?api=findAllPutsByTickerName?tickername=${selectedTicker}`, false)
+            const apiCallRes = apiCall
             setTableData(apiCallRes)
             findMeanPutByTickerName()
         } catch (error) {
@@ -151,8 +152,8 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`/api/proxy?api=findPutDataByDate?date=${selectedDate}`)
-            const apiCallRes = await apiCall.json()
+            const apiCall = await fetchWithInterceptor(`/api/proxy?api=findPutDataByDate?date=${selectedDate}`, false)
+            const apiCallRes = apiCall
             setTableData(apiCallRes)
             setMeanData(false)
         } catch (error) {
@@ -167,8 +168,8 @@ export default function PUTS() {
         }
         context.setLoaderState(true)
         try {
-            const apiCall = await fetch(`/api/proxy?api=findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`)
-            const apiCallRes = await apiCall.json()
+            const apiCall = await fetchWithInterceptor(`/api/proxy?api=findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`, false)
+            const apiCallRes = apiCall
             setMeanData(apiCallRes)
         } catch (error) {
             console.log("Error: ", error);
@@ -222,7 +223,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`/api/proxy?api=getCalculatedPutData`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedPutData`, false, null, {
                 method: 'POST',
                 body: formData,
             });
@@ -231,7 +232,7 @@ export default function PUTS() {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            const result = await response.json();
+            const result = response
             console.log("API Response", result);
             if (isFirstSubmission) {
                 setTableData([result]); // Clear and set new data on first submission
@@ -273,7 +274,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`/api/proxy?api=savePuts`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=savePuts`, false, null, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Add this line
@@ -286,7 +287,7 @@ export default function PUTS() {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const result = await response.json();
+            const result = response
             context.setLoaderState(true)
         }
         catch (error) {
@@ -310,9 +311,9 @@ export default function PUTS() {
             if (result.isConfirmed) {
                 context.setLoaderState(true)
                 try {
-                    const rowDelete = await fetch(`/api/proxy?api=deletePutBy?tickerid=${id}`)
+                    const rowDelete = await fetchWithInterceptor(`/api/proxy?api=deletePutBy?tickerid=${id}`, false)
                     if (rowDelete.ok) {
-                        const rowDeleteRes = await rowDelete.json()
+                        const rowDeleteRes = rowDelete
                         Swal.fire({
                             title: rowDeleteRes?.msg,
                             icon: "success",

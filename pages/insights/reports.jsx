@@ -16,6 +16,7 @@ import Select from 'react-select'
 import Breadcrumb from '../../components/Breadcrumb';
 import { Form } from 'react-bootstrap';
 import { Context } from '../../contexts/Context';
+import { fetchWithInterceptor } from '../../utils/utils';
 export default function Reports() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -31,8 +32,8 @@ export default function Reports() {
   const fetchVideoes = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("/api/proxy?api=getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144")
-      const response = await apiCall.json()
+      const apiCall = await fetchWithInterceptor("/api/proxy?api=getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144", false)
+      const response = apiCall
       setReports(response)
       setCurrentPdf(response[0])
     }

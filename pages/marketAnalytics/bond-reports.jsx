@@ -6,7 +6,7 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
-import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { calculateAverage, exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Form, Modal, Dropdown } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import BondReportHistoryModal from '../../components/BondReportHistoryModal';
@@ -34,8 +34,8 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Debt_Report_Matrices&_=1705582308870")
-            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Debt_Report_Matrices&_=1705582308870")
-            const columnApiRes = await columnApi.json()
+            const columnApi = await fetchWithInterceptor("/api/proxy?api=getColumns?metaDataName=Debt_Report_Matrices&_=1705582308870", false)
+            const columnApiRes = columnApi
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes);
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -53,8 +53,8 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             // const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871")
-            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871")
-            const getBondsRes = await getBonds.json()
+            const getBonds = await fetchWithInterceptor("/api/proxy?api=getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871", false)
+            const getBondsRes = getBonds
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             // setTimeout(() => {
@@ -114,8 +114,8 @@ const BondReports = () => {
     const handleReportData = async (name) => {
         context.setLoaderState(true)
         try {
-            const fetchReport = await fetch("/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name)
-            const fetchReportRes = await fetchReport.json()
+            const fetchReport = await fetchWithInterceptor("/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name, false)
+            const fetchReportRes = fetchReport
             setReportData(fetchReportRes)
             setReportModal(true)
         }
@@ -128,8 +128,8 @@ const BondReports = () => {
     const downloadReport = async (reportName) => {
         context.setLoaderState(true)
         try {
-            const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
-            const fetchReportRes = await fetchReport.json()
+            const fetchReport = await fetchWithInterceptor("/api/proxy?api=downloadTickerReport?fileName=" + reportName, false)
+            const fetchReportRes = fetchReport
             window.open(fetchReportRes.responseStr, '_blank')
         }
         catch (e) {
@@ -149,9 +149,9 @@ const BondReports = () => {
                 if (result.isConfirmed) {
                     context.setLoaderState(true)
                     try {
-                        const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
+                        const deleteApi = await fetchWithInterceptor("/api/proxy?api=deletePortfolioByName?name=" + reportName, false)
                         if (deleteApi.ok) {
-                            const deleteApiRes = await deleteApi.json()
+                            const deleteApiRes = deleteApi
                             Swal.fire({ title: deleteApiRes.msg, confirmButtonColor: "#719B5F" })
                         }
                     } catch (error) {
@@ -171,8 +171,8 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -184,8 +184,8 @@ const BondReports = () => {
         if (selectedTicker) {
             context.setLoaderState(true)
             try {
-                const Debt_Report_Matrices = await fetch("/api/proxy?api=getHistoryByTicker?metadataName=Debt_Report_Matrices&ticker=" + selectedTicker)
-                const Debt_Report_MatricesRes = await Debt_Report_Matrices.json()
+                const Debt_Report_Matrices = await fetchWithInterceptor("/api/proxy?api=getHistoryByTicker?metadataName=Debt_Report_Matrices&ticker=" + selectedTicker, false)                
+                const Debt_Report_MatricesRes = Debt_Report_Matrices
                 setTableData(Debt_Report_MatricesRes)
             } catch (error) {
                 console.log("Error", error);
@@ -217,14 +217,14 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-            const upload = await fetch("/api/proxy?api=uploadFile", {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFile",false, null, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: formData
             })
-            const uploadRes = await upload.json()
+            const uploadRes = upload
             if (upload.status == 400) {
                 Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
             }

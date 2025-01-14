@@ -5,6 +5,7 @@ import Sidebar from '../../components/sidebar';
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
 import Breadcrumb from '../../components/Breadcrumb';
+import { fetchWithInterceptor } from '../../utils/utils';
 export default function Podcast() {
   const [podcasts, setPodcasts] = useState([])
   const [show, setShow] = useState(false);
@@ -14,8 +15,8 @@ export default function Podcast() {
   const fetchPodcasts = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("/api/proxy?api=getAllPodCasts?filterText=&_=1707116098092")
-      const response = await apiCall.json()
+      const apiCall = await fetchWithInterceptor("/api/proxy?api=getAllPodCasts?filterText=&_=1707116098092", false)
+      const response = apiCall
       setPodcasts(response)
     }
     catch (e) {

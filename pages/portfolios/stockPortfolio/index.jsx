@@ -76,8 +76,8 @@ export default function Portfolio() {
     const handleClick = async (name) => {
         setReportModal(true)
         try {
-            const fetchReport = await fetch("/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name)
-            const fetchReportRes = await fetchReport.json()
+            const fetchReport = await fetchWithInterceptor("/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name, false)
+            const fetchReportRes = fetchReport
             console.log("fetchReportRes", fetchReportRes)
             setReportData(fetchReportRes)
         }
@@ -87,8 +87,8 @@ export default function Portfolio() {
     }
     const fetchColumnNames = async () => {
         try {
-            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist&_=170004124669")
-            const columnApiRes = await columnApi.json()
+            const columnApi = await fetchWithInterceptor("/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist&_=170004124669", false)
+            const columnApiRes = columnApi
             setColumnNames(columnApiRes)
         }
         catch (e) {
@@ -204,8 +204,8 @@ export default function Portfolio() {
     const getAllStock = async () => {
         context.setLoaderState(true)
         try {
-            const allStocksApi = await fetch("/api/proxy?api=getAllStocksForPolio")
-            const allStocksApiRes = await allStocksApi.json()
+            const allStocksApi = await fetchWithInterceptor("/api/proxy?api=getAllStocksForPolio", false)
+            const allStocksApiRes = allStocksApi
             setAllStocks(allStocksApiRes)
         }
         catch (e) {
@@ -250,8 +250,8 @@ export default function Portfolio() {
     }
     const downloadReport = async (reportName) => {
         try {
-            const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
-            const fetchReportRes = await fetchReport.json()
+            const fetchReport = await fetchWithInterceptor("/api/proxy?api=downloadTickerReport?fileName=" + reportName, false)
+            const fetchReportRes = fetchReport
             window.open(fetchReportRes.responseStr, '_blank')
         }
         catch (e) {
@@ -260,8 +260,8 @@ export default function Portfolio() {
     }
     const deleteReport = async (reportName) => {
         try {
-            const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
-            const deleteApiRes = await deleteApi.json()
+            const deleteApi = await fetchWithInterceptor("/api/proxy?api=deletePortfolioByName?name=" + reportName, false)
+            const deleteApiRes = deleteApi
             alert(deleteApiRes.msg)
         }
         catch (e) {
@@ -415,8 +415,8 @@ export default function Portfolio() {
         setManageView(true)
         context.setLoaderState(true)
         try {
-            const allStockApi = await fetch(`/api/proxy?api=getAllPortfolio?userId=2&_=${new Date().getTime()}`)
-            const allStockApiRes = await allStockApi.json()
+            const allStockApi = await fetchWithInterceptor(`/api/proxy?api=getAllPortfolio?userId=2&_=${new Date().getTime()}`, true)
+            const allStockApiRes = allStockApi
             setStockportfolios(allStockApiRes)
         } catch (error) {
 

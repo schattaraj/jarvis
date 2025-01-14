@@ -5,6 +5,7 @@ import { Context } from "../contexts/Context";
 import { PageFlip } from "page-flip";
 import Link from "next/link";
 import { Button } from "react-bootstrap";
+import { fetchWithInterceptor } from "../utils/utils";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -103,7 +104,7 @@ const PDFViewer = ({ pdfUrl }) => {
   function downloadPDF(url) {
     const slipLength = url.split("/").length
     const fileName = url.split("/")[slipLength - 1]
-    fetch(url)
+    fetchWithInterceptor(url, false)
         .then(response => response.blob())
         .then(blob => {
             const link = document.createElement('a');

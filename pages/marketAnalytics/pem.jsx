@@ -11,6 +11,7 @@ import {
   amountSeperator,
   calculateAverage,
   exportToExcel,
+  fetchWithInterceptor,
   formatCurrency,
   generatePDF,
   getSortIcon,
@@ -55,10 +56,11 @@ export default function PemDetails() {
       // const columnApi = await fetch(
       //   "https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344"
       // );
-      const columnApi = await fetch(
-        "/api/proxy?api=getColumns?metaDataName=PEM_NEW&_=1725280625344"
+      const columnApi = await fetchWithInterceptor(
+        "/api/proxy?api=getColumns?metaDataName=PEM_NEW&_=1725280625344",
+        false
       );
-      const columnApiRes = await columnApi.json();
+      const columnApiRes = columnApi;
       columnApiRes.push(...extraColumns);
       // columnApiRes.splice(0, 0, extraColumns[0])
       // columnApiRes.push(...extraColumns.slice(1))
@@ -91,13 +93,14 @@ export default function PemDetails() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        "/api/proxy?api=getImportsData?metaDataName=PEM_NEW&_=1725280825673"
+      const getBonds = await fetchWithInterceptor(
+        "/api/proxy?api=getImportsData?metaDataName=PEM_NEW&_=1725280825673",
+        false
       );
       // const getBonds = await fetch(
       //   "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
       // );
-      const getBondsRes = await getBonds.json();
+      const getBondsRes = getBonds;
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       // setTimeout(() => {
@@ -174,8 +177,10 @@ export default function PemDetails() {
     context.setLoaderState(true);
     try {
       const formData = new FormData(form);
-      const upload = await fetch(
+      const upload = await fetchWithInterceptor(
         "/api/proxy?api=uploadFilePEM",
+        true,
+        null,
         {
           method: "POST",
           headers: {
@@ -184,7 +189,7 @@ export default function PemDetails() {
           body: formData,
         }
       );
-      const uploadRes = await upload.json();
+      const uploadRes = upload
       if (upload.status == 400) {
         Swal.fire({
           title: uploadRes?.message,
@@ -570,14 +575,21 @@ export default function PemDetails() {
                 <tr>
                   {columnNames.map((columnName, index) => {
                     const columnClass =
-                      columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
+                      columnName.elementInternalName === "element1" ||
+                      columnName.elementInternalName === "element2"
+                        ? "sticky-column"
+                        : "";
                     return (
                       visibleColumns.includes(
                         columnName.elementInternalName
                       ) && (
                         <th
                           key={index}
-                          ref={columnName.elementInternalName === "element1" ? firstColRef : null}
+                          ref={
+                            columnName.elementInternalName === "element1"
+                              ? firstColRef
+                              : null
+                          }
                           className={columnClass}
                           style={{
                             left:
@@ -711,7 +723,10 @@ export default function PemDetails() {
                       }
                       // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                       const columnClass =
-                        columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
+                        columnName.elementInternalName === "element1" ||
+                        columnName.elementInternalName === "element2"
+                          ? "sticky-column"
+                          : "";
                       return (
                         <td
                           key={colIndex}

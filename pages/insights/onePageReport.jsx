@@ -14,7 +14,7 @@ import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import PDFViewer from '../../components/PDFViewer';
 import Breadcrumb from '../../components/Breadcrumb';
 import { Context } from '../../contexts/Context';
-import { formatDate } from '../../utils/utils';
+import { fetchWithInterceptor, formatDate } from '../../utils/utils';
 export default function OnePageReport() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -30,8 +30,8 @@ export default function OnePageReport() {
   const fetchVideoes = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005")
-      const response = await apiCall.json()
+      const apiCall = await fetchWithInterceptor("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005", false)
+      const response = apiCall
       setReports(response)
       setCurrentPdf(response[0])
       console.log(response)

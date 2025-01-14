@@ -4,7 +4,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
-import { calculateAverage, getSortIcon, mmddyy, searchTable } from '../../utils/utils';
+import { calculateAverage, fetchWithInterceptor, getSortIcon, mmddyy, searchTable } from '../../utils/utils';
 import Breadcrumb from '../../components/Breadcrumb';
 import { Context } from '../../contexts/Context';
 export default function MyStocks() {
@@ -24,8 +24,8 @@ export default function MyStocks() {
     const context = useContext(Context)
     const fecthStocks = async () => {
         try {
-            const stocksApi = await fetch("/api/proxy?api=getAllFavStocks")
-            const stocksRes = await stocksApi.json()
+            const stocksApi = await fetchWithInterceptor("/api/proxy?api=getAllFavStocks", false)
+            const stocksRes = stocksApi
             setFavStocks(stocksRes)
         }
         catch (e) {
@@ -100,11 +100,11 @@ export default function MyStocks() {
         url.searchParams.append('_', Date.now());
         context.setLoaderState(true)
         try {
-            const response = await fetch(url.toString());
+            const response = await fetchWithInterceptor(url.toString(), false);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            const stockByDateRes = await response.json();
+            const stockByDateRes = response
             console.log("Data", stockByDateRes);
             setTableData(stockByDateRes);
         } catch (error) {

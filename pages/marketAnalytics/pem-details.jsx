@@ -6,7 +6,7 @@ import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
-import { calculateAverage, exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { calculateAverage, exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Form, Dropdown } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../components/Breadcrumb';
@@ -25,8 +25,8 @@ export default function PemDetails() {
     const fetchColumnNames = async () => {
         try {
             // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM&_=1706681174127")
-            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=PEM&_=1706681174127")
-            const columnApiRes = await columnApi.json()
+            const columnApi = await fetchWithInterceptor("/api/proxy?api=getColumns?metaDataName=PEM&_=1706681174127",false)
+            const columnApiRes = columnApi
             // columnApiRes.push(...extraColumns)
             columnApiRes.splice(0, 0, extraColumns[0])
             columnApiRes.push(...extraColumns.slice(1))
@@ -44,8 +44,8 @@ export default function PemDetails() {
         context.setLoaderState(true)
         try {
             // const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM&_=1706681174128")
-            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=PEM&_=1706681174128")
-            const getBondsRes = await getBonds.json()
+            const getBonds = await fetchWithInterceptor("/api/proxy?api=getImportsData?metaDataName=PEM&_=1706681174128", false)
+            const getBondsRes = getBonds
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             // setTimeout(() => {
@@ -114,14 +114,14 @@ export default function PemDetails() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-        const upload = await fetch("/api/proxy?api=uploadFilePEM", {
+        const upload = await fetchWithInterceptor("/api/proxy?api=uploadFilePEM", true, null, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: formData
         })
-        const uploadRes = await upload.json()
+        const uploadRes = upload
         if(upload.status == 400){
         Swal.fire({title:uploadRes?.message,icon:"warning",confirmButtonColor:"var(--primary)"})
         }

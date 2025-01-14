@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../../utils/staticData'
 import Select from 'react-select'
-import { convertToReadableString, exportToExcel, formatDate, generatePDF, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals, searchTable } from '../../utils/utils';
+import { convertToReadableString, exportToExcel, fetchWithInterceptor, formatDate, generatePDF, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import CallChart from '../../components/CallChart';
 import Swal from 'sweetalert2';
@@ -51,8 +51,8 @@ export default function Calls() {
     const fetchTickersFunc = async () => {
         try {
             // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
-            const fetchTickers = await fetch("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -63,8 +63,8 @@ export default function Calls() {
         context.setLoaderState(true)
         try {
             // const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
-            const fetchDates = await fetch("/api/proxy?api=findAllDates?_=1706798577725")
-            const fetchDateRes = await fetchDates.json()
+            const fetchDates = await fetchWithInterceptor("/api/proxy?api=findAllDates?_=1706798577725", false)
+            const fetchDateRes = fetchDates
             setDates(fetchDateRes)
             setFilteredToDates(fetchDateRes);
         }
@@ -84,8 +84,8 @@ export default function Calls() {
         }
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch(`/api/proxy?api=findAllCallsByTickerName?tickername=${selectedTicker}`)
-            const fetchHistoryRes = await fetchHistory.json()
+            const fetchHistory = await fetchWithInterceptor(`/api/proxy?api=findAllCallsByTickerName?tickername=${selectedTicker}`, false)
+            const fetchHistoryRes = fetchHistory
             if(fetchHistoryRes?.length == 0){
                 Swal.fire({title:"No Data Available for this Ticker",icon:"warning",confirmButtonColor:"var(--primary)"})
             }
@@ -100,8 +100,8 @@ export default function Calls() {
     const fetchMeanCalls = async () => {
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch("/api/proxy?api=findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
-            const fetchHistoryRes = await fetchHistory.json()
+            const fetchHistory = await fetchWithInterceptor("/api/proxy?api=findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`, false)
+            const fetchHistoryRes =  fetchHistory
             setMeanCalls(fetchHistoryRes)
         }
         catch (e) {
@@ -125,8 +125,8 @@ export default function Calls() {
         context.setLoaderState(true)
         try {
             // const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
-            const fetchByDate = await fetch(`/api/proxy?api=findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
-            const fetchByDateRes = await fetchByDate.json()
+            const fetchByDate = await fetchWithInterceptor(`/api/proxy?api=findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`, false)
+            const fetchByDateRes = fetchByDate
             console.log("fetchByDateRes",fetchByDateRes);
             setCurrentPage(1)
             setTableData(fetchByDateRes)
@@ -228,8 +228,8 @@ export default function Calls() {
         if (selectedFromDate) {
             context.setLoaderState(true)
             try {
-                const fetchData = await fetch("/api/proxy?api=findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
-                const fetchDataRes = await fetchData.json()
+                const fetchData = await fetchWithInterceptor("/api/proxy?api=findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743", false)
+                const fetchDataRes =  fetchData
                 setChartData(fetchDataRes)
             } catch (error) {
 
@@ -291,7 +291,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`/api/proxy?api=getCalculatedData`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedData`,true, null, {
                 method: 'POST',
                 body: formData,
             });
@@ -300,7 +300,7 @@ export default function Calls() {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            const result = await response.json();
+            const result = response
             console.log("API Response", result);    
             // Update the state based on whether it's the first submission
             if (isFirstSubmission) {
@@ -343,7 +343,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetch(`/api/proxy?api=saveCalls`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=saveCalls`, true, null, {
                 method: 'POST',
                 body: JSON.stringify(calculateData),
             });
@@ -353,7 +353,7 @@ export default function Calls() {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const result = await response.json();
+            const result = response
             context.setLoaderState(true)
         }
         catch (error) {
@@ -380,9 +380,9 @@ export default function Calls() {
             if (result.isConfirmed) {
                 context.setLoaderState(true)
                 try {
-                    const rowDelete = await fetch(`https://jharvis.com/JarvisV2/deleteCallBy?tickerid=${id}`)
+                    const rowDelete = await fetchWithInterceptor(`https://jharvis.com/JarvisV2/deleteCallBy?tickerid=${id}`, false)
                     if (rowDelete.ok) {
-                        const rowDeleteRes = await rowDelete.json()
+                        const rowDeleteRes = rowDelete
                         Swal.fire({
                             title: rowDeleteRes?.msg,
                             icon: "success",

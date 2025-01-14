@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import { Navigation as Nav2,Autoplay } from 'swiper/modules';
 import Breadcrumb from '../../components/Breadcrumb';
+import { fetchWithInterceptor } from '../../utils/utils';
 export default function TheChosen() {
     const [reports,setReports] = useState([])
     const [show, setShow] = useState(false);
@@ -20,8 +21,8 @@ export default function TheChosen() {
     const fetchVideoes = async()=>{
         setLoader(true)
         try{
-            const apiCall = await fetch("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005")
-            const response = await apiCall.json()
+            const apiCall = await fetchWithInterceptor("/api/proxy?api=getAllTickerOnePageReports?filterText=&_=1706882102005", false)
+            const response = apiCall
             setReports(response)
             setCurrentPdf(response[0])
             console.log(response)

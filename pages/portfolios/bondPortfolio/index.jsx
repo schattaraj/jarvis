@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import { Pagination } from '../../../components/Pagination';
-import { ValueDisplay, calculateAverage, exportToExcel, formatDate, formatWithSeparator, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
+import { ValueDisplay, calculateAverage, exportToExcel, fetchWithInterceptor, formatDate, formatWithSeparator, generatePDF, getSortIcon, searchTable } from '../../../utils/utils'
 import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import Breadcrumb from '../../../components/Breadcrumb';
@@ -73,8 +73,8 @@ export default function BondPortfolio() {
   }
   const fetchPortfolioNames = async () => {
     try {
-      const portfolioApi = await fetch("/api/proxy?api=getAllBondPortFolioTicker?userId=2&_=1716292770931")
-      const portfolioApiRes = await portfolioApi.json()
+      const portfolioApi = await fetchWithInterceptor("/api/proxy?api=getAllBondPortFolioTicker?userId=2&_=1716292770931", true)
+      const portfolioApiRes = portfolioApi
       setPortfolioNames(portfolioApiRes)
       setPortfolioId(portfolioApiRes[0]?.idBondPortfolio)
       setCountApiCall(countApiCall + 1)
@@ -86,8 +86,8 @@ export default function BondPortfolio() {
   const fetchColumnNames = async () => {
     try {
       // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1716356733282")
-      const columnApi = await fetch("/api/proxy?api=getColumnsBondPortfolio?metaDataName=Bondpricing_Master")
-      const columnApiRes = await columnApi.json()
+      const columnApi = await fetchWithInterceptor("/api/proxy?api=getColumnsBondPortfolio?metaDataName=Bondpricing_Master", false)
+      const columnApiRes = columnApi
       const extraColumns = [{
         "elementId": null,
         "elementName": "Stock",
@@ -163,8 +163,8 @@ export default function BondPortfolio() {
     context.setLoaderState(true)
     try {
       if (selectedPortfolioId) {
-        const getPortfolio = await fetch("/api/proxy?api=getBondPortFolioSet?idPortfolio=" + selectedPortfolioId)
-        const getPortfolioRes = await getPortfolio.json()
+        const getPortfolio = await fetchWithInterceptor("/api/proxy?api=getBondPortFolioSet?idPortfolio=" + selectedPortfolioId, false)
+        const getPortfolioRes = getPortfolio
         setTableData(getPortfolioRes)
         setFilterData(getPortfolioRes)
         const totalItems = getPortfolioRes.length
@@ -182,8 +182,8 @@ export default function BondPortfolio() {
   const getAllStock = async () => {
     context.setLoaderState(true)
     try {
-      const allStocksApi = await fetch("/api/proxy?api=getAllBondForPolio?_=1716357445057")
-      const allStocksApiRes = await allStocksApi.json()
+      const allStocksApi = await fetchWithInterceptor("/api/proxy?api=getAllBondForPolio?_=1716357445057", false)
+      const allStocksApiRes = allStocksApi
       setAllBondPortfolio(allStocksApiRes)
     }
     catch (e) {
@@ -247,8 +247,8 @@ export default function BondPortfolio() {
     setManageView(true)
     context.setLoaderState(true)
     try {
-      const allBondApi = await fetch("/api/proxy?api=getAllBondPortfolio?userId=2&_=1721819897846")
-      const allBondApiRes = await allBondApi.json()
+      const allBondApi = await fetchWithInterceptor("/api/proxy?api=getAllBondPortfolio?userId=2&_=1721819897846", true)
+      const allBondApiRes = allBondApi
       setBondportfolios(allBondApiRes)
     } catch (error) {
 
@@ -288,8 +288,8 @@ export default function BondPortfolio() {
       if (result.isConfirmed) {
         context.setLoaderState(true)
         try {
-          const deleteApi = await fetch(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
-          const deleteApiRes = deleteApi.json()
+          const deleteApi = await fetchWithInterceptor(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`, false)
+          const deleteApiRes = deleteApi
           console.log("Success", deleteApiRes)
           getAllBondForPolios()
         } catch (error) {
@@ -350,7 +350,7 @@ export default function BondPortfolio() {
     });
     context.setLoaderState(true)
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithInterceptor(url, true, null, {
         method: 'POST',
         body: formData,
       });

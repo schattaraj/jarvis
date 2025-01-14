@@ -13,6 +13,7 @@ import 'swiper/css/navigation';
 import { Navigation as Nav2, Autoplay } from 'swiper/modules';
 import Breadcrumb from '../components/Breadcrumb';
 import PDFViewer from '../components/PDFViewer';
+import { fetchWithInterceptor } from '../utils/utils';
 export default function Newsletter() {
   const [reports, setReports] = useState([])
   const [show, setShow] = useState(false);
@@ -21,8 +22,8 @@ export default function Newsletter() {
   const fetchVideoes = async () => {
     setLoader(true)
     try {
-      const apiCall = await fetch("/api/proxy?api=getAllTickerReportsBYWeekly?_=1706881081108")
-      const response = await apiCall.json()
+      const apiCall = await fetchWithInterceptor("/api/proxy?api=getAllTickerReportsBYWeekly?_=1706881081108", false)
+      const response = apiCall
       setReports(response)
       setCurrentPdf(response[0])
       console.log(response)

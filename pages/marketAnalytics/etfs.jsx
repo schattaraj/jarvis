@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { Context } from '../../contexts/Context';
 import parse from 'html-react-parser';
-import { exportToExcel, formatDate, getSortIcon, searchTable } from '../../utils/utils';
+import { exportToExcel, fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import EtfHistoryModal from '../../components/EtfHistoryModal';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
@@ -131,8 +131,8 @@ export default function Etfs() {
     const fetchColumnNames = async () => {
         try {
             // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Everything_List_New")
-            const columnApi = await fetch("/api/proxy?api=getColumns?metaDataName=Everything_List_New")
-            const columnApiRes = await columnApi.json()
+            const columnApi = await fetchWithInterceptor("/api/proxy?api=getColumns?metaDataName=Everything_List_New", false)
+            const columnApiRes =  columnApi
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes);
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -150,8 +150,8 @@ export default function Etfs() {
         try {
 
             // const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Everything_List_New&_=1705403290395")
-            const getBonds = await fetch("/api/proxy?api=getImportsData?metaDataName=Everything_List_New&_=1705403290395")
-            const getBondsRes = await getBonds.json()
+            const getBonds = await fetchWithInterceptor("/api/proxy?api=getImportsData?metaDataName=Everything_List_New&_=1705403290395", false)
+            const getBondsRes = getBonds
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
 
@@ -169,8 +169,8 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`)
-            const getBonds = await fetch(`/api/proxy?api=getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`)
-            const getBondsRes = await getBonds.json()
+            const getBonds = await fetchWithInterceptor(`/api/proxy?api=getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`, false)
+            const getBondsRes = getBonds
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setChartView(false)
@@ -199,8 +199,8 @@ export default function Etfs() {
     const downloadReport = async (reportName) => {
         try {
             // const fetchReport = await fetch("https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" + reportName)
-            const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
-            const fetchReportRes = await fetchReport.json()
+            const fetchReport = await fetchWithInterceptor("/api/proxy?api=downloadTickerReport?fileName=" + reportName, false)
+            const fetchReportRes = fetchReport
             window.open(fetchReportRes.responseStr, '_blank')
         }
         catch (e) {
@@ -211,8 +211,8 @@ export default function Etfs() {
     const deleteReport = async (reportName) => {
         try {
             // const deleteApi = await fetch("https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName)
-            const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
-            const deleteApiRes = await deleteApi.json()
+            const deleteApi = await fetchWithInterceptor("/api/proxy?api=deletePortfolioByName?name=" + reportName, false)
+            const deleteApiRes = deleteApi
             alert(deleteApiRes.msg)
         }
         catch (e) {
@@ -241,8 +241,8 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496")
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Everything_List_New&_=1718886601496")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTicker?metadataName=Everything_List_New&_=1718886601496", false)
+            const fetchTickersRes =  fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -260,8 +260,8 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             // const getChartHistrory = await fetch("https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + `&year=${dateRange?.startDate}&year2=${dateRange?.endDate}&_=1718886601497`)
-            const getChartHistrory = await fetch("/api/proxy?api=getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + `&year=${dateRange?.startDate}&year2=${dateRange?.endDate}&_=1718886601497`)
-            const getChartHistroryRes = await getChartHistrory.json()
+            const getChartHistrory = await fetchWithInterceptor("/api/proxy?api=getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" + selectedTicker + `&year=${dateRange?.startDate}&year2=${dateRange?.endDate}&_=1718886601497`, false)
+            const getChartHistroryRes = getChartHistrory
             setChartHistory(getChartHistroryRes)
             setChartView(true)
             setActiveView("Chart View")
@@ -311,8 +311,8 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-            const rankingApi = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-            const rankingApiRes = await rankingApi.json()
+            const rankingApi = await fetchWithInterceptor(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`, false)
+            const rankingApiRes = rankingApi
             setChartView(false)
             setRankingData(rankingApiRes)
             setActiveView("Ranking")
@@ -341,14 +341,14 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-            const upload = await fetch("/api/proxy?api=uploadFileEveryThing", {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileEveryThing", true, null, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: formData
             })
-            const uploadRes = await upload.json()
+            const uploadRes = upload
             if (upload.status == 400) {
                 Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
             }
@@ -376,8 +376,8 @@ export default function Etfs() {
     const filterBydate = async (date) => {
         context.setLoaderState(true)
         try {
-            const getStocks = await fetch(`/api/proxy?api=getDataByWeek?metadataName=Everything_List_New&date=${date}&_=${new Date().getTime()}`)
-            const getStocksRes = await getStocks.json()
+            const getStocks = await fetchWithInterceptor(`/api/proxy?api=getDataByWeek?metadataName=Everything_List_New&date=${date}&_=${new Date().getTime()}`, false)
+            const getStocksRes = getStocks
             setTableData(getStocksRes)
             setFilterData(getStocksRes)
             setOpenModal(false)

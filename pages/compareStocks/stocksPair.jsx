@@ -8,11 +8,15 @@ import Loader from "../../components/loader";
 import { Context } from "../../contexts/Context";
 import { Pagination } from "../../components/Pagination";
 import SliceData from "../../components/SliceData";
-import { calculateAverage, searchTable } from "../../utils/utils";
+import {
+  calculateAverage,
+  fetchWithInterceptor,
+  searchTable,
+} from "../../utils/utils";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Select from "react-select";
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from "../../components/Breadcrumb";
 import {
   Formik,
   Form as FormikForm,
@@ -42,10 +46,11 @@ export default function StocksPair() {
   const fecthStocks = async () => {
     context.setLoaderState(true);
     try {
-      const stocksApi = await fetch(
-        `/api/proxy?api=getAllStocks?_=${new Date().getTime()}`
+      const stocksApi = await fetchWithInterceptor(
+        `/api/proxy?api=getAllStocks?_=${new Date().getTime()}`,
+        false
       );
-      const stocksRes = await stocksApi.json();
+      const stocksRes = stocksApi;
       setStocks(stocksRes);
       setFilterData(stocksRes);
     } catch (e) {
@@ -64,7 +69,7 @@ export default function StocksPair() {
   const submitData = async (chartView = false) => {
     context.setLoaderState(true);
     try {
-      const dataApi = await fetch(
+      const dataApi = await fetchWithInterceptor(
         "/api/proxy?api=getHistoricalDataByStockAndDate?stockA=" +
           inputData?.stockA +
           "&stockB=" +
@@ -77,9 +82,10 @@ export default function StocksPair() {
           inputData?.startDate +
           "&endDate=" +
           inputData?.endDate +
-          "&_=1699957833253"
+          "&_=1699957833253",
+        false
       );
-      const dataRes = await dataApi.json();
+      const dataRes = dataApi;
       setTableData(dataRes);
       if (chartView) {
         setViewChart(true);
@@ -283,7 +289,7 @@ export default function StocksPair() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
-        <Breadcrumb />
+          <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -304,7 +310,7 @@ export default function StocksPair() {
                             }
                             </select> */}
                 <Select
-                value={{value:inputData?.stockA,label:inputData?.stockA}}
+                  value={{ value: inputData?.stockA, label: inputData?.stockA }}
                   options={selectOptions}
                   name="stockA"
                   onChange={(e) => {
@@ -315,7 +321,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockB,label:inputData?.stockB}}
+                  value={{ value: inputData?.stockB, label: inputData?.stockB }}
                   options={selectOptions}
                   name="stockB"
                   onChange={(e) => {
@@ -334,7 +340,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockC,label:inputData?.stockC}}
+                  value={{ value: inputData?.stockC, label: inputData?.stockC }}
                   options={selectOptions}
                   name="stockC"
                   onChange={(e) => {
@@ -353,7 +359,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockD,label:inputData?.stockD}}
+                  value={{ value: inputData?.stockD, label: inputData?.stockD }}
                   options={selectOptions}
                   name="stockD"
                   onChange={(e) => {

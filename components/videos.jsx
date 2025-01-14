@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import { fetchWithInterceptor } from "../utils/utils";
 
 const baseVidURL = `/api/proxy?api=playVideo?fileName=`;
 
@@ -24,10 +25,10 @@ const VideoComponent = () => {
 
   const fetchVideoes = async () => {
     try {
-      const apiCall = await fetch(
-        "/api/proxy?api=getAllAnalystVideo?filterText=&_=1699861659729"
+      const apiCall = await fetchWithInterceptor(
+        "/api/proxy?api=getAllAnalystVideo?filterText=&_=1699861659729", false
       );
-      const response = await apiCall.json();
+      const response = apiCall
       setVideoes(response);
       // setCurrentVideo(
       //   `https://jharvis.com/JarvisV2/playVideo?fileName=${response[0].anaylstVideoDetails}`

@@ -431,7 +431,7 @@ export default function Stocks() {
             formData.append('metaDataName', 'Tickers_Watchlist');
             formData.append('myfile', file);
             console.log("formData", formData)
-            const upload = await fetch("/api/proxy?api=uploadFileTickerImport", {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileTickerImport", false, null, {
                 method: "POST",
                 // headers: {
                 //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -440,7 +440,7 @@ export default function Stocks() {
                 //   },
                 body: formData
             })
-            const uploadRes = await upload.json()
+            const uploadRes = upload
             if (upload.status == 400) {
                 Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
             }
@@ -452,8 +452,8 @@ export default function Stocks() {
     const filterBydate = async (date) => {
         context.setLoaderState(true)
         try {
-            const getStocks = await fetch(`/api/proxy?api=getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`)
-            const getStocksRes = await getStocks.json()
+            const getStocks = await fetchWithInterceptor(`/api/proxy?api=getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`, false)
+            const getStocksRes = getStocks
             setTableData(getStocksRes)
             setFilterData(getStocksRes)
             setHistoryModal(false)
@@ -465,8 +465,8 @@ export default function Stocks() {
     const rankingPDF = async () => {
         context.setLoaderState(true)
         try {
-            const getPDF = await fetch(`/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`)
-            const getPDFRes = await getPDF.json()
+            const getPDF = await fetchWithInterceptor(`/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`, false)
+            const getPDFRes = getPDF
             window.open(getPDFRes?.responseStr, "_blank")
         } catch (error) {
             console.log("Error: ", error)
@@ -476,8 +476,8 @@ export default function Stocks() {
     const pdfDownload = async () => {
         context.setLoaderState(true)
         try {
-            const getPDF = await fetch(`/api/proxy?api=generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`)
-            const getPDFRes = await getPDF.json()
+            const getPDF = await fetchWithInterceptor(`/api/proxy?api=generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`, false)
+            const getPDFRes = getPDF
             window.open(getPDFRes?.responseStr, "_blank")
         } catch (error) {
             console.log("Error: ", error)
@@ -525,8 +525,8 @@ export default function Stocks() {
         url.searchParams.append('isHighPerforming', isHighPerforming);
         context.setLoaderState(true)
         try {
-            const response = await fetch(url.toString());
-            const data = await response.json();
+            const response = await fetchWithInterceptor(url.toString(), false);
+            const data = response
             if (data.length > 0) {
                 setTableData(data)
                 setFilterData(data)
@@ -589,7 +589,7 @@ export default function Stocks() {
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
+            const imgTag = `<img src="${fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${filePath}`, false)}" alt="Image">${anchorTag}`;
             return parse(imgTag, options2);
         }
 
@@ -599,7 +599,7 @@ export default function Stocks() {
             const filePath = matchOnlyPath[1];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image">`;
+            const imgTag = `<img src="${fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${filePath}`, false)}" alt="Image">`;
             return parse(imgTag);
         }
 
@@ -615,7 +615,7 @@ export default function Stocks() {
             const additionalText = matchPathAndText[2];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            const imgTag = `<img src="${fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${filePath}`, false)}" alt="Image"></br>`;
             // Combine img tag with additional text
             const resultHtml = `${imgTag} ${additionalText}`;
             return parse(resultHtml); // Adjust parse function as needed

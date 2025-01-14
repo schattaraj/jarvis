@@ -266,7 +266,8 @@ export default function Bonds() {
         try {
             // const fetchReport = await fetch("https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" + reportName)
             const fetchReport = await fetch("/api/proxy?api=downloadTickerReport?fileName=" + reportName)
-            const fetchReportRes = await fetchReport.json()
+            // const fetchReportRes = await fetchReport.json()
+            const fetchReportRes = await fetchWithInterceptor(fetchReport,false)
             window.open(fetchReportRes.responseStr, '_blank')
         }
         catch (e) {
@@ -278,7 +279,7 @@ export default function Bonds() {
         try {
             // const deleteApi = await fetch("https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName)
             const deleteApi = await fetch("/api/proxy?api=deletePortfolioByName?name=" + reportName)
-            const deleteApiRes = await deleteApi.json()
+            const deleteApiRes = await fetchWithInterceptor(deleteApi,false)
             alert(deleteApiRes.msg)
         }
         catch (e) {
@@ -292,8 +293,8 @@ export default function Bonds() {
             const tickerName = selectedBond.map(item => item.element1)
             const apiUrl = `/api/proxy?api=getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(tickerName)}&year=2023&year2=2023`;
 
-            const response = await fetch(apiUrl);
-            const data = await response.json();
+            const response = await fetchWithInterceptor(apiUrl, false);
+            const data = response
             setChartData(data);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -332,8 +333,8 @@ export default function Bonds() {
         context.setLoaderState(true)
         try {
             // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
-            const rankingApi = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`)
-            const rankingApiRes = await rankingApi.json()
+            const rankingApi = await fetchWithInterceptor(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`, false)
+            const rankingApiRes = rankingApi
             setRankingData(rankingApiRes)
             setCompareData(rankingApiRes)
             setSelectedOption("Ranking")
@@ -366,8 +367,8 @@ export default function Bonds() {
         const url = `/api/proxy?api=getCalculateBond?${queryString}`;
         context.setLoaderState(true)
         try {
-            const response = await fetch(url);
-            const data = await response.json();
+            const response = await fetchWithInterceptor(url, false);
+            const data = response
             setTableData(data)
             setFilterData(data)
             setCalculateModal(false)
@@ -395,8 +396,8 @@ export default function Bonds() {
             };
             const queryString = new URLSearchParams(payload).toString();
             // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-            const getChartHistrory = await fetch(`/api/proxy?api=getChartForHistoryByTicker?${queryString}`)
-            const getChartHistroryRes = await getChartHistrory.json()
+            const getChartHistrory = await fetchWithInterceptor(`/api/proxy?api=getChartForHistoryByTicker?${queryString}`, false)
+            const getChartHistroryRes = getChartHistrory
             console.log("getChartHistroryRes", getChartHistroryRes)
             setChartHistory(getChartHistroryRes)
             setSelectedOption("Chart View")
@@ -451,8 +452,8 @@ export default function Bonds() {
             formData.append('metaDataName', 'Bondpricing_Master');
             formData.append('fileDate', fileDate);
             formData.append('myfile', file);
-            console.log("formData", formData)
-            const upload = await fetch("/api/proxy?api=uploadFileBondImport", {
+            console.log("formData", formData['myfile'])
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileBondImport",false, null, {
                 method: "POST",
                 // headers: {
                 //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -461,7 +462,8 @@ export default function Bonds() {
                 //   },
                 body: formData
             })
-            const uploadRes = await upload.json()
+            
+            const uploadRes = upload
             if (upload.status == 400) {
                 Swal.fire({ title: uploadRes?.message, icon: "warning", confirmButtonColor: "var(--primary)" })
             }
@@ -490,7 +492,8 @@ export default function Bonds() {
             const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${encodeURIComponent(filePath)}" alt="Image"  loading="lazy">`;
+            const image =  fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${encodeURIComponent(filePath)}`, false)
+            const imgTag = `<img src="${image}" alt="Image"  loading="lazy">`;
             return <>{parse(imgTag)}{parse(anchorTag, options)}</>
         }
 
@@ -500,7 +503,8 @@ export default function Bonds() {
             const filePath = matchOnlyPath[1];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image">`;
+            const image =  fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${filePath}`, false)
+            const imgTag = `<img src="${image}" alt="Image">`;
             return parse(imgTag);
         }
 
@@ -516,7 +520,8 @@ export default function Bonds() {
             const additionalText = matchPathAndText[2];
             // Create img tag from file path
             // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
-            const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            const image =  fetchWithInterceptor(`/api/proxy?api=downloadPDF?fileName=${filePath}`, false)
+            const imgTag = `<img src="${image}" alt="Image"></br>`;
             // Combine img tag with additional text
             const resultHtml = `${imgTag} ${additionalText}`;
             return parse(resultHtml); // Adjust parse function as needed
