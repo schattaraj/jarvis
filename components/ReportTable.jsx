@@ -110,8 +110,8 @@ function ReportTable({name, open, handleCloseModal,news }) {
             if (result.isConfirmed) {
                 context.setLoaderState(true)
                 try {
-                    const deleteApi = await fetch(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
-                const deleteApiRes = deleteApi.json()
+                    const deleteApi = await fetchWithInterceptor(`/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`, false)
+                const deleteApiRes = deleteApi
                 console.log("Success",deleteApiRes)
                 } catch (error) {
                     console.log("Error",error)
@@ -121,7 +121,7 @@ function ReportTable({name, open, handleCloseModal,news }) {
         })
     }
     const handleDownload = async(reportfileDetails)=>{
-        const url = process.env.NEXT_PUBLIC_BASE_URL+"downloadPDF?fileName="+reportfileDetails
+        const url = "/api/proxy?api=downloadPDF?fileName="+reportfileDetails
         window.open(url,"_blank")
     }
     // Filter the data based on the search query

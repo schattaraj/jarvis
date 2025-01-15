@@ -415,7 +415,7 @@ export default function Portfolio() {
         setManageView(true)
         context.setLoaderState(true)
         try {
-            const allStockApi = await fetchWithInterceptor(`/api/proxy?api=getAllPortfolio?userId=2&_=${new Date().getTime()}`, true)
+            const allStockApi = await fetchWithInterceptor(`/api/proxy?api=getAllPortfolio`, true)
             const allStockApiRes = allStockApi
             setStockportfolios(allStockApiRes)
         } catch (error) {

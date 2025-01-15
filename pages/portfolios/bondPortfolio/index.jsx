@@ -73,7 +73,7 @@ export default function BondPortfolio() {
   }
   const fetchPortfolioNames = async () => {
     try {
-      const portfolioApi = await fetchWithInterceptor("/api/proxy?api=getAllBondPortFolioTicker?userId=2&_=1716292770931", true)
+      const portfolioApi = await fetchWithInterceptor("/api/proxy?api=getAllBondPortFolioTicker", true)
       const portfolioApiRes = portfolioApi
       setPortfolioNames(portfolioApiRes)
       setPortfolioId(portfolioApiRes[0]?.idBondPortfolio)

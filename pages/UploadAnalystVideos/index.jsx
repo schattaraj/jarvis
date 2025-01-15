@@ -2,7 +2,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
-import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
+import { fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import ReactDatePicker from 'react-datepicker';
@@ -24,8 +24,8 @@ export default function UploadAnalystVideos() {
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -41,8 +41,8 @@ export default function UploadAnalystVideos() {
     const fetchAllAnalystVideos = async () => {
         context.setLoaderState(true)
         try {
-            const getAllAnalyst = await fetch("/api/proxy?api=getAllAnalystVideo?_=1716538528362")
-            const getAllAnalystRes = await getAllAnalyst.json()
+            const getAllAnalyst = await fetchWithInterceptor("/api/proxy?api=getAllAnalystVideo?_=1716538528362", false)
+            const getAllAnalystRes = getAllAnalyst
             setAllAnalystData([...getAllAnalystRes])
         }
         catch (e) {
@@ -97,13 +97,13 @@ export default function UploadAnalystVideos() {
             return;
         }
         try {
-            const response = await fetch('/api/proxy?api=uploadAnalystVideo', {
+            const response = await fetchWithInterceptor('/api/proxy?api=uploadAnalystVideo', false, {}, {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok) {
-                const result = await response.json();
+                const result = response;
                 Swal.fire({
                     title: result.msg,
                     icon: "success",
@@ -133,12 +133,12 @@ export default function UploadAnalystVideos() {
                 try {
                     const formData = new FormData();
                     formData.append("idAnaylstVideo", id)
-                    const analystDelete = await fetch("/api/proxy?api=deleteAnalystVideo", {
+                    const analystDelete = await fetchWithInterceptor("/api/proxy?api=deleteAnalystVideo", false,{}, {
                         method: 'DELETE',
                         body: formData
                     })
                     if (analystDelete.ok) {
-                        const analystDeleteRes = await analystDelete.json()
+                        const analystDeleteRes = analystDelete
                         Swal.fire({
                             title: analystDeleteRes.msg,
                             icon: "success",

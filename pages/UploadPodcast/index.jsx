@@ -2,7 +2,7 @@ import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal';
-import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
+import { fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import Loader from '../../components/loader';
 import { Context } from '../../contexts/Context';
@@ -25,8 +25,8 @@ export default function UploadPodcast() {
     const fetchTickersFunc = async () => {
         context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716538528361", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -43,8 +43,8 @@ export default function UploadPodcast() {
     const fetchAllPodcastVideos = async () => {
         context.setLoaderState(true)
         try {
-            const getAllAnalyst = await fetch("/api/proxy?api=getAllPodCasts?_=1716548464958")
-            const getAllAnalystRes = await getAllAnalyst.json()
+            const getAllAnalyst = await fetchWithInterceptor("/api/proxy?api=getAllPodCasts?_=1716548464958", false)
+            const getAllAnalystRes = getAllAnalyst
             setallPodcastData(getAllAnalystRes)
             setallPodcastDataFiltered([...getAllAnalystRes])
         } catch (error) {
@@ -81,13 +81,13 @@ export default function UploadPodcast() {
             e.preventDefault()
             const form = e.target;
             const formData = new FormData(form);
-            const response = await fetch('/api/proxy?api=uploadPodCast', {
+            const response = await fetchWithInterceptor('/api/proxy?api=uploadPodCast',false, {}, {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok) {
-                const result = await response.json();
+                const result = response
                 Swal.fire({
                     title: result.msg,
                     icon: "success",
@@ -117,12 +117,12 @@ export default function UploadPodcast() {
                 try {
                     const formData = new FormData();
                     formData.append("idPodCast", id)
-                    const rowDelete = await fetch("/api/proxy?api=deletePodCast", {
+                    const rowDelete = await fetchWithInterceptor("/api/proxy?api=deletePodCast", false, {}, {
                         method: 'DELETE',
                         body: formData
                     })
                     if (rowDelete.ok) {
-                        const rowDeleteRes = await rowDelete.json()
+                        const rowDeleteRes = rowDelete
                         Swal.fire({
                             title: rowDeleteRes?.msg,
                             icon: "success",

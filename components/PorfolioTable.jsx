@@ -171,7 +171,7 @@ function PortfolioTable({
     context.setLoaderState(true);
     console.log("url", url, selectedStocks);
     try {
-      const response = await fetchWithInterceptor(url, true, null, {
+      const response = await fetchWithInterceptor(url, true, {}, {
         method: "POST",
         body: formData,
         // Note: Fetch does not support query parameters directly; add them manually to the URL if needed

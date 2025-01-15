@@ -24,6 +24,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import Swal from 'sweetalert2';
 import { Context } from '../contexts/Context';
+import { fetchWithInterceptor } from '../utils/utils';
 
 const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption }) => {
     const [data, setData] = useState([]);
@@ -37,8 +38,8 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
     const context = useContext(Context)
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/proxy?api=findImportDatesByMonth?metaDataName=Bondpricing_Master&_=1705052752528');
-            const result = await response.json();
+            const response = await fetchWithInterceptor('/api/proxy?api=findImportDatesByMonth?metaDataName=Bondpricing_Master&_=1705052752528', false);
+            const result = response
             setData(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -63,11 +64,11 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
         // console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, false, {}, {
                 method: 'DELETE',
             });
 
-            const result = await response.json();
+            const result = response;
 
             if (response.ok) {
                 alert(result.msg);
@@ -136,8 +137,8 @@ const BondsHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
           }
           context.setLoaderState(true)
           try {
-            const bondHistoryCompare = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=${dates.date1}&date2=${dates.date2}`)
-            const bondHistoryCompareRes = await bondHistoryCompare.json()
+            const bondHistoryCompare = await fetchWithInterceptor(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=${dates.date1}&date2=${dates.date2}`, false)
+            const bondHistoryCompareRes = bondHistoryCompare
             setCompareData(bondHistoryCompareRes)
             setSelectedOption("History")
             handleClose()

@@ -27,6 +27,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx'; // For Excel export
 import jsPDF from 'jspdf'; // For PDF export
 import 'jspdf-autotable'; // For PDF table auto-generation
+import { fetchWithInterceptor } from '../utils/utils';
 function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDates, setActiveView, filterBydate}) {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
@@ -39,8 +40,8 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch('/api/proxy?api=findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127');
-            const result = await response.json();
+            const response = await fetchWithInterceptor('/api/proxy?api=findImportDatesByMonth?metaDataName=Everything_List_New&_=1705502307127',false);
+            const result = response
             setData(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -51,11 +52,11 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
         console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`,false, {}, {
                 method: 'DELETE',
             });
 
-            const result = await response.json();
+            const result = response
 
             if (response.ok) {
                 console.log(result.msg);
@@ -151,8 +152,8 @@ function EtfHistoryModal({ open, handleCloseModal, setCompareData, setRankingDat
         //   return
           context.setLoaderState(true)
           try {
-            const historyCompare = await fetch(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`)
-            const historyCompareRes = await historyCompare.json()
+            const historyCompare = await fetchWithInterceptor(`/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`, false)
+            const historyCompareRes = historyCompare
             setCompareData(historyCompareRes)
             setActiveView("History")
             handleCloseModal()

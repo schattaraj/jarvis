@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import Breadcrumb from "../../../../components/Breadcrumb";
 import { useContext, useEffect, useState } from "react";
-import { formatDate, getSortIcon } from "../../../../utils/utils";
+import { fetchWithInterceptor, formatDate, getSortIcon } from "../../../../utils/utils";
 import parse from 'html-react-parser';
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
@@ -69,8 +69,8 @@ export default function BondDetails() {
     const bondTable = async () => {
         context.setLoaderState(true)
         try {
-            const fetchBondTable = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getBondDetailsByCusip?metadataName=${metadataName}&cusipNo=${cusipNo}&_=${new Date().getTime()}`)
-            const fetchBondTableRes = await fetchBondTable.json()
+            const fetchBondTable = await fetchWithInterceptor(`/api/proxy?api=getBondDetailsByCusip?metadataName=${metadataName}&cusipNo=${cusipNo}&_=${new Date().getTime()}`, false)
+            const fetchBondTableRes = fetchBondTable
             setBondDataFiltered(fetchBondTableRes)
         } catch (error) {
             console.error(error);
@@ -80,8 +80,8 @@ export default function BondDetails() {
     const getChartForHistoryByCusip = async () => {
         context.setLoaderState(true)
         try {
-            const fetchChart = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getChartForHistoryByCusip?metadataName=${metadataName}&cusipNo=${cusipNo}&year=2024&year2=2024&_=${new Date().getTime()}`)
-            const fetchChartRes = await fetchChart.json()
+            const fetchChart = await fetchWithInterceptor(`/api/proxy?api=getChartForHistoryByCusip?metadataName=${metadataName}&cusipNo=${cusipNo}&year=2024&year2=2024&_=${new Date().getTime()}`, false)
+            const fetchChartRes = fetchChart
             setChartData(fetchChartRes)
         } catch (error) {
             console.error(error);
@@ -89,15 +89,15 @@ export default function BondDetails() {
         context.setLoaderState(false)
     }
     const findMeanBondByCusip = async () => {
-        const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findMeanBondByCusip?cusipNo=${cusipNo}&chartYear1=2024&chartYear2=2024&_=${new Date().getTime()}`)
-        const fetchDataRes = await fetchData.json()
+        const fetchData = await fetchWithInterceptor(`/api/proxy?api=findMeanBondByCusip?cusipNo=${cusipNo}&chartYear1=2024&chartYear2=2024&_=${new Date().getTime()}`, false)
+        const fetchDataRes = fetchData
     }
     const getHistoricalDataByStockAndBond = async () => {
         context.setLoaderState(true)
         try {
             const ticker = tickerName.slice(tickerName.indexOf("(") + 1, tickerName.indexOf(")"))
-            const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getHistoricalDataByStockAndBond?ticker=${ticker}&cusip=${cusipNo}&_=${new Date().getTime()}`)
-            const fetchDataRes = await fetchData.json()
+            const fetchData = await fetchWithInterceptor(`/api/proxy?api=getHistoricalDataByStockAndBond?ticker=${ticker}&cusip=${cusipNo}&_=${new Date().getTime()}`, false)
+            const fetchDataRes = fetchData
             setStockBondData(fetchDataRes)
         } catch (error) {
             console.error(error);
@@ -108,8 +108,8 @@ export default function BondDetails() {
         context.setLoaderState(true)
         try {
             const ticker = tickerName.slice(tickerName.indexOf("(") + 1, tickerName.indexOf(")"))
-            const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getHistoricalDataByStockAndBondForChart?ticker=${ticker}&cusip=${cusipNo}&year=2024&year2=2024&_=${new Date().getTime()}`)
-            const fetchDataRes = await fetchData.json()
+            const fetchData = await fetchWithInterceptor(`/api/proxy?api=getHistoricalDataByStockAndBondForChart?ticker=${ticker}&cusip=${cusipNo}&year=2024&year2=2024&_=${new Date().getTime()}`, false)
+            const fetchDataRes = fetchData
             setSBChartData(fetchDataRes)
         } catch (error) {
             console.error(error);

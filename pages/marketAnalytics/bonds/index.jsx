@@ -453,7 +453,7 @@ export default function Bonds() {
             formData.append('fileDate', fileDate);
             formData.append('myfile', file);
             console.log("formData", formData['myfile'])
-            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileBondImport",false, null, {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileBondImport",false, {}, {
                 method: "POST",
                 // headers: {
                 //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',

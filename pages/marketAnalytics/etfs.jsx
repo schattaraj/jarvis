@@ -341,7 +341,7 @@ export default function Etfs() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileEveryThing", true, null, {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFileEveryThing", true, {}, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'

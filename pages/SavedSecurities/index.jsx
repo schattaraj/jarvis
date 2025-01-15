@@ -3,7 +3,7 @@ import Sidebar from '../../components/sidebar';
 import { useState, useEffect, useContext } from 'react';
 import React from 'react'
 import { Pagination } from '../../components/Pagination';
-import { getSortIcon, searchTable } from '../../utils/utils';
+import { fetchWithInterceptor, getSortIcon, searchTable } from '../../utils/utils';
 import { Context } from '../../contexts/Context';
 import SliceData from '../../components/SliceData';
 import Breadcrumb from '../../components/Breadcrumb';
@@ -45,8 +45,8 @@ export default function SaveSecurities() {
     const fetchAllStockData = async () => {
         context.setLoaderState(true)
         try {
-            const findAllStocks = await fetch("/api/proxy?api=findAllStocks")
-            const findAllStocksRes = await findAllStocks.json()
+            const findAllStocks = await fetchWithInterceptor("/api/proxy?api=findAllStocks", false)
+            const findAllStocksRes = findAllStocks
             setStockData(findAllStocksRes)
         } catch (error) {
             console.log("Error", error);
@@ -56,8 +56,8 @@ export default function SaveSecurities() {
     const fetchAllFavoriteStockData = async () => {
         context.setLoaderState(true)
         try {
-            const findAllFavoriteStocks = await fetch("/api/proxy?api=findAllFavoriteStocks?userid=2")
-            const findAllFavoriteStocksRes = await findAllFavoriteStocks.json()
+            const findAllFavoriteStocks = await fetchWithInterceptor("/api/proxy?api=findAllFavoriteStocks", true)
+            const findAllFavoriteStocksRes = await findAllFavoriteStocks
             setFavoriteStockData(findAllFavoriteStocksRes)
         } catch (error) {
             console.log("Error", error);
@@ -67,8 +67,8 @@ export default function SaveSecurities() {
     const fetchAllBonds = async () => {
         context.setLoaderState(true)
         try {
-            const findAllBonds = await fetch("/api/proxy?api=findAllBonds")
-            const findAllBondsRes = await findAllBonds.json()
+            const findAllBonds = await fetchWithInterceptor("/api/proxy?api=findAllBonds", false)
+            const findAllBondsRes = findAllBonds
             setAllBonds(findAllBondsRes)
             setAllBondsFiltered(SliceData(bondCurrentPage, allBondLimit, findAllBondsRes))
         } catch (error) {
@@ -79,8 +79,8 @@ export default function SaveSecurities() {
     const fetchAllFavoriteBonds = async () => {
         context.setLoaderState(true)
         try {
-            const findAllFavoriteBonds = await fetch("/api/proxy?api=findAllFavoriteBonds?userid=2")
-            const findAllFavoriteBondsRes = await findAllFavoriteBonds.json()
+            const findAllFavoriteBonds = await fetchWithInterceptor("/api/proxy?api=findAllFavoriteBonds", true)
+            const findAllFavoriteBondsRes = findAllFavoriteBonds
             setAllFavoriteBonds(findAllFavoriteBondsRes)
             setAllFavoriteBondsFiltered(sliceData(allFavoriteBonds, favBondCurrentPage))
         } catch (error) {

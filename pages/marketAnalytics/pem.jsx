@@ -180,7 +180,7 @@ export default function PemDetails() {
       const upload = await fetchWithInterceptor(
         "/api/proxy?api=uploadFilePEM",
         true,
-        null,
+        {},
         {
           method: "POST",
           headers: {

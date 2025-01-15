@@ -1,7 +1,7 @@
 import Navigation from '../../components/navigation';
 import Sidebar from '../../components/sidebar';
 import { useContext, useEffect, useState } from 'react'
-import { formatDate, getSortIcon, searchTable } from '../../utils/utils';
+import { fetchWithInterceptor, formatDate, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import SliceData from '../../components/SliceData';
 import { Context } from '../../contexts/Context';
@@ -19,8 +19,8 @@ export default function MutualFund() {
     const fetchMutualFund = async () => {
         context.setLoaderState(true)
         try {
-            const getMutualFund = await fetch("/api/proxy?api=getAllMutualFund?_=1716649829527")
-            const getMutualFundRes = await getMutualFund.json()
+            const getMutualFund = await fetchWithInterceptor("/api/proxy?api=getAllMutualFund?_=1716649829527", false)
+            const getMutualFundRes = getMutualFund
             setMutualFund(getMutualFundRes)
             setMutualFundFiltered(getMutualFundRes)
         }
@@ -48,8 +48,8 @@ export default function MutualFund() {
     };
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716787665088")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = await fetchWithInterceptor("/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1716787665088", false)
+            const fetchTickersRes = fetchTickers
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -58,8 +58,8 @@ export default function MutualFund() {
     }
     const fetchAllNav = async () => {
         try {
-            const getAllNav = await fetch("/api/proxy?api=getAllNav?_=1716873949438")
-            const getAllNavRes = await getAllNav.json()
+            const getAllNav = await fetchWithInterceptor("/api/proxy?api=getAllNav?_=1716873949438", false)
+            const getAllNavRes = getAllNav
             setNavValue(getAllNavRes.nav)
         }
         catch (e) {
@@ -72,8 +72,8 @@ export default function MutualFund() {
     const getStockPriceCheck = async () => {
         context.setLoaderState(true)
         try {
-            const stockPrice = await fetch("/api/proxy?api=getStockPriceCheck?_=1716883270435")
-            const stockPriceRes = await stockPrice.json()
+            const stockPrice = await fetchWithInterceptor("/api/proxy?api=getStockPriceCheck?_=1716883270435", false)
+            const stockPriceRes = stockPrice
             Swal.fire({title:stockPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
         catch (e) {
@@ -84,8 +84,8 @@ export default function MutualFund() {
     const getBondPriceCheck = async () => {
         context.setLoaderState(true)
         try {
-            const bondPrice = await fetch("/api/proxy?api=getBondPriceCheck?_=1716883270437")
-            const bondPriceRes = await bondPrice.json()
+            const bondPrice = await fetchWithInterceptor("/api/proxy?api=getBondPriceCheck?_=1716883270437", false)
+            const bondPriceRes = bondPrice
             Swal.fire({title:bondPriceRes.msg,confirmButtonColor: "#719B5F"});
         }
         catch (e) {
@@ -98,7 +98,7 @@ export default function MutualFund() {
         const form = e.target;
         const formData = new FormData(form);
         try {
-            const response = await fetch('/api/proxy?api=createNav', {
+            const response = await fetchWithInterceptor('/api/proxy?api=createNav', false, {}, {
                 method: 'POST',
                 body: formData
             });
@@ -124,13 +124,13 @@ export default function MutualFund() {
         const formData = new FormData(form);
         context.setLoaderState(true)
         try {
-            const response = await fetch('/api/proxy?api=createMutualFund', {
+            const response = await fetchWithInterceptor('/api/proxy?api=createMutualFund', false, {}, {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok) {
-                const result = await response.json();
+                const result = response
                 Swal.fire({
                     title: result.msg,
                     icon: "success",

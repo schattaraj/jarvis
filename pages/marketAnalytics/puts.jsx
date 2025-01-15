@@ -223,7 +223,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedPutData`, false, null, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedPutData`, false, {}, {
                 method: 'POST',
                 body: formData,
             });
@@ -274,7 +274,7 @@ export default function PUTS() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetchWithInterceptor(`/api/proxy?api=savePuts`, false, null, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=savePuts`, false, {}, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json' // Add this line

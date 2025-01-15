@@ -192,10 +192,11 @@ export default function BusinessPipeline() {
   const fetchAllAmount = async () => {
     context.setLoaderState(true);
     try {
-      const getAllAmount = await fetch(
-        "/api/proxy?api=getAmountsByAdvisor?_=1714645928468"
+      const getAllAmount = await fetchWithInterceptor(
+        "/api/proxy?api=getAmountsByAdvisor?_=1714645928468",
+        false
       );
-      const getAllAmountRes = await getAllAmount.json();
+      const getAllAmountRes = getAllAmount;
       setAllAmountString(getAllAmountRes.msg);
     } catch (e) {
       console.log("error", e);
@@ -276,8 +277,10 @@ export default function BusinessPipeline() {
         jsonObject[key] = value;
       });
       setErrors(errors);
-      const addPipeline = await fetch(
+      const addPipeline = await fetchWithInterceptor(
         "/api/proxy?api=addBusinessPipeline",
+        false,
+        {},
         {
           method: "POST",
           headers: {
@@ -286,7 +289,7 @@ export default function BusinessPipeline() {
           body: JSON.stringify(jsonObject),
         }
       );
-      const addPipelineRes = await addPipeline.json();
+      const addPipelineRes = addPipeline;
       Swal.fire({
         title: addPipelineRes?.msg,
         // text: "You clicked the button!",
@@ -316,15 +319,17 @@ export default function BusinessPipeline() {
         try {
           const formData = new FormData();
           formData.append("idBusinessPipelineg", id);
-          const rowDelete = await fetch(
+          const rowDelete = await fetchWithInterceptor(
             "/api/proxy?api=deleteBusinessPipeline",
+            false,
+            {},
             {
               method: "DELETE",
               body: formData,
             }
           );
           if (rowDelete.ok) {
-            const rowDeleteRes = await rowDelete.json();
+            const rowDeleteRes = rowDelete;
             Swal.fire("Deleted!", "", "success");
             alert(rowDeleteRes.msg);
             fetchData();
@@ -420,8 +425,10 @@ export default function BusinessPipeline() {
 
       setErrors(errors);
 
-      const updatePipeline = await fetch(
+      const updatePipeline = await fetchWithInterceptor(
         "/api/proxy?api=editBusinessPipeline",
+        false,
+        {},
         {
           method: "POST",
           headers: {
@@ -489,9 +496,8 @@ export default function BusinessPipeline() {
         jsonObject[key] = value;
       });
       setErrors(errors);
-      const addPipeline = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL +
-          "getSearchBusinessPipeline?searchAdvisorName=" +
+      const addPipeline = await fetchWithInterceptor(
+        "/api/proxy?api=getSearchBusinessPipeline?searchAdvisorName=" +
           jsonObject?.searchAdvisorName +
           "&searchStatus=" +
           jsonObject?.searchStatus +
@@ -502,6 +508,8 @@ export default function BusinessPipeline() {
           "&endDate=" +
           jsonObject?.endDate +
           "&_=1720517072931",
+        false,
+        {},
         {
           method: "GET",
           headers: {
@@ -509,7 +517,7 @@ export default function BusinessPipeline() {
           },
         }
       );
-      const addPipelineRes = await addPipeline.json();
+      const addPipelineRes = addPipeline;
       if (addPipelineRes?.length == 0) {
         Swal.fire({
           title: "No data found!",
@@ -531,11 +539,11 @@ export default function BusinessPipeline() {
   const fetchAnalysisData = async () => {
     context.setLoaderState(true);
     try {
-      const fetchAnalysis = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL +
-          "getCountsByOpportunity?_=1720549352011"
+      const fetchAnalysis = await fetchWithInterceptor(
+        "/api/proxy?api=getCountsByOpportunity?_=1720549352011",
+        false
       );
-      const fetchAnalysisRes = await fetchAnalysis.json();
+      const fetchAnalysisRes = fetchAnalysis;
       setAnalysisModal(true);
       setAnalysisData(fetchAnalysisRes);
     } catch (error) {}

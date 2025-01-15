@@ -291,7 +291,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedData`,true, null, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=getCalculatedData`,true, {}, {
                 method: 'POST',
                 body: formData,
             });
@@ -343,7 +343,7 @@ export default function Calls() {
         try {
             context.setLoaderState(true)
             // Send the FormData to your API
-            const response = await fetchWithInterceptor(`/api/proxy?api=saveCalls`, true, null, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=saveCalls`, true, {}, {
                 method: 'POST',
                 body: JSON.stringify(calculateData),
             });

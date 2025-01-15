@@ -217,7 +217,7 @@ const BondReports = () => {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFile",false, null, {
+            const upload = await fetchWithInterceptor("/api/proxy?api=uploadFile",false, {}, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'

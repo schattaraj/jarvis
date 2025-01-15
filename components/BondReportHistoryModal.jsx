@@ -22,6 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import parse from 'html-react-parser';
 import { Context } from '../contexts/Context';
+import { fetchWithInterceptor } from '../utils/utils';
 function BondReportHistoryModal({ open, handleClose }) {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
@@ -32,8 +33,8 @@ function BondReportHistoryModal({ open, handleClose }) {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL+'findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567');
-            const result = await response.json();
+            const response = await fetchWithInterceptor('/api/proxy?api=findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567', false);
+            const result = response;
             setData(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -44,7 +45,7 @@ function BondReportHistoryModal({ open, handleClose }) {
         console.log(`Delete action triggered for ID ${deleteItemId}`);
         setDeleteConfirmationOpen(false);
         try {
-            const response = await fetch(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, {
+            const response = await fetchWithInterceptor(`/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`, false, {}, {
                 method: 'DELETE',
             });
 

@@ -114,7 +114,7 @@ export default function PemDetails() {
         context.setLoaderState(true)
         try {
             const formData = new FormData(form);
-        const upload = await fetchWithInterceptor("/api/proxy?api=uploadFilePEM", true, null, {
+        const upload = await fetchWithInterceptor("/api/proxy?api=uploadFilePEM", true, {}, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'

@@ -4,6 +4,7 @@ import { Context } from '../../contexts/Context';
 import Loader from '../../components/loader';
 import { useContext } from 'react';
 import Breadcrumb from '../../components/Breadcrumb';
+import { fetchWithInterceptor } from '../../utils/utils';
 export default function AddTicker() {
     const context = useContext(Context)
     const uploadFormData = async(e)=>{
@@ -12,7 +13,7 @@ export default function AddTicker() {
             e.preventDefault()
         const form = e.target;
         const formData = new FormData(form);
-        const response = await fetch('/api/proxy?api=addTicker', {
+        const response = await fetchWithInterceptor('/api/proxy?api=addTicker', false, {}, {
                 method: 'POST',
                 body: formData
             });
