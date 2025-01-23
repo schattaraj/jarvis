@@ -64,7 +64,7 @@ export default function Sidebar() {
             </div>
               <div className={context.openDropdown === "marketAnalytics" ? "collapse show" : "collapse"} id="ui-basic" ref={context.collapse}>
                 <ul className="nav flex-column sub-menu">
-                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/stocks' ? 'nav-link btn active' : 'nav-link'} href="/marketAnalytics/stocks" onClick={context.toggleStockMenu}>Stocks</Link>
+                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/stocks' ? 'nav-link btn active' : 'nav-link'} href="/marketAnalytics/stocks" onClick={context.toggleStockMenu}>Stocks</Link>                  
                   {/* <div className={context.stockMenu ?"collapse show" : "collapse"} id="ui-basic">
                 <ul className="nav flex-column sub-menu ps-3">
                 <li className='nav-item'>
@@ -82,12 +82,13 @@ export default function Sidebar() {
                 </ul>
                 </div> */}
                   </li>
+                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/newStocks' ? 'nav-link btn active' : 'nav-link'} href="/marketAnalytics/newStocks" onClick={context.toggleStockMenu}>New Stocks</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/bonds' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/bonds">Bonds</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/etfs' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/etfs">ETFs</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/bond-reports' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/bond-reports">Bond Reports</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/pem' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/pem">PEM</Link></li>
                   <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/Calls' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/Calls">Calls</Link></li>
-                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/puts' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/puts">PUTS</Link></li>
+                  <li className="nav-item"><Link className={router.pathname === '/marketAnalytics/puts' ? 'nav-link active' : 'nav-link'} href="/marketAnalytics/puts">Puts</Link></li>
                 </ul> 
                 </div>
             </li>
