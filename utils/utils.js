@@ -364,3 +364,22 @@ export function jsonToFormData(json) {
     appendData(json, '');
     return formData;
 }
+export const ValueDisplay = ({ value }) => {
+    // Convert string to a number
+    const numericValue = parseFloat(value);
+  
+    // Determine the class based on the numeric value
+    const className = numericValue < 0 ? 'text-danger' : 'text-success';
+  
+    return (
+      <div className={className}>
+        {value}
+      </div>
+    );
+  };
+
+  export const formatWithSeparator = (number) => {
+    let [integerPart, decimalPart] = Number(number).toFixed(2).split(".");
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${integerPart}.${decimalPart}`;
+  }

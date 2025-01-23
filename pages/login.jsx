@@ -174,7 +174,7 @@ export default function Login() {
                 {errors.password}
               </Form.Control.Feedback>
                   </div>
-                  <div className="mt-3">
+                  <div className="mt-5">
                     <button className="btn btn-block text-white btn-lg font-weight-medium" type='submit'>SIGN IN</button>
                   </div>
                   {/* <div className="my-2 d-flex justify-content-between align-items-center">

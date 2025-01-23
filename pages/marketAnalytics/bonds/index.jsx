@@ -683,15 +683,15 @@ export default function Bonds() {
                                 <Form onSubmit={uploadFile} encType="multipart/form-data">
                                     <input type="hidden" name="metaDataName" value="Bondpricing_Master" />
                                     <div className="d-flex justify-content-between align-items-end flex-wrap mb-3">
-                                        <div className="form-group d-flex" style={{ flex: "2" }}>
-                                            <div style={{flex:"2"}}>
+                                        <div className="form-group d-flex align-items-center" style={{ flex: "2" }}>
+                                            <div style={{flex:"1"}}>
                                             <ReactSelect className='mb-0 me-2' isMulti onChange={setSelectedBond} styles={customStyles} options={
                                                 tickers && tickers.map((item, index) => (
                                                     { value: item.element1, label: item.element1 }
                                                 ))
                                             } />
                                             </div>
-                                             <div className="actions">
+                                             <div className="actions flex-grow-1">
                                             <button className='btn btn-primary mb-0' type='button' onClick={() => {
                                                 if (selectedBond.length && selectedOption === 'Chart View') {
                                                     charts()
@@ -703,6 +703,9 @@ export default function Bonds() {
                                         </div>
                                         </div>
                                        
+                                        <div className="form-group flex-grow-1">
+                                            
+                                        </div>
                                         <div className="form-group">
                                             <label htmlFor="" className='form-label'>File Upload Date</label>
                                             <input type="date" className="form-control" name='fileDate' required onChange={(e) => { setFileDate(e.target.value) }} />
@@ -915,7 +918,7 @@ export default function Bonds() {
                                             <tr>
                                                 <th>Most Risen Stock</th>
                                                 <th>Price Risen By</th>
-                                                <th>% In Rise</th>
+                                                <th>% Increase</th>
                                                 <th>Current Price</th>
                                                 <th>Previous Price</th>
                                                 <th>Current YTM</th>
@@ -951,7 +954,7 @@ export default function Bonds() {
                                             <tr>
                                                 <th>Most Dropped Stock</th>
                                                 <th>Price Dropped By</th>
-                                                <th>% In Drop</th>
+                                                <th>% Decrease</th>
                                                 <th>Current Price</th>
                                                 <th>Previous Price</th>
                                                 <th>Current YTM</th>

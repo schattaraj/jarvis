@@ -27,6 +27,7 @@ import { Context } from '../contexts/Context';
 import * as XLSX from 'xlsx'; // For Excel export
 import jsPDF from 'jspdf'; // For PDF export
 import 'jspdf-autotable'; // For PDF table auto-generation
+import { fetchWithInterceptor } from '../utils/utils';
 const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOption,filterBydate }) => {
     const [data, setData] = useState([]);
     const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
@@ -39,8 +40,10 @@ const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
     const context = useContext(Context)
     const fetchData = async () => {
         try {
-            const response = await fetch('https://www.jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Tickers_Watchlist&_=1705052752528');
-            const result = await response.json();
+            // const response = await fetch('https://www.jharvis.com/JarvisV2/findImportDatesByMonth?metaDataName=Tickers_Watchlist&_=1705052752528');
+            // const result = await response.json();
+            const api = `/api/proxy?api=findImportDatesByMonth?metaDataName=Tickers_Watchlist&_=1705052752528`
+            const result = await fetchWithInterceptor(api,false)
             setData(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -138,8 +141,10 @@ const StockHistoryModal = ({ open, handleClose, setCompareData, setSelectedOptio
           }
           context.setLoaderState(true)
           try {
-            const bondHistoryCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates.date1}&date2=${dates.date2}`)
-            const bondHistoryCompareRes = await bondHistoryCompare.json()
+            // const bondHistoryCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates.date1}&date2=${dates.date2}`)
+            // const bondHistoryCompareRes = await bondHistoryCompare.json()
+            const bondHistoryCompare = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates.date1}&date2=${dates.date2}`
+            const bondHistoryCompareRes = await fetchWithInterceptor(bondHistoryCompare,false)
             setCompareData(bondHistoryCompareRes)
             setSelectedOption("History")
             handleClose()

@@ -5,7 +5,7 @@ import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
 import Select from 'react-select'
 import { Context } from '../../contexts/Context';
-import { exportToExcel, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
+import { exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
 import { Pagination } from '../../components/Pagination';
 import parse from 'html-react-parser';
 import SliceData from '../../components/SliceData';
@@ -187,7 +187,14 @@ export default function Stocks() {
         priceEarningW: '',
         priceFreeW: '',
     };
+    const firstColRef = useRef(null);
+    const [firstColWidth, setFirstColWidth] = useState(0);
     const context = useContext(Context)
+    useEffect(() => {
+        if (firstColRef.current) {
+          setFirstColWidth(firstColRef.current.offsetWidth);
+        }
+      }, [firstColRef, filterData, visibleColumns]);
     const handleSelect = (inputs) => {
         let arr = inputs.map((item) => item.value)
         setSelectedTicker(arr.join(","))
@@ -199,8 +206,10 @@ export default function Stocks() {
         }
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-            const getBondsRes = await getBonds.json()
+            // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+            // const getBondsRes = await getBonds.json()
+            const getBonds = `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`
+            const getBondsRes = await fetchWithInterceptor(getBonds,false)
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
             setActiveView("Ticker Home")
@@ -227,8 +236,10 @@ export default function Stocks() {
                 _: new Date().getTime() // This will generate a unique timestamp
             };
             const queryString = new URLSearchParams(payload).toString();
-            const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-            const getChartHistroryRes = await getChartHistrory.json()
+            // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+            // const getChartHistroryRes = await getChartHistrory.json()
+            const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`
+            const getChartHistroryRes = await fetchWithInterceptor(api,false)
             console.log("getChartHistroryRes", getChartHistroryRes)
             setChartHistory(getChartHistroryRes)
             setActiveView("Chart View")
@@ -247,8 +258,10 @@ export default function Stocks() {
     const ranking = async () => {
         context.setLoaderState(true)
         try {
-            const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-            const rankingApiRes = await rankingApi.json()
+            // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+            // const rankingApiRes = await rankingApi.json()
+            const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`
+            const rankingApiRes = await fetchWithInterceptor(api,false)
             setRankingData(rankingApiRes)
             setActiveView("Ranking")
         } catch (error) {
@@ -265,8 +278,10 @@ export default function Stocks() {
     const fetchColumnNames = async () => {
         context.setLoaderState(true)
         try {
-            const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
-            const columnApiRes = await columnApi.json()
+            // const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
+            // const columnApiRes = await columnApi.json()
+            const columnApi = `/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist`
+            const columnApiRes = await fetchWithInterceptor(columnApi,false)
             columnApiRes.push(...extraColumns)
             setColumnNames(columnApiRes);
             const defaultCheckedColumns = columnApiRes.map(col => col.elementInternalName);
@@ -284,8 +299,10 @@ export default function Stocks() {
         context.setLoaderState(true)
         try {
 
-            const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
-            const getStocksRes = await getStocks.json()
+            // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
+            // const getStocksRes = await getStocks.json()
+            const getStocks =`/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`
+            const getStocksRes = await fetchWithInterceptor(getStocks,false)
             setTableData(getStocksRes)
             setFilterData(getStocksRes)
             context.setLoaderState(false)
@@ -373,8 +390,10 @@ export default function Stocks() {
     const fetchTickersFunc = async () => {
         // context.setLoaderState(true)
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
-            const fetchTickersRes = await fetchTickers.json()
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+            // const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`
+            const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -860,14 +879,26 @@ export default function Stocks() {
                                             {columnNames.map((columnName, index) => (
                                                 visibleColumns.includes(columnName.elementInternalName) && (
                                                     <th key={index} onClick={() => handleSort(columnName.elementInternalName)}
-                                                    className={columnName.elementInternalName === "element1" ? "sticky-left" : ""}
-                                                    >{columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}</th>
+                                                    className={columnName.elementInternalName === "element1" || columnName.elementInternalName === "element4" ? "sticky-column" : ""}
+                                                    style={{
+                                                        left:
+                                                          columnName.elementInternalName === "element1"
+                                                            ? 0
+                                                            : columnName.elementInternalName === "element4"
+                                                            ? firstColWidth
+                                                            : "auto",
+                                                      }}
+                                                      ref={columnName.elementInternalName === "element1" ? firstColRef : null}
+                                                    >
+                                                        {columnName.elementDisplayName} {getSortIcon(columnName, sortConfig)}
+                                                        
+                                                    </th>
                                                 )
                                             ))}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filterData.map((rowData, rowIndex) => (
+                                        {filterData?.map((rowData, rowIndex) => (
                                             <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                                 {
                                                     columnNames.map((columnName, colIndex) => {
@@ -886,6 +917,24 @@ export default function Stocks() {
                                                         }
                                                         else if (columnName.elementInternalName === 'element1') {
                                                             content = parse(rowData[columnName.elementInternalName], options2)
+                                                        }else if(columnName.elementInternalName === 'element31' ||
+                                                            columnName.elementInternalName ==='element34' ||
+                                                            columnName.elementInternalName ==='element35' ||
+                                                            columnName.elementInternalName ==='element7' ||
+                                                            columnName.elementInternalName ==='element8' ||
+                                                            columnName.elementInternalName ==='element9' ||
+                                                            columnName.elementInternalName ==='element11' ||
+                                                            columnName.elementInternalName ==='element12' ||
+                                                            columnName.elementInternalName ==='element13' ||
+                                                            // columnName.elementInternalName ==='element15' ||
+                                                            // columnName.elementInternalName ==='element16' ||
+                                                            // columnName.elementInternalName ==='element17'||
+                                                            columnName.elementInternalName ==='element30'){
+                                                            content = (Number.parseFloat(rowData[columnName.elementInternalName])*100 || 0).toFixed(2)
+                                                        }
+                                                        else if(columnName.elementInternalName === 'element19'){
+                                                            // content = (rowData[columnName.elementInternalName] / 1000000000)
+                                                            content = rowData[columnName.elementInternalName] && (rowData[columnName.elementInternalName] / 1000).toFixed(2)
                                                         }
                                                         else {
                                                             content = rowData[columnName.elementInternalName];
@@ -893,10 +942,24 @@ export default function Stocks() {
                                                         if (typeof (content) == 'string' && columnName.elementInternalName != "element1") {
                                                             content = parse(content, options)
                                                         }
-                                                        if(columnName.elementInternalName === 'element1'){
-                                                            return <td key={colIndex} className='sticky-left'>{content}</td>;
-                                                        }
-                                                        return <td key={colIndex}>{content}</td>;
+                                                        // if(columnName.elementInternalName === 'element1'){
+                                                        //     return <td key={colIndex} className={}>{content}</td>;
+                                                        // }
+                                                        return (
+                                                            <td 
+                                                                key={colIndex} 
+                                                                className={columnName.elementInternalName === "element1" || columnName.elementInternalName === "element4" ? "sticky-column" : ""} 
+                                                                style={{
+                                                                    left:
+                                                                    columnName.elementInternalName === "element1"
+                                                                        ? 0
+                                                                        : columnName.elementInternalName === "element4"
+                                                                        ? firstColWidth
+                                                                        : "auto",
+                                                                }}
+                                                            >
+                                                                {content}
+                                                            </td>);
                                                     })
                                                 }
                                             </tr>
