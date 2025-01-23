@@ -64,7 +64,9 @@ export default function Sidebar() {
                   {context.userName.split("@")[0]}
                 </span>
                 <span className="text-secondary text-small">
-                  {context.userName.split("@")[0] === "NolandL" ? "CEO" : "USER"}
+                  {context.userName.split("@")[0] === "NolandL"
+                    ? "CEO"
+                    : "USER"}
                 </span>
               </div>
               <i className="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
@@ -151,6 +153,18 @@ export default function Sidebar() {
                 </li>
                 </ul>
                 </div> */}
+                </li>
+                <li className="nav-item">
+                  <Link
+                    className={
+                      router.pathname === "/marketAnalytics/newStocks"
+                        ? "nav-link active"
+                        : "nav-link"
+                    }
+                    href="/marketAnalytics/newStocks"
+                  >
+                    New Stocks
+                  </Link>
                 </li>
                 <li className="nav-item">
                   <Link
