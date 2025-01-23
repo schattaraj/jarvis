@@ -1,25 +1,34 @@
-import React, { useContext, useState } from 'react'
-import Dropdown from 'react-bootstrap/Dropdown';
-import { Context } from '../contexts/Context';
+import React, { useContext, useState } from "react";
+import Dropdown from "react-bootstrap/Dropdown";
+import { Context } from "../contexts/Context";
 export default function Navigation() {
-    const [sidebar,setSidebar] = useState(false)
-    const toggleSidebar = ()=>{
-        document.body.classList.toggle('sidebar-icon-only');
-    }
-    const context = useContext(Context)
-  return (<>
-          <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+  const [sidebar, setSidebar] = useState(false);
+  const toggleSidebar = () => {
+    document.body.classList.toggle("sidebar-icon-only");
+  };
+  const context = useContext(Context);
+  return (
+    <>
+      <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-          <a className="navbar-brand brand-logo" href="/"><img src="/assets/images/logo-black.png" alt="logo" /></a>
-          <a className="navbar-brand brand-logo-mini" onClick={toggleSidebar}><img src="/assets/images/logo-mini.svg" alt="logo" /></a>
+          <a className="navbar-brand brand-logo" href="/">
+            <img src="/assets/images/logo-black.png" alt="logo" />
+          </a>
+          <a className="navbar-brand brand-logo-mini" onClick={toggleSidebar}>
+            <img src="/assets/images/logo-mini.svg" alt="logo" />
+          </a>
         </div>
         <div className="navbar-menu-wrapper d-flex align-items-stretch">
-          <button className="navbar-toggler navbar-toggler align-self-center" onClick={toggleSidebar} type="button" data-toggle="minimize">
+          <button
+            className="navbar-toggler navbar-toggler align-self-center"
+            onClick={toggleSidebar}
+            type="button"
+            data-toggle="minimize"
+          >
             <span className="mdi mdi-menu"></span>
           </button>
-          
+
           <ul className="navbar-nav navbar-nav-right">
-            
             {/* <li className="nav-item dropdown">
               <a className="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
                 <i className="mdi mdi-bell-outline"></i>
@@ -109,23 +118,38 @@ export default function Navigation() {
               </div>
             </li> */}
             <li className="nav-item nav-profile dropdown">
-            <Dropdown>
-      <Dropdown.Toggle variant="" className='nav-link' id="dropdown-basic">
-      <div className="nav-profile-img">
-                  <img src="/images/team-1.jpg" alt="image"/>
-                  <span className="availability-status online"></span>
-                </div>
-                <div className="nav-profile-text">
-                  <p className="mb-1 text-black">Noland</p>
-                </div>
-      </Dropdown.Toggle>
+              <Dropdown>
+                <Dropdown.Toggle
+                  variant=""
+                  className="nav-link"
+                  id="dropdown-basic"
+                >
+                  <div className="nav-profile-img">
+                    <img
+                      src={
+                        context.userName.split("@")[0] === "NolandL"
+                          ? "/images/team-1.jpg"
+                          : "/images/user.png"
+                      }
+                      alt="image"
+                    />
+                    <span className="availability-status online"></span>
+                  </div>
+                  <div className="nav-profile-text">
+                    <p className="mb-1 text-black">
+                      {context.userName.split("@")[0]}
+                    </p>
+                  </div>
+                </Dropdown.Toggle>
 
-      <Dropdown.Menu>
-        <Dropdown.Item onClick={context.logOut}><i className="mdi mdi-logout me-2 text-danger"></i> Signout </Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={context.logOut}>
+                    <i className="mdi mdi-logout me-2 text-danger"></i> Signout{" "}
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </li>
-              {/* <li className="nav-item nav-profile dropdown">
+            {/* <li className="nav-item nav-profile dropdown">
                 <a className="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                   <div className="nav-profile-img">
                     <img src="./images/team-1.jpg" alt="image"/>
@@ -142,14 +166,17 @@ export default function Navigation() {
                     <i className="mdi mdi-logout me-2 text-primary"></i> Signout </a>
                 </div>
               </li> */}
-            
-           
           </ul>
-          <button className="navbar-toggler navbar-toggler-right d-lg-none align-self-center"  onClick={toggleSidebar} type="button" data-toggle="offcanvas">
+          <button
+            className="navbar-toggler navbar-toggler-right d-lg-none align-self-center"
+            onClick={toggleSidebar}
+            type="button"
+            data-toggle="offcanvas"
+          >
             <span className="mdi mdi-menu"></span>
           </button>
         </div>
       </nav>
-      </>
-  )
+    </>
+  );
 }
