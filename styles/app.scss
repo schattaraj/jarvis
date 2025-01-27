@@ -1542,4 +1542,22 @@ div:where(.swal2-container) {
     border: 1px solid rgba(#444, 0.4);
     margin-bottom: 16px;
   }
+  ul{
+    li{
+      // margin-bottom: 16px;
+      border: none;
+      border-bottom: 1px solid rgb(196, 195, 195);
+      // padding-left: 0;
+      // padding-right: 0;
+      border-radius: 0 !important;
+      cursor: pointer;
+      transition: all 0.3s;
+      &:hover{
+        // background-color: #e6f0fb;
+        // background-color: #a8cd8f;
+        background-color: #81a065;
+        color: #fff;
+      }
+    }
+  }
 }

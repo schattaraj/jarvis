@@ -383,3 +383,47 @@ export const ValueDisplay = ({ value }) => {
     integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return `${integerPart}.${decimalPart}`;
   }
+  export const formatDateTime = (dateStr) => {
+    // Check if the input is a valid string and is properly formatted
+    if (typeof dateStr !== 'string' || dateStr.length !== 15) {
+        console.error("Invalid date string format");
+        return null;
+    }
+
+    // Extract date components from the string
+    const year = dateStr.substring(0, 4);
+    const month = dateStr.substring(4, 6) - 1; // Months are 0-indexed in JavaScript Date
+    const day = dateStr.substring(6, 8);
+    const hours = dateStr.substring(9, 11);
+    const minutes = dateStr.substring(11, 13);
+    const seconds = dateStr.substring(13, 15);
+
+    // Create a new Date object
+    const date = new Date(year, month, day, hours, minutes, seconds);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+        console.error("Invalid date object created");
+        return null;
+    }
+
+    // Format the date (e.g., MM/DD/YYYY)
+    const dateOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    };
+    const formattedDate = date.toLocaleDateString('en-US', dateOptions);
+
+    // Format the time (e.g., HH:MM:SS)
+    const timeOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+    };
+    const formattedTime = date.toLocaleTimeString('en-US', timeOptions);
+
+    // Return the formatted date and time as a string
+    return `${formattedDate} ${formattedTime}`;
+};

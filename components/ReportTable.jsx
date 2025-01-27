@@ -27,9 +27,12 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx'; // For Excel export
 import jsPDF from 'jspdf'; // For PDF export
 import 'jspdf-autotable'; // For PDF table auto-generation
-import { fetchWithInterceptor, formatDate, formatPublishedDate } from '../utils/utils';
+import { fetchWithInterceptor, formatDate, formatDateTime, formatPublishedDate } from '../utils/utils';
 import { Download } from '@mui/icons-material';
 import Link from 'next/link';
+import { ListGroup } from 'react-bootstrap';
+import { IoMdArrowBack } from "react-icons/io";
+import "animate.css";
 function ReportTable({name, open, handleCloseModal,news }) {
     const [data, setData] = useState([]);
     const [searchQuery, setSearchQuery] = useState(''); // State for search query
@@ -39,6 +42,8 @@ function ReportTable({name, open, handleCloseModal,news }) {
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [dates, setDates] = useState({ date1: null, date2: null });
     const [newsSentiment,setNewsSentiment] = useState(false)
+    const [selectedIndex,setSelectedIndex] = useState(0)
+    const [showDetails,setShowDetails] = useState(false)
     const context = useContext(Context)
     const fetchData = async () => {
         context.setLoaderState(true)
@@ -128,6 +133,10 @@ function ReportTable({name, open, handleCloseModal,news }) {
     const filteredData = data.filter((row) =>
         row.tickerName.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    const showNewsDetails = (index)=>{
+        setSelectedIndex(index)
+        setShowDetails(true)
+    }
     useEffect(() => {
         if (open) {
             fetchData();
@@ -231,20 +240,40 @@ function ReportTable({name, open, handleCloseModal,news }) {
                     news && newsSentiment &&
                     <>
                     <div className="news-area">
-                    <h3>News Sentiment</h3>                    
-                    <h4><Link href={newsSentiment?.feed[0]?.url}>{newsSentiment?.feed[0]?.title}</Link></h4>
-                   {newsSentiment?.feed[0]?.banner_image && <img src={newsSentiment?.feed[0]?.banner_image} alt="" className="image" loading='lazy'/>}
-                    <p>By <span className='name'>{newsSentiment?.feed[0]?.authors[0]}</span> - {formatPublishedDate(newsSentiment?.feed[0]?.time_published)}</p>
-                    <p>Summary : {newsSentiment?.feed[0]?.summary}</p>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h3 className='mb-0'>News Sentiment</h3>
+                   {showDetails && <button className='btn btn-primary px-3 py-2 ps-2' onClick={()=>{setShowDetails(false)}}><IoMdArrowBack style={{fontSize:"20px"}}/> <span className='ms-1'>Back</span></button>}
+                    </div>
+                    {!showDetails && 
+                    <ListGroup as="ul" className='animate__animated animate__fadeInRight'>    
+                    {
+                        newsSentiment.feed.map((item,index)=>{
+                            return (
+                                <ListGroup.Item as="li" key={index} onClick={()=>{showNewsDetails(index)}}>
+                                    <h5 className='mb-1'>{item.title}</h5>
+                                    <div>{formatDateTime(item?.time_published)} by {item?.authors.map((name)=>name+',')}</div>
+                                    </ListGroup.Item>)
+                        })
+                    }     
+                      </ListGroup>   
+                    }  
+                    {showDetails &&
+                    <div className='animate__animated animate__fadeInLeft'>
+                    <h4><Link href={newsSentiment?.feed[0]?.url}>{newsSentiment?.feed[selectedIndex]?.title}</Link></h4>
+                   {newsSentiment?.feed[selectedIndex]?.banner_image && <img src={newsSentiment?.feed[selectedIndex]?.banner_image} alt="" className="image" loading='lazy'/>}
+                    <p>By <span className='name'>{newsSentiment?.feed[selectedIndex]?.authors[0]}</span> - {formatPublishedDate(newsSentiment?.feed[selectedIndex]?.time_published)}</p>
+                    <p>Summary : {newsSentiment?.feed[selectedIndex]?.summary}</p>
                     <h6>Topics :</h6>
                     <ul>
                         {
-                            newsSentiment?.feed[0]?.topics?.map((item)=>{
+                            newsSentiment?.feed[selectedIndex]?.topics?.map((item)=>{
                                 return <li>{item?.topic} - {item?.relevance_score}</li>
                             })
                         }
                     </ul>
-                    <h6>Overall Sentiment Score : {newsSentiment?.feed[0]?.overall_sentiment_score}</h6>
+                    <h6>Overall Sentiment Score : {newsSentiment?.feed[selectedIndex]?.overall_sentiment_score}</h6>
+                    </div>
+                }     
                     </div>
                     </>
                 }
