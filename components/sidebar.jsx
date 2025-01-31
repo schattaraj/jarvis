@@ -235,7 +235,7 @@ export default function Sidebar() {
                     }
                     href="/marketAnalytics/puts"
                   >
-                    PUTS
+                    Puts
                   </Link>
                 </li>
               </ul>

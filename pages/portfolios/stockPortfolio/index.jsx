@@ -97,9 +97,9 @@ export default function Portfolio() {
     }
     const fetchPortfolioNames = async () => {
         try {
-            const baseUrl = `/api/proxy?api=common/getAllPortFolioTicker`;
-            const {payload} = await fetchWithInterceptor(baseUrl,true)
-            const portfolioApiRes = payload
+            const baseUrl = `/api/proxy?api=getAllPortFolioTicker`;
+            // const {payload} = await fetchWithInterceptor(baseUrl,true)
+            const portfolioApiRes = await fetchWithInterceptor(baseUrl,true)
             setPortfolioNames(portfolioApiRes)
             setPortfolioId(portfolioApiRes[0]?.idPortfolio)
             setCountApiCall(countApiCall + 1)
@@ -112,9 +112,10 @@ export default function Portfolio() {
         context.setLoaderState(true)
         try {
             if (selectedPortfolioId) {
-                const baseUrl = `/api/proxy?api=portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
-                const {payload} = await fetchWithInterceptor(baseUrl,false)
-                const getPortfolioRes = payload
+                // const baseUrl = `/api/proxy?api=portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
+                const baseUrl = `/api/proxy?api=getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
+                // const {payload} = await fetchWithInterceptor(baseUrl,false)
+                const getPortfolioRes = await fetchWithInterceptor(baseUrl,false)
                 setTableData(getPortfolioRes)
                 setFilterData(getPortfolioRes)
                 const totalItems = getPortfolioRes.length
@@ -624,7 +625,7 @@ export default function Portfolio() {
                                             <select name="portfolio_name" className='form-select' onChange={handleChange} value={selectedPortfolioId}>
                                                 <option>Select Portfolio</option>
                                                 {
-                                                    portfolioNames.length > 0 && portfolioNames.map((item, index) => {
+                                                   Array.isArray(portfolioNames) && portfolioNames.length > 0 && portfolioNames.map((item, index) => {
                                                         return <option value={item?.idPortfolio} key={"name" + index}>{item?.name}</option>
                                                     })
                                                 }

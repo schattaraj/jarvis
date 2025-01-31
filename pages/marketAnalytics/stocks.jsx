@@ -554,7 +554,7 @@ export default function Stocks() {
         replace: (elememt) => {
             if (elememt?.name === 'a') {
                 return (
-                    <a onClick={() => { handleReportData(elememt?.children[0]?.data) }} href='#'>
+                    <a onClick={() => { handleReportData(elememt?.children[0]?.data) }}>
                         {typeof (elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
                     </a>
                 );
@@ -567,7 +567,7 @@ export default function Stocks() {
                 return (
                     <React.Fragment>
                         <img className="img-responsive" src={elememt?.attribs?.src} />
-                        <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }} href='#'>
+                        <a onClick={() => { handleReportData(elememt?.next?.children[0]?.data) }}>
                             {typeof (elememt?.next?.children[0]?.data) == "string" ? parse(elememt?.next?.children[0]?.data) : elememt?.next?.children[0]?.data}
                         </a>
                     </React.Fragment>

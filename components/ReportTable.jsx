@@ -62,6 +62,9 @@ function ReportTable({name, open, handleCloseModal,news }) {
         try {
             const response = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=${name}&apikey=TY1WA5LN5KU3SQIV `);
             const result = await response.json();
+            if(result?.Information){
+                Swal.fire({icon:"warning",text:result.Information})
+            }
             setNewsSentiment(result);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -247,15 +250,17 @@ function ReportTable({name, open, handleCloseModal,news }) {
                     {!showDetails && 
                     <ListGroup as="ul" className='animate__animated animate__fadeInRight'>    
                     {
-                        newsSentiment.feed.map((item,index)=>{
+                        newsSentiment?.feed?.map((item,index)=>{
                             return (
                                 <ListGroup.Item as="li" key={index} onClick={()=>{showNewsDetails(index)}}>
-                                    <h5 className='mb-1'>{item.title}</h5>
+                                   <img src={item?.banner_image} alt="" loading='lazy'/>
+                                   <div className="text"><h5 className='mb-1'>{item.title}</h5>
                                     <div>{formatDateTime(item?.time_published)} by {item?.authors.map((name)=>name+',')}</div>
+                                    </div> 
                                     </ListGroup.Item>)
                         })
                     }     
-                      </ListGroup>   
+                    </ListGroup>   
                     }  
                     {showDetails &&
                     <div className='animate__animated animate__fadeInLeft'>

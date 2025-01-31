@@ -192,6 +192,27 @@ export default function BondPortfolio() {
     context.setLoaderState(false)
   }
   const handleShow = () => {
+    if(selectedStocks.length > 0){
+      Swal.fire(
+        {title:"Do you want to clear the previous filled data?",icon:"warning",
+        showDenyButton:true,
+        confirmButtonText:"Yes"
+      }
+        ).then((result)=>{
+          if (result.isConfirmed) {
+            setSelectedStocks([])
+            setPortfolioName("")
+            setSearchQuery("")
+            setShow(true);
+          } else if (result.isDenied) {
+            setShow(true);
+          }
+      })
+      return
+    }
+    else{
+
+    }
     setShow(true);
   }
   const handleClose = () => setShow(false);
@@ -222,7 +243,6 @@ export default function BondPortfolio() {
     const tickerName = name.slice(name.indexOf("(")+1,name.indexOf(")"))
     setReportTicker(tickerName)
     setReportModal(true)
-    console.log("Print",e,name,tickerName)
   }
   const changeLimit = (e) => {
     setLimit(e.target.value)
@@ -290,7 +310,6 @@ export default function BondPortfolio() {
         try {
           const deleteApi = await fetch(`https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`)
           const deleteApiRes = deleteApi.json()
-          console.log("Success", deleteApiRes)
           getAllBondForPolios()
         } catch (error) {
           console.log("Error", error)
@@ -310,15 +329,39 @@ export default function BondPortfolio() {
     // return Object.keys(newErrors).length === 0;
     return newErrors;
   };
+  const ShowTarget = (errorLabel)=>{
+setSearchQuery(errorLabel)
+Swal.close(); 
+  }
   const createPortfolio = async () => {
     const errors = validateStocks();
     if (Object.keys(errors).length > 0) {
-      Swal.fire({
+      let errorHtml = `Please fill in all required fields for selected symbols.`;
+      for (const error in errors) {
+        // If the error is an object, loop through and handle nested errors
+        if (typeof errors[error] === 'object') {
+          errorHtml += `<ul><button class="btn show-target-btn outline" data-error="${error}" title="Go to the field"><u>${error}</u></button>`;
+          for (const err in errors[error]) {
+            errorHtml += `<li style='text-align:left;color:red;text-transform:capitalize'>${err.replace(/([a-z])([A-Z])/g, '$1 $2').replace('share','quantity')} field is required</li>`;
+          }
+          errorHtml += '</ul>';
+        } else {
+          errorHtml += `<p>${errors[error]}</p>`;
+        }
+      }
+     await Swal.fire({
         title: 'Validation Errors',
-        text: 'Please fill in all required fields for selected symbols.',
+        html: errorHtml,
         icon: 'error',
         confirmButtonText: 'OK',
-        confirmButtonColor: "var(--primary)"
+        confirmButtonColor: "var(--primary)",
+        didOpen: () => {
+          document.querySelectorAll('.show-target-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+              ShowTarget(e.target.textContent);
+            });
+          });
+        }
       });
       return;
     }
@@ -362,7 +405,6 @@ export default function BondPortfolio() {
       const data = await response.json();
       setShow(false)
       getAllBondForPolios()
-      console.log('Portfolio created successfully:', data);
     } catch (error) {
       console.error('Error creating portfolio:', error);
     }
@@ -374,15 +416,14 @@ export default function BondPortfolio() {
     setSelectedStocks(prevStocks => {
       if (isChecked) {
         // Add stock if checkbox is checked
-        console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
+        // console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
         return [...prevStocks, { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" }];
       } else {
-        console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
+        // console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
         // Remove stock if checkbox is unchecked
         return prevStocks.filter(stock => stock.name !== issuerName);
       }
     });
-    console.log("issuerName", issuerName, e.target.checked)
   }
   const updateSelectedBond = (e, issuerName) => {
     const { name, value } = e.target;
@@ -787,7 +828,7 @@ export default function BondPortfolio() {
                   <tr>
                     <th>Select</th>
                     <th>Symbol</th>
-                    <th>Share</th>
+                    <th>Quantity</th>
                     <th>Purchase Date</th>
                     <th>Purchase Price</th>
                   </tr>
@@ -805,7 +846,7 @@ export default function BondPortfolio() {
                             type="text"
                             value={selectedStocks.find(stock => stock.name === item?.issuerName)?.share || ""}
                             name="share"
-                            placeholder="Share"
+                            placeholder="Quantity"
                             className='form-control'
                             onChange={(e) => updateSelectedBond(e, item?.issuerName)}
                             style={{ minWidth: "150px" }}
