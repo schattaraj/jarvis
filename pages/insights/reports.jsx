@@ -94,7 +94,7 @@ export default function Reports() {
     // Construct the payload
 
     const params = new URLSearchParams();
-    params.append("orderType", orderType);
+    params.append("orderType", "Ticker Name");
     params.append("sortOrder", sortOrder);
     params.append("categoryType", categoryType.join(",")); // Convert array to comma-separated string
     params.append("filterText", filterText);
@@ -122,12 +122,14 @@ export default function Reports() {
         setRecentReports(
           getRecentReports(
             filteredReports.length > 0 ? filteredReports : data,
+            sortOrder,
             orderType
           )
         );
         setArchiveReports(
           getArchiveReports(
             filteredReports.length > 0 ? filteredReports : data,
+            sortOrder,
             orderType
           )
         );
@@ -154,6 +156,7 @@ export default function Reports() {
       selectedOptions ? selectedOptions.map((option) => option.value) : []
     );
   };
+  // console.log(sortOrder);
 
   const fetchVideoesCallBack = useCallback(() => {
     // Fetch logic here
@@ -161,7 +164,15 @@ export default function Reports() {
   }, []);
   useEffect(() => {
     filter();
-  }, [categoryType, fetchVideoesCallBack, setCategoryType]);
+  }, [
+    categoryType,
+    fetchVideoesCallBack,
+    setCategoryType,
+    sortOrder,
+    setSortOrder,
+    orderType,
+    setOrderType,
+  ]);
 
   return (
     <>
@@ -183,7 +194,7 @@ export default function Reports() {
             todays investors with sound analytics helping them make the best
             possible decisions for the future.
           </p>
-          <Form onSubmit={filter}>
+          <Form onSubmit={(e) => e.preventDefault()}>
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex dt-buttons mb-3">
                 <div className="d-flex align-items-center me-2">
@@ -301,7 +312,7 @@ export default function Reports() {
                     {formatDateString(currentPdf?.reportDate)}
                   </span>
                   <span className="mx-2">|</span>
-                  <span className="card-text color-343a40">
+                  <span className="card-text color-357920 text-uppercase">
                     {currentPdf?.catagoryType}
                   </span>
                 </div>
@@ -355,7 +366,7 @@ export default function Reports() {
                                 {formatDateString(item?.reportDate)}
                               </p>
                               <p className="mx-2 mb-0">|</p>
-                              <p className="card-text color-343a40 mb-0">
+                              <p className="card-text color-357920 text-uppercase mb-0">
                                 {item?.catagoryType}
                               </p>
                             </div>
@@ -405,7 +416,7 @@ export default function Reports() {
                             {formatDateString(item?.reportDate)}
                           </p>
                           <p className="mx-2 mb-0">|</p>
-                          <p className="card-text color-343a40 mb-0">
+                          <p className="card-text color-357920 text-uppercase mb-0">
                             {item?.catagoryType}
                           </p>
                         </div>

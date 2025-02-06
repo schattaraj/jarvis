@@ -33,13 +33,13 @@ export const formatDateString = (dateString) => {
     if (day > 3 && day < 21) return "th"; // 4th - 20th
     switch (day % 10) {
       case 1:
-        return "st";
+        return "ˢᵗ";
       case 2:
-        return "nd";
+        return "ⁿᵈ";
       case 3:
-        return "rd";
+        return "ʳᵈ";
       default:
-        return "th";
+        return "ᵗʰ";
     }
   };
 
@@ -50,40 +50,83 @@ export const getLatestReport = (reports) => {
     new Date(report.reportDate) > new Date(latest.reportDate) ? report : latest
   );
 };
-export const getRecentReports = (reports, orderType) => {
+export const getRecentReports = (reports, sortType, orderType) => {
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-
+  // let sortedData = [...reports];
   const recentReports = reports.filter(
     (report) => new Date(report.reportDate) >= threeMonthsAgo
   );
-  if (orderType === "Desc") {
-    return recentReports.sort(
-      (a, b) => new Date(a.reportDate) - new Date(b.reportDate)
-    );
-  } else {
-    return recentReports.sort(
-      (a, b) => new Date(b.reportDate) - new Date(a.reportDate)
-    );
+  console.log("orderType", orderType, "sortOrder", sortType);
+
+  if (orderType == "Ticker Name") {
+    console.log("if");
+
+    return recentReports.sort((a, b) => {
+      if (sortType === "Desc") {
+        return b.tickerName.localeCompare(a.tickerName);
+      } else {
+        return a.tickerName.localeCompare(b.tickerName);
+      }
+    });
+  } else if (orderType == "Report Date") {
+    console.log("else if");
+
+    return recentReports.sort((a, b) => {
+      if (sortType === "Desc") {
+        return new Date(a.reportDate) - new Date(b.reportDate); // Oldest to Latest
+      } else {
+        return new Date(b.reportDate) - new Date(a.reportDate); // Latest to Oldest
+      }
+    });
   }
+  // else {
+  //   if (sortType === "Desc") {
+  //     return recentReports.sort(
+  //       (a, b) => new Date(a.reportDate) - new Date(b.reportDate)
+  //     );
+  //   } else {
+  //     return recentReports.sort(
+  //       (a, b) => new Date(b.reportDate) - new Date(a.reportDate)
+  //     );
+  //   }
+  // }
   // return recentReports.sort((a, b) => new Date(b.reportDate) - new Date(a.reportDate));
 };
-export const getArchiveReports = (reports, orderType) => {
+export const getArchiveReports = (reports, sortType, orderType) => {
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
   const achieveReports = reports.filter(
     (report) => new Date(report.reportDate) < threeMonthsAgo
   );
-  if (orderType === "Desc") {
-    return achieveReports.sort(
-      (a, b) => new Date(a.reportDate) - new Date(b.reportDate)
-    );
-  } else {
-    return achieveReports.sort(
-      (a, b) => new Date(b.reportDate) - new Date(a.reportDate)
-    );
+  if (orderType === "Ticker Name") {
+    return achieveReports.sort((a, b) => {
+      if (sortType === "Desc") {
+        return b.tickerName.localeCompare(a.tickerName);
+      } else {
+        return a.tickerName.localeCompare(b.tickerName);
+      }
+    });
+  } else if (orderType === "Report Date") {
+    return achieveReports.sort((a, b) => {
+      if (sortType === "Desc") {
+        return new Date(a.reportDate) - new Date(b.reportDate); // Oldest to Latest
+      } else {
+        return new Date(b.reportDate) - new Date(a.reportDate); // Latest to Oldest
+      }
+    });
   }
+
+  // if (sortType === "Desc") {
+  //   return achieveReports.sort(
+  //     (a, b) => new Date(a.reportDate) - new Date(b.reportDate)
+  //   );
+  // } else {
+  //   return achieveReports.sort(
+  //     (a, b) => new Date(b.reportDate) - new Date(a.reportDate)
+  //   );
+  // }
   // return achieveReports.sort((a, b) => new Date(b.reportDate) - new Date(a.reportDate));
 };
 
