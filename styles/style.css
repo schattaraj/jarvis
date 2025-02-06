@@ -7398,6 +7398,18 @@ fieldset:disabled .btn {
   margin-bottom: 0;
 }
 
+.card-text-company {
+  font-size: 0.9375rem;
+  line-height: 2;
+  color: #343a40 !important;
+  font-weight: normal !important;
+}
+.color-343a40{
+  color: #343a40;
+}
+.text-600{
+  font-weight: 600;
+}
 .card-text:last-child {
   margin-bottom: 0;
 }
@@ -19844,6 +19856,6 @@ dl li {
 .btn-primary.active-table-button {
   background-image: linear-gradient(to left, #b66dff, #35065c) !important;
 }
-.btn-primary.active-table-button:focus{
+.btn-primary.active-table-button:focus {
   box-shadow: none;
 }
