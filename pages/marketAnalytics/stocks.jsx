@@ -132,22 +132,22 @@ export default function Stocks() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [calculateModal, setCalculate] = useState(false)
-    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2023 })
+    const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2025 })
     const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
     const [ViewOptions, setViewOptions] = useState({
         element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
         element32: { name: "enterPriseValue", displayName: "Enterprise value($M)" },
         element33: { name: "priceSale", displayName: "Price / Sales" },
         element34: { name: "grossMargin", displayName: "Gross Margin" },
-        element34: { name: "roic", displayName: "ROIC" },
-        element34: { name: "priceAvg", displayName: "Price vs 20-day Avg (%)" },
-        element34: { name: "price", displayName: "Price" },
-        element34: { name: "ytdReturn", displayName: "YTD Return" },
-        element34: { name: "dividendYield", displayName: "Dividend Yield" },
-        element34: { name: "shortFloat", displayName: "Short as % of Float" },
-        element34: { name: "relativeStrength", displayName: "Relative Strength" },
-        element34: { name: "priceEarning", displayName: "Price/Earnings" },
-        element34: { name: "evEbitda", displayName: "EV / EBITDA" },
+        element35: { name: "roic", displayName: "ROIC" },
+        element9: { name: "priceAvg", displayName: "Price vs 20-day Avg (%)" },
+        element10: { name: "price", displayName: "Price" },
+        element11: { name: "ytdReturn", displayName: "YTD Return" },
+        element12: { name: "dividendYield", displayName: "Dividend Yield" },
+        element13: { name: "shortFloat", displayName: "Short as % of Float" },
+        element18: { name: "relativeStrength", displayName: "Relative Strength" },
+        element22: { name: "priceEarning", displayName: "Price/Earnings" },
+        element26: { name: "evEbitda", displayName: "EV / EBITDA" },
     })
     const [selectedView, setSelectedView] = useState('element3')
     const [chartData, setChartData] = useState([])
@@ -575,6 +575,31 @@ export default function Stocks() {
             }
         }
     }
+    const options3 = {
+        replace(elememt) {
+            if (elememt?.name === 'a') {
+                return (
+                    <a onClick={() => { handleReportData(elememt?.children[0]?.data) }}>
+                        {typeof (elememt?.children[0]?.data) == "string" ? parse(elememt?.children[0]?.data) : elememt?.children[0]?.data}
+                    </a>
+                );
+            }
+        }
+    }
+    const options4 = {
+        replace(element) {
+            if (element?.name === 'img' && element?.next?.type === 'text') {
+                return (
+                    <React.Fragment>
+                        <img className="img-responsive" src={element?.attribs?.src} />
+                        <a onClick={() => { handleReportData(element?.next?.data) }}>
+                            {element?.next?.data}
+                        </a>
+                    </React.Fragment>
+                );
+            }
+        }
+    }
     function extractAndConvert(inputString) {
         // Define regex patterns to match both cases
         const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
@@ -611,13 +636,19 @@ export default function Stocks() {
             const filePath = matchPathAndText[1];
             const additionalText = matchPathAndText[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
             // Combine img tag with additional text
-            const resultHtml = `${imgTag} ${additionalText}`;
-            return parse(resultHtml); // Adjust parse function as needed
+            const resultHtml = `${imgTag}${additionalText}`;
+            return parse(resultHtml,options4); // Adjust parse function as needed
         }
         // If neither pattern is matched, return an empty array
-        return inputString;
+        if(inputString.split(" ").length == 1){
+            return   parse(`<a>${inputString.split(" ")[0]}</a>`,options3);
+        }
+        if(inputString.split(" ").length == 2){
+            return   parse(`<a>${inputString.split(" ")[1]}</a>`,options3);
+        }
+        
     }
     const closeReportModal = () => {
         setReportModal(false)
@@ -915,9 +946,10 @@ export default function Stocks() {
                                                         else if (columnName.elementInternalName === 'element1') {
                                                             content = extractAndConvert(rowData[columnName.elementInternalName])
                                                         }
-                                                        else if (columnName.elementInternalName === 'element1') {
-                                                            content = parse(rowData[columnName.elementInternalName], options2)
-                                                        }else if(columnName.elementInternalName === 'element31' ||
+                                                        // else if (columnName.elementInternalName === 'element1') {
+                                                        //     content = parse(rowData[columnName.elementInternalName], options2)
+                                                        // }
+                                                        else if(columnName.elementInternalName === 'element31' ||
                                                             columnName.elementInternalName ==='element34' ||
                                                             columnName.elementInternalName ==='element35' ||
                                                             columnName.elementInternalName ==='element7' ||
