@@ -165,7 +165,10 @@ function ReportTable({name, open, handleCloseModal,news }) {
                     p: 3,
                 }}
             >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 2, }}>
+                {
+                    data.length > 0 &&
+<>
+<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 2, }}>
                     <Typography variant="h6">Report Table</Typography>
                     <IconButton onClick={handleCloseModal}>
                         <CloseIcon />
@@ -239,6 +242,9 @@ function ReportTable({name, open, handleCloseModal,news }) {
                         <div className="dt-buttons mb-3"></div>
                     </DialogActions>
                 </Dialog>
+                </>
+                }
+              
                 {
                     news && newsSentiment &&
                     <>
