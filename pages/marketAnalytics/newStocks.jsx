@@ -33,44 +33,46 @@ const companyOverviewColumns = [
   "Sector",
   "Industry",
   "Address",
-  "OfficialSite",
-  "MarketCapitalization",
+  "Official Site",
+  "Market Capitalization",
   "EBITDA",
-  "PERation",
-  "PEGRatio",
-  "BookValue",
-  "DividendPerShare",
-  "DividendYield",
+  "PE Ratio",
+  "PEG Ratio",
+  "Book Value",
+  "Dividend Per Share",
+  "Dividend Yield",
   "EPS",
-  "RevenuePerShareTTM",
-  "ProfitMargin",
-  "OperatingMarginTTM",
-  "ReturnOnAssetsTTM",
-  "ReturnOnEquityTTM",
-  "RevenueTTM",
-  "GrossProfitTTM",
-  "DilutedEPSTTM",
-  "QuarterlyEarningsGrowthYOY",
-  "QuarterlyRevenueGrowthYOY",
-  "AnalystRatingStrongBuy",
-  "AnalystRatingBuy",
-  "AnalystRatingHold",
-  "AnalystRatingSell",
-  "AnalystRatingStrongSell",
-  "TrailingPE",
-  "ForwardPE",
-  "PriceToSalesRatioTTM",
-  "PriceToBookRatio",
-  "EVToRevenue",
-  "EVToEBITDA",
+  "Revenue Per Share TTM",
+  "Profit Margin",
+  "Operating Margin TTM",
+  "Return On Assets TTM",
+  "Return On Equity TTM",
+  "Revenue TTM",
+  "Gross Profit TTM",
+  "Diluted EPS TTM",
+  "Quarterly Earnings Growth YOY",
+  "Quarterly Revenue Growth YOY",
+  "Analyst Rating Strong Buy",
+  "Analyst Rating Buy",
+  "Analyst Rating Hold",
+  "Analyst Rating Sell",
+  "Analyst Rating Strong Sell",
+  "Trailing PE",
+  "Forward PE",
+  "Price To Sales Ratio TTM",
+  "Price To Book Ratio",
+  "EVTo Revenue",
+  "EVTo EBITDA",
   "Beta",
-  "52WeekHigh",
-  "52WeekLow",
-  "50DayMovingAverage",
-  "200DayMovingAverage",
+  "52 Week High",
+  "52 Week Low",
+  "50Day Moving Average",
+  "200Day Moving Average",
 ];
 
 const incomeStatementColumn = [
+  "Symbol",
+  "Name",
   "Gross Profit",
   "Total Revenue",
   "Operating Incomes",
@@ -81,12 +83,16 @@ const incomeStatementColumn = [
   "Net Income",
 ];
 const balanceSheetColumn = [
+  "Symbol",
+  "Name",
   "Total Liabilities",
   "Long Term Debt",
   "Common Stock",
   "Common Stock Shares Outstanding",
 ];
 const cashFlowColumn = [
+  "Symbol",
+  "Name",
   "Operating Cashflow",
   "Capital Expenditures",
   "Profit Loss",
@@ -95,14 +101,18 @@ const cashFlowColumn = [
   "New Income",
 ];
 const quarterlyEarningsColumn = [
+  "Symbol",
+  "Name",
   "Reported Date",
   "Reported EPS",
   "Estimated EPS",
   "Surprise",
   "Surprise Percentage",
 ];
-const earningsColumn = ["Fiscal Date Ending", "Reported EPS"];
+const earningsColumn = ["Symbol", "Name", "Fiscal Date Ending", "Reported EPS"];
 const smaColumn = [
+  "Symbol",
+  "Name",
   "Symbol",
   "Indicator",
   "Last Refreshed",
@@ -377,7 +387,7 @@ export default function Stocks() {
   const reset = () => {
     setActiveView("Ticker Home");
     setSelectedTicker(false);
-    fetchData();
+    // fetchData();
   };
   const fetchColumnNames = async () => {
     context.setLoaderState(true);
@@ -392,28 +402,28 @@ export default function Stocks() {
         (col) => col.elementInternalName
       );
       setVisibleColumns(defaultCheckedColumns);
-      fetchData();
+      // fetchData();
       // context.setLoaderState(false)
     } catch (e) {
       console.log("error", e);
       context.setLoaderState(false);
     }
   };
-  const fetchData = async () => {
-    context.setLoaderState(true);
-    try {
-      // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
-      // const getStocksRes = await getStocks.json()
-      const getStocks = `/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`;
-      const getStocksRes = await fetchWithInterceptor(getStocks, false);
-      setTableData(getStocksRes);
-      setFilterData(getStocksRes);
-      context.setLoaderState(false);
-    } catch (e) {
-      console.log("error", e);
-      context.setLoaderState(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
+  //     // const getStocksRes = await getStocks.json()
+  //     const getStocks = `/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`;
+  //     const getStocksRes = await fetchWithInterceptor(getStocks, false);
+  //     setTableData(getStocksRes);
+  //     setFilterData(getStocksRes);
+  //     context.setLoaderState(false);
+  //   } catch (e) {
+  //     console.log("error", e);
+  //     context.setLoaderState(false);
+  //   }
+  // };
   const handleSort = (key) => {
     let direction = "asc";
     if (
@@ -494,13 +504,14 @@ export default function Stocks() {
     setLimit(e.target.value);
   };
   const fetchTickersFunc = async () => {
-    // context.setLoaderState(true)
+    context.setLoaderState(true)
     try {
       // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
       // const fetchTickersRes = await fetchTickers.json()
       const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
       const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
       setTickers(fetchTickersRes);
+      context.setLoaderState(false);
     } catch (e) {}
     // context.setLoaderState(false)
   };
@@ -1317,6 +1328,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1326,6 +1351,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1335,6 +1374,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1344,6 +1397,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1353,6 +1420,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1362,6 +1443,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1371,6 +1466,20 @@ export default function Stocks() {
                             <th
                               key={index}
                               onClick={() => handleSort(columnName)}
+                              className={
+                                index === 0 || index === 1
+                                  ? "sticky-column"
+                                  : ""
+                              }
+                              style={{
+                                left:
+                                  index === 0
+                                    ? 0
+                                    : index === 1
+                                    ? firstColWidth
+                                    : "auto",
+                              }}
+                              ref={index === 0 ? firstColRef : null}
                             >
                               {columnName} {getSortIcon(columnName, sortConfig)}
                             </th>
@@ -1415,9 +1524,9 @@ export default function Stocks() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    {/* <tr>
                       <td colSpan={columnNames?.length}>No data available</td>
-                    </tr>
+                    </tr> */}
                     {/* {filterData?.map((rowData, rowIndex) => (
                         <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
                         {columnNames.map((columnName, colIndex) => {
