@@ -638,7 +638,7 @@ export default function Stocks() {
             // Create img tag from file path
             const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
             // Combine img tag with additional text
-            const resultHtml = `${imgTag}${additionalText}`;
+            const resultHtml = `${imgTag} ${additionalText}`;
             return parse(resultHtml,options4); // Adjust parse function as needed
         }
         // If neither pattern is matched, return an empty array
