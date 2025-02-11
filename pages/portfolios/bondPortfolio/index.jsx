@@ -575,7 +575,7 @@ Swal.close();
   }, { totalValue: parseFloat(0), totalPV: parseFloat(0) })
 
   const getProfitValue = (price, purchasePrice, purchaseVolume)=>{
-    const value = (parseFloat(price) - parseFloat(purchasePrice)) * (parseFloat(purchaseVolume) * 1000)
+    const value = (parseFloat(price) - parseFloat(purchasePrice)) * (parseFloat(purchaseVolume) * 1000)/100
     return Number(value).toFixed(2)
   }
   useEffect(() => {
