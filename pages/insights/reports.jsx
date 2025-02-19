@@ -35,6 +35,7 @@ export default function Reports() {
   const [sortOrder, setSortOrder] = useState("Asc");
   const [categoryType, setCategoryType] = useState([]);
   const [filterText, setFilterText] = useState("");
+  const [fetchData, setFetchData] = useState(false);
   const context = useContext(Context);
   const fetchVideoes = async () => {
     setLoader(true);
@@ -60,7 +61,7 @@ export default function Reports() {
       const filteredReports = reports.filter((report) =>
         categoryType.includes(report.catagoryType)
       );
-      console.log(filteredReports);
+      // console.log(filteredReports);
 
       // setReports(filteredReports);
       setRecentReports(getRecentReports(filteredReports));
@@ -111,7 +112,6 @@ export default function Reports() {
     await fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data); // Handle the response data
         const filteredReports =
           categoryType.length > 0
             ? data.filter((report) =>
@@ -141,6 +141,66 @@ export default function Reports() {
       });
     context.setLoaderState(false);
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const params = new URLSearchParams();
+    params.append("orderType", orderType);
+    params.append("sortOrder", sortOrder);
+    params.append("categoryType", categoryType.join(",")); // Convert array to comma-separated string
+    params.append("filterText", filterText);
+    params.append("_", new Date().getTime());
+
+    // Example GET request URL with payload
+    const url = `${
+      process.env.NEXT_PUBLIC_BASE_URL_V2 +
+      "getAllTickerReports?" +
+      params.toString()
+    }`;
+    context.setLoaderState(true);
+
+    await fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const filteredData =
+          categoryType.length > 0
+            ? data.filter((report) =>
+                categoryType.includes(report.catagoryType)
+              )
+            : [];
+
+        const filteredReports =
+          filteredData.length > 0
+            ? filteredData.filter((report) => report.tickerName === filterText)
+            : data.filter((report) => report.tickerName === filterText);
+
+        setReports(filteredReports.length > 0 ? filteredReports : data);
+        setRecentReports(
+          getRecentReports(
+            filteredReports.length > 0 ? filteredReports : data,
+            sortOrder,
+            orderType,
+            true
+          )
+        );
+        setArchiveReports(
+          []
+          // getArchiveReports(
+          //   filteredReports.length > 0 ? filteredReports : data,
+          //   sortOrder,
+          //   orderType
+          // )
+        );
+        setCurrentPdf(getLatestReport(data));
+        // setCurrentPdf(data[0]);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    context.setLoaderState(false);
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     if (name === "orderType") {
@@ -149,6 +209,9 @@ export default function Reports() {
       setSortOrder(value);
     } else if (name === "filterText") {
       setFilterText(value);
+      if (value === "") {
+        setFetchData(true);
+      }
     }
   };
   const handleCategoryChange = (selectedOptions) => {
@@ -163,6 +226,7 @@ export default function Reports() {
     fetchVideoes();
   }, []);
   useEffect(() => {
+    setFetchData(false);
     filter();
   }, [
     categoryType,
@@ -172,8 +236,8 @@ export default function Reports() {
     setSortOrder,
     orderType,
     setOrderType,
+    fetchData, setFetchData,
   ]);
-
   return (
     <>
       <div className="main-panel">
@@ -194,7 +258,7 @@ export default function Reports() {
             todays investors with sound analytics helping them make the best
             possible decisions for the future.
           </p>
-          <Form onSubmit={(e) => e.preventDefault()}>
+          <Form onSubmit={handleSubmit}>
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex dt-buttons mb-3">
                 <div className="d-flex align-items-center me-2">
@@ -264,7 +328,7 @@ export default function Reports() {
                       { value: "One Page Reports", label: "One Page Reports" },
                     ]}
                     onChange={handleCategoryChange}
-                    required
+                    // required
                   />
                 </div>
                 <div className="d-flex align-items-center me-2">
@@ -282,10 +346,10 @@ export default function Reports() {
                     className="form-control"
                     onChange={handleChange}
                   />
+                  <button className="dt-button buttons-html5 btn-primary h-auto">
+                    <span>Filter</span>
+                  </button>
                 </div>
-                <button className="dt-button buttons-html5 btn-primary h-auto">
-                  <span>Filter</span>
-                </button>
               </div>
             </div>
           </Form>

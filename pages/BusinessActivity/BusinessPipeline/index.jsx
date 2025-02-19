@@ -20,6 +20,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
+import { Dropdown } from "react-bootstrap";
 import StringToHTML from "../../../components/StringToHtml.jsx";
 import formatAmount from "../../../components/formatAmount.js";
 import Select from "react-select";
@@ -33,7 +34,7 @@ export default function BusinessPipeline() {
     { data: "opportunity", display_name: "Opportunity" },
     {
       data: "opportunityComeAbout",
-      display_name: "How did the ooportunity come about?",
+      display_name: "How did the opportunity come about?",
     },
     { data: "amounts", display_name: "Amount($)" },
     { data: "status", display_name: "Status" },
@@ -66,6 +67,14 @@ export default function BusinessPipeline() {
     advisorName: "",
     totalAmount: 0,
   });
+  const [visibleColumns, setVisibleColumns] = useState([
+    "Name",
+    "Amount($)",
+    "Status",
+    "Date added",
+    "Last Contact",
+    "Action",
+  ]);
   const [bPInputs, setBPInputs] = useState({
     name: "",
     opportunity: [],
@@ -111,6 +120,7 @@ export default function BusinessPipeline() {
       // return
       setTableData(response);
       setFilterData(response);
+      // setVisibleColumns(columnNames);
       if (searchRef.current && searchRef.current.value) {
         searchRef.current.value = "";
       }
@@ -591,6 +601,21 @@ export default function BusinessPipeline() {
   }, [currentPage, tableData, sortConfig, limit]);
   console.log(typeof editData.connections == "string");
 
+  const handleColumnToggle = (column) => {
+    setVisibleColumns((prevState) =>
+      prevState.includes(column)
+        ? prevState.filter((col) => col !== column)
+        : [...prevState, column]
+    );
+  };
+  const handleAllCheckToggle = () => {
+    if (visibleColumns.length === columnNames.length) {
+      setVisibleColumns([]);
+    } else {
+      const allColumnNames = columnNames.map((col) => col.display_name);
+      setVisibleColumns(allColumnNames);
+    }
+  };
   return (
     <>
       <div className="main-panel">
@@ -640,6 +665,73 @@ export default function BusinessPipeline() {
               >
                 <span>Analysis</span>
               </button>
+
+              <div className="column-selector d-inline-block">
+                <Dropdown>
+                  <Dropdown.Toggle
+                    variant="btn btn-primary mb-0"
+                    id="dropdown-basic"
+                  >
+                    Columns
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu
+                    style={{
+                      width: "160px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      overflowX: "hidden",
+                      marginTop: "1px",
+                    }}
+                  >
+                    <Dropdown.Item
+                      as="label"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        whiteSpace: "normal",
+                        wordWrap: "break-word",
+                        display: "inline-block",
+                        width: "100%",
+                        padding: "6px",
+                        fontWeight: "bold",
+                      }}
+                      className="columns-dropdown-item"
+                    >
+                      <Form.Check
+                        type="checkbox"
+                        checked={visibleColumns.length === columnNames.length}
+                        onChange={handleAllCheckToggle}
+                        label="Select All"
+                        id="selectAll"
+                      />
+                    </Dropdown.Item>
+                    {columnNames.map((column, index) => (
+                      <Dropdown.Item
+                        as="label"
+                        key={index}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          whiteSpace: "normal",
+                          wordWrap: "break-word",
+                          display: "inline-block",
+                          width: "100%",
+                          padding: "6px",
+                        }}
+                        className="columns-dropdown-item"
+                      >
+                        <Form.Check
+                          type="checkbox"
+                          checked={visibleColumns.includes(column.display_name)}
+                          onChange={() =>
+                            handleColumnToggle(column.display_name)
+                          }
+                          label={column.display_name}
+                          id={`checkId${column.display_name}${index}`}
+                        />
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
             </div>
             <div className="form-group d-flex align-items-center">
               <label
@@ -685,87 +777,93 @@ export default function BusinessPipeline() {
             >
               <thead>
                 <tr>
-                  {columnNames.map((columnName, index) => (
-                    <th
-                      key={index}
-                      onClick={() => handleSort(columnName.data)}
-                      className={
-                        columnName.data === "action"
-                          ? "sticky-action"
-                          : columnName.data == "name"
-                          ? "sticky-left"
-                          : ""
-                      }
-                    >
-                      {columnName.display_name}
-                      {getSortIcon(columnName.data)}
-                    </th>
-                  ))}
+                  {columnNames.map(
+                    (columnName, index) =>
+                      visibleColumns.includes(columnName.display_name) && (
+                        <th
+                          key={index}
+                          onClick={() => handleSort(columnName.data)}
+                          className={
+                            columnName.data === "action"
+                              ? "sticky-action"
+                              : columnName.data == "name"
+                              ? "sticky-left"
+                              : ""
+                          }
+                        >
+                          {columnName.display_name}
+                          {getSortIcon(columnName.data)}
+                        </th>
+                      )
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {tableData.length > 0 && filterData.map((rowData, rowIndex) => (
-                  <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
-                    {columnNames.map((columnName, colIndex) => {
-                      let content;
-                      content = rowData[columnName.data];
-                      if (columnName.data == "name") {
-                        return (
-                          <td key={colIndex} className="sticky-left">
-                            {content}
-                          </td>
-                        );
-                      }
-                      if (columnName.data == "advisorName") {
-                        return (
-                          <td key={colIndex}>
-                            <a
-                              href="#"
-                              onClick={() => {
-                                totalAmountByPerson(content);
-                              }}
-                            >
+                {tableData.length > 0 &&
+                  filterData.map((rowData, rowIndex) => (
+                    <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
+                      {columnNames.map((columnName, colIndex) => {
+                        if (!visibleColumns.includes(columnName.display_name))
+                          return null;
+                        let content;
+                        content = rowData[columnName.data];
+                        if (columnName.data == "name") {
+                          return (
+                            <td key={colIndex} className="sticky-left">
                               {content}
-                            </a>
-                          </td>
-                        );
-                      }
-                      if (columnName.data == "amounts") {
-                        content = amountSeperator(rowData[columnName.data]);
-                      }
-                      if (columnName.data == "action") {
-                        return (
-                          <td key={colIndex} className="sticky-action">
-                            <button
-                              className="px-4 btn btn-primary"
-                              title="Edit"
-                              onClick={() => {
-                                handleEditModal(
-                                  "open",
-                                  rowData?.idBusinessPipelineg
-                                );
-                              }}
-                            >
-                              <i className="mdi mdi-pen"></i>
-                            </button>
-                            <button
-                              className="px-4 ms-2 btn btn-danger"
-                              title="Delete"
-                              onClick={() => {
-                                deleteBusinessPipeline(
-                                  rowData?.idBusinessPipelineg
-                                );
-                              }}
-                            >
-                              <i className="mdi mdi-delete"></i>
-                            </button>
-                          </td>
-                        );
-                      }
-                      return <td key={colIndex}>{content}</td>;
-                    })}
-                  </tr>
-                ))}
+                            </td>
+                          );
+                        }
+                        if (columnName.data == "advisorName") {
+                          return (
+                            <td key={colIndex}>
+                              <a
+                                href="#"
+                                onClick={() => {
+                                  totalAmountByPerson(content);
+                                }}
+                              >
+                                {content}
+                              </a>
+                            </td>
+                          );
+                        }
+                        if (columnName.data == "amounts") {
+                          content = amountSeperator(rowData[columnName.data]);
+                        }
+                        if (columnName.data == "action") {
+                          return (
+                            <td key={colIndex} className="sticky-action">
+                              <button
+                                className="px-4 btn btn-primary"
+                                title="Edit"
+                                onClick={() => {
+                                  handleEditModal(
+                                    "open",
+                                    rowData?.idBusinessPipelineg
+                                  );
+                                }}
+                              >
+                                <i className="mdi mdi-pen"></i>
+                              </button>
+                              <button
+                                className="px-4 ms-2 btn btn-danger"
+                                title="Delete"
+                                onClick={() => {
+                                  deleteBusinessPipeline(
+                                    rowData?.idBusinessPipelineg
+                                  );
+                                }}
+                              >
+                                <i className="mdi mdi-delete"></i>
+                              </button>
+                            </td>
+                          );
+                        }
+                        return <td key={colIndex}>{content}</td>;
+                      })}
+                    </tr>
+                  ))}
               </tbody>
               <tfoot className="fixed">
                 <tr>

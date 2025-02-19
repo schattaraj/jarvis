@@ -50,18 +50,20 @@ export const getLatestReport = (reports) => {
     new Date(report.reportDate) > new Date(latest.reportDate) ? report : latest
   );
 };
-export const getRecentReports = (reports, sortType, orderType) => {
+export const getRecentReports = (
+  reports,
+  sortType,
+  orderType,
+  isAllData = false
+) => {
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
   // let sortedData = [...reports];
-  const recentReports = reports.filter(
-    (report) => new Date(report.reportDate) >= threeMonthsAgo
-  );
-  console.log("orderType", orderType, "sortOrder", sortType);
+  const recentReports = isAllData
+    ? reports
+    : reports.filter((report) => new Date(report.reportDate) >= threeMonthsAgo);
 
   if (orderType == "Ticker Name") {
-    console.log("if");
-
     return recentReports.sort((a, b) => {
       if (sortType === "Desc") {
         return b.tickerName.localeCompare(a.tickerName);
@@ -70,8 +72,6 @@ export const getRecentReports = (reports, sortType, orderType) => {
       }
     });
   } else if (orderType == "Report Date") {
-    console.log("else if");
-
     return recentReports.sort((a, b) => {
       if (sortType === "Desc") {
         return new Date(a.reportDate) - new Date(b.reportDate); // Oldest to Latest

@@ -12,7 +12,8 @@ import { calculateAverage, searchTable } from "../../utils/utils";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Select from "react-select";
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from "../../components/Breadcrumb";
+import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
 import {
   Formik,
   Form as FormikForm,
@@ -20,6 +21,7 @@ import {
   ErrorMessage,
   useFormik,
 } from "formik";
+import { Nav } from "react-bootstrap";
 // import { strocksValidationSchema } from "../../components/stocksValidationSchema";
 export default function StocksPair() {
   const [stocks, setStocks] = useState([]);
@@ -36,8 +38,9 @@ export default function StocksPair() {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewChart, setViewChart] = useState(false);
   const [chartOption, setChartOption] = useState([]);
+  const [ratioChartOption, setRatioChartOption] = useState([]);
   const [limit, setLimit] = useState(25);
-
+  const [activeTab, setActiveTab] = useState("chart");
   const context = useContext(Context);
   const fecthStocks = async () => {
     context.setLoaderState(true);
@@ -80,7 +83,27 @@ export default function StocksPair() {
           "&_=1699957833253"
       );
       const dataRes = await dataApi.json();
-      setTableData(dataRes);
+
+      const formattedData = [];
+      let lastTrend = null;
+      let lastRatio = parseFloat(dataRes[0].ratio).toFixed(2);
+
+      dataRes.forEach((item, index) => {
+        const currentRatio = parseFloat(item.ratio).toFixed(2);
+        if (index === 0 || currentRatio === lastRatio) {
+          formattedData.push({ ...item, trend: null });
+        } else if (currentRatio > lastRatio) {
+          lastTrend = "up";
+          lastRatio = currentRatio;
+          formattedData.push({ ...item, trend: "up" });
+        } else {
+          lastTrend = "down";
+          lastRatio = currentRatio;
+          formattedData.push({ ...item, trend: "down" });
+        }
+      });
+
+      setTableData(formattedData);
       if (chartView) {
         setViewChart(true);
       } else {
@@ -168,8 +191,10 @@ export default function StocksPair() {
         if (item?.fourthParamVal) {
           compareData[inputData?.stockD].push(Number(item?.fourthParamVal));
         }
-        compareData.ratioFirst.push(Number(item?.ratio));
-        compareData.ratioSecond.push(Number(item?.ratioThirdFourth));
+        compareData.ratioFirst.push(Number(Number(item?.ratio).toFixed(2)));
+        compareData.ratioSecond.push(
+          Number(Number(item?.ratioThirdFourth).toFixed(2))
+        );
       });
     }
 
@@ -179,7 +204,7 @@ export default function StocksPair() {
         zoomType: "x",
       },
       title: {
-        text: "Ratio Graph",
+        text: "Value Chart",
         align: "center",
       },
       xAxis: {
@@ -220,6 +245,49 @@ export default function StocksPair() {
             symbol: "triangle",
           },
         },
+        // {
+        //   name: "Ratio First",
+        //   data: compareData.ratioFirst,
+        //   marker: {
+        //     symbol: "circle",
+        //   },
+        // },
+      ],
+    };
+
+    const ratioOptions = {
+      chart: {
+        type: "line",
+        zoomType: "x",
+      },
+      title: {
+        text: "Ratio Chart",
+        align: "center",
+      },
+      xAxis: {
+        categories: compareData.dates,
+        title: {
+          text: "Date",
+        },
+      },
+      yAxis: {
+        title: {
+          text: "Price",
+        },
+      },
+      tooltip: {
+        shared: true,
+        valueSuffix: " units",
+      },
+      plotOptions: {
+        line: {
+          dataLabels: {
+            enabled: true,
+          },
+          enableMouseTracking: true,
+        },
+      },
+      series: [
         {
           name: "Ratio First",
           data: compareData.ratioFirst,
@@ -251,7 +319,7 @@ export default function StocksPair() {
       compareData[inputData?.stockC].length > 0 &&
       compareData[inputData?.stockD].length > 0
     ) {
-      options.series.push({
+      ratioOptions.series.push({
         name: "Ratio Second",
         data: compareData.ratioSecond,
         marker: {
@@ -261,7 +329,21 @@ export default function StocksPair() {
     }
     // console.log("Chart Options ", options);
     setChartOption(options);
+    setRatioChartOption(ratioOptions);
   }, [tableData, viewChart, filterData]);
+
+  // useEffect(() => {
+  //   const formattedData = tableData.map((item, index, arr) => {
+  //     let trend = null;
+  //     if (index > 0) {
+  //       trend =
+  //         parseFloat(item.ratio) > parseFloat(arr[index - 1].ratio) ? "up" : "down";
+  //     }
+  //     return { ...item, trend };
+  //   });
+
+  //   setProcessedData(formattedData);
+  // }, [tableData]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -283,7 +365,7 @@ export default function StocksPair() {
     <>
       <div className="main-panel">
         <div className="content-wrapper">
-        <Breadcrumb />
+          <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">
@@ -304,7 +386,7 @@ export default function StocksPair() {
                             }
                             </select> */}
                 <Select
-                value={{value:inputData?.stockA,label:inputData?.stockA}}
+                  value={{ value: inputData?.stockA, label: inputData?.stockA }}
                   options={selectOptions}
                   name="stockA"
                   onChange={(e) => {
@@ -315,7 +397,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockB,label:inputData?.stockB}}
+                  value={{ value: inputData?.stockB, label: inputData?.stockB }}
                   options={selectOptions}
                   name="stockB"
                   onChange={(e) => {
@@ -334,7 +416,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockC,label:inputData?.stockC}}
+                  value={{ value: inputData?.stockC, label: inputData?.stockC }}
                   options={selectOptions}
                   name="stockC"
                   onChange={(e) => {
@@ -353,7 +435,7 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                value={{value:inputData?.stockD,label:inputData?.stockD}}
+                  value={{ value: inputData?.stockD, label: inputData?.stockD }}
                   options={selectOptions}
                   name="stockD"
                   onChange={(e) => {
@@ -553,7 +635,33 @@ export default function StocksPair() {
                         <td>{item?.date}</td>
                         <td>{item?.firstParamVal}</td>
                         <td>{item?.secondParamVal}</td>
-                        <td>{item?.ratio}</td>
+                        <td
+                          style={{
+                            color:
+                              item.trend === "up"
+                                ? "green"
+                                : item.trend === "down"
+                                ? "red"
+                                : "",
+                          }}
+                        >
+                          {!isNaN(item?.ratio)
+                            ? Number.parseFloat(item?.ratio).toFixed(2)
+                            : ""}{" "}
+                          {item.trend === "up" ? (
+                            <span>
+                              <ArrowUpward />
+                            </span>
+                          ) : item.trend === "down" ? (
+                            <span>
+                              <ArrowDownward />
+                            </span>
+                          ) : null}
+                          {/* {!isNaN(item?.ratio)
+                            ? Number.parseFloat(item?.ratio).toFixed(2)
+                            : ""} */}
+                        </td>
+                        {/* <td>{item?.ratio}</td> */}
                         <td>{item?.thirdParamVal}</td>
                         <td>{item?.fourthParamVal}</td>
                         <td>{item?.ratioThirdFourth}</td>
@@ -578,8 +686,50 @@ export default function StocksPair() {
           className="content-wrapper"
           style={{ padding: "16px", display: !viewChart ? "none" : "" }}
         >
-          <HighchartsReact highcharts={Highcharts} options={chartOption} />
+          {/* Tab Buttons */}
+          <div style={{ marginBottom: "16px", display: "flex", gap: "10px" }}>
+            <Nav fill variant="tabs">
+              <Nav.Item>
+                <Nav.Link
+                  className={`nav-link ${
+                    activeTab === "chart" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("chart")}
+                >
+                  Value Chart
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  className={`nav-link ${
+                    activeTab === "ratioChart" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("ratioChart")}
+                >
+                  Ratio Chart
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+          </div>
+
+          {/* Chart Display */}
+          {activeTab === "chart" && (
+            <HighchartsReact highcharts={Highcharts} options={chartOption} />
+          )}
+          {activeTab === "ratioChart" && (
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={ratioChartOption}
+            />
+          )}
         </div>
+        {/* <div
+          className="content-wrapper"
+          style={{ padding: "16px", display: !viewChart ? "none" : "" }}
+        >
+          <HighchartsReact highcharts={Highcharts} options={chartOption} />
+          <HighchartsReact highcharts={Highcharts} options={ratioChartOption} />
+        </div> */}
         <Footer />
       </div>
     </>
