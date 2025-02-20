@@ -44,8 +44,8 @@ function ReportTable({
   open,
   handleCloseModal,
   news,
-  activeTab,
-  setActiveTab,
+//   activeTab={tab : "latest", selectedDate : "All"},
+//   setActiveTab=null,
 }) {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -76,7 +76,7 @@ function ReportTable({
   });
   //   const [selectedMonth, setSelectedMonth] = useState("All");
   //   const [activeTab, setActiveTab] = useState("latest");
-
+  const [activeTab, setActiveTab] = useState({tab : "latest", selectedDate : "All"});
   const context = useContext(Context);
   const months = [
     "All",
@@ -118,7 +118,7 @@ function ReportTable({
       if (result?.Information) {
         Swal.fire({ icon: "warning", text: result.Information });
       }
-
+      setActiveTab((prev) => ({ ...prev, tab: "latest", selectedDate: "All" }))
       result.feed.forEach((news) => {
         const newsYear = parseInt(news.time_published.substring(0, 4), 10);
 
