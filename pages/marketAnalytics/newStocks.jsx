@@ -240,6 +240,11 @@ export default function Stocks() {
   const [visibleColumns, setVisibleColumns] = useState(
     columnNames.map((col) => col.elementInternalName)
   );
+
+  const transformedColumns = companyOverviewColumns.map((column) =>
+    column.toLowerCase().replace(/\s+/g, "")
+  );
+
   const [ViewOptions, setViewOptions] = useState({
     element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
     element32: { name: "enterPriseValue", displayName: "Enterprise value($M)" },
@@ -320,7 +325,7 @@ export default function Stocks() {
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
-      const getBonds = `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`;
+      const getBonds = `/api/proxy?api=getCompanyOverview?symbol=${selectedTicker}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
@@ -409,21 +414,21 @@ export default function Stocks() {
       context.setLoaderState(false);
     }
   };
-  // const fetchData = async () => {
-  //   context.setLoaderState(true);
-  //   try {
-  //     // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
-  //     // const getStocksRes = await getStocks.json()
-  //     const getStocks = `/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`;
-  //     const getStocksRes = await fetchWithInterceptor(getStocks, false);
-  //     setTableData(getStocksRes);
-  //     setFilterData(getStocksRes);
-  //     context.setLoaderState(false);
-  //   } catch (e) {
-  //     console.log("error", e);
-  //     context.setLoaderState(false);
-  //   }
-  // };
+  const fetchData = async () => {
+    context.setLoaderState(true);
+    try {
+      // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+      // const getBondsRes = await getBonds.json()
+      const getBonds = `/api/proxy?api=getCompanyOverview`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      setTableData(getBondsRes);
+      setFilterData(getBondsRes);
+      setActiveView("Ticker Home");
+    } catch (e) {
+      console.log("error", e);
+    }
+    context.setLoaderState(false);
+  };
   const handleSort = (key) => {
     let direction = "asc";
     if (
@@ -504,7 +509,7 @@ export default function Stocks() {
     setLimit(e.target.value);
   };
   const fetchTickersFunc = async () => {
-    context.setLoaderState(true)
+    context.setLoaderState(true);
     try {
       // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
       // const fetchTickersRes = await fetchTickers.json()
@@ -837,8 +842,9 @@ export default function Stocks() {
     }
   }, [rankingData, activeView]);
   useEffect(() => {
-    fetchColumnNames();
+    // fetchColumnNames();
     fetchTickersFunc();
+    fetchData();
   }, []);
   useEffect(() => {
     async function run() {
@@ -1524,6 +1530,54 @@ export default function Stocks() {
                     </tr>
                   </thead>
                   <tbody>
+                    {tableState === "companyOverview" ? (
+                      filterData?.map((rowData, rowIndex) => {
+                        const rowDataLowercase = Object.fromEntries(
+                          Object.entries(rowData).map(([key, value]) => [
+                            key.toLowerCase(),
+                            value,
+                          ])
+                        );
+
+                        const isAllNull = Object.values(rowDataLowercase).every(
+                          (value) => value === null
+                        );
+
+                        if (isAllNull) {
+                          return null; // Do not render the row if all fields are null
+                        }
+                        return (
+                          <tr
+                            key={rowIndex}
+                            style={{ overflowWrap: "break-word" }}
+                          >
+                            {transformedColumns?.map((columnName, colIndex) => {
+                              let content = (
+                                <td key={colIndex}>
+                                  {rowDataLowercase[columnName]}
+                                </td>
+                              );
+                              if (columnName === "description") {
+                                content = (
+                                  <td
+                                    key={colIndex}
+                                    className="text-wrap d-block"
+                                    style={{ width: "300px" }}
+                                  >
+                                    {rowDataLowercase[columnName]}
+                                  </td>
+                                );
+                              }
+                              return content;
+                            })}
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={columnNames?.length}>No data available</td>
+                      </tr>
+                    )}
                     {/* <tr>
                       <td colSpan={columnNames?.length}>No data available</td>
                     </tr> */}
