@@ -63,6 +63,7 @@ export default function BusinessPipeline() {
   //
   const [totalAmount, setTotalAmount] = useState(0);
   const [byPersonModal, setByPersonModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("Active");
   const [personModalData, setPersonModalData] = useState({
     advisorName: "",
     totalAmount: 0,
@@ -107,6 +108,7 @@ export default function BusinessPipeline() {
   const [analysisData, setAnalysisData] = useState(false);
   const context = useContext(Context);
   const searchRef = useRef();
+  const isMounted = useRef(false);
   const filter = (e) => {
     const value = e.target.value;
     setFilterData(searchTable(tableData, value));
@@ -114,7 +116,7 @@ export default function BusinessPipeline() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const apiEndpoint = `/api/proxy?api=getAllBusinessPipeline`;
+      const apiEndpoint = `/api/proxy?api=getAllBusinessPipeline?followupActionVal=${activeTab}`;
       const response = await fetchWithInterceptor(apiEndpoint, false);
       console.log("getBondsRes", response);
       // return
@@ -567,6 +569,14 @@ export default function BusinessPipeline() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    fetchData();
+  }, [activeTab]);
   useEffect(() => {
     async function run() {
       if (tableData.length > 0) {
@@ -768,6 +778,35 @@ export default function BusinessPipeline() {
               </select>
             </div>
           </div>
+          {/* <div> */}
+          <Form>
+            <div
+              key={`inline-radio`}
+              className="mb-3 d-flex align-items-center"
+            >
+              <Form.Check
+                className="pipeline-tab"
+                inline
+                label="Active"
+                name="group1"
+                type="radio"
+                id={`inline-radio-1`}
+                onClick={() => setActiveTab("Active")}
+                checked={activeTab === "Active"}
+              />
+              <Form.Check
+                className="pipeline-tab"
+                inline
+                label="Closed"
+                name="group1"
+                type="radio"
+                id={`inline-radio-2`}
+                onClick={() => setActiveTab("Closed")}
+                checked={activeTab === "Closed"}
+              />
+            </div>
+          </Form>
+          {/* </div> */}
           <div className="table-responsive">
             <table
               className="table border display no-footer dataTable"
