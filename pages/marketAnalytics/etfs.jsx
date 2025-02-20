@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 import { Form, Modal, Dropdown } from 'react-bootstrap';
 import { FilterAlt } from '@mui/icons-material';
 import Breadcrumb from '../../components/Breadcrumb';
+import ReportTable from '../../components/ReportTable';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 const extraColumns = [
     {
@@ -104,6 +105,7 @@ export default function Etfs() {
     const [activeView, setActiveView] = useState("ETF Home")
     const [isExpanded, setIsExpanded] = useState(false);
     const [contentWidth, setContentWidth] = useState(0);
+    const [reportTicker, setReportTicker] = useState("")
     const contentRef = useRef(null);
     const handleOpenModal = () => {
         setIsExpanded(false)
@@ -381,6 +383,13 @@ export default function Etfs() {
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
     };
+    const handleReportData = (data) => {
+        setReportTicker(data)
+        setReportModal(true)
+    }
+    const closeReportModal = () => {
+        setReportModal(false)
+    }
     useEffect(() => {
         if (screen.width < 576) {
             if (isExpanded) {
@@ -753,7 +762,9 @@ export default function Etfs() {
                                                     columnNames.map((columnName, colIndex) => {
                                                         if (!visibleColumns.includes(columnName.elementInternalName)) return null;
                                                         let content;
-
+                                                        if(columnName.elementInternalName === "element1"){
+                                                            return <td key={colIndex}><a onClick={()=>{handleReportData(rowData[columnName.elementInternalName])}}>{rowData[columnName.elementInternalName]}</a></td>
+                                                        }
                                                         if (columnName.elementInternalName === 'element3') {
                                                             // content = (Number.parseFloat(rowData[columnName.elementInternalName]) || 0).toFixed(2);
                                                             content = rowData[columnName.elementInternalName];
@@ -913,6 +924,7 @@ export default function Etfs() {
                     <button className="btn btn-primary" onClick={charts}>Apply</button>
                 </Modal.Footer>
             </Modal>
+            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
             {isExpanded && <div className='backdrop'></div>}
         </>
     )

@@ -19,6 +19,7 @@ import { Pagination } from "../../components/Pagination";
 import PutChart from "../../components/PutChart";
 import { Form } from "react-bootstrap";
 import Select from "react-select";
+import ReportTable from "../../components/ReportTable";
 const columns = [
   {
     displayName: "Ticker",
@@ -112,6 +113,10 @@ export default function PUTS() {
   const [viewBy, setViewBy] = useState("putPrice");
   const [chartData, setChartData] = useState(false);
   const context = useContext(Context);
+  const [reportTicker, setReportTicker] = useState("")
+  const [reportModal, setReportModal] = useState(false)
+  const regex = /[A-Za-z]:[\\/][A-Za-z0-9_\\-]+(?:[\\/][A-Za-z0-9_\\-]+)*\.(jpg|jpeg|png|gif|bmp|tiff|webp|svg)/;
+  const anchorRegex = /<a\s+href=['"]#['"][^>]*\s+data-toggle=['"][^'"]*['"][^>]*\s+onclick=['"][^'"]*['"][^>]*>[^<]*<\/a>/
   const fetchTickersFunc = async () => {
     context.setLoaderState(true);
     try {
@@ -365,7 +370,10 @@ export default function PUTS() {
       }
     });
   };
-  const handleClick = () => {};
+  const handleClick = (data) => {
+        setReportTicker(data)
+        setReportModal(true)
+  };
   const options = {
     replace: (elememt) => {
       if (elememt.name === "a") {
@@ -416,6 +424,9 @@ export default function PUTS() {
   const handleChart = (e) => {
     setViewBy(e.target.value);
   };
+  const closeReportModal = () => {
+    setReportModal(false)
+}
   useEffect(() => {
     async function run() {
       if (tableData.length > 0) {
@@ -770,6 +781,13 @@ export default function PUTS() {
                               </td>
                             );
                           }
+                          if(elementName == "stockNameTicker"){
+                            const match  = item[elementName].match(regex)
+                            const matchAnchor = item[elementName].match(anchorRegex)
+                           return <td key={"td-" + index}>
+                            <img src={`https://jharvis.com/JarvisV2/downloadPDF?fileName=${match && match[0]}`}/>
+                            {parse(matchAnchor[0],options)}</td>
+                          }
                           return (
                             <td key={"td-" + index}>
                               {typeof item[elementName] == "string"
@@ -827,6 +845,7 @@ export default function PUTS() {
           )}
         </div>
       </div>
+      <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
     </>
   );
 }

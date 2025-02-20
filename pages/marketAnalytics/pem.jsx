@@ -1096,6 +1096,7 @@ export default function PemDetails() {
           name={reportTicker}
           open={reportModal}
           handleCloseModal={closeReportModal}
+          news={true}
         />
       </div>
     </>

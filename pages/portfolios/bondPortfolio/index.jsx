@@ -982,7 +982,7 @@ Swal.close();
             </div>
           </Modal.Body>
         </Modal>
-        <ReportTable  name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} />
+        <ReportTable  name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
       </div>
     </>
   )

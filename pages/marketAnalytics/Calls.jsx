@@ -14,6 +14,7 @@ import CallChart from '../../components/CallChart';
 import Swal from 'sweetalert2';
 import { Pagination } from '../../components/Pagination';
 import Breadcrumb from '../../components/Breadcrumb';
+import ReportTable from '../../components/ReportTable';
 export default function Calls() {
     const [option, setOption] = useState([]);
     const [tickers, setTickers] = useState(tickersData);
@@ -47,6 +48,9 @@ export default function Calls() {
     })
     const [calculateData, setCalculateData] = useState([])
     const [isFirstSubmission,setIsFirstSubmission] = useState(true)
+    const [reportTicker, setReportTicker] = useState("")
+    const [reportData, setReportData] = useState([])
+    const [reportModal, setReportModal] = useState(false)
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
@@ -188,8 +192,9 @@ export default function Calls() {
         setSelectedToDate(event.target.value);
     };
 
-    const handleClick = () => {
-
+    const handleClick = (data) => {
+        setReportTicker(data)
+        setReportModal(true)
     }
     const filter = (e) => {
         const value = e.target.value;
@@ -394,6 +399,13 @@ export default function Calls() {
                 context.setLoaderState(false)
             }
         })
+    }
+    const handleReportData = (data) => {
+        setReportTicker(data)
+        setReportModal(true)
+    }
+    const closeReportModal = () => {
+        setReportModal(false)
     }
     useEffect(() => {
         if (tableData.length > 0) {
@@ -632,9 +644,10 @@ export default function Calls() {
                                                 filterData.map((item, index) => {
                                                     return (
                                                         <tr key={index + 'tr'}>
-                                                            <td>{
+                                                            <td><img style={{marginBottom:'2px'}} src={`https://jharvis.com/JarvisV2/downloadPDF?fileName=${item?.stockNameTicker.split(" ")[0]}`}/>{
+                                                                // JSON.stringify(item?.stockNameTicker.match(/(<a.*?<\/a>)/)[0])
                                                                 typeof (item?.stockNameTicker) == 'string' ?
-                                                                    parse(item?.stockNameTicker, options)
+                                                                    parse(item?.stockNameTicker.match(/(<a.*?<\/a>)/)[0], options)
                                                                     :
                                                                     ""
                                                             }</td>
@@ -681,6 +694,7 @@ export default function Calls() {
 
                 </div>
             </div>
+            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
         </>
     )
 }

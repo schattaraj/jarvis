@@ -873,7 +873,7 @@ export default function Bonds() {
                         className="form-group d-flex align-items-center"
                         style={{ flex: "2" }}
                       >
-                        <div style={{ flex: "1" }}>
+                        <div style={{ flex: "4" }}>
                           <ReactSelect
                             className="mb-0 me-2"
                             isMulti
@@ -907,8 +907,6 @@ export default function Bonds() {
                           </button>
                         </div>
                       </div>
-
-                      <div className="form-group flex-grow-1"></div>
                       <div className="form-group">
                         <label htmlFor="" className="form-label">
                           File Upload Date
@@ -1761,6 +1759,7 @@ export default function Bonds() {
         name={reportTicker}
         open={reportModal}
         handleCloseModal={closeReportModal}
+        news={true}
       />
       <Drawer
         anchor={"right"}

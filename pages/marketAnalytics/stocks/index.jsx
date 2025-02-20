@@ -1,25 +1,26 @@
 import React, { useRef } from 'react'
-import Footer from '../../components/footer';
+import Footer from '../../../components/footer';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { useContext, useEffect, useState } from 'react'
 import Select from 'react-select'
-import { Context } from '../../contexts/Context';
-import { exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../utils/utils';
-import { Pagination } from '../../components/Pagination';
+import { Context } from '../../../contexts/Context';
+import { exportToExcel, fetchWithInterceptor, generatePDF, getSortIcon, searchTable } from '../../../utils/utils';
+import { Pagination } from '../../../components/Pagination';
 import parse from 'html-react-parser';
-import SliceData from '../../components/SliceData';
+import SliceData from '../../../components/SliceData';
 import Swal from 'sweetalert2';
 import { Form, Modal, Dropdown } from 'react-bootstrap';
-import HightChart from '../../components/HighChart';
+import HightChart from '../../../components/HighChart';
 import { FilterAlt } from '@mui/icons-material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'
-import StockHistoryModal from '../../components/StockHistoryModal';
-import Breadcrumb from '../../components/Breadcrumb';
+import StockHistoryModal from '../../../components/StockHistoryModal';
+import Breadcrumb from '../../../components/Breadcrumb';
 import { FaGlasses } from 'react-icons/fa';
-import ReportTable from '../../components/ReportTable';
-import { staticStocks } from '../../utils/staticStock';
+import ReportTable from '../../../components/ReportTable';
+import { staticStocks } from '../../../utils/staticStock';
+import { useRouter } from 'next/router';
 const extraColumns = [
     {
         "elementId": null,
@@ -173,6 +174,7 @@ export default function Stocks() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [contentWidth, setContentWidth] = useState(0);
     const contentRef = useRef(null);
+    const router = useRouter()
     // Initial form values
     const initialFormValues = {
         isHighPerforming: '',
@@ -227,30 +229,31 @@ export default function Stocks() {
             return;
         }
         context.setLoaderState(true)
-        try {
-            const payload = {
-                ticker: selectedTicker,
-                year: dateRange?.startDate,
-                year2: dateRange?.endDate,
-                metadataName: 'Tickers_Watchlist',
-                _: new Date().getTime() // This will generate a unique timestamp
-            };
-            const queryString = new URLSearchParams(payload).toString();
-            // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-            // const getChartHistroryRes = await getChartHistrory.json()
-            const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`
-            const getChartHistroryRes = await fetchWithInterceptor(api,false)
-            console.log("getChartHistroryRes", getChartHistroryRes)
-            setChartHistory(getChartHistroryRes)
-            setActiveView("Chart View")
-            setTableData(getChartHistroryRes)
-            setFilterData(getChartHistroryRes)
-            setDateModal(false)
-        }
-        catch (e) {
-            console.log("Error", e)
-        }
+        // try {
+        //     const payload = {
+        //         ticker: selectedTicker,
+        //         year: dateRange?.startDate,
+        //         year2: dateRange?.endDate,
+        //         metadataName: 'Tickers_Watchlist',
+        //         _: new Date().getTime() // This will generate a unique timestamp
+        //     };
+        //     const queryString = new URLSearchParams(payload).toString();
+        //     // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+        //     // const getChartHistroryRes = await getChartHistrory.json()
+        //     const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`
+        //     const getChartHistroryRes = await fetchWithInterceptor(api,false)
+        //     console.log("getChartHistroryRes", getChartHistroryRes)
+        //     setChartHistory(getChartHistroryRes)
+        //     setActiveView("Chart View")
+        //     setTableData(getChartHistroryRes)
+        //     setFilterData(getChartHistroryRes)
+        //     setDateModal(false)
+        // }
+        // catch (e) {
+        //     console.log("Error", e)
+        // }
         context.setLoaderState(false)
+        router.push(`/marketAnalytics/stocks/chart/${selectedTicker}`)
     }
     const tickerHome = () => {
         setActiveView("Ticker Home")
@@ -801,13 +804,13 @@ export default function Stocks() {
                             <div className="actions">
                                 <button className={"btn btn-primary mb-0"} type="button" onClick={getHistoryByTicker}><span>Go</span></button>
                             </div>
-                            <div className="form-group me-2">
+                            {/* <div className="form-group me-2">
                                 <label htmlFor="uploadFile">Upload File</label>
                                 <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
                             </div>
                             <div className="actions">
                                 <button className='btn btn-primary mb-0' type='submit'>Upload</button>
-                            </div>
+                            </div> */}
                             </div>
                         </Form>
                     </div>
