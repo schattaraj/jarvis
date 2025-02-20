@@ -133,6 +133,8 @@ export default function Stocks() {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(25)
     const [calculateModal, setCalculate] = useState(false)
+    const [activeTab, setActiveTab] = useState({tab : "latest", selectedDate : "All"});
+    
     const [dateRange, setDateRange] = useState({ startDate: 2023, endDate: 2025 })
     const [visibleColumns, setVisibleColumns] = useState(columnNames.map(col => col.elementInternalName));
     const [ViewOptions, setViewOptions] = useState({
@@ -655,6 +657,7 @@ export default function Stocks() {
     }
     const closeReportModal = () => {
         setReportModal(false)
+        setActiveTab({tab: 'latest', selectedDate: "All"});
     }
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
@@ -1336,7 +1339,7 @@ export default function Stocks() {
                     <button className="btn btn-primary" onClick={charts}>Apply</button>
                 </Modal.Footer>
             </Modal>
-            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
+            <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true} activeTab={activeTab} setActiveTab={setActiveTab}/>
             {isExpanded && <div className='backdrop'></div>}
         </>
     )

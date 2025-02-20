@@ -85,22 +85,49 @@ export default function StocksPair() {
       const dataRes = await dataApi.json();
 
       const formattedData = [];
+
       let lastTrend = null;
-      let lastRatio = parseFloat(dataRes[0].ratio).toFixed(2);
+      let lastTrendThirdForth = null;
+
+      let lastRatio = Number(parseFloat(dataRes[0].ratio).toFixed(2));
+      let lastRatioThirdFourth = Number(
+        parseFloat(dataRes[0].ratioThirdFourth).toFixed(2)
+      );
 
       dataRes.forEach((item, index) => {
-        const currentRatio = parseFloat(item.ratio).toFixed(2);
+        const currentRatio = Number(parseFloat(item.ratio).toFixed(2));
+        const currentRatioThirdFourth = Number(
+          parseFloat(item.ratioThirdFourth).toFixed(2)
+        );
+        let trendRatio = null;
+        let trendThirdFourth = null;
+
         if (index === 0 || currentRatio === lastRatio) {
-          formattedData.push({ ...item, trend: null });
+          trendRatio = null;
         } else if (currentRatio > lastRatio) {
-          lastTrend = "up";
+          trendRatio = "up";
           lastRatio = currentRatio;
-          formattedData.push({ ...item, trend: "up" });
         } else {
-          lastTrend = "down";
+          trendRatio = "down";
           lastRatio = currentRatio;
-          formattedData.push({ ...item, trend: "down" });
         }
+
+        // Calculate trend for `ratioThirdFourth`
+        if (index === 0 || currentRatioThirdFourth === lastRatioThirdFourth) {
+          trendThirdFourth = null;
+        } else if (currentRatioThirdFourth > lastRatioThirdFourth) {
+          trendThirdFourth = "up";
+          lastRatioThirdFourth = currentRatioThirdFourth;
+        } else {
+          trendThirdFourth = "down";
+          lastRatioThirdFourth = currentRatioThirdFourth;
+        }
+
+        formattedData.push({
+          ...item,
+          trend: trendRatio, // Trend for `ratio`
+          trendThirdFourth: trendThirdFourth, // Trend for `ratioThirdFourth`
+        });
       });
 
       setTableData(formattedData);
@@ -633,8 +660,16 @@ export default function StocksPair() {
                     return (
                       <tr key={"tr" + index}>
                         <td>{item?.date}</td>
-                        <td>{item?.firstParamVal}</td>
-                        <td>{item?.secondParamVal}</td>
+                        <td>
+                          {!isNaN(item?.firstParamVal)
+                            ? Number.parseFloat(item?.firstParamVal).toFixed(2)
+                            : ""}
+                        </td>
+                        <td>
+                          {!isNaN(item?.secondParamVal)
+                            ? Number.parseFloat(item?.secondParamVal).toFixed(2)
+                            : ""}
+                        </td>
                         <td
                           style={{
                             color:
@@ -657,14 +692,43 @@ export default function StocksPair() {
                               <ArrowDownward />
                             </span>
                           ) : null}
-                          {/* {!isNaN(item?.ratio)
-                            ? Number.parseFloat(item?.ratio).toFixed(2)
-                            : ""} */}
                         </td>
-                        {/* <td>{item?.ratio}</td> */}
-                        <td>{item?.thirdParamVal}</td>
-                        <td>{item?.fourthParamVal}</td>
-                        <td>{item?.ratioThirdFourth}</td>
+
+                        <td>
+                          {!isNaN(item?.thirdParamVal)
+                            ? Number.parseFloat(item?.thirdParamVal).toFixed(2)
+                            : ""}
+                        </td>
+                        <td>
+                          {!isNaN(item?.fourthParamVal)
+                            ? Number.parseFloat(item?.fourthParamVal).toFixed(2)
+                            : ""}
+                        </td>
+                        <td
+                          style={{
+                            color:
+                              item.trendThirdFourth === "up"
+                                ? "green"
+                                : item.trendThirdFourth === "down"
+                                ? "red"
+                                : "",
+                          }}
+                        >
+                          {!isNaN(item?.ratioThirdFourth)
+                            ? Number.parseFloat(item?.ratioThirdFourth).toFixed(
+                                2
+                              )
+                            : ""}{" "}
+                          {item.trendThirdFourth === "up" ? (
+                            <span>
+                              <ArrowUpward />
+                            </span>
+                          ) : item.trendThirdFourth === "down" ? (
+                            <span>
+                              <ArrowDownward />
+                            </span>
+                          ) : null}
+                        </td>
                       </tr>
                     );
                   })}

@@ -7404,10 +7404,10 @@ fieldset:disabled .btn {
   color: #343a40 !important;
   font-weight: normal !important;
 }
-.color-357920{
+.color-357920 {
   color: #357920;
 }
-.text-600{
+.text-600 {
   font-weight: 600;
 }
 .card-text:last-child {
@@ -19858,4 +19858,19 @@ dl li {
 }
 .btn-primary.active-table-button:focus {
   box-shadow: none;
+}
+
+.pipeline-tab {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  input.form-check-input {
+    margin-top: 0;
+    cursor: pointer;
+  }
+  label.form-check-label {
+    margin-left: 0.8rem;
+    cursor: pointer;
+  }
 }
