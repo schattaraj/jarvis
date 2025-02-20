@@ -673,6 +673,9 @@ Swal.close();
                               // if(keyid === 0){
                               //   return <td key={"keyid" + keyid} className={columnClass} style={{left: 0}}>{item[inner['elementInternalName']]}</td>
                               // }
+                              if(inner['elementInternalName'] == 'element10'){
+                                return <td key={"keyid" + keyid}><a onClick={(e)=>{handleClick(e,item[inner['elementInternalName']])}}>{item[inner['elementInternalName']]}</a></td>
+                              }
                               if(inner['elementInternalName'] == 'averageYearToMaturity'){
                                 const today = new Date();
                                 const maturityDate = new Date(item['element7']);
