@@ -1552,8 +1552,25 @@ export default function Stocks() {
                             style={{ overflowWrap: "break-word" }}
                           >
                             {transformedColumns?.map((columnName, colIndex) => {
+                              const columnClass =
+                                columnName === "symbol"
+                                  ? "sticky-column"
+                                  : columnName === "name"
+                                  ? "sticky-column"
+                                  : "";
                               let content = (
-                                <td key={colIndex}>
+                                <td
+                                  key={colIndex}
+                                  className={`${columnClass}`}
+                                  style={{
+                                    left:
+                                      columnName === "symbol"
+                                        ? 0
+                                        : columnName === "name"
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                >
                                   {rowDataLowercase[columnName]}
                                 </td>
                               );
@@ -1561,7 +1578,7 @@ export default function Stocks() {
                                 content = (
                                   <td
                                     key={colIndex}
-                                    className="text-wrap d-block"
+                                    className={`text-wrap d-block`}
                                     style={{ width: "300px" }}
                                   >
                                     {rowDataLowercase[columnName]}
