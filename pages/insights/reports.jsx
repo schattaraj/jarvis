@@ -208,7 +208,7 @@ export default function Reports() {
     } else if (name === "sortOrder") {
       setSortOrder(value);
     } else if (name === "filterText") {
-      setFilterText(value);
+      setFilterText(value.toString().toUpperCase());
       if (value === "") {
         setFetchData(true);
       }
@@ -236,7 +236,8 @@ export default function Reports() {
     setSortOrder,
     orderType,
     setOrderType,
-    fetchData, setFetchData,
+    fetchData,
+    setFetchData,
   ]);
   return (
     <>

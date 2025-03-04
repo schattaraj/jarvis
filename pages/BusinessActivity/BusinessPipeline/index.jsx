@@ -399,6 +399,8 @@ export default function BusinessPipeline() {
       ...editData,
       connections: e.map((item) => item.value),
     };
+    console.log(updatedObj);
+
     setEditData(updatedObj);
   };
   const editOpportunityComeAbout = (e) => {
@@ -1125,7 +1127,7 @@ export default function BusinessPipeline() {
                   >
                     <option>--Select--</option>
                     {/* <option value="Will invest money once the check shows up">Transfer in Process</option> */}
-                    <option value="Closed">Closed</option>
+                    {/* <option value="Closed">Closed</option> */}
                     <option value="Client Action Required">
                       Client Action Required
                     </option>

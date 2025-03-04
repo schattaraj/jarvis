@@ -120,104 +120,104 @@ const smaColumn = [
   "Time Period",
 ];
 
-const extraColumns = [
-  {
-    elementId: null,
-    elementName: "OBV",
-    elementInternalName: "element80",
-    elementDisplayName: "OBV",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-  {
-    elementId: null,
-    elementName: "MOM",
-    elementInternalName: "element81",
-    elementDisplayName: "MOM",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-  {
-    elementId: null,
-    elementName: "RSI",
-    elementInternalName: "element82",
-    elementDisplayName: "RSI",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-  {
-    elementId: null,
-    elementName: "EMA",
-    elementInternalName: "element83",
-    elementDisplayName: "EMA",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-  {
-    elementId: null,
-    elementName: "SMA",
-    elementInternalName: "element84",
-    elementDisplayName: "SMA",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-  {
-    elementId: null,
-    elementName: "Date",
-    elementInternalName: "lastUpdatedAt",
-    elementDisplayName: "Date",
-    elementType: null,
-    metadataName: "Everything_List_New",
-    isAmountField: 0,
-    isUniqueField: 0,
-    isSearchCriteria: 0,
-    isVisibleInDashboard: 0,
-    isCurrencyField: 0,
-  },
-];
-const bestFiveStockColumn = {
-  company: "Company",
-  bestMovedStock: "Most Risen Stock",
-  bestMovedBy: "Price Risen By",
-  percentageChangeRise: "% In Rise",
-  bestMoveCurrValue: "Current Price",
-  bestMovePrevValue: "Previous Price",
-};
-const worstFiveStockColumn = {
-  company: "Company",
-  worstMovedStock: "Most Dropped Stock",
-  worstMovedBy: "Price Dropped By",
-  percentageChangeRise: "% In Drop",
-  worstMoveCurrValue: "Current Price",
-  worstMovePrevValue: "Previous Price",
-};
+// const extraColumns = [
+//   {
+//     elementId: null,
+//     elementName: "OBV",
+//     elementInternalName: "element80",
+//     elementDisplayName: "OBV",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+//   {
+//     elementId: null,
+//     elementName: "MOM",
+//     elementInternalName: "element81",
+//     elementDisplayName: "MOM",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+//   {
+//     elementId: null,
+//     elementName: "RSI",
+//     elementInternalName: "element82",
+//     elementDisplayName: "RSI",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+//   {
+//     elementId: null,
+//     elementName: "EMA",
+//     elementInternalName: "element83",
+//     elementDisplayName: "EMA",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+//   {
+//     elementId: null,
+//     elementName: "SMA",
+//     elementInternalName: "element84",
+//     elementDisplayName: "SMA",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+//   {
+//     elementId: null,
+//     elementName: "Date",
+//     elementInternalName: "lastUpdatedAt",
+//     elementDisplayName: "Date",
+//     elementType: null,
+//     metadataName: "Everything_List_New",
+//     isAmountField: 0,
+//     isUniqueField: 0,
+//     isSearchCriteria: 0,
+//     isVisibleInDashboard: 0,
+//     isCurrencyField: 0,
+//   },
+// ];
+// const bestFiveStockColumn = {
+//   company: "Company",
+//   bestMovedStock: "Most Risen Stock",
+//   bestMovedBy: "Price Risen By",
+//   percentageChangeRise: "% In Rise",
+//   bestMoveCurrValue: "Current Price",
+//   bestMovePrevValue: "Previous Price",
+// };
+// const worstFiveStockColumn = {
+//   company: "Company",
+//   worstMovedStock: "Most Dropped Stock",
+//   worstMovedBy: "Price Dropped By",
+//   percentageChangeRise: "% In Drop",
+//   worstMoveCurrValue: "Current Price",
+//   worstMovePrevValue: "Previous Price",
+// };
 export default function Stocks() {
-  const [columnNames, setColumnNames] = useState([]);
+  const [columnNames, setColumnNames] = useState(companyOverviewColumns);
   const [tableData, setTableData] = useState([]);
   const [filterData, setFilterData] = useState([]);
   const [selectedTicker, setSelectedTicker] = useState(false);
@@ -237,13 +237,7 @@ export default function Stocks() {
     startDate: 2023,
     endDate: 2023,
   });
-  const [visibleColumns, setVisibleColumns] = useState(
-    columnNames.map((col) => col.elementInternalName)
-  );
-
-  const transformedColumns = companyOverviewColumns.map((column) =>
-    column.toLowerCase().replace(/\s+/g, "")
-  );
+  const [visibleColumns, setVisibleColumns] = useState([]);
 
   const [ViewOptions, setViewOptions] = useState({
     element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
@@ -304,6 +298,10 @@ export default function Stocks() {
   const handleTableStateChange = (tableState) => {
     setTableState(tableState);
   };
+  useEffect(() => {
+    setVisibleColumns(columnNames.map((col) => col));
+  }, [columnNames, setColumnNames]);
+
   useEffect(() => {
     if (firstColRef.current) {
       setFirstColWidth(firstColRef.current.offsetWidth);
@@ -369,51 +367,51 @@ export default function Stocks() {
     }
     context.setLoaderState(false);
   };
-  const tickerHome = () => {
-    setActiveView("Ticker Home");
-  };
-  const ranking = async () => {
-    context.setLoaderState(true);
-    try {
-      // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
-      // const rankingApiRes = await rankingApi.json()
-      const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${
-        dates?.date1 == null ? "1900-01-01" : dates?.date1
-      }&date2=${
-        dates?.date2 == null ? "1900-01-01" : dates?.date2
-      }&_=1719818279196`;
-      const rankingApiRes = await fetchWithInterceptor(api, false);
-      setRankingData(rankingApiRes);
-      setActiveView("Ranking");
-    } catch (error) {}
-    setIsExpanded(false);
-    context.setLoaderState(false);
-  };
-  const reset = () => {
-    setActiveView("Ticker Home");
-    setSelectedTicker(false);
-    // fetchData();
-  };
-  const fetchColumnNames = async () => {
-    context.setLoaderState(true);
-    try {
-      // const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
-      // const columnApiRes = await columnApi.json()
-      const columnApi = `/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist`;
-      const columnApiRes = await fetchWithInterceptor(columnApi, false);
-      columnApiRes.push(...extraColumns);
-      setColumnNames(columnApiRes);
-      const defaultCheckedColumns = columnApiRes.map(
-        (col) => col.elementInternalName
-      );
-      setVisibleColumns(defaultCheckedColumns);
-      // fetchData();
-      // context.setLoaderState(false)
-    } catch (e) {
-      console.log("error", e);
-      context.setLoaderState(false);
-    }
-  };
+  // const tickerHome = () => {
+  //   setActiveView("Ticker Home");
+  // };
+  // const ranking = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+  //     // const rankingApiRes = await rankingApi.json()
+  //     const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${
+  //       dates?.date1 == null ? "1900-01-01" : dates?.date1
+  //     }&date2=${
+  //       dates?.date2 == null ? "1900-01-01" : dates?.date2
+  //     }&_=1719818279196`;
+  //     const rankingApiRes = await fetchWithInterceptor(api, false);
+  //     setRankingData(rankingApiRes);
+  //     setActiveView("Ranking");
+  //   } catch (error) {}
+  //   setIsExpanded(false);
+  //   context.setLoaderState(false);
+  // };
+  // const reset = () => {
+  //   setActiveView("Ticker Home");
+  //   setSelectedTicker(false);
+  //   fetchData();
+  // };
+  // const fetchColumnNames = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     // const columnApi = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getColumns?metaDataName=Tickers_Watchlist`)
+  //     // const columnApiRes = await columnApi.json()
+  //     const columnApi = `/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist`;
+  //     const columnApiRes = await fetchWithInterceptor(columnApi, false);
+  //     columnApiRes.push(...extraColumns);
+  //     setColumnNames(columnApiRes);
+  //     const defaultCheckedColumns = columnApiRes.map(
+  //       (col) => col.elementInternalName
+  //     );
+  //     setVisibleColumns(defaultCheckedColumns);
+  //     // fetchData();
+  //     // context.setLoaderState(false)
+  //   } catch (e) {
+  //     console.log("error", e);
+  //     context.setLoaderState(false);
+  //   }
+  // };
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
@@ -526,14 +524,14 @@ export default function Stocks() {
   const handleDateRange = (e) => {
     setDateRange({ ...dateRange, [e.target.name]: Number(e.target.value) });
   };
-  const searchBestStocks = (e) => {
-    const value = e.target.value;
-    setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value));
-  };
-  const searchWorstStocks = (e) => {
-    const value = e.target.value;
-    setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value));
-  };
+  // const searchBestStocks = (e) => {
+  //   const value = e.target.value;
+  //   setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value));
+  // };
+  // const searchWorstStocks = (e) => {
+  //   const value = e.target.value;
+  //   setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value));
+  // };
   const handleCloseModal = () => {
     setHistoryModal(false);
   };
@@ -593,94 +591,94 @@ export default function Stocks() {
     }
     context.setLoaderState(false);
   };
-  const rankingPDF = async () => {
-    context.setLoaderState(true);
-    try {
-      const getPDF = await fetchWithInterceptor(
-        `/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`,
-        false
-      );
-      const getPDFRes = getPDF;
-      window.open(getPDFRes?.responseStr, "_blank");
-    } catch (error) {
-      console.log("Error: ", error);
-    }
-    context.setLoaderState(false);
-  };
-  const pdfDownload = async () => {
-    context.setLoaderState(true);
-    try {
-      const getPDF = await fetchWithInterceptor(
-        `/api/proxy?api=generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`,
-        false
-      );
-      const getPDFRes = getPDF;
-      window.open(getPDFRes?.responseStr, "_blank");
-    } catch (error) {
-      console.log("Error: ", error);
-    }
-    context.setLoaderState(false);
-  };
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const rankingPDF = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     const getPDF = await fetchWithInterceptor(
+  //       `/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`,
+  //       false
+  //     );
+  //     const getPDFRes = getPDF;
+  //     window.open(getPDFRes?.responseStr, "_blank");
+  //   } catch (error) {
+  //     console.log("Error: ", error);
+  //   }
+  //   context.setLoaderState(false);
+  // };
+  // const pdfDownload = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     const getPDF = await fetchWithInterceptor(
+  //       `/api/proxy?api=generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`,
+  //       false
+  //     );
+  //     const getPDFRes = getPDF;
+  //     window.open(getPDFRes?.responseStr, "_blank");
+  //   } catch (error) {
+  //     console.log("Error: ", error);
+  //   }
+  //   context.setLoaderState(false);
+  // };
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormValues((prevValues) => ({
+  //     ...prevValues,
+  //     [name]: value,
+  //   }));
+  // };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-    const {
-      isHighPerforming,
-      rankWithinTableW,
-      relativeStrengthW,
-      priceVs20DAvgW,
-      salesAvgW,
-      priceSalesW,
-      ebitdaW,
-      grossMarginW,
-      roicW,
-      priceEarningW,
-      priceFreeW,
-    } = formValues;
+  //   const {
+  //     isHighPerforming,
+  //     rankWithinTableW,
+  //     relativeStrengthW,
+  //     priceVs20DAvgW,
+  //     salesAvgW,
+  //     priceSalesW,
+  //     ebitdaW,
+  //     grossMarginW,
+  //     roicW,
+  //     priceEarningW,
+  //     priceFreeW,
+  //   } = formValues;
 
-    // const url = new URL('https://jharvis.com/JarvisV2/getCalculateTicker');
-    const url = new URL("/api/proxy?api=getCalculateTicker");
-    url.searchParams.append("metadataName", "Tickers_Watchlist");
-    url.searchParams.append("date", "");
-    url.searchParams.append("rankWithinTable", rankWithinTableW || "10");
-    url.searchParams.append("relativeStrength", relativeStrengthW || "");
-    url.searchParams.append("priceVs20DAvg", priceVs20DAvgW || "");
-    url.searchParams.append("salesAvg", salesAvgW || "");
-    url.searchParams.append("priceSales", priceSalesW || "");
-    url.searchParams.append("ebitda", ebitdaW || "");
-    url.searchParams.append("grossMargin", grossMarginW || "");
-    url.searchParams.append("roic", roicW || "");
-    url.searchParams.append("priceEarning", priceEarningW || "");
-    url.searchParams.append("priceFree", priceFreeW || "");
-    url.searchParams.append("isHighPerforming", isHighPerforming);
-    context.setLoaderState(true);
-    try {
-      const response = await fetchWithInterceptor(url.toString(), false);
-      const data = response;
-      if (data.length > 0) {
-        setTableData(data);
-        setFilterData(data);
-        setCalculate(false);
-      }
-      if (data.length == 0) {
-        Swal.fire({ title: "No data found", confirmButtonColor: "#719B5F" });
-      }
-      console.log(data); // Handle the response data here
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-    context.setLoaderState(false);
-  };
-  const handleReset = () => {
-    setFormValues(initialFormValues);
-  };
+  //   // const url = new URL('https://jharvis.com/JarvisV2/getCalculateTicker');
+  //   const url = new URL("/api/proxy?api=getCalculateTicker");
+  //   url.searchParams.append("metadataName", "Tickers_Watchlist");
+  //   url.searchParams.append("date", "");
+  //   url.searchParams.append("rankWithinTable", rankWithinTableW || "10");
+  //   url.searchParams.append("relativeStrength", relativeStrengthW || "");
+  //   url.searchParams.append("priceVs20DAvg", priceVs20DAvgW || "");
+  //   url.searchParams.append("salesAvg", salesAvgW || "");
+  //   url.searchParams.append("priceSales", priceSalesW || "");
+  //   url.searchParams.append("ebitda", ebitdaW || "");
+  //   url.searchParams.append("grossMargin", grossMarginW || "");
+  //   url.searchParams.append("roic", roicW || "");
+  //   url.searchParams.append("priceEarning", priceEarningW || "");
+  //   url.searchParams.append("priceFree", priceFreeW || "");
+  //   url.searchParams.append("isHighPerforming", isHighPerforming);
+  //   context.setLoaderState(true);
+  //   try {
+  //     const response = await fetchWithInterceptor(url.toString(), false);
+  //     const data = response;
+  //     if (data.length > 0) {
+  //       setTableData(data);
+  //       setFilterData(data);
+  //       setCalculate(false);
+  //     }
+  //     if (data.length == 0) {
+  //       Swal.fire({ title: "No data found", confirmButtonColor: "#719B5F" });
+  //     }
+  //     console.log(data); // Handle the response data here
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  //   context.setLoaderState(false);
+  // };
+  // const handleReset = () => {
+  //   setFormValues(initialFormValues);
+  // };
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -727,62 +725,62 @@ export default function Stocks() {
       }
     },
   };
-  function extractAndConvert(inputString) {
-    // Define regex patterns to match both cases
-    const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
-    const onlyPathRegex = /(.*?\.jpg)/;
-    const onlyAnchorRegex = /(<a.*?<\/a>)/;
+  // function extractAndConvert(inputString) {
+  //   // Define regex patterns to match both cases
+  //   const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
+  //   const onlyPathRegex = /(.*?\.jpg)/;
+  //   const onlyAnchorRegex = /(<a.*?<\/a>)/;
 
-    // Try to match both path and anchor
-    const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
-    if (matchPathAndAnchor) {
-      const filePath = matchPathAndAnchor[1];
-      const anchorTag = matchPathAndAnchor[2];
-      // Create img tag from file path
-      // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
-      const imgTag = `<img src="${fetchWithInterceptor(
-        `/api/proxy?api=downloadPDF?fileName=${filePath}`,
-        false
-      )}" alt="Image">${anchorTag}`;
-      return parse(imgTag, options2);
-    }
+  //   // Try to match both path and anchor
+  //   const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
+  //   if (matchPathAndAnchor) {
+  //     const filePath = matchPathAndAnchor[1];
+  //     const anchorTag = matchPathAndAnchor[2];
+  //     // Create img tag from file path
+  //     // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
+  //     const imgTag = `<img src="${fetchWithInterceptor(
+  //       `/api/proxy?api=downloadPDF?fileName=${filePath}`,
+  //       false
+  //     )}" alt="Image">${anchorTag}`;
+  //     return parse(imgTag, options2);
+  //   }
 
-    // Try to match only file path
-    const matchOnlyPath = inputString.match(onlyPathRegex);
-    if (matchOnlyPath) {
-      const filePath = matchOnlyPath[1];
-      // Create img tag from file path
-      // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
-      const imgTag = `<img src="${fetchWithInterceptor(
-        `/api/proxy?api=downloadPDF?fileName=${filePath}`,
-        false
-      )}" alt="Image">`;
-      return parse(imgTag);
-    }
+  //   // Try to match only file path
+  //   const matchOnlyPath = inputString.match(onlyPathRegex);
+  //   if (matchOnlyPath) {
+  //     const filePath = matchOnlyPath[1];
+  //     // Create img tag from file path
+  //     // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+  //     const imgTag = `<img src="${fetchWithInterceptor(
+  //       `/api/proxy?api=downloadPDF?fileName=${filePath}`,
+  //       false
+  //     )}" alt="Image">`;
+  //     return parse(imgTag);
+  //   }
 
-    // Try to match only anchor tag
-    const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
-    if (matchOnlyAnchor) {
-      return parse(matchOnlyAnchor[1], options);
-    }
-    const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
-    const matchPathAndText = inputString.match(pathAndTextRegex);
-    if (matchPathAndText) {
-      const filePath = matchPathAndText[1];
-      const additionalText = matchPathAndText[2];
-      // Create img tag from file path
-      // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
-      const imgTag = `<img src="${fetchWithInterceptor(
-        `/api/proxy?api=downloadPDF?fileName=${filePath}`,
-        false
-      )}" alt="Image"></br>`;
-      // Combine img tag with additional text
-      const resultHtml = `${imgTag} ${additionalText}`;
-      return parse(resultHtml); // Adjust parse function as needed
-    }
-    // If neither pattern is matched, return an empty array
-    return inputString;
-  }
+  //   // Try to match only anchor tag
+  //   const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
+  //   if (matchOnlyAnchor) {
+  //     return parse(matchOnlyAnchor[1], options);
+  //   }
+  //   const pathAndTextRegex = /(.*?\.png)\s*(.*)/;
+  //   const matchPathAndText = inputString.match(pathAndTextRegex);
+  //   if (matchPathAndText) {
+  //     const filePath = matchPathAndText[1];
+  //     const additionalText = matchPathAndText[2];
+  //     // Create img tag from file path
+  //     // const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+  //     const imgTag = `<img src="${fetchWithInterceptor(
+  //       `/api/proxy?api=downloadPDF?fileName=${filePath}`,
+  //       false
+  //     )}" alt="Image"></br>`;
+  //     // Combine img tag with additional text
+  //     const resultHtml = `${imgTag} ${additionalText}`;
+  //     return parse(resultHtml); // Adjust parse function as needed
+  //   }
+  //   // If neither pattern is matched, return an empty array
+  //   return inputString;
+  // }
   const closeReportModal = () => {
     setReportModal(false);
   };
@@ -891,10 +889,11 @@ export default function Stocks() {
     if (visibleColumns.length === columnNames.length) {
       setVisibleColumns([]);
     } else {
-      const allColumnNames = columnNames.map((col) => col.elementInternalName);
+      const allColumnNames = columnNames.map((col) => col);
       setVisibleColumns(allColumnNames);
     }
   };
+  // console.log("transformed Cols: " + transformedColumns, visibleColumns);
 
   return (
     <>
@@ -909,7 +908,7 @@ export default function Stocks() {
         <div className="content-wrapper">
           <div className="d-flex justify-content-between align-items-center flex-wrap">
             <Breadcrumb />
-            <div
+            {/* <div
               className={`collapsible-container ${
                 isExpanded ? "expanded" : ""
               }`}
@@ -1006,7 +1005,7 @@ export default function Stocks() {
                   <span>Reset</span>
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="page-header">
             <h3 className="page-title">
@@ -1158,14 +1157,10 @@ export default function Stocks() {
                       >
                         <Form.Check
                           type="checkbox"
-                          checked={visibleColumns.includes(
-                            column.elementInternalName
-                          )}
-                          onChange={() =>
-                            handleColumnToggle(column.elementInternalName)
-                          }
-                          label={column.elementDisplayName}
-                          id={`checkId${column.elementDisplayName}${index}`}
+                          checked={visibleColumns.includes(column)}
+                          onChange={() => handleColumnToggle(column)}
+                          label={column}
+                          id={`checkId${column}${index}`}
                         />
                       </Dropdown.Item>
                     ))}
@@ -1193,6 +1188,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("companyOverview");
+                          setColumnNames(companyOverviewColumns);
                         }}
                         className={`${
                           tableState === "companyOverview"
@@ -1207,6 +1203,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("incomeStatement");
+                          setColumnNames(incomeStatementColumn);
                         }}
                         className={`${
                           tableState === "incomeStatement"
@@ -1221,6 +1218,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("balanceSheet");
+                          setColumnNames(balanceSheetColumn);
                         }}
                         className={`${
                           tableState === "balanceSheet"
@@ -1235,6 +1233,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("cashFlow");
+                          setColumnNames(cashFlowColumn);
                         }}
                         className={`${
                           tableState === "cashFlow" ? "active-table-button" : ""
@@ -1247,6 +1246,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("quarterlyEarnings");
+                          setColumnNames(quarterlyEarningsColumn);
                         }}
                         className={`${
                           tableState === "quarterlyEarnings"
@@ -1261,6 +1261,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("earnings");
+                          setColumnNames(earningsColumn);
                         }}
                         className={`${
                           tableState === "earnings" ? "active-table-button" : ""
@@ -1273,6 +1274,7 @@ export default function Stocks() {
                       <button
                         onClick={() => {
                           handleTableStateChange("sma");
+                          setColumnNames(smaColumn);
                         }}
                         className={`${
                           tableState === "sma" ? "active-table-button" : ""
@@ -1330,166 +1332,194 @@ export default function Stocks() {
                   <thead>
                     <tr>
                       {tableState === "companyOverview"
-                        ? companyOverviewColumns.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? companyOverviewColumns.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "incomeStatement"
-                        ? incomeStatementColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? incomeStatementColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "balanceSheet"
-                        ? balanceSheetColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? balanceSheetColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "cashFlow"
-                        ? cashFlowColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? cashFlowColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "quarterlyEarnings"
-                        ? quarterlyEarningsColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? quarterlyEarningsColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "earnings"
-                        ? earningsColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? earningsColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : tableState === "sma"
-                        ? smaColumn.map((columnName, index) => (
-                            <th
-                              key={index}
-                              onClick={() => handleSort(columnName)}
-                              className={
-                                index === 0 || index === 1
-                                  ? "sticky-column"
-                                  : ""
-                              }
-                              style={{
-                                left:
-                                  index === 0
-                                    ? 0
-                                    : index === 1
-                                    ? firstColWidth
-                                    : "auto",
-                              }}
-                              ref={index === 0 ? firstColRef : null}
-                            >
-                              {columnName} {getSortIcon(columnName, sortConfig)}
-                            </th>
-                          ))
+                        ? smaColumn.map(
+                            (columnName, index) =>
+                              visibleColumns.includes(columnName) && (
+                                <th
+                                  key={index}
+                                  onClick={() => handleSort(columnName)}
+                                  className={
+                                    index === 0 || index === 1
+                                      ? "sticky-column"
+                                      : ""
+                                  }
+                                  style={{
+                                    left:
+                                      index === 0
+                                        ? 0
+                                        : index === 1
+                                        ? firstColWidth
+                                        : "auto",
+                                  }}
+                                  ref={index === 0 ? firstColRef : null}
+                                >
+                                  {columnName}{" "}
+                                  {getSortIcon(columnName, sortConfig)}
+                                </th>
+                              )
+                          )
                         : false}
                       {/* {columnNames.map(
                         (columnName, index) =>
@@ -1538,7 +1568,6 @@ export default function Stocks() {
                             value,
                           ])
                         );
-
                         const isAllNull = Object.values(rowDataLowercase).every(
                           (value) => value === null
                         );
@@ -1551,37 +1580,44 @@ export default function Stocks() {
                             key={rowIndex}
                             style={{ overflowWrap: "break-word" }}
                           >
-                            {transformedColumns?.map((columnName, colIndex) => {
+                            {columnNames?.map((columnName, colIndex) => {
+                              const colNameLower = columnName
+                                .toLowerCase()
+                                .replace(/\s+/g, "");
+                              if (!visibleColumns.includes(columnName)) {
+                                return null;
+                              }
                               const columnClass =
-                                columnName === "symbol"
+                                colNameLower === "symbol"
                                   ? "sticky-column"
-                                  : columnName === "name"
+                                  : colNameLower === "name"
                                   ? "sticky-column"
                                   : "";
+
                               let content = (
                                 <td
                                   key={colIndex}
                                   className={`${columnClass}`}
                                   style={{
                                     left:
-                                      columnName === "symbol"
+                                      colNameLower === "symbol"
                                         ? 0
-                                        : columnName === "name"
+                                        : colNameLower === "name"
                                         ? firstColWidth
                                         : "auto",
                                   }}
                                 >
-                                  {rowDataLowercase[columnName]}
+                                  {rowDataLowercase[colNameLower]}
                                 </td>
                               );
-                              if (columnName === "description") {
+                              if (colNameLower === "description") {
                                 content = (
                                   <td
                                     key={colIndex}
                                     className={`text-wrap d-block`}
                                     style={{ width: "300px" }}
                                   >
-                                    {rowDataLowercase[columnName]}
+                                    {rowDataLowercase[colNameLower]}
                                   </td>
                                 );
                               }
@@ -1767,7 +1803,7 @@ export default function Stocks() {
               )}
             </>
           )}
-          {activeView == "Ranking" && (
+          {/* {activeView == "Ranking" && (
             <>
               <h3 className="mb-3">Best Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
@@ -1808,14 +1844,6 @@ export default function Stocks() {
                     className="form-control"
                     onChange={searchBestStocks}
                   />
-                  {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                                <option value="all">All</option>
-                                            </select> */}
                 </div>
               </div>
               <div className="table-responsive mb-4">
@@ -1915,14 +1943,6 @@ export default function Stocks() {
                     className="form-control"
                     onChange={searchWorstStocks}
                   />
-                  {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
-                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                                <option value="all">All</option>
-                                            </select> */}
                 </div>
               </div>
               <div className="table-responsive mb-4">
@@ -1982,10 +2002,10 @@ export default function Stocks() {
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
-              />
+              /> 
             </>
-          )}
-          {activeView == "History" && (
+          )}*/}
+          {/* {activeView == "History" && (
             <>
               <h3 className="mb-3">Best Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
@@ -2186,10 +2206,10 @@ export default function Stocks() {
                 subTitle={"Worst Twenty"}
               />
             </>
-          )}
+          )} */}
         </div>
       </div>
-      <Modal
+      {/* <Modal
         show={calculateModal}
         onHide={() => {
           setCalculate(false);
@@ -2384,7 +2404,7 @@ export default function Stocks() {
             <button className="btn btn-primary">Compare</button>
           </Modal.Footer>
         </Form>
-      </Modal>
+      </Modal> */}
       <Modal
         show={dateModal}
         onHide={() => {
