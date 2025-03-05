@@ -1560,7 +1560,9 @@ export default function Stocks() {
                     </tr>
                   </thead>
                   <tbody>
-                    {tableState === "companyOverview" ? (
+                    {/* {tableState === "companyOverview" ? ( */}
+                    {/*please uncomment this upper check if symbol and name is different for each tableState, and add this check for each tableState, otherwise not required. along with this line uncomment line 1630 to 1634*/}
+                    {
                       filterData?.map((rowData, rowIndex) => {
                         const rowDataLowercase = Object.fromEntries(
                           Object.entries(rowData).map(([key, value]) => [
@@ -1626,11 +1628,12 @@ export default function Stocks() {
                           </tr>
                         );
                       })
-                    ) : (
-                      <tr>
-                        <td colSpan={columnNames?.length}>No data available</td>
-                      </tr>
-                    )}
+                      //) : (
+                      // <tr>
+                      // <td colSpan={columnNames?.length}>No data available</td>
+                      //</tr>
+                      //)
+                    }
                     {/* <tr>
                       <td colSpan={columnNames?.length}>No data available</td>
                     </tr> */}
