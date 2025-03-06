@@ -25,7 +25,11 @@ const CallChart = ({data,view,title}) => {
           align: 'left'
         },
         xAxis: {
-          categories: data.map(item => item?.stockNameTicker),
+          categories: data.map(item => {
+            // item?.stockNameTicker
+            const match = item?.stockNameTicker.match(/>([^<]+)<\/a>/);
+            return match ? match[1] : item?.stockNameTicker;
+          }),
           title: {
             text: 'Price'
           }

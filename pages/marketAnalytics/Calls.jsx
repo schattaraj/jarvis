@@ -230,7 +230,8 @@ export default function Calls() {
         if (selectedFromDate) {
             context.setLoaderState(true)
             try {
-                const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
+                // const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
+                const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
                 const fetchDataRes = await fetchData.json()
                 setChartData(fetchDataRes)
             } catch (error) {
