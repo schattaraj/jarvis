@@ -240,11 +240,50 @@ export default function StocksPair() {
           text: "Date",
         },
       },
-      yAxis: {
-        title: {
-          text: "Price",
+      // yAxis: {
+      //   title: {
+      //     text: "Price",
+      //   },
+      //   min: 0,
+      //   tickInterval: 5, 
+      // },
+      yAxis:[
+        {
+          // Primary Y-axis for the first series
+          title: {
+            text: inputData?.stockA,
+          },
+          min: 0,
+          tickInterval: Math.max(...compareData[inputData?.stockA]) > 500 ? 200 : 10,
+          max:Math.max(...compareData[inputData?.stockA])
         },
-      },
+        {
+          // Secondary Y-axis for the second series
+          title: {
+            text: inputData?.stockB,
+          },
+          min: 0,
+          tickInterval: Math.max(...compareData[inputData?.stockB]) > 500 ? 200 : 10,
+          max:Math.max(...compareData[inputData?.stockB])
+        },
+        {
+          // Secondary Y-axis for the second series
+          title: {
+            text: inputData?.stockC,
+          },
+          min: 0,
+          tickInterval: Math.max(...compareData[inputData?.stockC]) > 500 ? 200 : 10,
+          max:Math.max(...compareData[inputData?.stockC])
+        },
+        {
+          title: {
+            text: inputData?.stockD,
+          },
+          min: 0,
+          tickInterval: Math.max(...compareData[inputData?.stockD]) > 500 ? 200 : 10,
+          max:Math.max(...compareData[inputData?.stockD])
+        },
+      ],
       tooltip: {
         shared: true,
         valueSuffix: " units",
@@ -264,6 +303,7 @@ export default function StocksPair() {
           marker: {
             symbol: "circle",
           },
+          yAxis:0,
         },
         {
           name: inputData?.stockB,
@@ -271,6 +311,7 @@ export default function StocksPair() {
           marker: {
             symbol: "triangle",
           },
+          yAxis:1
         },
         // {
         //   name: "Ratio First",
@@ -331,6 +372,7 @@ export default function StocksPair() {
         marker: {
           symbol: "square",
         },
+        yAxis:2
       });
     }
     if (compareData[inputData?.stockD].length > 0) {
@@ -340,6 +382,7 @@ export default function StocksPair() {
         marker: {
           symbol: "square",
         },
+        yAxis:3
       });
     }
     if (
@@ -748,7 +791,7 @@ export default function StocksPair() {
         </div>
         <div
           className="content-wrapper"
-          style={{ padding: "16px", display: !viewChart ? "none" : "" }}
+          style={{ padding: "16px", display: !viewChart ? "none" : "",height:"800px" }}
         >
           {/* Tab Buttons */}
           <div style={{ marginBottom: "16px", display: "flex", gap: "10px" }}>
@@ -778,7 +821,7 @@ export default function StocksPair() {
 
           {/* Chart Display */}
           {activeTab === "chart" && (
-            <HighchartsReact highcharts={Highcharts} options={chartOption} />
+            <HighchartsReact highcharts={Highcharts} options={chartOption} style={{height:"800px",width:"100%"}}/>
           )}
           {activeTab === "ratioChart" && (
             <HighchartsReact

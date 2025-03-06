@@ -1583,3 +1583,9 @@ div:where(.swal2-container) {
 .swal-icon--success, .swal-icon--error, .swal-icon--warning {
   font-size: 50px; /* Adjust the font size as needed */
 }
+.highcharts-container {
+  height: 800px !important;
+}
+.pem-new-calculate-modal .modal-dialog{
+  max-width: 90%;
+}

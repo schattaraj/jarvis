@@ -239,22 +239,29 @@ function ReportTable({
       : filterByMonth(archivedNewsSentiment);
 
   const getChartHistory = async () => {
-    const payload = {
-      ticker: name,
-      year: "2023",
-      year2: "2025",
-      metadataName: "Tickers_Watchlist",
-      _: new Date().getTime(), // This will generate a unique timestamp
-    };
-    const queryString = new URLSearchParams(payload).toString();
-    const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
-    const getChartHistroryRes = await fetchWithInterceptor(api, false);
-    setChartHistory(getChartHistroryRes);
+    try {
+        context.setLoaderState(true)
+        const payload = {
+            ticker: name,
+            year: "2017",
+            year2: "2025",
+            metadataName: "Tickers_Watchlist",
+            _: new Date().getTime(), // This will generate a unique timestamp
+          };
+          const queryString = new URLSearchParams(payload).toString();
+          const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
+          const getChartHistroryRes = await fetchWithInterceptor(api, false);
+          setChartHistory(getChartHistroryRes);
+          context.setLoaderState(false)
+    } catch (error) {
+        context.setLoaderState(false)
+    }
+  
   };
 
   useEffect(() => {
     getChartHistory();
-  }, []);
+  }, [name]);
   return (
     <Modal open={open} onClose={handleCloseModal}>
       <Box

@@ -43,7 +43,152 @@ export default function PemDetails() {
   const contentRef = useRef(null);
   const firstColRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
+  const [formData, setFormData] = useState({
+    revenueTAMSign: "",
+    revenueTAM: "",
+    organicCompanySign:"",                // Revenue as a % of TAM
+    organicSalesCompany: "",       // Organic Sales Company
+    organicTAMSign:"",
+    organicGrowthTAM: "", 
+    fwdEVSign:"",
+    fwdEV:"",         // Organic Growth TAM
+    fwdEVSales: "",
+    priceEarningsSign:"",                // Fwd EV/Sales
+    priceEarnings: "",
+    priceFreeSign:"",             // Price/Earnings
+    priceFree:"",
+    revConsistencySign:"",
+    roicSign:"",
+    normalizedROIC:"",
+    fcfMarginSign:"",
+    fcfMargin:"",
+    fwdEbitdaSign:"",
+    fwdEbitdaGrowthRate:"",
+    ebitdaMarginSign:"",
+    ebitdaMargin:"",
+    fcfMarginExpandSign:"",
+    fcfMarginExpand:"",
+    priceFreeCashFlow: "",         // Price/Free Cash Flow
+    revenueConsistency: "",         // Revenue Consistency
+    // normalizedROIC: "",            // Normalized ROIC
+    // fcfMargin: "",                 // FCF Margin
+    // fwdEbitdaGrowthRate: "",       // Fwd Ebitda growth rate
+    // ebitdaMarginsExpand: "",       // Ebitda Margins Expand
+    // fcfMarginsExpand: "",  
+    competitiveEnvironmentSign:"",        // FCF Margins Expand
+    competitiveEnvironment: "",     // Competitive Environment
+    valueProSign: "",
+    valueProposition: "",          // Value Proposition
+    rate12Sign:"",
+    rateLast12Months: "",          // Rate % last 12 months
+    organicCompany: "",            // Organic Sales Company (for comparison)
+    fwdEV: "",                     // Fwd EV/Sales (for comparison)
+    priceFree: "",  
+  });
+  const handleInputChange = (e) => {
+    const { name, value,type } = e.target;
+    console.log("e.target",type);
+    if (type === "text") {
+      const numericValue = parseFloat(value) / 100;
+      setFormData((prevData) => ({
+          ...prevData,
+          [name]: numericValue,
+      }));
+  }
+  else{
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  }
+  };
+  const formSubmit = async()=>{
+console.log("formData",formData);
+// return 
+const params = new URLSearchParams({
+  metadataName: "PEM_NEW",
+  rate12: formData.rateLast12Months,
+  revenueTAM: formData.revenueTAM,
+  organicCompany: formData.organicSalesCompany,
+  organicTAM: formData.organicGrowthTAM,
+  fwdEV: formData.fwdEVSales,
+  priceEarnings: formData.priceEarnings,
+  priceFree: formData.priceFreeCashFlow,
+  revConsistency: formData.revenueConsistency,
+  roic: formData.normalizedROIC,
+  fcfMargin: formData.fcfMargin,
+  fwdEbitda: formData.fwdEbitdaGrowthRate,
+  ebitdaMargin: formData.ebitdaMargin, // Add other parameters as needed
+  fcfMarginExpand: formData.fcfMarginExpand,
+  competitiveEnvironment: formData.competitiveEnvironment,
+  valuePro: formData?.valueProSign,
+  rate12Sign: formData?.rate12Sign,
+  revenueTAMSign: formData.revenueTAMSign,
+  organicCompanySign:formData.organicCompanySign,
+  organicTAMSign:formData.organicTAMSign,
+  fwdEVSign: formData?.fwdEVSign,
+  priceEarningsSign: formData?.priceEarningsSign,
+  priceFreeSign: formData?.priceFreeSign,
+  revConsistencySign: formData?.revConsistencySign,
+  roicSign: formData?.roicSign,
+  fcfMarginSign: formData?.fcfMarginSign,
+  fwdEbitdaSign: formData?.fwdEbitdaSign,
+  ebitdaMarginSign: formData?.ebitdaMarginSign,
+  fcfMarginExpandSign: formData?.fcfMarginExpandSign,
+  competitiveEnvironmentSign: formData?.competitiveEnvironmentSign,
+  valueProSign: formData?.valueProSign,
+});
 
+const apiUrl = `https://jharvis.com/JarvisV2/getCalculatePemNew?${params.toString()}`;
+try {
+  // const apiCall = await fetch("https://jharvis.com/JarvisV2/getCalculatePemNew?metadataName=PEM_NEW&rate12=0&revenueTAM=1&organicCompany=0.6&organicTAM=0&fwdEV=&priceEarnings=&priceFree=&revConsistency=&roic=0&fcfMargin=0&fwdEbitda=0&ebitdaMargin=&fcfMarginExpand=&competitiveEnvironment=&valuePro=&rate12Sign=0&revenueTAMSign=%3C&organicCompanySign=%3C&organicTAMSign=0&fwdEVSign=0&priceEarningsSign=0&priceFreeSign=0&revConsistencySign=0&roicSign=0&fcfMarginSign=0&fwdEbitdaSign=0&ebitdaMarginSign=0&fcfMarginExpandSign=0&competitiveEnvironmentSign=0&valueProSign=0&_=1741256270172")
+  const apiCall = await fetch(apiUrl)
+  const resJson = await apiCall.json() 
+  setTableData(resJson);
+  setFilterData(resJson); 
+  handleClose()
+} catch (error) {
+  console.error('Error:', error); // Handle errors
+}
+  }
+  const resetFormData = () => {
+    setFormData({
+      revenueTAMSign: "",
+      revenueTAM: "",
+      organicCompanySign: "",
+      organicSalesCompany: "",
+      organicTAMSign: "",
+      organicGrowthTAM: "",
+      fwdEVSign: "",
+      fwdEV: "",
+      priceEarningsSign: "",
+      priceEarnings: "",
+      priceFreeSign: "",
+      priceFree: "",
+      revConsistencySign: "",
+      roicSign: "",
+      normalizedROIC: "",
+      fcfMarginSign: "",
+      fcfMargin: "",
+      fwdEbitdaSign: "",
+      fwdEbitdaGrowthRate: "",
+      ebitdaMarginSign: "",
+      ebitdaMargin: "",
+      fcfMarginExpandSign: "",
+      fcfMarginExpand: "",
+      priceFreeCashFlow: "",
+      revenueConsistency: "",
+      competitiveEnvironmentSign: "",
+      competitiveEnvironment: "",
+      valueProSign: "",
+      valueProposition: "",
+      rate12Sign: "",
+      rateLast12Months: "",
+      organicCompany: "",
+      fwdEV: "",
+      priceFree: "",
+    });
+  };
   const router = useRouter();
   useEffect(() => {
     if (firstColRef.current) {
@@ -753,13 +898,18 @@ export default function PemDetails() {
           </Modal.Header>
           <Modal.Body>
             <div>
-              <div className="row">
+            <div className="row">
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label htmlFor="" className="form-label">
                       Revenue as a % of TAM
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="revenueTAMSign"
+                      onChange={handleInputChange}
+                      value={formData.revenueTAMSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -771,7 +921,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="revenueTAM"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.revenueTAM ? (formData.revenueTAM * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -780,7 +936,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Organic Sales Company
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="organicCompanySign"
+                      onChange={handleInputChange}
+                      value={formData.organicCompanySign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -793,7 +954,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="organicSalesCompany"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.organicSalesCompany ? (formData.organicSalesCompany * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -802,7 +969,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Organic Growth TAM
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="organicTAMSign"
+                      onChange={handleInputChange}
+                      value={formData.organicTAMSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -814,7 +986,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="organicGrowthTAM"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.organicGrowthTAM ? (formData.organicGrowthTAM * 100).toString() : ''}
+                    />
                   </div>
                 </div>
               </div>
@@ -824,7 +1002,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Fwd EV/Sales
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="fwdEVSign"
+                      onChange={handleInputChange}
+                      value={formData.fwdEVSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -836,7 +1019,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="fwdEV"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.fwdEV ? (formData.fwdEV * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -845,7 +1034,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Price/Earnings
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="priceEarningsSign"
+                      onChange={handleInputChange}
+                      value={formData.priceEarningsSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -858,7 +1052,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="priceEarnings"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.priceEarnings ? (formData.priceEarnings * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -867,7 +1067,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Price/Free Cash Flow
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="priceFreeSign"
+                      onChange={handleInputChange}
+                      value={formData.priceFreeSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -880,7 +1085,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="priceFree"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.priceFree ? (formData.priceFree * 100).toString() : ''}
+                    />
                   </div>
                 </div>
               </div>
@@ -890,7 +1101,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Revenue Consistency
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="revConsistencySign"
+                      onChange={handleInputChange}
+                      value={formData.revConsistencySign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -902,7 +1118,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      className="form-control"
+                      name="revenueConsistency"
+                      onChange={handleInputChange}
+                      value={formData.revenueConsistency ? (formData.revenueConsistency * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -911,7 +1133,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Normalized ROIC
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="roicSign"
+                      onChange={handleInputChange}
+                      value={formData.roicSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -924,7 +1151,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="normalizedROIC"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.normalizedROIC ? (formData.normalizedROIC * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -933,7 +1166,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       FCF Margin
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="fcfMarginSign"
+                      onChange={handleInputChange}
+                      value={formData.fcfMarginSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -946,7 +1184,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="fcfMargin"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.fcfMargin ? (formData.fcfMargin * 100).toString() : ''}
+                    />
                   </div>
                 </div>
               </div>
@@ -956,7 +1200,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Fwd Ebitda growth rate
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="fwdEbitdaSign"
+                      onChange={handleInputChange}
+                      value={formData.fwdEbitdaSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -968,7 +1217,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="fwdEbitdaGrowthRate"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.fwdEbitdaGrowthRate ? (formData.fwdEbitdaGrowthRate * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -977,7 +1232,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Ebitda Margins Expand
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="ebitdaMarginSign"
+                      onChange={handleInputChange}
+                      value={formData.ebitdaMarginSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -989,7 +1249,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="ebitdaMargin"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.ebitdaMargin ? (formData.ebitdaMargin * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -998,7 +1264,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       FCF Margins Expand
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="fcfMarginExpandSign"
+                      onChange={handleInputChange}
+                      value={formData.fcfMarginExpandSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -1010,7 +1281,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="fcfMarginsExpand"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.fcfMarginsExpand ? (formData.fcfMarginsExpand * 100).toString() : ''}
+                    />
                   </div>
                 </div>
               </div>
@@ -1018,9 +1295,14 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label htmlFor="" className="form-label">
-                      CompetitiveEnvironment
+                      Competitive Environment
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="competitiveEnvironmentSign"
+                      onChange={handleInputChange}
+                      value={formData.competitiveEnvironmentSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -1032,7 +1314,13 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="competitiveEnvironment"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.competitiveEnvironment ? (formData.competitiveEnvironment * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
@@ -1041,7 +1329,12 @@ export default function PemDetails() {
                     <label htmlFor="" className="form-label">
                       Value Proposition
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="valueProSign"
+                      onChange={handleInputChange}
+                      value={formData.valueProSign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -1053,16 +1346,27 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="valueProposition"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.valueProposition ? (formData.valueProposition * 100).toString() : ''}
+                    />
                   </div>
                 </div>
 
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label htmlFor="" className="form-label">
-                      rate % last 12 months
+                      Rate % Last 12 Months
                     </label>
-                    <select className="form-select">
+                    <select
+                      className="form-select"
+                      name="rate12Sign"
+                      onChange={handleInputChange}
+                      value={formData.rate12Sign}
+                    >
                       <option value="0">-Select-</option>
                       <option value="<">Less Than</option>
                       <option value=">">Greater Than</option>
@@ -1074,20 +1378,26 @@ export default function PemDetails() {
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label className="form-label">Value</label>
-                    <input type="text" name="" className="form-control" />
+                    <input
+                      type="text"
+                      name="rateLast12Months"
+                      className="form-control"
+                      onChange={handleInputChange}
+                      value={formData.rateLast12Months ? (formData.rateLast12Months * 100).toString() : ''}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button type="button" class="btn btn-secondary">
+            <button type="button" class="btn btn-secondary" onClick={handleClose}>
               Cancel
             </button>
-            <button type="button" class="btn btn-primary">
+            <button type="button" class="btn btn-primary" onClick={resetFormData}>
               Reset
             </button>
-            <button type="button" class="btn btn-primary">
+            <button type="button" class="btn btn-primary" onClick={()=>{formSubmit()}}>
               Compare
             </button>
           </Modal.Footer>
