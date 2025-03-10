@@ -295,8 +295,25 @@ export default function Stocks() {
   const firstColRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
   const context = useContext(Context);
-  const handleTableStateChange = (tableState) => {
-    setTableState(tableState);
+  const handleTableStateChange = (table) => {
+    if(table != tableState){
+      switch (table) {
+        case "companyOverview":
+          fetchData("getCompanyOverview")
+          break;
+      case "incomeStatement":
+        fetchData("getIncomeStatement")
+          break;
+      case "balanceSheet":
+        fetchData("getBalanceSheet")
+          break;
+          case "cashFlow":
+        fetchData("getCashFlow")
+          break;
+      }
+      setTableState(table);
+    }
+
   };
   useEffect(() => {
     setVisibleColumns(columnNames.map((col) => col));
@@ -412,12 +429,12 @@ export default function Stocks() {
   //     context.setLoaderState(false);
   //   }
   // };
-  const fetchData = async () => {
+  const fetchData = async (api = "getCompanyOverview") => {
     context.setLoaderState(true);
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
-      const getBonds = `/api/proxy?api=getCompanyOverview`;
+      const getBonds = `/api/proxy?api=${api}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes);
       setFilterData(getBondsRes);

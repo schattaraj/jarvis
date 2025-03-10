@@ -6,6 +6,7 @@ import Loader from '../components/loader';
 import { Context } from '../contexts/Context';
 import backgroundImage from '../public/images/DRKBkgrd.png'
 import 'animate.css';
+import { getRoleFromToken } from '../utils/auth';
 export default function Login() {
   const [loginDetails,setLoginDetails] = useState({userName:"",password:""})
   const [error,setError] = useState(false)
@@ -60,7 +61,13 @@ export default function Login() {
             if (localStorage.getItem('route') && localStorage.getItem('route') !== '/login') {
                 router.push(localStorage.getItem('route'));
             } else {
-                router.push('/dashboard');
+            const role = getRoleFromToken(result.accessToken)
+            if(role == "internal"){
+              router.push('/dashboard');
+            }
+            else{
+              router.push('/User/dashboard');
+            }
             }
         } else {
             console.error(result.message);

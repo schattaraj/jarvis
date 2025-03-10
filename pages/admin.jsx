@@ -8,7 +8,8 @@ import { Context } from '../contexts/Context';
 import Card from '../components/Card';
 import 'animate.css';
 import Breadcrumb from '../components/Breadcrumb';
-export default function Admin() {
+import withRoleProtection from '../hoc/withRoleProtection';
+function Admin() {
     const context = useContext(Context)
     useEffect(()=>{
         context.setBackground(true)
@@ -147,3 +148,4 @@ export default function Admin() {
         </>
     )
 }
+export default Admin
