@@ -113,7 +113,6 @@ const earningsColumn = ["Symbol", "Name", "Fiscal Date Ending", "Reported EPS"];
 const smaColumn = [
   "Symbol",
   "Name",
-  "Symbol",
   "Indicator",
   "Last Refreshed",
   "Interval",
