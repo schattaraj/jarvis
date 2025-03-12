@@ -27,7 +27,7 @@ const PutChart = ({data,view,title}) => {
         xAxis: {
           categories: data.map(item => {
             const match = item?.stockNameTicker.match(/>([^<]+)<\/a>/);
-            return match ? match[1] : item?.stockNameTicker;
+            return match ? match[1].split(",")[0] : (item?.stockNameTicker).split(",")[0];
           }),
           title: {
             text: 'Ticker'

@@ -28,7 +28,7 @@ const CallChart = ({data,view,title}) => {
           categories: data.map(item => {
             // item?.stockNameTicker
             const match = item?.stockNameTicker.match(/>([^<]+)<\/a>/);
-            return match ? match[1] : item?.stockNameTicker;
+            return match ? match[1].split(",")[0] : item?.stockNameTicker;
           }),
           title: {
             text: 'Price'

@@ -310,6 +310,12 @@ export default function Stocks() {
           case "cashFlow":
         fetchData("getCashFlow")
           break;
+          case "earnings":
+          fetchData("getEarning")
+          break;
+          case "sma":
+            fetchData("getSmaTrading")
+            break;
       }
       setTableState(table);
     }
@@ -1036,7 +1042,7 @@ export default function Stocks() {
             <Form
               onSubmit={uploadFile}
               encType="multipart/form-data"
-              className="w-100"
+              className="w-100 d-none"
             >
               <input
                 type="hidden"
@@ -1092,7 +1098,7 @@ export default function Stocks() {
               </div>
             </Form>
 
-            <div className="d-flex align-items-center justify-content-center mt-1">
+            <div className="d-flex align-items-center justify-content-center mt-1 ms-auto">
               <div className="w-100">
                 <button
                   className="dt-button buttons-pdf buttons-html5 btn-primary d-flex"

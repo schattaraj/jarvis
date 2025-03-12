@@ -15,12 +15,12 @@ export const getRoleFromToken = (code = null) => {
           return null;
         }
         // for testing need to remove before pushing //
-        // if(decoded.userID == 2){
-        //     return 'internal';
-        // }
-        // else{
-        //     return 'external';
-        // }
+        if(decoded.userID == 2){
+            return 'internal';
+        }
+        else{
+            return 'external';
+        }
         //////////////////////////////////////////////
         // Determine role based on 'isExtUser'
         if (isExtUser === 1) {

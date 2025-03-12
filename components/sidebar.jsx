@@ -1010,7 +1010,7 @@ export default function Sidebar() {
               context.handleDropdownClick("insights");
             }}
           >
-            <span className="menu-title">Model Insights</span>
+            <span className="menu-title">Investment Insights</span>
           </Link>
           <button
             className="btn nav-link"

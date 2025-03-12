@@ -224,10 +224,11 @@ export default function Calls() {
         setSortConfig({ key, direction });
     };
     const findCallDataByDate = async () => {
-        if (!selectedFromDate) {
-            Swal.fire({ title: "Please select date", icon: "warning", confirmButtonColor: "var(--primary)" })
+        if (!selectedFromDate && !selectedTicker) {
+            Swal.fire({ title: "Please select ticker or date", icon: "warning", confirmButtonColor: "var(--primary)" })
+            return
         }
-        if (selectedFromDate) {
+        if (selectedFromDate && !selectedTicker) {
             context.setLoaderState(true)
             try {
                 // const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
@@ -239,6 +240,11 @@ export default function Calls() {
             }
             setChartView(true)
             context.setLoaderState(false)
+            return
+        }
+        if(!selectedDate && tableData?.length > 0){
+        setChartData(tableData)
+        setChartView(true)
         }
     }
     const handleChart = (e) => {
