@@ -716,7 +716,7 @@ export default function Sidebar() {
           <i className="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
         </Link>
       </li>
-      <li className="nav-item">
+      {/* <li className="nav-item">
         <Link
           className={
             router.pathname === "/User/dashboard"
@@ -728,8 +728,8 @@ export default function Sidebar() {
           <span className="menu-title">Dashboard</span>
           <i className="mdi mdi-home menu-icon"></i>
         </Link>
-      </li>
-      <li className="nav-item">
+      </li> */}
+      {/* <li className="nav-item">
         <div className="d-flex align-items-center justify-content-between">
           <Link
             href="/marketAnalytics"
@@ -868,8 +868,8 @@ export default function Sidebar() {
             </li>
           </ul>
         </div>
-      </li>
-      <li className="nav-item">
+      </li> */}
+      {/* <li className="nav-item">
         <div className="d-flex align-items-center justify-content-between">
           <Link
             className={
@@ -932,7 +932,7 @@ export default function Sidebar() {
             </li>
           </ul>
         </div>
-      </li>
+      </li> */}
       <li className="nav-item">
         <div className="d-flex align-items-center justify-content-between">
           <Link

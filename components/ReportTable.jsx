@@ -408,17 +408,21 @@ function ReportTable({
             </Dialog>
           </>
         )}
+       {
+        chartHistory && chartHistory.length > 0 &&
         <HightChart
-          data={chartHistory?.map((item) => [
-            new Date(item["lastUpdatedAt"]).getTime(),
-            Number(item["element10"]),
-          ])}
-          title={
-            "element10" &&
-            `Chart View For ${ViewOptions["element10"].displayName}`
-          }
-          yAxisTitle={"Price"}
-        />
+        data={chartHistory?.map((item) => [
+          new Date(item["lastUpdatedAt"]).getTime(),
+          Number(item["element10"]),
+        ])}
+        title={
+          "element10" &&
+          `Chart View For ${ViewOptions["element10"].displayName}`
+        }
+        yAxisTitle={"Price"}
+      />
+}
+      
         {news && displayedNews && (
           <>
             <div className="news-area">
