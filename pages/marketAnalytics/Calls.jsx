@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { tickersData } from '../../utils/staticData'
 import Select from 'react-select'
-import { convertToReadableString, exportToExcel, formatDate, generatePDF, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals, searchTable } from '../../utils/utils';
+import { convertToReadableString, exportToExcel, fetchWithInterceptor, formatDate, generatePDF, getSortIcon, jsonToFormData, mmddyy, roundToTwoDecimals, searchTable } from '../../utils/utils';
 import SliceData from '../../components/SliceData';
 import CallChart from '../../components/CallChart';
 import Swal from 'sweetalert2';
@@ -54,8 +54,10 @@ export default function Calls() {
     const context = useContext(Context)
     const fetchTickersFunc = async () => {
         try {
-            const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
-            const fetchTickersRes = await fetchTickers.json()
+            const fetchTickers = `/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist`;
+            // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724")
+            // const fetchTickersRes = await fetchTickers.json()
+            const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
             setTickers(fetchTickersRes)
         }
         catch (e) {
@@ -65,10 +67,17 @@ export default function Calls() {
     const fetchDates = async () => {
         context.setLoaderState(true)
         try {
-            const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
-            const fetchDateRes = await fetchDates.json()
-            setDates(fetchDateRes)
-            setFilteredToDates(fetchDateRes);
+            // const fetchDates = await fetch("https://jharvis.com/JarvisV2/findAllDates?_=1706798577725")
+            // const fetchDateRes = await fetchDates.json()
+            const fetchDates = `/api/proxy?api=findAllDates`
+            const fetchDateRes = await fetchWithInterceptor(fetchDates, false);
+           const filtered = fetchDateRes.filter((item)=>{
+                const date = new Date(item)
+                const currentDate = new Date()
+                return date < currentDate
+            })
+            setDates(filtered)
+            setFilteredToDates(filtered);
         }
         catch (e) {
             context.setLoaderState(false)
