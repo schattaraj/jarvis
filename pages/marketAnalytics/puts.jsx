@@ -433,13 +433,15 @@ export default function PUTS() {
         let items = [...tableData];
         if (sortConfig !== null) {
           items.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
-              return sortConfig.direction === "asc" ? -1 : 1;
-            }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
-              return sortConfig.direction === "asc" ? 1 : -1;
-            }
-            return 0;
+            const first = isNaN(a[sortConfig.key]) ? a[sortConfig.key] : parseFloat(a[sortConfig.key])
+            const second = isNaN(b[sortConfig.key]) ? b[sortConfig.key] : parseFloat(b[sortConfig.key])
+                    if (first < second) {
+                        return sortConfig.direction === 'asc' ? -1 : 1;
+                    }
+                    if (first > second) {
+                        return sortConfig.direction === 'asc' ? 1 : -1;
+                    }
+                    return 0;
           });
         }
         let dataLimit = limit;

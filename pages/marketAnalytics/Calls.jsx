@@ -95,8 +95,10 @@ export default function Calls() {
         }
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch(`https://jharvis.com/JarvisV2/findAllCallsByTickerName?tickername=${selectedTicker}`)
-            const fetchHistoryRes = await fetchHistory.json()
+            // const fetchHistory = await fetch(`https://jharvis.com/JarvisV2/findAllCallsByTickerName?tickername=${selectedTicker}`)
+            // const fetchHistoryRes = await fetchHistory.json()
+            const fetchHistory = `/api/proxy?api=findAllCallsByTickerName?tickername=${selectedTicker}`
+            const fetchHistoryRes = await fetchWithInterceptor(fetchHistory, false);
             if(fetchHistoryRes?.length == 0){
                 Swal.fire({title:"No Data Available for this Ticker",icon:"warning",confirmButtonColor:"var(--primary)"})
             }
@@ -111,8 +113,10 @@ export default function Calls() {
     const fetchMeanCalls = async () => {
         context.setLoaderState(true)
         try {
-            const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
-            const fetchHistoryRes = await fetchHistory.json()
+            // const fetchHistory = await fetch("https://jharvis.com/JarvisV2/findMeanCalls?tickername=" + `${selectedTicker}&selectColumn=${meanColumn}`)
+            // const fetchHistoryRes = await fetchHistory.json()
+            const fetchHistory = `/api/proxy?api=findMeanCalls?tickername=${selectedTicker}&selectColumn=${meanColumn}`
+            const fetchHistoryRes = await fetchWithInterceptor(fetchHistory, false);
             setMeanCalls(fetchHistoryRes)
         }
         catch (e) {
@@ -135,9 +139,10 @@ export default function Calls() {
         }
         context.setLoaderState(true)
         try {
-            const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
-            const fetchByDateRes = await fetchByDate.json()
-            console.log("fetchByDateRes",fetchByDateRes);
+            // const fetchByDate = await fetch(`https://www.jharvis.com/JarvisV2/findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
+            // const fetchByDateRes = await fetchByDate.json()
+            const fetchByDate = `/api/proxy?api=findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`
+            const fetchByDateRes = await fetchWithInterceptor(fetchByDate,false)
             setCurrentPage(1)
             setTableData(fetchByDateRes)
             
@@ -241,8 +246,10 @@ export default function Calls() {
             context.setLoaderState(true)
             try {
                 // const fetchData = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "findCallDataByDate?date=" + selectedFromDate + "&_=1721911430743")
-                const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
-                const fetchDataRes = await fetchData.json()
+                // const fetchData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`)
+                // const fetchDataRes = await fetchData.json()
+                const fetchData = `/api/proxy?api=findCallFromDataToDate?startDate=${selectedFromDate}&endDate=${selectedToDate}`
+                const fetchDataRes = await fetchWithInterceptor(fetchData,false)
                 setChartData(fetchDataRes)
             } catch (error) {
 
@@ -428,10 +435,12 @@ export default function Calls() {
             let items = [...tableData];
             if (sortConfig !== null) {
                 items.sort((a, b) => {
-                    if (a[sortConfig.key] < b[sortConfig.key]) {
+                    const first = isNaN(a[sortConfig.key]) ? a[sortConfig.key] : parseFloat(a[sortConfig.key])
+                    const second = isNaN(b[sortConfig.key]) ? b[sortConfig.key] : parseFloat(b[sortConfig.key])
+                    if (first < second) {
                         return sortConfig.direction === 'asc' ? -1 : 1;
                     }
-                    if (a[sortConfig.key] > b[sortConfig.key]) {
+                    if (first > second) {
                         return sortConfig.direction === 'asc' ? 1 : -1;
                     }
                     return 0;
@@ -663,7 +672,7 @@ export default function Calls() {
                                                             <td><img style={{marginBottom:'2px'}} src={`https://jharvis.com/JarvisV2/downloadPDF?fileName=${item?.stockNameTicker.split(" ")[0]}`}/>{
                                                                 // JSON.stringify(item?.stockNameTicker.match(/(<a.*?<\/a>)/)[0])
                                                                 typeof (item?.stockNameTicker) == 'string' ?
-                                                                    parse(item?.stockNameTicker.match(/(<a.*?<\/a>)/)[0], options)
+                                                                    parse(item?.stockNameTicker.match(/(<a.*?<\/a>)/) ? item?.stockNameTicker.match(/(<a.*?<\/a>)/)[0] : item?.stockNameTicker, options)
                                                                     :
                                                                     ""
                                                             }</td>

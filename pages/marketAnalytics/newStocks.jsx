@@ -299,7 +299,7 @@ export default function Stocks() {
     if(table != tableState){
       switch (table) {
         case "companyOverview":
-          fetchData("getCompanyOverview")
+          fetchData("getCompanyOverview?symbol=AAL")
           break;
       case "incomeStatement":
         fetchData("getIncomeStatement")
@@ -313,6 +313,9 @@ export default function Stocks() {
           case "earnings":
           fetchData("getEarning")
           break;
+          case "quarterlyEarnings":
+            fetchData("getQuarterlyEarning")
+            break;
           case "sma":
             fetchData("getSmaTrading")
             break;
@@ -435,7 +438,7 @@ export default function Stocks() {
   //     context.setLoaderState(false);
   //   }
   // };
-  const fetchData = async (api = "getCompanyOverview") => {
+  const fetchData = async (api = "getCompanyOverview?symbol=AAL") => {
     context.setLoaderState(true);
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
@@ -1631,8 +1634,11 @@ export default function Stocks() {
                                         ? firstColWidth
                                         : "auto",
                                   }}
-                                >
-                                  {rowDataLowercase[colNameLower]}
+                                > 
+                                  {rowDataLowercase[colNameLower] == null ?
+                                   "Null" 
+                                   : isNaN(rowDataLowercase[colNameLower]) ? rowDataLowercase[colNameLower] :  parseFloat(rowDataLowercase[colNameLower]).toFixed(2)
+                                   }
                                 </td>
                               );
                               if (colNameLower === "description") {
