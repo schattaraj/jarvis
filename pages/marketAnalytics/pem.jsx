@@ -46,117 +46,288 @@ export default function PemDetails() {
   const [formData, setFormData] = useState({
     revenueTAMSign: "",
     revenueTAM: "",
-    organicCompanySign:"",                // Revenue as a % of TAM
-    organicSalesCompany: "",       // Organic Sales Company
-    organicTAMSign:"",
-    organicGrowthTAM: "", 
-    fwdEVSign:"",
-    fwdEV:"",         // Organic Growth TAM
+    organicCompanySign: "", // Revenue as a % of TAM
+    organicSalesCompany: "", // Organic Sales Company
+    organicTAMSign: "",
+    organicGrowthTAM: "",
+    fwdEVSign: "",
+    fwdEV: "", // Organic Growth TAM
     fwdEVSales: "",
-    priceEarningsSign:"",                // Fwd EV/Sales
+    priceEarningsSign: "", // Fwd EV/Sales
     priceEarnings: "",
-    priceFreeSign:"",             // Price/Earnings
-    priceFree:"",
-    revConsistencySign:"",
-    roicSign:"",
-    normalizedROIC:"",
-    fcfMarginSign:"",
-    fcfMargin:"",
-    fwdEbitdaSign:"",
-    fwdEbitdaGrowthRate:"",
-    ebitdaMarginSign:"",
-    ebitdaMargin:"",
-    fcfMarginExpandSign:"",
-    fcfMarginExpand:"",
-    priceFreeCashFlow: "",         // Price/Free Cash Flow
-    revenueConsistency: "",         // Revenue Consistency
+    priceFreeSign: "", // Price/Earnings
+    priceFree: "",
+    revConsistencySign: "",
+    roicSign: "",
+    normalizedROIC: "",
+    fcfMarginSign: "",
+    fcfMargin: "",
+    fwdEbitdaSign: "",
+    fwdEbitdaGrowthRate: "",
+    ebitdaMarginSign: "",
+    ebitdaMargin: "",
+    fcfMarginExpandSign: "",
+    fcfMarginExpand: "",
+    priceFreeCashFlow: "", // Price/Free Cash Flow
+    revenueConsistency: "", // Revenue Consistency
     // normalizedROIC: "",            // Normalized ROIC
     // fcfMargin: "",                 // FCF Margin
     // fwdEbitdaGrowthRate: "",       // Fwd Ebitda growth rate
     // ebitdaMarginsExpand: "",       // Ebitda Margins Expand
-    // fcfMarginsExpand: "",  
-    competitiveEnvironmentSign:"",        // FCF Margins Expand
-    competitiveEnvironment: "",     // Competitive Environment
+    // fcfMarginsExpand: "",
+    competitiveEnvironmentSign: "", // FCF Margins Expand
+    competitiveEnvironment: "", // Competitive Environment
     valueProSign: "",
-    valueProposition: "",          // Value Proposition
-    rate12Sign:"",
-    rateLast12Months: "",          // Rate % last 12 months
-    organicCompany: "",            // Organic Sales Company (for comparison)
-    fwdEV: "",                     // Fwd EV/Sales (for comparison)
-    priceFree: "",  
+    valueProposition: "", // Value Proposition
+    rate12Sign: "",
+    rateLast12Months: "", // Rate % last 12 months
+    organicCompany: "", // Organic Sales Company (for comparison)
+    fwdEV: "", // Fwd EV/Sales (for comparison)
+    priceFree: "",
   });
   const handleInputChange = (e) => {
-    const { name, value,type } = e.target;
-    console.log("e.target",type);
+    const { name, value, type } = e.target;
+    console.log("e.target", type, name);
     if (type === "text") {
       // const numericValue = parseFloat(value) / 100;
-      console.log("numericValue",parseFloat(value));
-      
+      console.log("numericValue", parseFloat(value));
+
       const numericValue = parseFloat(value);
       setFormData((prevData) => ({
-          ...prevData,
-          [name]: numericValue,
+        ...prevData,
+        [name]: numericValue,
       }));
-  }
-  else{
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  }
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
-  const formSubmit = async()=>{
-console.log("formData",formData);
-// return 
-const params = new URLSearchParams({
-  metadataName: "PEM_NEW",
-  rate12: formData.rateLast12Months,
-  revenueTAM: formData.revenueTAM,
-  organicCompany: formData.organicSalesCompany,
-  organicTAM: formData.organicGrowthTAM,
-  fwdEV: formData.fwdEVSales,
-  priceEarnings: formData.priceEarnings,
-  priceFree: formData.priceFreeCashFlow,
-  revConsistency: formData.revenueConsistency,
-  roic: formData.normalizedROIC,
-  fcfMargin: formData.fcfMargin,
-  fwdEbitda: formData.fwdEbitdaGrowthRate,
-  ebitdaMargin: formData.ebitdaMargin, // Add other parameters as needed
-  fcfMarginExpand: formData.fcfMarginExpand,
-  competitiveEnvironment: formData.competitiveEnvironment,
-  valuePro: formData?.valueProSign,
-  rate12Sign: formData?.rate12Sign,
-  revenueTAMSign: formData.revenueTAMSign,
-  organicCompanySign:formData.organicCompanySign,
-  organicTAMSign:formData.organicTAMSign,
-  fwdEVSign: formData?.fwdEVSign,
-  priceEarningsSign: formData?.priceEarningsSign,
-  priceFreeSign: formData?.priceFreeSign,
-  revConsistencySign: formData?.revConsistencySign,
-  roicSign: formData?.roicSign,
-  fcfMarginSign: formData?.fcfMarginSign,
-  fwdEbitdaSign: formData?.fwdEbitdaSign,
-  ebitdaMarginSign: formData?.ebitdaMarginSign,
-  fcfMarginExpandSign: formData?.fcfMarginExpandSign,
-  competitiveEnvironmentSign: formData?.competitiveEnvironmentSign,
-  valueProSign: formData?.valueProSign,
-});
+  const formSubmit = async () => {
+    console.log("formData", formData);
+    // return
+    const params = new URLSearchParams({
+      metadataName: "PEM_NEW",
+      rate12: formData.rateLast12Months,
+      revenueTAM: formData.revenueTAM,
+      organicCompany: formData.organicSalesCompany,
+      organicTAM: formData.organicGrowthTAM,
+      fwdEV: formData.fwdEVSales,
+      priceEarnings: formData.priceEarnings,
+      priceFree: formData.priceFreeCashFlow,
+      revConsistency: formData.revenueConsistency,
+      roic: formData.normalizedROIC,
+      fcfMargin: formData.fcfMargin,
+      fwdEbitda: formData.fwdEbitdaGrowthRate,
+      ebitdaMargin: formData.ebitdaMargin, // Add other parameters as needed
+      fcfMarginExpand: formData.fcfMarginExpand,
+      competitiveEnvironment: formData.competitiveEnvironment,
+      valuePro: formData?.valueProSign,
+      rate12Sign: formData?.rate12Sign,
+      revenueTAMSign: formData.revenueTAMSign,
+      organicCompanySign: formData.organicCompanySign,
+      organicTAMSign: formData.organicTAMSign,
+      fwdEVSign: formData?.fwdEVSign,
+      priceEarningsSign: formData?.priceEarningsSign,
+      priceFreeSign: formData?.priceFreeSign,
+      revConsistencySign: formData?.revConsistencySign,
+      roicSign: formData?.roicSign,
+      fcfMarginSign: formData?.fcfMarginSign,
+      fwdEbitdaSign: formData?.fwdEbitdaSign,
+      ebitdaMarginSign: formData?.ebitdaMarginSign,
+      fcfMarginExpandSign: formData?.fcfMarginExpandSign,
+      competitiveEnvironmentSign: formData?.competitiveEnvironmentSign,
+      valueProSign: formData?.valueProSign,
+    });
 
-const apiUrl = `https://jharvis.com/JarvisV2/getCalculatePemNew?${params.toString()}`;
-try {
-  context.setLoaderState(true)
-  // const apiCall = await fetch("https://jharvis.com/JarvisV2/getCalculatePemNew?metadataName=PEM_NEW&rate12=0&revenueTAM=1&organicCompany=0.6&organicTAM=0&fwdEV=&priceEarnings=&priceFree=&revConsistency=&roic=0&fcfMargin=0&fwdEbitda=0&ebitdaMargin=&fcfMarginExpand=&competitiveEnvironment=&valuePro=&rate12Sign=0&revenueTAMSign=%3C&organicCompanySign=%3C&organicTAMSign=0&fwdEVSign=0&priceEarningsSign=0&priceFreeSign=0&revConsistencySign=0&roicSign=0&fcfMarginSign=0&fwdEbitdaSign=0&ebitdaMarginSign=0&fcfMarginExpandSign=0&competitiveEnvironmentSign=0&valueProSign=0&_=1741256270172")
-  const apiCall = await fetch(apiUrl)
-  const resJson = await apiCall.json() 
-  setTableData(resJson);
-  setFilterData(resJson); 
-  handleClose()
-  setLoaderState(false)
-} catch (error) {
-  console.error('Error:', error); // Handle errors
-  context.setLoaderState(false)
-}
-  }
+    const apiUrl = `https://jharvis.com/JarvisV2/getCalculatePemNew?${params.toString()}`;
+    try {
+      context.setLoaderState(true);
+      // const apiCall = await fetch("https://jharvis.com/JarvisV2/getCalculatePemNew?metadataName=PEM_NEW&rate12=0&revenueTAM=1&organicCompany=0.6&organicTAM=0&fwdEV=&priceEarnings=&priceFree=&revConsistency=&roic=0&fcfMargin=0&fwdEbitda=0&ebitdaMargin=&fcfMarginExpand=&competitiveEnvironment=&valuePro=&rate12Sign=0&revenueTAMSign=%3C&organicCompanySign=%3C&organicTAMSign=0&fwdEVSign=0&priceEarningsSign=0&priceFreeSign=0&revConsistencySign=0&roicSign=0&fcfMarginSign=0&fwdEbitdaSign=0&ebitdaMarginSign=0&fcfMarginExpandSign=0&competitiveEnvironmentSign=0&valueProSign=0&_=1741256270172")
+      // const apiCall = await fetch(apiUrl);
+      // const resJson = await apiCall.json();
+      await fetchData();
+      const filteredData = tableData.filter((pem) => {
+        // Helper function to compare values based on sign
+        const compareValues = (value1, value2, sign) => {
+          if (!sign || sign === "0") return true;
+          switch (sign) {
+            case "<":
+              return value1 < value2;
+            case ">":
+              return value1 > value2;
+            case "<=":
+              return value1 <= value2;
+            case ">=":
+              return value1 >= value2;
+            default:
+              return true;
+          }
+        };
+
+        // Revenue TAM
+        const elem5 = parseFloat(
+          (Number.parseFloat(pem.element5) * 100).toFixed(2)
+        );
+        const formTAM = Number.parseFloat(formData?.revenueTAM);
+        if (!compareValues(elem5, formTAM, formData?.revenueTAMSign))
+          return false;
+
+        // Organic Sales Company
+        const elem6 = parseFloat(
+          (Number.parseFloat(pem.element6) * 100).toFixed(2)
+        );
+        const formOrganicCompany = Number.parseFloat(
+          formData?.organicSalesCompany
+        );
+        if (
+          !compareValues(
+            elem6,
+            formOrganicCompany,
+            formData?.organicCompanySign
+          )
+        )
+          return false;
+
+        // Organic Growth TAM
+        const elem7 = parseFloat(
+          (Number.parseFloat(pem.element7) * 100).toFixed(2)
+        );
+        const formOrganicTAM = Number.parseFloat(formData?.organicGrowthTAM);
+        if (!compareValues(elem7, formOrganicTAM, formData?.organicTAMSign))
+          return false;
+
+        // Fwd EV/Sales
+        const elem8 = parseFloat(
+          (Number.parseFloat(pem.element8) * 100).toFixed(2)
+        );
+        const formFwdEV = Number.parseFloat(formData?.fwdEV);
+        if (!compareValues(elem8, formFwdEV, formData?.fwdEVSign)) return false;
+
+        // Price/Earnings
+        const elem9 = parseFloat(
+          (Number.parseFloat(pem.element9) * 100).toFixed(2)
+        );
+        const formPriceEarnings = Number.parseFloat(formData?.priceEarnings);
+        if (
+          !compareValues(elem9, formPriceEarnings, formData?.priceEarningsSign)
+        )
+          return false;
+
+        // Price/Free Cash Flow
+        const elem10 = parseFloat(
+          (Number.parseFloat(pem.element10) * 100).toFixed(2)
+        );
+        const formPriceFree = Number.parseFloat(formData?.priceFree);
+        if (!compareValues(elem10, formPriceFree, formData?.priceFreeSign))
+          return false;
+
+        // Revenue Consistency
+        const elem11 = parseFloat(
+          (Number.parseFloat(pem.element11) * 100).toFixed(2)
+        );
+        const formRevConsistency = Number.parseFloat(
+          formData?.revenueConsistency
+        );
+        if (
+          !compareValues(
+            elem11,
+            formRevConsistency,
+            formData?.revConsistencySign
+          )
+        )
+          return false;
+
+        // Normalized ROIC
+        const elem12 = parseFloat(
+          (Number.parseFloat(pem.element12) * 100).toFixed(2)
+        );
+        const formROIC = Number.parseFloat(formData?.normalizedROIC);
+        if (!compareValues(elem12, formROIC, formData?.roicSign)) return false;
+
+        // FCF Margin
+        const elem13 = parseFloat(
+          (Number.parseFloat(pem.element13) * 100).toFixed(2)
+        );
+        const formFCFMargin = Number.parseFloat(formData?.fcfMargin);
+        if (!compareValues(elem13, formFCFMargin, formData?.fcfMarginSign))
+          return false;
+
+        // Fwd Ebitda growth rate
+        const elem14 = parseFloat(
+          (Number.parseFloat(pem.element14) * 100).toFixed(2)
+        );
+        const formFwdEbitda = Number.parseFloat(formData?.fwdEbitdaGrowthRate);
+        if (!compareValues(elem14, formFwdEbitda, formData?.fwdEbitdaSign))
+          return false;
+
+        // Ebitda Margins Expand
+        // const elem15 = (Number.parseFloat(pem.element15) * 100).toFixed(2);
+        // const formEbitdaMargin = Number.parseFloat(formData?.ebitdaMargin);
+        // if (
+        //   !compareValues(elem15, formEbitdaMargin, formData?.ebitdaMarginSign)
+        // )
+        //   return false;
+
+        // FCF Margins Expand
+        // const elem16 = (Number.parseFloat(pem.element16) * 100).toFixed(2);
+        // const formFCFMarginExpand = Number.parseFloat(
+        //   formData?.fcfMarginExpand
+        // );
+        // if (
+        //   !compareValues(
+        //     elem16,
+        //     formFCFMarginExpand,
+        //     formData?.fcfMarginExpandSign
+        //   )
+        // )
+        //   return false;
+
+        // Competitive Environment
+        const elem21 = parseFloat(
+          (Number.parseFloat(pem.element21) * 100).toFixed(2)
+        );
+        const formCompetitiveEnv = Number.parseFloat(
+          formData?.competitiveEnvironment
+        );
+        if (
+          !compareValues(
+            elem21,
+            formCompetitiveEnv,
+            formData?.competitiveEnvironmentSign
+          )
+        )
+          return false;
+
+        // Value Proposition
+        const elem22 = parseFloat(
+          (Number.parseFloat(pem.element22) * 100).toFixed(2)
+        );
+        const formValueProp = Number.parseFloat(formData?.valueProposition);
+        if (!compareValues(elem22, formValueProp, formData?.valueProSign))
+          return false;
+
+        // Rate % Last 12 Months
+        const elem26 = parseFloat(
+          (Number.parseFloat(pem.element26) * 100).toFixed(2)
+        );
+        const formRate12 = Number.parseFloat(formData?.rateLast12Months);
+        if (!compareValues(elem26, formRate12, formData?.rate12Sign))
+          return false;
+
+        return true;
+      });
+      // console.log(filteredData);
+      setTableData(filteredData);
+      setFilterData(filteredData);
+      handleClose();
+      context.setLoaderState(false);
+    } catch (error) {
+      console.error("Error:", error); // Handle errors
+      context.setLoaderState(false);
+    }
+  };
   const resetFormData = () => {
     setFormData({
       revenueTAMSign: "",
@@ -422,6 +593,7 @@ try {
     setShow(false);
   };
   const handleShow = (path) => {
+    // fetchData();
     setShow(true);
   };
 
@@ -562,6 +734,16 @@ try {
                       onClick={handleShow}
                     >
                       Calculate
+                    </button>
+                    <button
+                      className="btn btn-primary mb-0"
+                      type="button"
+                      onClick={async () => {
+                        await fetchData();
+                        resetFormData();
+                      }}
+                    >
+                      All
                     </button>
                   </div>
                 </div>
@@ -715,14 +897,21 @@ try {
                 <tr>
                   {columnNames.map((columnName, index) => {
                     const columnClass =
-                      columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
+                      columnName.elementInternalName === "element1" ||
+                      columnName.elementInternalName === "element2"
+                        ? "sticky-column"
+                        : "";
                     return (
                       visibleColumns.includes(
                         columnName.elementInternalName
                       ) && (
                         <th
                           key={index}
-                          ref={columnName.elementInternalName === "element1" ? firstColRef : null}
+                          ref={
+                            columnName.elementInternalName === "element1"
+                              ? firstColRef
+                              : null
+                          }
                           className={columnClass}
                           style={{
                             left:
@@ -856,7 +1045,10 @@ try {
                       }
                       // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                       const columnClass =
-                        columnName.elementInternalName === "element1" || columnName.elementInternalName === "element2" ? "sticky-column" : "";
+                        columnName.elementInternalName === "element1" ||
+                        columnName.elementInternalName === "element2"
+                          ? "sticky-column"
+                          : "";
                       return (
                         <td
                           key={colIndex}
@@ -904,7 +1096,7 @@ try {
           </Modal.Header>
           <Modal.Body>
             <div>
-            <div className="row">
+              <div className="row">
                 <div className="col-sm-2">
                   <div className="form-group">
                     <label htmlFor="" className="form-label">
@@ -933,7 +1125,11 @@ try {
                       className="form-control"
                       onChange={handleInputChange}
                       // value={formData.revenueTAM ? (formData.revenueTAM * 100).toString() : ''}
-                      value={formData.revenueTAM ? (formData.revenueTAM).toString() : ''}
+                      value={
+                        formData.revenueTAM
+                          ? formData.revenueTAM.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -966,7 +1162,11 @@ try {
                       name="organicSalesCompany"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.organicSalesCompany ? (formData.organicSalesCompany * 100).toString() : ''}
+                      value={
+                        formData.organicSalesCompany
+                          ? formData.organicSalesCompany.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -998,7 +1198,11 @@ try {
                       name="organicGrowthTAM"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.organicGrowthTAM ? (formData.organicGrowthTAM * 100).toString() : ''}
+                      value={
+                        formData.organicGrowthTAM
+                          ? formData.organicGrowthTAM.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1031,7 +1235,7 @@ try {
                       name="fwdEV"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.fwdEV ? (formData.fwdEV * 100).toString() : ''}
+                      value={formData.fwdEV ? formData.fwdEV.toString() : ""}
                     />
                   </div>
                 </div>
@@ -1064,7 +1268,11 @@ try {
                       name="priceEarnings"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.priceEarnings ? (formData.priceEarnings * 100).toString() : ''}
+                      value={
+                        formData.priceEarnings
+                          ? formData.priceEarnings.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1097,7 +1305,9 @@ try {
                       name="priceFree"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.priceFree ? (formData.priceFree * 100).toString() : ''}
+                      value={
+                        formData.priceFree ? formData.priceFree.toString() : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1130,7 +1340,11 @@ try {
                       className="form-control"
                       name="revenueConsistency"
                       onChange={handleInputChange}
-                      value={formData.revenueConsistency ? (formData.revenueConsistency * 100).toString() : ''}
+                      value={
+                        formData.revenueConsistency
+                          ? formData.revenueConsistency.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1163,7 +1377,11 @@ try {
                       name="normalizedROIC"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.normalizedROIC ? (formData.normalizedROIC * 100).toString() : ''}
+                      value={
+                        formData.normalizedROIC
+                          ? formData.normalizedROIC.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1196,7 +1414,9 @@ try {
                       name="fcfMargin"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.fcfMargin ? (formData.fcfMargin * 100).toString() : ''}
+                      value={
+                        formData.fcfMargin ? formData.fcfMargin.toString() : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1229,7 +1449,11 @@ try {
                       name="fwdEbitdaGrowthRate"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.fwdEbitdaGrowthRate ? (formData.fwdEbitdaGrowthRate * 100).toString() : ''}
+                      value={
+                        formData.fwdEbitdaGrowthRate
+                          ? formData.fwdEbitdaGrowthRate.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1261,7 +1485,11 @@ try {
                       name="ebitdaMargin"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.ebitdaMargin ? (formData.ebitdaMargin * 100).toString() : ''}
+                      value={
+                        formData.ebitdaMargin
+                          ? formData.ebitdaMargin.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1293,7 +1521,11 @@ try {
                       name="fcfMarginsExpand"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.fcfMarginsExpand ? (formData.fcfMarginsExpand * 100).toString() : ''}
+                      value={
+                        formData.fcfMarginsExpand
+                          ? formData.fcfMarginsExpand.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1326,7 +1558,11 @@ try {
                       name="competitiveEnvironment"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.competitiveEnvironment ? (formData.competitiveEnvironment * 100).toString() : ''}
+                      value={
+                        formData.competitiveEnvironment
+                          ? formData.competitiveEnvironment.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1358,7 +1594,11 @@ try {
                       name="valueProposition"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.valueProposition ? (formData.valueProposition * 100).toString() : ''}
+                      value={
+                        formData.valueProposition
+                          ? formData.valueProposition.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1390,7 +1630,11 @@ try {
                       name="rateLast12Months"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.rateLast12Months ? (formData.rateLast12Months * 100).toString() : ''}
+                      value={
+                        formData.rateLast12Months
+                          ? formData.rateLast12Months.toString()
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -1398,13 +1642,27 @@ try {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <button type="button" class="btn btn-secondary" onClick={handleClose}>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onClick={handleClose}
+            >
               Cancel
             </button>
-            <button type="button" class="btn btn-primary" onClick={resetFormData}>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={resetFormData}
+            >
               Reset
             </button>
-            <button type="button" class="btn btn-primary" onClick={()=>{formSubmit()}}>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={() => {
+                formSubmit();
+              }}
+            >
               Compare
             </button>
           </Modal.Footer>
