@@ -384,6 +384,9 @@ export function formatPublishedDate(dateString) {
   return date.toLocaleString("en-US", options).replace(",", " at");
 }
 export function formatCurrency(value) {
+  if (isNaN(value)) {
+    return value;
+  }
   value = Number(value);
   const parts = value.toFixed(2).split(".");
   const wholePart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");

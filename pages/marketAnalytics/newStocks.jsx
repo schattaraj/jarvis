@@ -8,6 +8,7 @@ import { Context } from "../../contexts/Context";
 import {
   exportToExcel,
   fetchWithInterceptor,
+  formatCurrency,
   generatePDF,
   getSortIcon,
   searchTable,
@@ -26,6 +27,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import { FaGlasses } from "react-icons/fa";
 import ReportTable from "../../components/ReportTable";
 import { staticStocks } from "../../utils/staticStock";
+import Loader from "../../components/loader";
 const companyOverviewColumns = [
   "Symbol",
   "Name",
@@ -75,7 +77,7 @@ const incomeStatementColumn = [
   "Name",
   "Gross Profit",
   "Total Revenue",
-  "Operating Incomes",
+  "Operating Income",
   "Selling General And Administrative",
   "Interest Expense",
   "EBIT",
@@ -96,9 +98,9 @@ const cashFlowColumn = [
   "Operating Cashflow",
   "Capital Expenditures",
   "Profit Loss",
-  "Payment For Repurchase Of Common Stock",
-  "Divident Payment Common Stock",
-  "New Income",
+  "Payments For Repurchase Of Common Stock",
+  "Dividend Payout Common Stock",
+  "Net Income",
 ];
 const quarterlyEarningsColumn = [
   "Symbol",
@@ -119,102 +121,6 @@ const smaColumn = [
   "Time Period",
 ];
 
-// const extraColumns = [
-//   {
-//     elementId: null,
-//     elementName: "OBV",
-//     elementInternalName: "element80",
-//     elementDisplayName: "OBV",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-//   {
-//     elementId: null,
-//     elementName: "MOM",
-//     elementInternalName: "element81",
-//     elementDisplayName: "MOM",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-//   {
-//     elementId: null,
-//     elementName: "RSI",
-//     elementInternalName: "element82",
-//     elementDisplayName: "RSI",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-//   {
-//     elementId: null,
-//     elementName: "EMA",
-//     elementInternalName: "element83",
-//     elementDisplayName: "EMA",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-//   {
-//     elementId: null,
-//     elementName: "SMA",
-//     elementInternalName: "element84",
-//     elementDisplayName: "SMA",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-//   {
-//     elementId: null,
-//     elementName: "Date",
-//     elementInternalName: "lastUpdatedAt",
-//     elementDisplayName: "Date",
-//     elementType: null,
-//     metadataName: "Everything_List_New",
-//     isAmountField: 0,
-//     isUniqueField: 0,
-//     isSearchCriteria: 0,
-//     isVisibleInDashboard: 0,
-//     isCurrencyField: 0,
-//   },
-// ];
-// const bestFiveStockColumn = {
-//   company: "Company",
-//   bestMovedStock: "Most Risen Stock",
-//   bestMovedBy: "Price Risen By",
-//   percentageChangeRise: "% In Rise",
-//   bestMoveCurrValue: "Current Price",
-//   bestMovePrevValue: "Previous Price",
-// };
-// const worstFiveStockColumn = {
-//   company: "Company",
-//   worstMovedStock: "Most Dropped Stock",
-//   worstMovedBy: "Price Dropped By",
-//   percentageChangeRise: "% In Drop",
-//   worstMoveCurrValue: "Current Price",
-//   worstMovePrevValue: "Previous Price",
-// };
 export default function Stocks() {
   const [columnNames, setColumnNames] = useState(companyOverviewColumns);
   const [tableData, setTableData] = useState([]);
@@ -238,62 +144,25 @@ export default function Stocks() {
   });
   const [visibleColumns, setVisibleColumns] = useState([]);
 
-  const [ViewOptions, setViewOptions] = useState({
-    element3: { name: "rankWithInTable", displayName: "Rank Within Table" },
-    element32: { name: "enterPriseValue", displayName: "Enterprise value($M)" },
-    element33: { name: "priceSale", displayName: "Price / Sales" },
-    element34: { name: "grossMargin", displayName: "Gross Margin" },
-    element34: { name: "roic", displayName: "ROIC" },
-    element34: { name: "priceAvg", displayName: "Price vs 20-day Avg (%)" },
-    element34: { name: "price", displayName: "Price" },
-    element34: { name: "ytdReturn", displayName: "YTD Return" },
-    element34: { name: "dividendYield", displayName: "Dividend Yield" },
-    element34: { name: "shortFloat", displayName: "Short as % of Float" },
-    element34: { name: "relativeStrength", displayName: "Relative Strength" },
-    element34: { name: "priceEarning", displayName: "Price/Earnings" },
-    element34: { name: "evEbitda", displayName: "EV / EBITDA" },
-  });
   const [selectedView, setSelectedView] = useState("element3");
   const [chartData, setChartData] = useState([]);
-  const [dateModal, setDateModal] = useState(false);
-  const [dates, setRankingDates] = useState({ date1: null, date2: null });
   const [compareData, setCompareData] = useState(false);
   const [reportModal, setReportModal] = useState(false);
-  const [formValues, setFormValues] = useState({
-    isHighPerforming: "true",
-    rankWithinTableW: "",
-    relativeStrengthW: "",
-    priceVs20DAvgW: "",
-    salesAvgW: "",
-    priceSalesW: "",
-    ebitdaW: "",
-    grossMarginW: "",
-    roicW: "",
-    priceEarningW: "",
-    priceFreeW: "",
-  });
   const [file, setFile] = useState(null);
   const [reportTicker, setReportTicker] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
   const contentRef = useRef(null);
-  // Initial form values
-  const initialFormValues = {
-    isHighPerforming: "",
-    rankWithinTableW: "",
-    relativeStrengthW: "",
-    priceVs20DAvgW: "",
-    salesAvgW: "",
-    priceSalesW: "",
-    ebitdaW: "",
-    grossMarginW: "",
-    roicW: "",
-    priceEarningW: "",
-    priceFreeW: "",
-  };
   const firstColRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
+  const [expandedRows, setExpandedRows] = useState({});
   const context = useContext(Context);
+  const toggleDescription = (index) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
   const handleTableStateChange = (table) => {
     if(table != tableState){
       switch (table) {
@@ -358,40 +227,40 @@ export default function Stocks() {
     }
     context.setLoaderState(false);
   };
-  const charts = async () => {
-    setIsExpanded(false);
-    if (!selectedTicker || selectedTicker.length == 0) {
-      Swal.fire({
-        title: "Please Select a Ticker",
-        confirmButtonColor: "#719B5F",
-      });
-      return;
-    }
-    context.setLoaderState(true);
-    try {
-      const payload = {
-        ticker: selectedTicker,
-        year: dateRange?.startDate,
-        year2: dateRange?.endDate,
-        metadataName: "Tickers_Watchlist",
-        _: new Date().getTime(), // This will generate a unique timestamp
-      };
-      const queryString = new URLSearchParams(payload).toString();
-      // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
-      // const getChartHistroryRes = await getChartHistrory.json()
-      const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
-      const getChartHistroryRes = await fetchWithInterceptor(api, false);
-      console.log("getChartHistroryRes", getChartHistroryRes);
-      setChartHistory(getChartHistroryRes);
-      setActiveView("Chart View");
-      setTableData(getChartHistroryRes);
-      setFilterData(getChartHistroryRes);
-      setDateModal(false);
-    } catch (e) {
-      console.log("Error", e);
-    }
-    context.setLoaderState(false);
-  };
+  // const charts = async () => {
+  //   setIsExpanded(false);
+  //   if (!selectedTicker || selectedTicker.length == 0) {
+  //     Swal.fire({
+  //       title: "Please Select a Ticker",
+  //       confirmButtonColor: "#719B5F",
+  //     });
+  //     return;
+  //   }
+  //   context.setLoaderState(true);
+  //   try {
+  //     const payload = {
+  //       ticker: selectedTicker,
+  //       year: dateRange?.startDate,
+  //       year2: dateRange?.endDate,
+  //       metadataName: "Tickers_Watchlist",
+  //       _: new Date().getTime(), // This will generate a unique timestamp
+  //     };
+  //     const queryString = new URLSearchParams(payload).toString();
+  //     // const getChartHistrory = await fetch(`https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`)
+  //     // const getChartHistroryRes = await getChartHistrory.json()
+  //     const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
+  //     const getChartHistroryRes = await fetchWithInterceptor(api, false);
+  //     console.log("getChartHistroryRes", getChartHistroryRes);
+  //     setChartHistory(getChartHistroryRes);
+  //     setActiveView("Chart View");
+  //     setTableData(getChartHistroryRes);
+  //     setFilterData(getChartHistroryRes);
+  //     setDateModal(false);
+  //   } catch (e) {
+  //     console.log("Error", e);
+  //   }
+  //   context.setLoaderState(false);
+  // };
   // const tickerHome = () => {
   //   setActiveView("Ticker Home");
   // };
@@ -447,6 +316,10 @@ export default function Stocks() {
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setActiveView("Ticker Home");
+      if(api == "getCompanyOverview?symbol=AAL"){
+        setTableState("companyOverview");
+        setColumnNames(companyOverviewColumns);
+      }
     } catch (e) {
       console.log("error", e);
     }
@@ -866,7 +739,7 @@ export default function Stocks() {
   }, [rankingData, activeView]);
   useEffect(() => {
     // fetchColumnNames();
-    fetchTickersFunc();
+    // fetchTickersFunc();
     fetchData();
   }, []);
   useEffect(() => {
@@ -1638,27 +1511,64 @@ export default function Stocks() {
                                    "Null" 
                                    : isNaN(rowDataLowercase[colNameLower]) ?
                                    colNameLower == "symbol" ? 
-                                   <>
+                                   <div style={{width:"100px"}}>
                                    {rowData?.logoFileDetails != null && parse(rowData?.logoFileDetails)}
                                    <p>{rowDataLowercase[colNameLower]}</p>                                    
-                                   </>
+                                   </div>
                                    :
-                                    rowDataLowercase[colNameLower]                                    
+                                   <div style={{width:"fit-content"}}>{rowDataLowercase[colNameLower]}</div>                                    
                                     :  parseFloat(rowDataLowercase[colNameLower]).toFixed(2)
                                    }
                                 </td>
                               );
                               if (colNameLower === "description") {
+                                const isExpanded = expandedRows[rowIndex];
+                                const description = rowDataLowercase[colNameLower];
+                                const shouldShowButton = description && description?.length > 165; 
                                 content = (
                                   <td
-                                    key={colIndex}
-                                    className={`text-wrap d-block`}
-                                    style={{ width: "300px" }}
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className={`text-wrap`}
+                                    style={{ width: "400px" }}
                                   >
-                                    {rowDataLowercase[colNameLower]}
+                                    {/* {rowDataLowercase[colNameLower]} */}
+                                    <p
+                                    style={{width:"300px",marginBottom:0}}
+                                    >
+                                      <span
+                                      className="description"
+                                      style={{WebkitLineClamp:`${isExpanded ? 'none' : 3}`,}}>
+{description}{description?.length}
+                                      </span>
+                                      {shouldShowButton && (
+        <button
+          style={{
+            border: "none",
+            padding: 0,
+            background: "transparent",
+            color: "var(--primary)"
+          }}
+          onClick={() => toggleDescription(rowIndex)}
+        >
+          {isExpanded ? "Read Less" : "Read More"}
+        </button>
+      )}     
+                </p>
+                
                                   </td>
                                 );
                               }
+                              if(["marketcapitalization","ebitda","bookvalue","dividendpershare","revenuettm","eps","grossprofitttm","grossprofit","totalrevenue","operatingincome","sellinggeneralandadministrative","interestexpense","ebit","netincome","totalliabilities","longtermdebt","commonstock","commonstocksharesoutstanding","operatingcashflow","capitalexpenditures","profitloss","paymentsforrepurchaseofcommonstock"].includes(colNameLower)){
+                                content = (
+                                  <td>
+                                    {formatCurrency(rowDataLowercase[colNameLower])}
+                                  </td>
+                                )
+                              }
+                              const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
+                              if (urlPattern.test(rowDataLowercase[colNameLower])) {
+                                content =(<td><a href={rowDataLowercase[colNameLower]} target="_blank" rel="noopener noreferrer">{rowDataLowercase[colNameLower]}</a></td>)
+                              } 
                               return content;
                             })}
                           </tr>
@@ -1791,724 +1701,8 @@ export default function Stocks() {
               )}
             </>
           )}
-          {activeView == "Chart View" && (
-            <>
-              <div className="form-group d-flex align-items-center">
-                <label htmlFor="" className="me-2 mb-0 form-label">
-                  Chart View:
-                </label>
-                <select
-                  className="form-select"
-                  style={{ maxWidth: "300px" }}
-                  onChange={handleChartView}
-                >
-                  {Object.entries(ViewOptions).map(([key, option]) => (
-                    <option key={key} value={key}>
-                      {option.displayName}
-                    </option>
-                  ))}
-                </select>
-                <button className="ms-2 btn btn-primary" onClick={charts}>
-                  GO
-                </button>
-                <div className="d-flex align-items-center mx-2">
-                  <label className="mb-0">
-                    <b>{`Year : ${dateRange?.startDate} - ${dateRange?.endDate}`}</b>
-                  </label>
-                  <button
-                    className="ms-2 btn p-0 text-primary"
-                    onClick={() => {
-                      setDateModal(true);
-                    }}
-                    type="button"
-                  >
-                    <FilterAlt />
-                  </button>
-                </div>
-              </div>
-              {/* <h3>Chart View For {ViewOptions[selectedView]}</h3> */}
-              {/* <BarChart data={data} /> */}
-              {chartHistory.length > 0 && (
-                <HightChart
-                  data={chartHistory?.map((item) => [
-                    new Date(item["lastUpdatedAt"]).getTime(),
-                    parseFloat(item[selectedView]),
-                  ])}
-                  title={
-                    selectedView &&
-                    `Chart View For ${ViewOptions[selectedView].displayName}`
-                  }
-                />
-              )}
-            </>
-          )}
-          {/* {activeView == "Ranking" && (
-            <>
-              <h3 className="mb-3">Best Stocks</h3>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="dt-buttons mb-3">
-                  <button
-                    className="dt-button buttons-pdf buttons-html5 btn-primary"
-                    type="button"
-                    title="PDF"
-                    onClick={() => {
-                      generatePDF();
-                    }}
-                  >
-                    <span className="mdi mdi-file-pdf-box me-2"></span>
-                    <span>PDF</span>
-                  </button>
-                  <button
-                    className="dt-button buttons-excel buttons-html5 btn-primary"
-                    type="button"
-                    onClick={() => {
-                      exportToExcel();
-                    }}
-                  >
-                    <span className="mdi mdi-file-excel me-2"></span>
-                    <span>EXCEL</span>
-                  </button>
-                </div>
-                <div className="form-group d-flex align-items-center">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={searchBestStocks}
-                  />
-                </div>
-              </div>
-              <div className="table-responsive mb-4">
-                <table
-                  className="table border display no-footer dataTable"
-                  role="grid"
-                  aria-describedby="exampleStocksPair_info"
-                  id="my-table"
-                >
-                  <thead>
-                    <tr>
-                      {Object.entries(bestFiveStockColumn).map(
-                        ([columnName, displayName]) => (
-                          <th key={columnName}>{displayName}</th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bestStocksFiltered.map((item, index) => {
-                      return (
-                        <tr key={"best" + index}>
-                          {Object.entries(bestFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
-                                {item[columnName]}
-                              </td>
-                            )
-                          )}
-                        </tr>
-                      );
-                    })}
-                    {bestStocksFiltered?.length == 0 && (
-                      <tr>
-                        <td
-                          className="text-center"
-                          colSpan={Object.entries(bestFiveStockColumn)?.length}
-                        >
-                          No data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <HightChart
-                data={compareData?.bestFiveStocks?.map((item) => [
-                  item["bestMovedStock"],
-                  parseFloat(item["percentageChangeRise"]),
-                ])}
-                title={"Ticker Performance"}
-                typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }}
-                yAxisTitle={"Risn in %"}
-                titleAlign={"center"}
-                subTitle={`Best Twenty`}
-              />
-              <h3 className="mb-3">Worst Stocks</h3>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="dt-buttons mb-3">
-                  <button
-                    className="dt-button buttons-pdf buttons-html5 btn-primary"
-                    type="button"
-                    title="PDF"
-                    onClick={() => {
-                      generatePDF();
-                    }}
-                  >
-                    <span className="mdi mdi-file-pdf-box me-2"></span>
-                    <span>PDF</span>
-                  </button>
-                  <button
-                    className="dt-button buttons-excel buttons-html5 btn-primary"
-                    type="button"
-                    onClick={() => {
-                      exportToExcel();
-                    }}
-                  >
-                    <span className="mdi mdi-file-excel me-2"></span>
-                    <span>EXCEL</span>
-                  </button>
-                </div>
-                <div className="form-group d-flex align-items-center">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={searchWorstStocks}
-                  />
-                </div>
-              </div>
-              <div className="table-responsive mb-4">
-                <table
-                  className="table border display no-footer dataTable"
-                  role="grid"
-                  aria-describedby="exampleStocksPair_info"
-                  id="my-table"
-                >
-                  <thead>
-                    <tr>
-                      {Object.entries(worstFiveStockColumn).map(
-                        ([columnName, displayName]) => (
-                          <th key={columnName}>{displayName}</th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {worstStocksFiltered.map((item, index) => {
-                      return (
-                        <tr key={"worst" + index}>
-                          {Object.entries(worstFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
-                                {item[columnName]}
-                              </td>
-                            )
-                          )}
-                        </tr>
-                      );
-                    })}
-                    {worstStocksFiltered?.length == 0 && (
-                      <tr>
-                        <td
-                          className="text-center"
-                          colSpan={Object.entries(worstFiveStockColumn)?.length}
-                        >
-                          No data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <HightChart
-                data={compareData?.worstFiveStocks?.map((item) => [
-                  item["worstMovedStock"],
-                  parseFloat(item["percentageChangeDrop"]),
-                ])}
-                title={"Ticker Performance"}
-                typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }}
-                yAxisTitle={"Risn in %"}
-                titleAlign={"center"}
-                subTitle={"Worst Twenty"}
-              /> 
-            </>
-          )}*/}
-          {/* {activeView == "History" && (
-            <>
-              <h3 className="mb-3">Best Stocks</h3>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="dt-buttons mb-3">
-                  <button
-                    className="dt-button buttons-pdf buttons-html5 btn-primary"
-                    type="button"
-                    title="PDF"
-                    onClick={() => {
-                      generatePDF();
-                    }}
-                  >
-                    <span className="mdi mdi-file-pdf-box me-2"></span>
-                    <span>PDF</span>
-                  </button>
-                  <button
-                    className="dt-button buttons-excel buttons-html5 btn-primary"
-                    type="button"
-                    onClick={() => {
-                      exportToExcel();
-                    }}
-                  >
-                    <span className="mdi mdi-file-excel me-2"></span>
-                    <span>EXCEL</span>
-                  </button>
-                </div>
-                <div className="form-group d-flex align-items-center">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={searchBestStocks}
-                  />
-                </div>
-              </div>
-              <div className="table-responsive mb-4">
-                <table
-                  className="table border display no-footer dataTable"
-                  role="grid"
-                  aria-describedby="exampleStocksPair_info"
-                  id="my-table"
-                >
-                  <thead>
-                    <tr>
-                      {Object.entries(bestFiveStockColumn).map(
-                        ([columnName, displayName]) => (
-                          <th key={columnName}>{displayName}</th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bestStocksFiltered.map((item, index) => {
-                      return (
-                        <tr key={"best" + index}>
-                          {Object.entries(bestFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
-                                {item[columnName]}
-                              </td>
-                            )
-                          )}
-                        </tr>
-                      );
-                    })}
-                    {bestStocksFiltered?.length == 0 && (
-                      <tr>
-                        <td
-                          className="text-center"
-                          colSpan={Object.entries(bestFiveStockColumn)?.length}
-                        >
-                          No data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <HightChart
-                data={compareData?.bestFiveStocks?.map((item) => [
-                  item["bestMovedStock"],
-                  parseFloat(item["percentageChangeRise"]),
-                ])}
-                title={"Ticker Performance"}
-                typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }}
-                yAxisTitle={"Risn in %"}
-                titleAlign={"center"}
-                subTitle={`Best Twenty`}
-              />
-              <h3 className="my-3">Worst Stocks</h3>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="dt-buttons mb-3">
-                  <button
-                    className="dt-button buttons-pdf buttons-html5 btn-primary"
-                    type="button"
-                    title="PDF"
-                    onClick={() => {
-                      generatePDF("worst-stock-table");
-                    }}
-                  >
-                    <span className="mdi mdi-file-pdf-box me-2"></span>
-                    <span>PDF</span>
-                  </button>
-                  <button
-                    className="dt-button buttons-excel buttons-html5 btn-primary"
-                    type="button"
-                    onClick={() => {
-                      exportToExcel();
-                    }}
-                  >
-                    <span className="mdi mdi-file-excel me-2"></span>
-                    <span>EXCEL</span>
-                  </button>
-                </div>
-                <div className="form-group d-flex align-items-center">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={searchWorstStocks}
-                  />
-                </div>
-              </div>
-              <div className="table-responsive mb-4">
-                <table
-                  className="table border display no-footer dataTable"
-                  role="grid"
-                  aria-describedby="exampleStocksPair_info"
-                  id="worst-stock-table"
-                >
-                  <thead>
-                    <tr>
-                      {Object.entries(worstFiveStockColumn).map(
-                        ([columnName, displayName]) => (
-                          <th key={columnName}>{displayName}</th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {worstStocksFiltered.map((item, index) => {
-                      return (
-                        <tr key={"worst" + index}>
-                          {Object.entries(worstFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
-                                {item[columnName]}
-                              </td>
-                            )
-                          )}
-                        </tr>
-                      );
-                    })}
-                    {worstStocksFiltered?.length == 0 && (
-                      <tr>
-                        <td
-                          className="text-center"
-                          colSpan={Object.entries(worstFiveStockColumn)?.length}
-                        >
-                          No data available
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <HightChart
-                data={compareData?.worstFiveStocks?.map((item) => [
-                  item["worstMovedStock"],
-                  parseFloat(item["percentageChangeDrop"]),
-                ])}
-                title={"Ticker Performance"}
-                typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }}
-                yAxisTitle={"Risn in %"}
-                titleAlign={"center"}
-                subTitle={"Worst Twenty"}
-              />
-            </>
-          )} */}
         </div>
       </div>
-      {/* <Modal
-        show={calculateModal}
-        onHide={() => {
-          setCalculate(false);
-        }}
-      >
-        <Form onSubmit={handleSubmit}>
-          <Modal.Header closeButton>
-            <Modal.Title>Analysis - Ticker Watchlist</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Performance
-                  </label>
-                  <select
-                    name="isHighPerforming"
-                    className="form-select"
-                    value={formValues.isHighPerforming}
-                    onChange={handleChange}
-                  >
-                    <option value="true">Best Performing</option>
-                    <option value="false">Worst Performing</option>
-                    <option value="NA">NA</option>
-                  </select>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Rank Less Than(for consecutive 3 weeks)
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="rankWithinTableW"
-                    value={formValues.rankWithinTableW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Relative Strength Greater Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="relativeStrengthW"
-                    value={formValues.relativeStrengthW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Price Vs 20 Day Average Greater Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="priceVs20DAvgW"
-                    value={formValues.priceVs20DAvgW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Sales 3 Year Average Greater Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="salesAvgW"
-                    value={formValues.salesAvgW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Price/Sales Less Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="priceSalesW"
-                    value={formValues.priceSalesW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    EV/Ebitda Less Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="ebitdaW"
-                    value={formValues.ebitdaW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Gross Margin Greater Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="grossMarginW"
-                    value={formValues.grossMarginW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    ROIC Greater Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="roicW"
-                    value={formValues.roicW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Price/Earning Less Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="priceEarningW"
-                    value={formValues.priceEarningW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label htmlFor="" className="form-label">
-                    Price/Free CashFlow Less Than
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="priceFreeW"
-                    value={formValues.priceFreeW}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-          </Modal.Body>
-          <Modal.Footer>
-            <button className="btn btn-secondary" type="button">
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={handleReset}
-            >
-              Reset
-            </button>
-            <button className="btn btn-primary">Compare</button>
-          </Modal.Footer>
-        </Form>
-      </Modal> */}
-      <Modal
-        show={dateModal}
-        onHide={() => {
-          setDateModal(false);
-        }}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Filter Chart</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="row">
-            <div className="col-md-6">
-              <div className="form-group">
-                <label htmlFor="startDate">Start Date</label>
-                <select
-                  name="startDate"
-                  id="startDate"
-                  className="form-select"
-                  value={dateRange?.startDate}
-                  onChange={handleDateRange}
-                >
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                  <option value="2019">2019</option>
-                  <option value="2018">2018</option>
-                  <option value="2017">2017</option>
-                  <option value="2016">2016</option>
-                </select>
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="form-group">
-                <label htmlFor="endDate">End Date</label>
-                <select
-                  name="endDate"
-                  id="endDate"
-                  className="form-select"
-                  value={dateRange?.endDate}
-                  onChange={handleDateRange}
-                >
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                  <option value="2019">2019</option>
-                  <option value="2018">2018</option>
-                  <option value="2017">2017</option>
-                  <option value="2016">2016</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-primary" onClick={charts}>
-            Apply
-          </button>
-        </Modal.Footer>
-      </Modal>
       <ReportTable
         name={reportTicker}
         open={reportModal}

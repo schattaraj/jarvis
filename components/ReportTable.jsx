@@ -240,6 +240,7 @@ function ReportTable({
 
   const getChartHistory = async () => {
     try {
+      if(open){
         context.setLoaderState(true)
         const payload = {
             ticker: name,
@@ -253,6 +254,7 @@ function ReportTable({
           const getChartHistroryRes = await fetchWithInterceptor(api, false);
           setChartHistory(getChartHistroryRes);
           context.setLoaderState(false)
+      }
     } catch (error) {
         context.setLoaderState(false)
     }

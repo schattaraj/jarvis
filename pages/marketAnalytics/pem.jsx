@@ -89,7 +89,10 @@ export default function PemDetails() {
     const { name, value,type } = e.target;
     console.log("e.target",type);
     if (type === "text") {
-      const numericValue = parseFloat(value) / 100;
+      // const numericValue = parseFloat(value) / 100;
+      console.log("numericValue",parseFloat(value));
+      
+      const numericValue = parseFloat(value);
       setFormData((prevData) => ({
           ...prevData,
           [name]: numericValue,
@@ -929,7 +932,8 @@ try {
                       name="revenueTAM"
                       className="form-control"
                       onChange={handleInputChange}
-                      value={formData.revenueTAM ? (formData.revenueTAM * 100).toString() : ''}
+                      // value={formData.revenueTAM ? (formData.revenueTAM * 100).toString() : ''}
+                      value={formData.revenueTAM ? (formData.revenueTAM).toString() : ''}
                     />
                   </div>
                 </div>

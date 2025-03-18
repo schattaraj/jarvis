@@ -381,6 +381,17 @@ a.navbar-brand {
         text-decoration: none;
         color: #719b5f;
       }
+      .description{
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    font-size: 12px;
+      }
+      button{
+        font-size: 12px;
+      }
     }
 
     .fixed {
