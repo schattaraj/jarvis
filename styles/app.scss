@@ -1600,3 +1600,23 @@ div:where(.swal2-container) {
 .pem-new-calculate-modal .modal-dialog{
   max-width: 90%;
 }
+.main-panel .content-wrapper td{
+  .symbol{
+    img{
+      height: 75px;
+    }
+    a{
+      display: block;
+    }
+    p{
+      font-size: 10px;
+      margin-bottom: 2px;
+      &:last-child{
+        margin-bottom: 0;
+      }
+    }
+    .text p{
+      font-size: 12px;
+    }
+  }
+}

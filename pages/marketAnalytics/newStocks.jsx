@@ -28,14 +28,15 @@ import { FaGlasses } from "react-icons/fa";
 import ReportTable from "../../components/ReportTable";
 import { staticStocks } from "../../utils/staticStock";
 import Loader from "../../components/loader";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 const companyOverviewColumns = [
   "Symbol",
-  "Name",
-  "Description",
-  "Sector",
-  "Industry",
-  "Address",
-  "Official Site",
+  // "Name",
+  // "Description",
+  // "Sector",
+  // "Industry",
+  // "Address",
+  // "Official Site",
   "Market Capitalization",
   "EBITDA",
   "PE Ratio",
@@ -74,7 +75,7 @@ const companyOverviewColumns = [
 
 const incomeStatementColumn = [
   "Symbol",
-  "Name",
+  // "Name",
   "Gross Profit",
   "Total Revenue",
   "Operating Income",
@@ -86,7 +87,7 @@ const incomeStatementColumn = [
 ];
 const balanceSheetColumn = [
   "Symbol",
-  "Name",
+  // "Name",
   "Total Liabilities",
   "Long Term Debt",
   "Common Stock",
@@ -94,7 +95,7 @@ const balanceSheetColumn = [
 ];
 const cashFlowColumn = [
   "Symbol",
-  "Name",
+  // "Name",
   "Operating Cashflow",
   "Capital Expenditures",
   "Profit Loss",
@@ -104,7 +105,7 @@ const cashFlowColumn = [
 ];
 const quarterlyEarningsColumn = [
   "Symbol",
-  "Name",
+  // "Name",
   "Reported Date",
   "Reported EPS",
   "Estimated EPS",
@@ -1237,7 +1238,8 @@ export default function Stocks() {
                                   key={index}
                                   onClick={() => handleSort(columnName)}
                                   className={
-                                    index === 0 || index === 1
+                                    index === 0 
+                                    // || index === 1
                                       ? "sticky-column"
                                       : ""
                                   }
@@ -1511,9 +1513,85 @@ export default function Stocks() {
                                    "Null" 
                                    : isNaN(rowDataLowercase[colNameLower]) ?
                                    colNameLower == "symbol" ? 
-                                   <div style={{width:"100px"}}>
-                                   {rowData?.logoFileDetails != null && parse(rowData?.logoFileDetails)}
-                                   <p>{rowDataLowercase[colNameLower]}</p>                                    
+                                   <div className="symbol" style={{width:"fit-content"}}>
+                                    <div style={{
+                                      display:"flex",
+                                      alignItems:"center",
+                                      marginBottom:"6px"
+                                    }}>
+                                   <div 
+                                  //  style={{width:"100px"}}
+                                   className="image me-2">
+                                   {rowData?.logoFileDetails != null &&
+                                   rowData?.logoFileDetails.includes("C:/") ?
+                                   <img src={`https://jharvis.com/JarvisV2/downloadPDF?fileName=${rowData?.logoFileDetails}`} alt="No Image"/>
+                                   :
+                                   rowData?.logoFileDetails != null && parse(rowData?.logoFileDetails)}                                   
+                                   </div>
+                                   <div className="text text-center">
+                                   <p>{rowDataLowercase?.name} | <strong>{rowDataLowercase[colNameLower]}</strong></p> 
+                                    {
+                                      rowDataLowercase?.officialsite && <a className="mt-1" href={rowDataLowercase?.officialsite} target="_blank" rel="noopener noreferrer">
+                                        {rowDataLowercase?.officialsite.replace("https://","").split("/")[0]}
+                                        </a>
+                                    }
+                                    <div 
+                                    style={{display:"flex",
+                                      alignItems:"center"
+                                    }}
+                                    >
+                                    {rowDataLowercase?.address && <p className="mb-0 mt-1" style={{
+                                      maxWidth:"100px",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap",
+                                      cursor:"pointer"
+                                      }}
+                                      title={rowDataLowercase?.address}
+                                      onClick={() => {
+                                        Swal.fire({
+                                          title:"Address",
+                                          text: rowDataLowercase?.address,
+                                        });
+                                      }}
+                                      >
+                                      <LocationOnIcon style={{color:"var(--primary)"}}/>
+                                      {rowDataLowercase?.address}
+                                      </p>}
+                                      <strong className="mx-2">|</strong>
+                                      {rowDataLowercase?.description && <div className="mb-0 mt-1" style={{
+                                      maxWidth:"150px",
+                                      cursor:"pointer",
+                                      display:"flex"
+                                      }}
+                                      title={rowDataLowercase?.description}
+                                      >
+                                        <div
+                                        style={{width:"100%",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap",}}
+                                        >
+                                      {rowDataLowercase?.description}
+                                      </div>
+                                      <button
+          style={{
+            border: "none",
+            padding: 0,
+            background: "transparent",
+            color: "var(--primary)"
+          }}
+          onClick={() => {
+            Swal.fire({
+              title:"Description",
+              text: rowDataLowercase?.description,
+              // icon: "success"
+            });
+          }}
+        >
+          Read More
+        </button>
+                                      </div>
+                                      }
+                                      </div>
+                                   </div>
+                                   </div>
+                                   {rowDataLowercase?.sector && <p><strong>Sector :</strong> {rowDataLowercase?.sector}</p>}
+                                   {rowDataLowercase?.industry &&<p style={{maxWidth:"300px"}}><strong>Industry : </strong> {rowDataLowercase?.industry}</p>}
                                    </div>
                                    :
                                    <div style={{width:"fit-content"}}>{rowDataLowercase[colNameLower]}</div>                                    
