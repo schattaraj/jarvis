@@ -1644,21 +1644,21 @@ export default function PemDetails() {
           <Modal.Footer>
             <button
               type="button"
-              class="btn btn-secondary"
+              className="btn btn-secondary"
               onClick={handleClose}
             >
               Cancel
             </button>
             <button
               type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={resetFormData}
             >
               Reset
             </button>
             <button
               type="button"
-              class="btn btn-primary"
+              className="btn btn-primary"
               onClick={() => {
                 formSubmit();
               }}
