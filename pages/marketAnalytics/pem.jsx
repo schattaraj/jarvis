@@ -745,6 +745,16 @@ export default function PemDetails() {
                     >
                       All
                     </button>
+                    <div className="form-check ms-3 d-inline-block">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="subscribersOnly"
+                      />
+                      <label className="form-check-label" htmlFor="subscribersOnly">
+                        Subscribers Only
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
