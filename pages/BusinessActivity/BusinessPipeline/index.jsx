@@ -367,7 +367,17 @@ export default function BusinessPipeline() {
     if (Array.isArray(value)) {
       arr = value;
     } else if (typeof value === "string") {
-      arr = JSON.parse(value);
+      try {
+        const parsedValue = JSON.parse(value);
+        if (Array.isArray(parsedValue)) {
+          arr = parsedValue;
+        } else {
+          arr = [value];
+        }
+      } catch (e) {
+        arr = [value];
+      }
+      // arr = JSON.parse(value);
     }
     return arr.map((item) => ({ value: item, label: item }));
     // let arr;
@@ -908,7 +918,7 @@ export default function BusinessPipeline() {
               </tbody>
               <tfoot className="fixed">
                 <tr>
-                  <td colSpan={3}>Total Amount</td>
+                  <td colSpan={1}>Total Amount</td>
                   <td>{formatAmount(totalAmount)}</td>
                   <td colSpan={12}></td>
                 </tr>
