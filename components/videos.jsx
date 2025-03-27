@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useState } from "react";
 import ReactPlayer from "react-player";
 import Skeleton from "@mui/material/Skeleton";
@@ -15,14 +15,16 @@ import {
 } from "@mui/material";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import { Context } from "../contexts/Context";
 
 const baseVidURL = `https://jharvis.com/JarvisV2/playVideo?fileName=`;
 
 const VideoComponent = () => {
   const [videoes, setVideoes] = useState([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-
+  const context = useContext(Context);
   const fetchVideoes = async () => {
+    context.setLoaderState(true);
     try {
       const apiCall = await fetch(
         "https://jharvis.com/JarvisV2/getAllAnalystVideo?filterText=&_=1699861659729"
@@ -33,6 +35,7 @@ const VideoComponent = () => {
       //   `https://jharvis.com/JarvisV2/playVideo?fileName=${response[0].anaylstVideoDetails}`
       // );
       console.log(response);
+      context.setLoaderState(false);
     } catch (e) {
       console.log("error", e);
     }

@@ -50,6 +50,12 @@ export default function OnePageReport() {
     console.log("path", path)
   }
   const filter = async(e) => {
+    const filterText = e.target.value;
+    setFilterText(filterText);
+    const filteredReports = reports.filter((item) => {
+      return item.tickerName.toLowerCase().includes(filterText.toLowerCase());
+    });
+    setFilterReports(filteredReports);
 
   }
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -103,7 +109,7 @@ function sortReportsOldestToNewest(reports) {
           <div className='d-flex justify-content-between align-items-center'>
             <div className="d-flex dt-buttons mb-3">
             <div className="d-flex align-items-center me-2"><label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /></div>
-            <button className="dt-button buttons-html5 btn-primary h-auto" type="button" onClick="#"><span>Filter</span></button>
+            <button className="dt-button buttons-html5 btn-primary h-auto" type="button" onClick={()=>{console.log("filter")}}><span>Filter</span></button>
             </div>
             <div className="d-flex align-items-center me-2">
                   <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Sort By : </label>
