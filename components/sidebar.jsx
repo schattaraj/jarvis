@@ -1037,6 +1037,18 @@ export default function Sidebar() {
           ref={context.collapse}
         >
           <ul className="nav flex-column sub-menu">
+          <li className="nav-item">
+              <Link
+                className={
+                  router.pathname === "/insights/reports"
+                    ? "nav-link active"
+                    : "nav-link"
+                }
+                href="/insights/reports"
+              >
+                Reports
+              </Link>
+            </li>
             <li className="nav-item">
               <Link
                 className={
@@ -1064,18 +1076,6 @@ export default function Sidebar() {
             <li className="nav-item">
               <Link
                 className={
-                  router.pathname === "/insights/reports"
-                    ? "nav-link active"
-                    : "nav-link"
-                }
-                href="/insights/reports"
-              >
-                Reports
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                className={
                   router.pathname === "/insights/onePageReport"
                     ? "nav-link active"
                     : "nav-link"
@@ -1098,7 +1098,7 @@ export default function Sidebar() {
           aria-expanded="false"
           aria-controls="general-pages"
         >
-          <span className="menu-title">Newsletter</span>
+          <span className="menu-title">Jarvis Newsletter</span>
           {/* <i className="menu-arrow"></i> */}
           <i className="mdi mdi-pen menu-icon"></i>
         </Link>

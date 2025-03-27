@@ -156,6 +156,7 @@ export default function Stocks() {
   const firstColRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
+  const [loaderState, setLoaderState] = useState(false);
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -164,33 +165,32 @@ export default function Stocks() {
     }));
   };
   const handleTableStateChange = (table) => {
-    if(table != tableState){
+    if (table != tableState) {
       switch (table) {
         case "companyOverview":
-          fetchData("getCompanyOverview?symbol=AAL")
+          fetchData("getCompanyOverview?symbol=AAL");
           break;
-      case "incomeStatement":
-        fetchData("getIncomeStatement")
+        case "incomeStatement":
+          fetchData("getIncomeStatement");
           break;
-      case "balanceSheet":
-        fetchData("getBalanceSheet")
+        case "balanceSheet":
+          fetchData("getBalanceSheet");
           break;
-          case "cashFlow":
-        fetchData("getCashFlow")
+        case "cashFlow":
+          fetchData("getCashFlow");
           break;
-          case "earnings":
-          fetchData("getEarning")
+        case "earnings":
+          fetchData("getEarning");
           break;
-          case "quarterlyEarnings":
-            fetchData("getQuarterlyEarning")
-            break;
-          case "sma":
-            fetchData("getSmaTrading")
-            break;
+        case "quarterlyEarnings":
+          fetchData("getQuarterlyEarning");
+          break;
+        case "sma":
+          fetchData("getSmaTrading");
+          break;
       }
       setTableState(table);
     }
-
   };
   useEffect(() => {
     setVisibleColumns(columnNames.map((col) => col));
@@ -205,28 +205,28 @@ export default function Stocks() {
     let arr = inputs.map((item) => item.value);
     setSelectedTicker(arr.join(","));
   };
-  const getHistoryByTicker = async () => {
-    if (!selectedTicker) {
-      Swal.fire({
-        title: "Please Select a ticker",
-        confirmButtonColor: "#719B5F",
-      });
-      return;
-    }
-    context.setLoaderState(true);
-    try {
-      // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-      // const getBondsRes = await getBonds.json()
-      const getBonds = `/api/proxy?api=getCompanyOverview?symbol=${selectedTicker}`;
-      const getBondsRes = await fetchWithInterceptor(getBonds, false);
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
-      setActiveView("Ticker Home");
-    } catch (e) {
-      console.log("error", e);
-    }
-    context.setLoaderState(false);
-  };
+  // const getHistoryByTicker = async () => {
+  //   if (!selectedTicker) {
+  //     Swal.fire({
+  //       title: "Please Select a ticker",
+  //       confirmButtonColor: "#719B5F",
+  //     });
+  //     return;
+  //   }
+  //   try {
+  //     // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+  //     // const getBondsRes = await getBonds.json()
+  //     const getBonds = `/api/proxy?api=getCompanyOverview?symbol=${selectedTicker}`;
+  //     context.setLoaderState(true);
+  //     const getBondsRes = await fetchWithInterceptor(getBonds, false);
+  //     setTableData(getBondsRes);
+  //     setFilterData(getBondsRes);
+  //     setActiveView("Ticker Home");
+  //   } catch (e) {
+  //     console.log("error", e);
+  //   }
+  //   context.setLoaderState(false);
+  // };
   // const charts = async () => {
   //   setIsExpanded(false);
   //   if (!selectedTicker || selectedTicker.length == 0) {
@@ -306,8 +306,9 @@ export default function Stocks() {
   //     context.setLoaderState(false);
   //   }
   // };
+
   const fetchData = async (api = "getCompanyOverview?symbol=AAL") => {
-    context.setLoaderState(true);
+    setLoaderState(true);
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
@@ -316,14 +317,16 @@ export default function Stocks() {
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setActiveView("Ticker Home");
-      if(api == "getCompanyOverview?symbol=AAL"){
+      if (api == "getCompanyOverview?symbol=AAL") {
         setTableState("companyOverview");
         setColumnNames(companyOverviewColumns);
       }
+      // setLoaderState(false);
     } catch (e) {
       console.log("error", e);
+    } finally {
+      setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   const handleSort = (key) => {
     let direction = "asc";
@@ -404,18 +407,18 @@ export default function Stocks() {
   const changeLimit = (e) => {
     setLimit(e.target.value);
   };
-  const fetchTickersFunc = async () => {
-    context.setLoaderState(true);
-    try {
-      // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
-      // const fetchTickersRes = await fetchTickers.json()
-      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
-      const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
-      setTickers(fetchTickersRes);
-      context.setLoaderState(false);
-    } catch (e) {}
-    // context.setLoaderState(false)
-  };
+  // const fetchTickersFunc = async () => {
+  //   context.setLoaderState(true);
+  //   try {
+  //     // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+  //     // const fetchTickersRes = await fetchTickers.json()
+  //     const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
+  //     const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
+  //     setTickers(fetchTickersRes);
+  //     context.setLoaderState(false);
+  //   } catch (e) {}
+  //   // context.setLoaderState(false)
+  // };
   const handleChartView = (e) => {
     setSelectedView(e.target.value);
   };
@@ -474,7 +477,7 @@ export default function Stocks() {
     context.setLoaderState(false);
   };
   const filterBydate = async (date) => {
-    context.setLoaderState(true);
+    setLoaderState(true);
     try {
       const getStocks = await fetchWithInterceptor(
         `/api/proxy?api=getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`,
@@ -487,7 +490,7 @@ export default function Stocks() {
     } catch (error) {
       console.log("Error: ", error);
     }
-    context.setLoaderState(false);
+    setLoaderState(false);
   };
   // const rankingPDF = async () => {
   //   context.setLoaderState(true);
@@ -795,16 +798,17 @@ export default function Stocks() {
 
   return (
     <>
-      <StockHistoryModal
+      {loaderState && <Loader />}
+      {/* <StockHistoryModal
         open={historyModal}
         handleClose={handleCloseModal}
         setCompareData={setCompareData}
         setSelectedOption={setActiveView}
         filterBydate={filterBydate}
-      />
+      /> */}
       <div className="main-panel">
         <div className="content-wrapper">
-          <div className="d-flex justify-content-between align-items-center flex-wrap">
+          <div className="d-flex flex-wrap align-items-center justify-content-between">
             <Breadcrumb />
             {/* <div
               className={`collapsible-container ${
@@ -813,7 +817,7 @@ export default function Stocks() {
             >
               <span>{activeView + " :"}</span>
               <button
-                className="main-button ms-2 btn-primary"
+                className="btn-primary main-button ms-2"
                 onClick={toggleExpand}
               >
                 <i
@@ -895,7 +899,7 @@ export default function Stocks() {
                   <span>Chart View</span>
                 </button>
                 <button
-                  className="h-100  collapsible-item"
+                  className="collapsible-item h-100"
                   type="button"
                   title="Reset"
                   onClick={reset}
@@ -907,26 +911,26 @@ export default function Stocks() {
           </div>
           <div className="page-header">
             <h3 className="page-title">
-              <span className="page-title-icon bg-gradient-primary text-white me-2">
+              <span className="bg-gradient-primary text-white me-2 page-title-icon">
                 <i className="mdi mdi-home"></i>
               </span>
               Stocks
             </h3>
           </div>
-          <div className="selection-area mb-3 d-flex align-items-center">
-            <Form
+          <div className="d-flex align-items-center mb-3 selection-area">
+            {/* <Form
               onSubmit={uploadFile}
               encType="multipart/form-data"
-              className="w-100 d-none"
+              className="d-none w-100"
             >
               <input
                 type="hidden"
                 name="metaDataName"
                 value="Tickers_Watchlist"
               />
-              <div className="d-flex align-items-end flex-wrap mb-3">
+              <div className="d-flex flex-wrap align-items-end mb-3">
                 <Select
-                  className="mb-0 me-2 col-md-3"
+                  className="col-md-3 mb-0 me-2"
                   isMulti
                   value={
                     selectedTicker &&
@@ -960,7 +964,7 @@ export default function Stocks() {
                     id="uploadFile"
                     type="file"
                     name="myfile"
-                    className="border-1 form-control"
+                    className="form-control border-1"
                     required
                     onChange={handleFileChange}
                   />
@@ -971,12 +975,12 @@ export default function Stocks() {
                   </button>
                 </div>
               </div>
-            </Form>
+            </Form> */}
 
-            <div className="d-flex align-items-center justify-content-center mt-1 ms-auto">
+            <div className="d-flex align-items-center justify-content-center ms-auto mt-1">
               <div className="w-100">
                 <button
-                  className="dt-button buttons-pdf buttons-html5 btn-primary d-flex"
+                  className="d-flex btn-primary buttons-html5 buttons-pdf dt-button"
                   type="button"
                   title="PDF"
                   onClick={() => {
@@ -990,7 +994,7 @@ export default function Stocks() {
 
               <div className="w-100">
                 <button
-                  className="dt-button buttons-excel buttons-html5 btn-primary d-flex"
+                  className="d-flex btn-primary buttons-excel buttons-html5 dt-button"
                   type="button"
                   title="EXCEL"
                   onClick={() => {
@@ -1081,7 +1085,7 @@ export default function Stocks() {
             <>
               <div className="d-flex justify-content-between">
                 <div style={{ width: "100%", overflow: "auto" }}>
-                  <div className="dt-buttons mb-3 d-flex">
+                  <div className="d-flex dt-buttons mb-3">
                     <div>
                       <button
                         onClick={() => {
@@ -1183,12 +1187,12 @@ export default function Stocks() {
                     </div>
                   </div>
                 </div>
-                <div className="form-group d-flex align-items-center">
-                  <div className="form-group d-flex align-items-center mb-0 me-3">
+                <div className="d-flex form-group align-items-center">
+                  <div className="d-flex form-group align-items-center mb-0 me-3">
                     {/* <label htmlFor="" style={{ textWrap: "nowrap" }} className='text-success me-2'>Search : </label><input type="search" placeholder='' className='form-control' onChange={filter} /> */}
                     <label
                       style={{ textWrap: "nowrap" }}
-                      className="text-success ms-2 me-2 mb-0"
+                      className="text-success mb-0 me-2 ms-2"
                     >
                       Show :{" "}
                     </label>
@@ -1208,7 +1212,7 @@ export default function Stocks() {
                   <label
                     htmlFor=""
                     style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
+                    className="text-success mb-0 me-2"
                   >
                     Search :{" "}
                   </label>
@@ -1222,7 +1226,7 @@ export default function Stocks() {
               </div>
               <div className="table-responsive">
                 <table
-                  className="table border display no-footer dataTable stock-table"
+                  className="table border dataTable display no-footer stock-table"
                   role="grid"
                   aria-describedby="exampleStocksPair_info"
                   id="my-table"
@@ -1461,119 +1465,187 @@ export default function Stocks() {
                     {/* {tableState === "companyOverview" ? ( */}
                     {/*please uncomment this upper check if symbol and name is different for each tableState, and add this check for each tableState, otherwise not required. along with this line uncomment line 1630 to 1634*/}
                     {
-                     filterData.length > 0 && filterData?.map((rowData, rowIndex) => {
-                        const rowDataLowercase = Object.fromEntries(
-                          Object.entries(rowData).map(([key, value]) => [
-                            key.toLowerCase(),
-                            value,
-                          ])
-                        );
-                        const isAllNull = Object.values(rowDataLowercase).every(
-                          (value) => value === null
-                        );
+                      filterData.length > 0 &&
+                        filterData?.map((rowData, rowIndex) => {
+                          const rowDataLowercase = Object.fromEntries(
+                            Object.entries(rowData).map(([key, value]) => [
+                              key.toLowerCase(),
+                              value,
+                            ])
+                          );
+                          const isAllNull = Object.values(
+                            rowDataLowercase
+                          ).every((value) => value === null);
 
-                        if (isAllNull) {
-                          return null; // Do not render the row if all fields are null
-                        }
-                        return (
-                          <tr
-                            key={rowIndex}
-                            style={{ overflowWrap: "break-word" }}
-                          >
-                            {columnNames?.map((columnName, colIndex) => {
-                              const colNameLower = columnName
-                                .toLowerCase()
-                                .replace(/\s+/g, "");
-                              if (!visibleColumns.includes(columnName)) {
-                                return null;
-                              }
-                              const columnClass =
-                                colNameLower === "symbol"
-                                  ? "sticky-column"
-                                  : colNameLower === "name"
-                                  ? "sticky-column"
-                                  : "";
+                          if (isAllNull) {
+                            return null; // Do not render the row if all fields are null
+                          }
+                          return (
+                            <tr
+                              key={rowIndex}
+                              style={{ overflowWrap: "break-word" }}
+                            >
+                              {columnNames?.map((columnName, colIndex) => {
+                                const colNameLower = columnName
+                                  .toLowerCase()
+                                  .replace(/\s+/g, "");
+                                if (!visibleColumns.includes(columnName)) {
+                                  return null;
+                                }
+                                const columnClass =
+                                  colNameLower === "symbol"
+                                    ? "sticky-column"
+                                    : colNameLower === "name"
+                                    ? "sticky-column"
+                                    : "";
 
-                              let content = (
-                                <td
-                                  key={colIndex}
-                                  className={`${columnClass}`}
-                                  style={{
-                                    left:
-                                      colNameLower === "symbol"
-                                        ? 0
-                                        : colNameLower === "name"
-                                        ? firstColWidth
-                                        : "auto",
-                                  }}
-                                > 
-                                  {rowDataLowercase[colNameLower] == null ?
-                                   "Null" 
-                                   : isNaN(rowDataLowercase[colNameLower]) ?
-                                   colNameLower == "symbol" ? 
-                                   <div style={{width:"100px"}}>
-                                   {rowData?.logoFileDetails != null && parse(rowData?.logoFileDetails)}
-                                   <p>{rowDataLowercase[colNameLower]}</p>                                    
-                                   </div>
-                                   :
-                                   <div style={{width:"fit-content"}}>{rowDataLowercase[colNameLower]}</div>                                    
-                                    :  parseFloat(rowDataLowercase[colNameLower]).toFixed(2)
-                                   }
-                                </td>
-                              );
-                              if (colNameLower === "description") {
-                                const isExpanded = expandedRows[rowIndex];
-                                const description = rowDataLowercase[colNameLower];
-                                const shouldShowButton = description && description?.length > 165; 
-                                content = (
+                                let content = (
                                   <td
-                                    key={`${rowIndex}-${colIndex}`}
-                                    className={`text-wrap`}
-                                    style={{ width: "400px" }}
+                                    key={colIndex}
+                                    className={`${columnClass}`}
+                                    style={{
+                                      left:
+                                        colNameLower === "symbol"
+                                          ? 0
+                                          : colNameLower === "name"
+                                          ? firstColWidth
+                                          : "auto",
+                                    }}
                                   >
-                                    {/* {rowDataLowercase[colNameLower]} */}
-                                    <p
-                                    style={{width:"300px",marginBottom:0}}
-                                    >
-                                      <span
-                                      className="description"
-                                      style={{WebkitLineClamp:`${isExpanded ? 'none' : 3}`,}}>
-{description}{description?.length}
-                                      </span>
-                                      {shouldShowButton && (
-        <button
-          style={{
-            border: "none",
-            padding: 0,
-            background: "transparent",
-            color: "var(--primary)"
-          }}
-          onClick={() => toggleDescription(rowIndex)}
-        >
-          {isExpanded ? "Read Less" : "Read More"}
-        </button>
-      )}     
-                </p>
-                
+                                    {rowDataLowercase[colNameLower] == null ? (
+                                      "Null"
+                                    ) : isNaN(
+                                        rowDataLowercase[colNameLower]
+                                      ) ? (
+                                      colNameLower == "symbol" ? (
+                                        <div style={{ width: "100px" }}>
+                                          {rowData?.logoFileDetails != null &&
+                                            parse(rowData?.logoFileDetails)}
+                                          <p>
+                                            {rowDataLowercase[colNameLower]}
+                                          </p>
+                                        </div>
+                                      ) : (
+                                        <div style={{ width: "fit-content" }}>
+                                          {rowDataLowercase[colNameLower]}
+                                        </div>
+                                      )
+                                    ) : (
+                                      parseFloat(
+                                        rowDataLowercase[colNameLower]
+                                      ).toFixed(2)
+                                    )}
                                   </td>
                                 );
-                              }
-                              if(["marketcapitalization","ebitda","bookvalue","dividendpershare","revenuettm","eps","grossprofitttm","grossprofit","totalrevenue","operatingincome","sellinggeneralandadministrative","interestexpense","ebit","netincome","totalliabilities","longtermdebt","commonstock","commonstocksharesoutstanding","operatingcashflow","capitalexpenditures","profitloss","paymentsforrepurchaseofcommonstock"].includes(colNameLower)){
-                                content = (
-                                  <td>
-                                    {formatCurrency(rowDataLowercase[colNameLower])}
-                                  </td>
-                                )
-                              }
-                              const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
-                              if (urlPattern.test(rowDataLowercase[colNameLower])) {
-                                content =(<td><a href={rowDataLowercase[colNameLower]} target="_blank" rel="noopener noreferrer">{rowDataLowercase[colNameLower]}</a></td>)
-                              } 
-                              return content;
-                            })}
-                          </tr>
-                        );
-                      })
+                                if (colNameLower === "description") {
+                                  const isExpanded = expandedRows[rowIndex];
+                                  const description =
+                                    rowDataLowercase[colNameLower];
+                                  const shouldShowButton =
+                                    description && description?.length > 165;
+                                  content = (
+                                    <td
+                                      key={`${rowIndex}-${colIndex}`}
+                                      className={`text-wrap`}
+                                      style={{ width: "400px" }}
+                                    >
+                                      {/* {rowDataLowercase[colNameLower]} */}
+                                      <p
+                                        style={{
+                                          width: "300px",
+                                          marginBottom: 0,
+                                        }}
+                                      >
+                                        <span
+                                          className="description"
+                                          style={{
+                                            WebkitLineClamp: `${
+                                              isExpanded ? "none" : 3
+                                            }`,
+                                          }}
+                                        >
+                                          {description}
+                                          {description?.length}
+                                        </span>
+                                        {shouldShowButton && (
+                                          <button
+                                            style={{
+                                              border: "none",
+                                              padding: 0,
+                                              background: "transparent",
+                                              color: "var(--primary)",
+                                            }}
+                                            onClick={() =>
+                                              toggleDescription(rowIndex)
+                                            }
+                                          >
+                                            {isExpanded
+                                              ? "Read Less"
+                                              : "Read More"}
+                                          </button>
+                                        )}
+                                      </p>
+                                    </td>
+                                  );
+                                }
+                                if (
+                                  [
+                                    "marketcapitalization",
+                                    "ebitda",
+                                    "bookvalue",
+                                    "dividendpershare",
+                                    "revenuettm",
+                                    "eps",
+                                    "grossprofitttm",
+                                    "grossprofit",
+                                    "totalrevenue",
+                                    "operatingincome",
+                                    "sellinggeneralandadministrative",
+                                    "interestexpense",
+                                    "ebit",
+                                    "netincome",
+                                    "totalliabilities",
+                                    "longtermdebt",
+                                    "commonstock",
+                                    "commonstocksharesoutstanding",
+                                    "operatingcashflow",
+                                    "capitalexpenditures",
+                                    "profitloss",
+                                    "paymentsforrepurchaseofcommonstock",
+                                  ].includes(colNameLower)
+                                ) {
+                                  content = (
+                                    <td>
+                                      {formatCurrency(
+                                        rowDataLowercase[colNameLower]
+                                      )}
+                                    </td>
+                                  );
+                                }
+                                const urlPattern =
+                                  /^(https?:\/\/[^\s$.?#].[^\s]*)$/i;
+                                if (
+                                  urlPattern.test(
+                                    rowDataLowercase[colNameLower]
+                                  )
+                                ) {
+                                  content = (
+                                    <td>
+                                      <a
+                                        href={rowDataLowercase[colNameLower]}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        {rowDataLowercase[colNameLower]}
+                                      </a>
+                                    </td>
+                                  );
+                                }
+                                return content;
+                              })}
+                            </tr>
+                          );
+                        })
                       //) : (
                       // <tr>
                       // <td colSpan={columnNames?.length}>No data available</td>
