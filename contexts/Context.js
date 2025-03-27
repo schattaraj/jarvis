@@ -130,6 +130,9 @@ export const ContextProvider = ({ children }) => {
 
   const noLayoutRoutes = ["/login", "/register"];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
+
+  console.log("loaderState", loaderState);
+
   return (
     <Context.Provider
       value={{
