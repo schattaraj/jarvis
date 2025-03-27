@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import Loader from "../components/loader";
 import { decodeJWT } from "../utils/utils";
 import Swal from "sweetalert2";
+import { getRoleFromToken } from "../utils/auth";
 
 export const Context = createContext();
 
@@ -65,7 +66,12 @@ export const ContextProvider = ({ children }) => {
         setAccessToken(token);
         setUserName(name);
         if (router.route == "/login") {
-          router.push("/admin");
+          if(getRoleFromToken() == "internal"){
+            router.push("/admin");
+          }
+          else{
+            router.push("/User/dashboard");
+          }      
         }
       } else {
         Swal.fire("Your session has been expired");

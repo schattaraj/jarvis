@@ -6,6 +6,7 @@ import { Context } from "../../../contexts/Context";
 import parse from "html-react-parser";
 import {
   calculateAverage,
+  fetchWithInterceptor,
   getSortIcon,
   searchTable,
 } from "../../../utils/utils";
@@ -241,10 +242,12 @@ export default function Bonds() {
   const fetchColumnNames = async () => {
     context.setLoaderState(true);
     try {
-      const columnApi = await fetch(
-        "https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517"
-      );
-      const columnApiRes = await columnApi.json();
+      // const columnApi = await fetch(
+      //   "https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517"
+      // );
+      // const columnApiRes = await columnApi.json();
+      const columnApi = `/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517`
+      const columnApiRes = await fetchWithInterceptor(columnApi,false)
       columnApiRes.push(...extraColumns);
       setColumnNames(columnApiRes);
       const defaultCheckedColumns = columnApiRes.map(
@@ -261,10 +264,12 @@ export default function Bonds() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        "https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518"
-      );
-      const getBondsRes = await getBonds.json();
+      // const getBonds = await fetch(
+      //   "https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518"
+      // );
+      // const getBondsRes = await getBonds.json();
+      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`
+      const getBondsRes = await fetchWithInterceptor(getBonds,false)
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setStocks(getBondsRes);
@@ -436,11 +441,13 @@ export default function Bonds() {
   const fetchTickersFunc = async () => {
     context.setLoaderState(true);
     try {
-      const fetchTickers = await fetch(
-        "https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" +
-          new Date().getTime()
-      );
-      const fetchTickersRes = await fetchTickers.json();
+      // const fetchTickers = await fetch(
+      //   "https://jharvis.com/JarvisV2/getAllTicker?metadataName=Bondpricing_Master&_=" +
+      //     new Date().getTime()
+      // );
+      // const fetchTickersRes = await fetchTickers.json();
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=${new Date().getTime()}`
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
       setTickers(fetchTickersRes);
       fetchColumnNames();
     } catch (e) {

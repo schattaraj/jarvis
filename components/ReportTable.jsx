@@ -117,9 +117,11 @@ function ReportTable({
       const archivedNews = [];
       if (result?.Information) {
         Swal.fire({ icon: "warning", text: result.Information });
+        setNewsSentiment([]);
+      setArchivedNewsSentiment([]);
       }
       setActiveTab((prev) => ({ ...prev, tab: "latest", selectedDate: "All" }))
-      result.feed.forEach((news) => {
+      result?.feed?.forEach((news) => {
         const newsYear = parseInt(news.time_published.substring(0, 4), 10);
 
         if (newsYear === currentYear) {
@@ -283,8 +285,7 @@ function ReportTable({
           p: 3,
         }}
       >
-        {data.length > 0 && (
-          <>
+       
             <Box
               sx={{
                 display: "flex",
@@ -293,11 +294,13 @@ function ReportTable({
                 paddingBottom: 2,
               }}
             >
-              <Typography variant="h6">Report Table</Typography>
+              {data.length > 0 ? <Typography variant="h6">Report Table</Typography> : <div></div>}
               <IconButton onClick={handleCloseModal}>
                 <CloseIcon />
               </IconButton>
             </Box>
+            {data.length > 0 && (
+          <>
             <TextField
               label="Search"
               variant="outlined"

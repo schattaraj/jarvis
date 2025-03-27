@@ -8,7 +8,8 @@ import { Context } from '../contexts/Context';
 import Card from '../components/Card';
 import 'animate.css';
 import Breadcrumb from '../components/Breadcrumb';
-export default function Admin() {
+import withRoleProtection from '../hoc/withRoleProtection';
+function Dashboard() {
     const context = useContext(Context)
     return (
         <>
@@ -90,3 +91,4 @@ export default function Admin() {
         </>
     )
 }
+export default withRoleProtection(Dashboard,['internal']);
