@@ -246,8 +246,8 @@ export default function Bonds() {
       //   "https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517"
       // );
       // const columnApiRes = await columnApi.json();
-      const columnApi = `/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517`
-      const columnApiRes = await fetchWithInterceptor(columnApi,false)
+      const columnApi = `/api/proxy?api=getColumns?metaDataName=Bondpricing_Master&_=1705052752517`;
+      const columnApiRes = await fetchWithInterceptor(columnApi, false);
       columnApiRes.push(...extraColumns);
       setColumnNames(columnApiRes);
       const defaultCheckedColumns = columnApiRes.map(
@@ -268,8 +268,8 @@ export default function Bonds() {
       //   "https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518"
       // );
       // const getBondsRes = await getBonds.json();
-      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`
-      const getBondsRes = await fetchWithInterceptor(getBonds,false)
+      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setStocks(getBondsRes);
@@ -446,8 +446,8 @@ export default function Bonds() {
       //     new Date().getTime()
       // );
       // const fetchTickersRes = await fetchTickers.json();
-      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=${new Date().getTime()}`
-      const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&_=${new Date().getTime()}`;
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
       setTickers(fetchTickersRes);
       fetchColumnNames();
     } catch (e) {
@@ -924,6 +924,8 @@ export default function Bonds() {
                           name="fileDate"
                           required
                           onChange={(e) => {
+                            console.log(e.target.value);
+
                             setFileDate(e.target.value);
                           }}
                         />

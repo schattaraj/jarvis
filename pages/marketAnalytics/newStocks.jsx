@@ -28,6 +28,7 @@ import { FaGlasses } from "react-icons/fa";
 import ReportTable from "../../components/ReportTable";
 import { staticStocks } from "../../utils/staticStock";
 import Loader from "../../components/loader";
+import html2canvas from "html2canvas";
 const companyOverviewColumns = [
   "Symbol",
   "Name",
@@ -154,9 +155,10 @@ export default function Stocks() {
   const [contentWidth, setContentWidth] = useState(0);
   const contentRef = useRef(null);
   const firstColRef = useRef(null);
+  const tableContainerRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
-  const [loaderState, setLoaderState] = useState(false);
+  // const [loaderState, setLoaderState] = useState(false);
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -190,6 +192,7 @@ export default function Stocks() {
           break;
       }
       setTableState(table);
+      setCurrentPage(1);
     }
   };
   useEffect(() => {
@@ -308,7 +311,7 @@ export default function Stocks() {
   // };
 
   const fetchData = async (api = "getCompanyOverview?symbol=AAL") => {
-    setLoaderState(true);
+    // setLoaderState(true);
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
@@ -325,7 +328,7 @@ export default function Stocks() {
     } catch (e) {
       console.log("error", e);
     } finally {
-      setLoaderState(false);
+      // setLoaderState(false);
     }
   };
   const handleSort = (key) => {
@@ -357,51 +360,79 @@ export default function Stocks() {
     setFilterData(searchTable(tableData, value));
   };
   const exportPdf = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollLeft = 0; // Reset scroll to the initial position
+    }
     if (tableData.length > 0) {
-      const doc = new jsPDF({ orientation: "landscape" });
-      // Define autoTable options
-      const options = {
-        html: "#my-table",
-        theme: "striped", // Optional: adds some style
-        margin: { top: 10, left: 10, right: 10, bottom: 10 },
-        // tableWidth: 'auto', // Automatically adjust table width
-        startY: 20, // Adjust this if the table starts too close to the top of the page
-        pageBreak: "auto", // Automatically handle page breaks
-        styles: {
-          cellPadding: 2, // Adjust padding if needed
-          fontSize: 10, // Adjust font size if needed
-          halign: "center", // Horizontal alignment of text
-          valign: "middle", // Vertical alignment of text
-        },
-        headStyles: {
-          fillColor: [255, 255, 255], // Header background color
-          textColor: [0, 0, 0], // Header text color
-          fontSize: 12, // Font size for headers
-          halign: "center", // Horizontal alignment of header text
-          valign: "middle", // Vertical alignment of header text
-        },
-        didParseCell: (data) => {
-          // This callback allows you to make further adjustments if needed
-          if (data.row.index === 0) {
-            // Header row
-            data.cell.styles.cellWidth = "auto"; // Ensure header cells have auto width
+      const parentDiv = document.createElement("div");
+      parentDiv.id = "loader";
+      parentDiv.classList.add("loader-container", "flex-column");
+      const loaderDiv = document.createElement("div");
+      loaderDiv.className = "loader";
+      parentDiv.appendChild(loaderDiv);
+      document.body.appendChild(parentDiv);
+
+      const input = document.getElementById("my-table");
+
+      html2canvas(input)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF({
+            orientation: columnNames.length > 8 ? "landscape" : "portrait",
+            format:
+              columnNames.length > 15
+                ? "a0"
+                : columnNames.length > 8
+                ? "a3"
+                : "a4",
+          });
+          const headers = columnNames.filter((col) =>
+            visibleColumns.includes(col)
+          );
+
+          // Table rows
+          const rows = filterData.map((rowData) => {
+            const rowDataLowercase = Object.fromEntries(
+              Object.entries(rowData).map(([key, value]) => [
+                key.toLowerCase(),
+                value,
+              ])
+            );
+
+            return headers.map((col) =>
+              rowDataLowercase[col.toLowerCase().replace(/\s+/g, "")]
+                ? rowDataLowercase[
+                    col.toLowerCase().replace(/\s+/g, "")
+                  ].toString()
+                : ""
+            );
+          });
+
+          pdf.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 20, // Adjust starting position
+            theme: "grid",
+            styles: { fontSize: 10, cellPadding: 3 },
+            margin: { top: 10 },
+            pageBreak: "auto", // Automatically creates new pages if content overflows
+          });
+
+          pdf.save("Table_Report.pdf");
+          // const imgProps = pdf.getImageProperties(imgData);
+          // const pdfWidth = pdf.internal.pageSize.getWidth();
+          // const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+          // pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          // pdf.save("table.pdf");
+          const loaderDiv = document.getElementById("loader");
+          if (loaderDiv) {
+            loaderDiv.remove();
           }
-        },
-        // Adjust column widths as needed
-        // columnStyles: {
-        //     0: { cellWidth: 30 }, // Example: set width for the first column
-        //     1: { cellWidth: 40 }, // Set width for the second column
-        //     2: { cellWidth: 40 }, // Set width for the second column
-        //     3: { cellWidth: 40 }, // Set width for the second column
-        //     4: { cellWidth: 40 }, // Set width for the second column
-        //     // Add more as needed
-        // },
-        // Ensure the table fits within the page bounds
-      };
-
-      autoTable(doc, options);
-
-      doc.save("table.pdf");
+        })
+        .catch((error) => {
+          context.setLoaderState(false);
+        });
     }
   };
   const changeLimit = (e) => {
@@ -798,7 +829,7 @@ export default function Stocks() {
 
   return (
     <>
-      {loaderState && <Loader />}
+      {/* {loaderState && <Loader />} */}
       {/* <StockHistoryModal
         open={historyModal}
         handleClose={handleCloseModal}
@@ -984,7 +1015,7 @@ export default function Stocks() {
                   type="button"
                   title="PDF"
                   onClick={() => {
-                    generatePDF();
+                    exportPdf();
                   }}
                 >
                   <span className="mdi mdi-file-pdf-box me-2"></span>
@@ -1182,7 +1213,7 @@ export default function Stocks() {
                           tableState === "sma" ? "active-table-button" : ""
                         } dt-button table-state-button buttons-html5 btn-primary d-flex`}
                       >
-                        SMA(Simple Moving Average)
+                        SMA (Simple Moving Average)
                       </button>
                     </div>
                   </div>
@@ -1224,7 +1255,7 @@ export default function Stocks() {
                   />
                 </div>
               </div>
-              <div className="table-responsive">
+              <div className="table-responsive" ref={tableContainerRef}>
                 <table
                   className="table border dataTable display no-footer stock-table"
                   role="grid"
@@ -1513,7 +1544,7 @@ export default function Stocks() {
                                     }}
                                   >
                                     {rowDataLowercase[colNameLower] == null ? (
-                                      "Null"
+                                      ""
                                     ) : isNaN(
                                         rowDataLowercase[colNameLower]
                                       ) ? (
