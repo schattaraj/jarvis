@@ -479,6 +479,8 @@ export default function Bonds() {
     try {
       const formData = new FormData();
       formData.append("metaDataName", "Bondpricing_Master");
+      console.log(fileDate);
+
       formData.append("fileDate", fileDate);
       formData.append("myfile", file);
       console.log("formData", formData);
@@ -494,10 +496,30 @@ export default function Bonds() {
           body: formData,
         }
       );
-      const uploadRes = await upload.json();
+      // const uploadRes = await upload.json();
+      if (upload.status == 200) {
+        setFile(null);
+        setFileDate("");
+        // Reset file input field
+        const fileInput = document.getElementById('uploadFile');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        // Reset date input field
+        const dateInput = document.querySelector('input[name="fileDate"]');
+        if (dateInput) {
+          dateInput.value = '';
+        }
+        Swal.fire({
+          title: "Bond Uploaded Successfully",
+          icon: "success",
+          confirmButtonColor: "var(--secondary)",
+          timer: 2000,
+        });
+      }
       if (upload.status == 400) {
         Swal.fire({
-          title: uploadRes?.message,
+          title: "Something Went Wrong While Uploading Bond!",
           icon: "warning",
           confirmButtonColor: "var(--primary)",
         });
@@ -924,9 +946,18 @@ export default function Bonds() {
                           name="fileDate"
                           required
                           onChange={(e) => {
-                            console.log(e.target.value);
-
-                            setFileDate(e.target.value);
+                            // console.log(e.target.value);
+                            //format date
+                            const date = new Date(e.target.value);
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            );
+                            const day = String(date.getDate()).padStart(2, "0");
+                            const year = date.getFullYear();
+                            const formattedDate = `${month}/${day}/${year}`;
+                            // console.log(formattedDate);
+                            setFileDate(formattedDate);
                           }}
                         />
                       </div>
