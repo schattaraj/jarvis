@@ -268,16 +268,39 @@ export default function Bonds() {
       //   "https://www.jharvis.com/JarvisV2/getImportsData?metaDataName=Bondpricing_Master&_=1705052752518"
       // );
       // const getBondsRes = await getBonds.json();
-      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`;
-      const getBondsRes = await fetchWithInterceptor(getBonds, false);
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
-      setStocks(getBondsRes);
+
+      //uncomment for v3
+      // const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`;
+      // const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      // setTableData(getBondsRes);
+      // setFilterData(getBondsRes);
+      // setStocks(getBondsRes);
+      console.log("data");
     } catch (e) {
       console.log("error", e);
     }
     context.setLoaderState(false);
   };
+
+  const getWeeklyData = async (importDate) => {
+    context.setLoaderState(true);
+    try {
+      const response = await fetch(
+        `https://jharvis.com/JarvisV2/getDataByWeek?metadataName=Bondpricing_Master&date=${importDate}&_=1744265661813`
+      );
+      const result = await response.json();
+      setTableData(result);
+      setFilterData(result);
+      setStocks(result);
+      // console.log(result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setOpenModal(false);
+    }
+    context.setLoaderState(false);
+  };
+
   const filter = (e) => {
     const value = e.target.value;
     setFilterData(searchTable(tableData, value));
@@ -501,14 +524,14 @@ export default function Bonds() {
         setFile(null);
         setFileDate("");
         // Reset file input field
-        const fileInput = document.getElementById('uploadFile');
+        const fileInput = document.getElementById("uploadFile");
         if (fileInput) {
-          fileInput.value = '';
+          fileInput.value = "";
         }
         // Reset date input field
         const dateInput = document.querySelector('input[name="fileDate"]');
         if (dateInput) {
-          dateInput.value = '';
+          dateInput.value = "";
         }
         Swal.fire({
           title: "Bond Uploaded Successfully",
@@ -767,6 +790,7 @@ export default function Bonds() {
           handleClose={handleCloseModal}
           setCompareData={setCompareData}
           setSelectedOption={setSelectedOption}
+          onClickImportDate={getWeeklyData}
         />
       </div>
       <div className="main-panel">
