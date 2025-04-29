@@ -1,6 +1,6 @@
 import * as Icon from "react-icons/fa";
 import { useState } from "react";
-export const Pagination = ({currentPage,totalItems,limit,setCurrentPage,handlePage}) => {
+export const Pagination = ({currentPage,totalItems,limit,setCurrentPage,handlePage}) => {    
     const count = totalItems.length
     if(limit == "all" || limit >= totalItems?.length){
         limit = totalItems?.length

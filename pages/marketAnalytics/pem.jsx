@@ -1029,8 +1029,9 @@ export default function PemDetails() {
                         columnName.elementInternalName === "lastUpdatedAt"
                       ) {
                         content = new Date(
-                          rowData[columnName.elementInternalName]
-                        ).toLocaleDateString();
+                          rowData['lastUpdatedAt']
+                        ).toDateString();
+                        
                       } else if (
                         columnName.elementInternalName === "idMarketData"
                       ) {

@@ -200,8 +200,10 @@ export default function Stocks() {
   }, [columnNames, setColumnNames]);
 
   useEffect(() => {
-    if (firstColRef.current) {
+    if (firstColRef.current && visibleColumns.includes("Symbol")) {
       setFirstColWidth(firstColRef.current.offsetWidth);
+    } else {
+      setFirstColWidth(0);
     }
   }, [firstColRef, filterData, visibleColumns]);
   const handleSelect = (inputs) => {

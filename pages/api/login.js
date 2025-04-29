@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         });
 
         const loginResult = await loginResponse.json();
-
+        
         if (loginResult?.statusCode === 4004) {
             return res.status(400).json({ message: loginResult?.message });
         }

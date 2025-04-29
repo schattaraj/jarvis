@@ -26,6 +26,7 @@ import html2canvas from "html2canvas";
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 import Breadcrumb from "../../../components/Breadcrumb";
+import { PaginationNew } from "../../../components/PaginationNew";
 export default function Portfolio() {
   const context = useContext(Context);
   const [columnNames, setColumnNames] = useState([]);
@@ -58,6 +59,9 @@ export default function Portfolio() {
     direction: null,
   });
   const [limit3, setLimit3] = useState(25);
+  const [totalPages3, setTotalPages3] = useState(0);
+  const [totalElements3, setTotalElements3] = useState(0);
+  const [isLastPage3, setIsLastPage3] = useState(false);
   const [portfolioPayload, setPortfolioPayload] = useState({
     myArr: [],
     portfolioName: "",
@@ -234,20 +238,32 @@ export default function Portfolio() {
   const getAllStock = async () => {
     context.setLoaderState(true);
     try {
-      const allStocksApi = await fetch(
-        "https://jharvis.com/JarvisV2/getAllStocksForPolio"
-      );
-      const allStocksApiRes = await allStocksApi.json();
-      setAllStocks(allStocksApiRes);
+      // const allStocksApi = await fetch(
+      //   "https://jharvis.com/JarvisV2/getAllStocksForPolio"
+      // );
+      // const allStocksApiRes = await allStocksApi.json();
+
+      const apiEndpoint = `/api/proxy?api=getAllStocksForPolio?pageSize=${
+        limit3 != "all" ? limit3 : totalElements3
+      }&pageNumber=${currentPage3 - 1}`;
+      const response = await fetchWithInterceptor(apiEndpoint, false);
+      setAllStocks(response?.content);
+      setfilteredAllStockPortfolios(response?.content);
+      setTotalPages3(response.totalPages);
+      setTotalElements3(response.totalElements);
+      setIsLastPage3(response.lastPage);
     } catch (e) {
       console.log("error", e);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   const handleClose = () => {
     setEditStatus(false);
     formData.portfolioName = "";
     setfilteredAllStockPortfolios([]);
+    setCurrentPage3(1);
+    setLimit3(25);
     formData.allStocks = [
       { stockName: "", share: "", purchaseDate: "", purchasePrice: "" },
     ];
@@ -352,7 +368,7 @@ export default function Portfolio() {
       visiblePortFolio: "yes",
     };
     try {
-      const apiEndpoint = `/api/proxy?api=portfolio/createPortfolio`;
+      const apiEndpoint = `/api/proxy?api=createPortfolio`;
       const options = { body: JSON.stringify(jsonObject), method: "POST" };
       const response = await fetchWithInterceptor(
         apiEndpoint,
@@ -566,7 +582,9 @@ export default function Portfolio() {
     try {
       // const allStocksApi = await fetch(`https://jharvis.com/JarvisV2/getAllPortfolioByName?name=${name}&_=1724917733195`);
       // const allStocksApiRes = await allStocksApi.json();
-      const apiEndpoint = `/api/proxy?api=portfolio/getAllPortfolioByName?name=${name}`;
+      const apiEndpoint = `/api/proxy?api=getAllPortfolioByName?name=${name}&pageNumber=${
+        currentPage3 - 1
+      }&pageSize=${limit3 != "all" ? limit3 : totalElements3}`;
       const options = { method: "GET" };
       const response = await fetchWithInterceptor(
         apiEndpoint,
@@ -574,10 +592,15 @@ export default function Portfolio() {
         {},
         options
       );
-      allStocksApiRes = response.payload;
+
+      const allStocksApiRes = response?.content;
+      setTotalPages3(response.totalPages);
+      setTotalElements3(response.totalElements);
+      setIsLastPage3(response.lastPage);
       console.log("response", response);
       // allStocksApiRes.reverse();
       setAllStocks(allStocksApiRes);
+      setfilteredAllStockPortfolios(allStocksApiRes);
       formData.portfolioName = name;
       allStocksApiRes.map((item, index) => {
         if (item.share || item.purchaseDate) {
@@ -638,8 +661,8 @@ export default function Portfolio() {
   };
 
   useEffect(() => {
-    allStockFilterData();
-  }, [currentPage3, allStocks, sortConfig3, limit3]);
+    getAllStock();
+  }, [currentPage3, limit3]);
 
   const allStockFilter = (e) => {
     const value = e.target.value;
@@ -660,6 +683,7 @@ export default function Portfolio() {
 
   const changeLimit3 = (e) => {
     setLimit3(e.target.value);
+    setCurrentPage3(1); // Reset to first page when limit changes
   };
 
   const handlePage3 = async (action) => {
@@ -1146,7 +1170,9 @@ export default function Portfolio() {
         <Footer />
         <Modal show={show} onHide={handleClose} className="portfolio-modal">
           <Modal.Header closeButton>
-            <Modal.Title>Create Portfolio</Modal.Title>
+            <Modal.Title>
+              {!editStatus ? "Create Portfolio" : "Update Portfolio"}
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="row">
@@ -1306,9 +1332,11 @@ export default function Portfolio() {
                 </tbody>
               </table>
             </div>
-            <Pagination
+
+            <PaginationNew
               currentPage={currentPage3}
-              totalItems={allStocks}
+              totalItems={totalElements3}
+              totalPage={totalPages3}
               limit={limit3}
               setCurrentPage={setCurrentPage3}
               handlePage={handlePage3}

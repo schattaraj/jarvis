@@ -181,9 +181,14 @@ const BondReports = () => {
         if (selectedTicker) {
             context.setLoaderState(true)
             try {
-                const Debt_Report_Matrices = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getHistoryByTicker?metadataName=Debt_Report_Matrices&ticker=" + selectedTicker)
-                const Debt_Report_MatricesRes = await Debt_Report_Matrices.json()
+                // const Debt_Report_Matrices = await fetch(process.env.NEXT_PUBLIC_BASE_URL_V2 + "getHistoryByTicker?metadataName=Debt_Report_Matrices&ticker=" + selectedTicker)
+                // const Debt_Report_MatricesRes = await Debt_Report_Matrices.json()
+                // setTableData(Debt_Report_MatricesRes)
+                const getBonds = await fetch("https://jharvis.com/JarvisV2/getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871")
+                const getBondsRes = await getBonds.json()
+                const Debt_Report_MatricesRes = getBondsRes.filter(item => item.element1 === selectedTicker)
                 setTableData(Debt_Report_MatricesRes)
+                setFilterData(Debt_Report_MatricesRes)
             } catch (error) {
                 console.log("Error", error);
             }
@@ -195,6 +200,10 @@ const BondReports = () => {
 
     }
     const reset = () => {
+        setIsExpanded(false)
+        setSelectedTicker("")
+        setFilterData([])
+        setTableData([])
         fetchData()
     }
     const history = () => {
@@ -202,7 +211,7 @@ const BondReports = () => {
         setIsExpanded(false)
     }
     const calculate = () => {
-
+        setIsExpanded(false)
     }
     const uploadFile = async (e) => {
         e.preventDefault()
@@ -365,8 +374,14 @@ const BondReports = () => {
                             <div className="d-flex align-items-end flex-wrap">
                                 <div className="form-group" style={{ flex: "1" }}>
                                     <label htmlFor="">Select Ticker</label>
-                                    <select name="tickerName" className='form-select mb-0' onChange={(e) => { setSelectedTicker(e.target.value) }} required>
-                                        <option value={""}>--Select Ticker--</option>
+                                    <select 
+                                        name="tickerName" 
+                                        className='form-select mb-0' 
+                                        onChange={(e) => { setSelectedTicker(e.target.value) }} 
+                                        value={selectedTicker || ""}
+                                        required
+                                    >
+                                        <option value="">--Select Ticker--</option>
                                         {tickers.map((item, index) => (
                                             <option key={index} value={item?.element1}>
                                                 {item?.element1}
@@ -497,7 +512,7 @@ const BondReports = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filterData.map((rowData, rowIndex) => (
+                                {filterData.length > 0 ? filterData.map((rowData, rowIndex) => (
                                     <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
                                         {
                                             columnNames.map((columnName, colIndex) => {
@@ -521,7 +536,11 @@ const BondReports = () => {
                                             })
                                         }
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan={columnNames?.length}>No data available</td>
+                                    </tr>
+                                )}
                             </tbody>
 
                         </table>

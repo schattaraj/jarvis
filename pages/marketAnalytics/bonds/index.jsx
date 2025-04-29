@@ -6,6 +6,7 @@ import { Context } from "../../../contexts/Context";
 import parse from "html-react-parser";
 import {
   calculateAverage,
+  exportToExcel,
   fetchWithInterceptor,
   getSortIcon,
   searchTable,
@@ -34,6 +35,8 @@ import { useRouter } from "next/router";
 import Breadcrumb from "../../../components/Breadcrumb";
 import { elements } from "chart.js";
 import ReportTable from "../../../components/ReportTable";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 const extraColumns = [
   {
     elementId: null,
@@ -132,6 +135,7 @@ export default function Bonds() {
   const [open, setOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
+  const tableContainerRef = useRef(null);
   const [visibleColumns, setVisibleColumns] = useState(
     columnNames.map((col) => col.elementInternalName)
   );
@@ -306,12 +310,67 @@ export default function Bonds() {
     setFilterData(searchTable(tableData, value));
   };
   const exportPdf = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollLeft = 0; // Reset scroll to the initial position
+    }
     if (tableData.length > 0) {
-      const doc = new jsPDF();
+      const parentDiv = document.createElement("div");
+      parentDiv.id = "loader";
+      parentDiv.classList.add("loader-container", "flex-column");
+      const loaderDiv = document.createElement("div");
+      loaderDiv.className = "loader";
+      parentDiv.appendChild(loaderDiv);
+      document.body.appendChild(parentDiv);
 
-      autoTable(doc, { html: "#my-table" });
+      const input = document.getElementById("my-table");
 
-      doc.save("table.pdf");
+      html2canvas(input)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF({
+            orientation: columnNames.length > 8 ? "landscape" : "portrait",
+            format:
+              columnNames.length > 15
+                ? "a0"
+                : columnNames.length > 8
+                ? "a3"
+                : "a4",
+          });
+
+          const headers = columnNames.filter((col) =>
+            visibleColumns.includes(col.elementInternalName)
+          );
+
+          const pdfColumns = headers.map((col) => col.elementDisplayName);
+
+          // Table rows
+          const rows = filterData.map((rowData) => {
+            return headers.map((col) =>
+              rowData[col.elementInternalName]
+                ? rowData[col.elementInternalName].toString()
+                : ""
+            );
+          });
+          console.log("rows", rows);
+          pdf.autoTable({
+            head: [pdfColumns],
+            body: rows,
+            startY: 20, // Adjust starting position
+            theme: "grid",
+            styles: { fontSize: 10, cellPadding: 3 },
+            margin: { top: 10 },
+            pageBreak: "auto", // Automatically creates new pages if content overflows
+          });
+
+          pdf.save("Bond_Table_Report.pdf");
+          const loaderDiv = document.getElementById("loader");
+          if (loaderDiv) {
+            loaderDiv.remove();
+          }
+        })
+        .catch((error) => {
+          context.setLoaderState(false);
+        });
     }
   };
   const downloadReport = async (reportName) => {
@@ -1064,6 +1123,9 @@ export default function Bonds() {
                   <button
                     className="dt-button buttons-excel buttons-html5 btn-primary"
                     type="button"
+                    onClick={() => {
+                      exportToExcel();
+                    }}
                   >
                     <span className="mdi mdi-file-excel me-2"></span>
                     <span>EXCEL</span>
@@ -1177,7 +1239,7 @@ export default function Bonds() {
                 </div>
               </div>
 
-              <div className="table-responsive">
+              <div className="table-responsive" ref={tableContainerRef}>
                 <table
                   className="table border display no-footer dataTable bond-table"
                   role="grid"
@@ -1215,6 +1277,12 @@ export default function Bonds() {
                         style={{ overflowWrap: "break-word" }}
                       >
                         {columnNames.map((columnName, colIndex) => {
+                          if (
+                            !visibleColumns.includes(
+                              columnName.elementInternalName
+                            )
+                          )
+                            return null;
                           let content;
 
                           if (columnName.elementInternalName === "element3") {
@@ -1298,61 +1366,62 @@ export default function Bonds() {
             </>
           )}
           {(selectedOption == "History" || selectedOption == "Ranking") && (
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group d-flex align-items-center mb-2">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={filterBestStocks}
-                  />
-                </div>
-                <div className="table-responsive mb-3">
-                  <table
-                    className="table border display no-footer dataTable"
-                    role="grid"
-                    aria-describedby="exampleStocksPair_info"
-                    id="my-table"
-                  >
-                    <thead>
-                      <tr>
-                        <th>Most Risen Stock</th>
-                        <th>Price Risen By</th>
-                        <th>% Increase</th>
-                        <th>Current Price</th>
-                        <th>Previous Price</th>
-                        <th>Current YTM</th>
-                        <th>Previous YTM</th>
-                        <th>Maturity</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {risenStocksFiltered?.map((item, index) => {
-                        return (
-                          <tr key={"bestStock" + index}>
-                            <td>{item?.bestMovedStock}</td>
-                            <td>{item?.bestMovedBy}</td>
-                            <td>{item?.percentageChangeRise}</td>
-                            <td>{item?.bestMoveCurrValue}</td>
-                            <td>{item?.bestMovePrevValue}</td>
-                            <td>{item?.currytm}</td>
-                            <td>{item?.prevytm}</td>
-                            <td>{item?.maturityDate}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <HightChart
+            <>
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group d-flex align-items-center mb-2">
+                    <label
+                      htmlFor=""
+                      style={{ textWrap: "nowrap" }}
+                      className="text-success me-2 mb-0"
+                    >
+                      Search :{" "}
+                    </label>
+                    <input
+                      type="search"
+                      placeholder=""
+                      className="form-control"
+                      onChange={filterBestStocks}
+                    />
+                  </div>
+                  <div className="table-responsive mb-3">
+                    <table
+                      className="table border display no-footer dataTable"
+                      role="grid"
+                      aria-describedby="exampleStocksPair_info"
+                      id="my-table"
+                    >
+                      <thead>
+                        <tr>
+                          <th>Most Risen Stock</th>
+                          <th>Price Risen By</th>
+                          <th>% Increase</th>
+                          <th>Current Price</th>
+                          <th>Previous Price</th>
+                          <th>Current YTM</th>
+                          <th>Previous YTM</th>
+                          <th>Maturity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {risenStocksFiltered?.map((item, index) => {
+                          return (
+                            <tr key={"bestStock" + index}>
+                              <td>{item?.bestMovedStock}</td>
+                              <td>{item?.bestMovedBy}</td>
+                              <td>{item?.percentageChangeRise}</td>
+                              <td>{item?.bestMoveCurrValue}</td>
+                              <td>{item?.bestMovePrevValue}</td>
+                              <td>{item?.currytm}</td>
+                              <td>{item?.prevytm}</td>
+                              <td>{item?.maturityDate}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {/* <HightChart
                   data={compareData?.bestFiveStocks?.map((item) => [
                     item["bestMovedStock"],
                     parseFloat(item["percentageChangeRise"]),
@@ -1366,78 +1435,103 @@ export default function Bonds() {
                   yAxisTitle={"Risn in %"}
                   titleAlign={"center"}
                   subTitle={"Best Fifty"}
-                />
+                /> */}
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group d-flex align-items-center mb-2">
+                    <label
+                      htmlFor=""
+                      style={{ textWrap: "nowrap" }}
+                      className="text-success me-2 mb-0"
+                    >
+                      Search :{" "}
+                    </label>
+                    <input
+                      type="search"
+                      placeholder=""
+                      className="form-control"
+                      onChange={filterWorstStocks}
+                    />
+                  </div>
+                  <div className="table-responsive mb-3">
+                    <table
+                      className="table border display no-footer dataTable"
+                      role="grid"
+                      aria-describedby="exampleStocksPair_info"
+                      id="my-table"
+                    >
+                      <thead>
+                        <tr>
+                          <th>Most Dropped Stock</th>
+                          <th>Price Dropped By</th>
+                          <th>% Decrease</th>
+                          <th>Current Price</th>
+                          <th>Previous Price</th>
+                          <th>Current YTM</th>
+                          <th>Previous YTM</th>
+                          <th>Maturity</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dropStocksFiltered?.map((item, index) => {
+                          return (
+                            <tr key={"worstStock" + index}>
+                              <td>{item?.worstMovedStock}</td>
+                              <td>{item?.worstMovedBy}</td>
+                              <td>{item?.percentageChangeRise}</td>
+                              <td>{item?.worstMoveCurrValue}</td>
+                              <td>{item?.worstMovePrevValue}</td>
+                              <td>{item?.currytm}</td>
+                              <td>{item?.prevytm}</td>
+                              <td>{item?.maturityDate}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                </div>
               </div>
-              <div className="col-md-6">
-                <div className="form-group d-flex align-items-center mb-2">
-                  <label
-                    htmlFor=""
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success me-2 mb-0"
-                  >
-                    Search :{" "}
-                  </label>
-                  <input
-                    type="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={filterWorstStocks}
+              <div className="row">
+                <div className="col-md-12">
+                  <HightChart
+                    data={compareData?.bestFiveStocks?.map((item) => [
+                      item["bestMovedStock"],
+                      parseFloat(item["percentageChangeRise"]),
+                    ])}
+                    title={"Bond Performance"}
+                    typeCheck={{
+                      categories: compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      ),
+                    }}
+                    yAxisTitle={"Risn in %"}
+                    titleAlign={"center"}
+                    subTitle={"Best Fifty"}
                   />
                 </div>
-                <div className="table-responsive mb-3">
-                  <table
-                    className="table border display no-footer dataTable"
-                    role="grid"
-                    aria-describedby="exampleStocksPair_info"
-                    id="my-table"
-                  >
-                    <thead>
-                      <tr>
-                        <th>Most Dropped Stock</th>
-                        <th>Price Dropped By</th>
-                        <th>% Decrease</th>
-                        <th>Current Price</th>
-                        <th>Previous Price</th>
-                        <th>Current YTM</th>
-                        <th>Previous YTM</th>
-                        <th>Maturity</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dropStocksFiltered?.map((item, index) => {
-                        return (
-                          <tr key={"worstStock" + index}>
-                            <td>{item?.worstMovedStock}</td>
-                            <td>{item?.worstMovedBy}</td>
-                            <td>{item?.percentageChangeRise}</td>
-                            <td>{item?.worstMoveCurrValue}</td>
-                            <td>{item?.worstMovePrevValue}</td>
-                            <td>{item?.currytm}</td>
-                            <td>{item?.prevytm}</td>
-                            <td>{item?.maturityDate}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <HightChart
-                  data={compareData?.worstFiveStocks?.map((item) => [
-                    item["worstMovedStock"],
-                    parseFloat(item["percentageChangeDrop"]),
-                  ])}
-                  title={"Bond Performance"}
-                  typeCheck={{
-                    categories: compareData?.bestFiveStocks?.map(
-                      (item) => item?.bestMovedStock
-                    ),
-                  }}
-                  yAxisTitle={"Risn in %"}
-                  titleAlign={"center"}
-                  subTitle={"Worst Fifty"}
-                />
               </div>
-            </div>
+              <div className="row my-3">
+                <div className="col-md-12">
+                  <HightChart
+                    data={compareData?.worstFiveStocks?.map((item) => [
+                      item["worstMovedStock"],
+                      parseFloat(item["percentageChangeDrop"]),
+                    ])}
+                    title={"Bond Performance"}
+                    typeCheck={{
+                      categories: compareData?.worstFiveStocks?.map(
+                        (item) => item?.worstMovedStock
+                      ),
+                    }}
+                    yAxisTitle={"Drop in %"}
+                    titleAlign={"center"}
+                    subTitle={"Worst Fifty"}
+                  />
+                </div>
+              </div>
+            </>
           )}
           {selectedOption == "Chart View" && (
             <>
