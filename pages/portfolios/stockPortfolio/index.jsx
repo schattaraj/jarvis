@@ -165,12 +165,57 @@ export default function Portfolio() {
   };
   const exportPdf = () => {
     if (tableData.length > 0) {
-      const doc = new jsPDF();
+      const parentDiv = document.createElement("div");
+      parentDiv.id = "loader";
+      parentDiv.classList.add("loader-container", "flex-column");
+      const loaderDiv = document.createElement("div");
+      loaderDiv.className = "loader";
+      parentDiv.appendChild(loaderDiv);
+      document.body.appendChild(parentDiv);
 
-      autoTable(doc, { html: "#my-table" });
+      const input = document.getElementById("my-table");
+      const headers = ["Symbol", "Portfolio Name"];
+      html2canvas(input)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
 
-      doc.save("table.pdf");
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            format: "a1",
+          });
+
+          // Table rows
+          const rows = filteredStockPortfolios.map((rowData) => {
+            return [rowData?.name, rowData?.ticker];
+          });
+
+          pdf.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 20, // Adjust starting position
+            theme: "grid",
+            styles: { fontSize: 10, cellPadding: 3 },
+            margin: { top: 10 },
+            pageBreak: "auto", // Automatically creates new pages if content overflows
+          });
+
+          pdf.save("Jarvis Ticker for " + formatDate(new Date()) + ".pdf");
+          const loaderDiv = document.getElementById("loader");
+          if (loaderDiv) {
+            loaderDiv.remove();
+          }
+        })
+        .catch((error) => {
+          context.setLoaderState(false);
+        });
     }
+    // if (tableData.length > 0) {
+    //   const doc = new jsPDF();
+
+    //   autoTable(doc, { html: "#my-table" });
+
+    //   doc.save("table.pdf");
+    // }
   };
   const generatePDF = () => {
     const input = document.getElementById("my-table");
@@ -349,27 +394,31 @@ export default function Portfolio() {
     }
   };
   const createPortfolio = async (e) => {
-    const stockArray = formData.allStocks
-      .map((stock) => {
-        if (
-          stock?.stockName &&
-          stock?.share &&
-          stock?.purchaseDate &&
-          stock?.purchasePrice
-        ) {
-          return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
-        }
-        return null; // Return null for invalid stocks
-      })
-      .filter(Boolean); // Filter out null values
-    const jsonObject = {
-      name: formData.portfolioName,
-      stockNames: stockArray,
-      visiblePortFolio: "yes",
-    };
+    const stockFormData = new FormData();
+    // const stockArray =
+    formData.allStocks.forEach((stock) => {
+      if (
+        stock?.stockName &&
+        stock?.share &&
+        stock?.purchaseDate &&
+        stock?.purchasePrice
+      ) {
+        // return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+        const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+        stockFormData.append(`myArray[]`, formattedStock);
+      }
+      // return null; // Return null for invalid stocks
+    });
+    // .filter(Boolean); // Filter out null values
+    // const jsonObject = {
+    //   name: formData.portfolioName,
+    //   stockNames: stockArray,
+    //   visiblePortFolio: "yes",
+    // };
     try {
-      const apiEndpoint = `/api/proxy?api=createPortfolio`;
-      const options = { body: JSON.stringify(jsonObject), method: "POST" };
+      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes`;
+      // const options = { body: JSON.stringify(jsonObject), method: "POST" };
+      const options = { body: stockFormData, method: "POST" };
       const response = await fetchWithInterceptor(
         apiEndpoint,
         true,
@@ -1056,7 +1105,7 @@ export default function Portfolio() {
                     type="button"
                     title="PDF"
                     onClick={() => {
-                      generatePDF();
+                      exportPdf();
                     }}
                   >
                     <span className="mdi mdi-file-pdf-box me-2"></span>

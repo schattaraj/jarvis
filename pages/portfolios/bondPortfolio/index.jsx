@@ -22,6 +22,8 @@ import Breadcrumb from "../../../components/Breadcrumb";
 import { Box, TablePagination, TextField } from "@mui/material";
 import PortfolioTable from "../../../components/PorfolioTable";
 import ReportTable from "../../../components/ReportTable";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 export default function BondPortfolio() {
   const context = useContext(Context);
   const [columnNames, setColumnNames] = useState([]);
@@ -661,6 +663,54 @@ export default function BondPortfolio() {
     setProfitValue(calculatedProfits);
   }, [filterData]);
 
+  const exportPdf = () => {
+    if (tableData.length > 0) {
+      const parentDiv = document.createElement("div");
+      parentDiv.id = "loader";
+      parentDiv.classList.add("loader-container", "flex-column");
+      const loaderDiv = document.createElement("div");
+      loaderDiv.className = "loader";
+      parentDiv.appendChild(loaderDiv);
+      document.body.appendChild(parentDiv);
+
+      const input = document.getElementById("my-table");
+      const headers = ["Symbol", "Portfolio Name"];
+      html2canvas(input)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            format: "a1",
+          });
+
+          // Table rows
+          const rows = filteredBondPortfolios.map((rowData) => {
+            return [rowData?.name, rowData?.ticker];
+          });
+
+          pdf.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 20, // Adjust starting position
+            theme: "grid",
+            styles: { fontSize: 10, cellPadding: 3 },
+            margin: { top: 10 },
+            pageBreak: "auto", // Automatically creates new pages if content overflows
+          });
+
+          pdf.save("Jarvis Ticker for " + formatDate(new Date()) + ".pdf");
+          const loaderDiv = document.getElementById("loader");
+          if (loaderDiv) {
+            loaderDiv.remove();
+          }
+        })
+        .catch((error) => {
+          context.setLoaderState(false);
+        });
+    }
+  };
+
   return (
     <>
       <div className="main-panel">
@@ -687,7 +737,7 @@ export default function BondPortfolio() {
                         onChange={handleChange}
                         value={selectedPortfolioId}
                       >
-                        <option>Select Portfolio</option>
+                        <option value={""}>Select Portfolio</option>
                         {portfolioNames.length > 0 &&
                           portfolioNames.map((item, index) => {
                             return (
@@ -1053,7 +1103,7 @@ export default function BondPortfolio() {
                     type="button"
                     title="PDF"
                     onClick={() => {
-                      generatePDF();
+                      exportPdf();
                     }}
                   >
                     <span className="mdi mdi-file-pdf-box me-2"></span>

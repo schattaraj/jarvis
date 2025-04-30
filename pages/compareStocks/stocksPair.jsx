@@ -22,6 +22,7 @@ import {
   useFormik,
 } from "formik";
 import { Nav } from "react-bootstrap";
+import Swal from "sweetalert2";
 // import { strocksValidationSchema } from "../../components/stocksValidationSchema";
 export default function StocksPair() {
   const [stocks, setStocks] = useState([]);
@@ -65,6 +66,26 @@ export default function StocksPair() {
     console.log("input", e, name);
   };
   const submitData = async (chartView = false) => {
+    if (inputData?.stockA === "" || inputData?.stockB === "") {
+      Swal.fire({
+        title: "Please select a pair of stocks for stockA and stockB",
+        icon: "warning",
+        confirmButtonColor: "var(--primary)",
+      });
+      return;
+    }
+    if (
+      (inputData?.stockC !== "" && inputData?.stockD === "") ||
+      (inputData?.stockC === "" && inputData?.stockD !== "")
+    ) {
+      Swal.fire({
+        title: "Please select a pair of stocks for stockC and stockD",
+        icon: "warning",
+        confirmButtonColor: "var(--primary)",
+      });
+      return;
+    }
+
     context.setLoaderState(true);
     try {
       const dataApi = await fetch(
@@ -150,6 +171,9 @@ export default function StocksPair() {
       startDate: "",
       endDate: "",
     });
+    setTableData([]);
+    setFilterData([]);
+    setViewChart(false);
   };
   const exportPdf = () => {
     if (tableData.length > 0) {
@@ -178,11 +202,13 @@ export default function StocksPair() {
     const value = e.target.value;
     setFilterData(searchTable(tableData, value));
   };
-  const selectOptions = [];
-  stocks.map((item, index) => {
-    selectOptions.push({ value: item?.stockName, label: item?.stockName });
-    // return <option value={item?.stockName} key={"stockA"+index}>{item?.stockName}</option>
-  });
+  const selectOptions = [
+    { value: "", label: "--Select stock--" },
+    ...stocks.map((item) => ({
+      value: item?.stockName,
+      label: item?.stockName,
+    })),
+  ];
   useEffect(() => {
     fecthStocks();
   }, []);
@@ -245,17 +271,18 @@ export default function StocksPair() {
       //     text: "Price",
       //   },
       //   min: 0,
-      //   tickInterval: 5, 
+      //   tickInterval: 5,
       // },
-      yAxis:[
+      yAxis: [
         {
           // Primary Y-axis for the first series
           title: {
             text: inputData?.stockA,
           },
           min: 0,
-          tickInterval: Math.max(...compareData[inputData?.stockA]) > 500 ? 200 : 10,
-          max:Math.max(...compareData[inputData?.stockA])
+          tickInterval:
+            Math.max(...compareData[inputData?.stockA]) > 500 ? 200 : 10,
+          max: Math.max(...compareData[inputData?.stockA]),
         },
         {
           // Secondary Y-axis for the second series
@@ -263,8 +290,9 @@ export default function StocksPair() {
             text: inputData?.stockB,
           },
           min: 0,
-          tickInterval: Math.max(...compareData[inputData?.stockB]) > 500 ? 200 : 10,
-          max:Math.max(...compareData[inputData?.stockB])
+          tickInterval:
+            Math.max(...compareData[inputData?.stockB]) > 500 ? 200 : 10,
+          max: Math.max(...compareData[inputData?.stockB]),
         },
         {
           // Secondary Y-axis for the second series
@@ -272,16 +300,18 @@ export default function StocksPair() {
             text: inputData?.stockC,
           },
           min: 0,
-          tickInterval: Math.max(...compareData[inputData?.stockC]) > 500 ? 200 : 10,
-          max:Math.max(...compareData[inputData?.stockC])
+          tickInterval:
+            Math.max(...compareData[inputData?.stockC]) > 500 ? 200 : 10,
+          max: Math.max(...compareData[inputData?.stockC]),
         },
         {
           title: {
             text: inputData?.stockD,
           },
           min: 0,
-          tickInterval: Math.max(...compareData[inputData?.stockD]) > 500 ? 200 : 10,
-          max:Math.max(...compareData[inputData?.stockD])
+          tickInterval:
+            Math.max(...compareData[inputData?.stockD]) > 500 ? 200 : 10,
+          max: Math.max(...compareData[inputData?.stockD]),
         },
       ],
       tooltip: {
@@ -303,7 +333,7 @@ export default function StocksPair() {
           marker: {
             symbol: "circle",
           },
-          yAxis:0,
+          yAxis: 0,
         },
         {
           name: inputData?.stockB,
@@ -311,7 +341,7 @@ export default function StocksPair() {
           marker: {
             symbol: "triangle",
           },
-          yAxis:1
+          yAxis: 1,
         },
         // {
         //   name: "Ratio First",
@@ -372,7 +402,7 @@ export default function StocksPair() {
         marker: {
           symbol: "square",
         },
-        yAxis:2
+        yAxis: 2,
       });
     }
     if (compareData[inputData?.stockD].length > 0) {
@@ -382,7 +412,7 @@ export default function StocksPair() {
         marker: {
           symbol: "square",
         },
-        yAxis:3
+        yAxis: 3,
       });
     }
     if (
@@ -456,7 +486,10 @@ export default function StocksPair() {
                             }
                             </select> */}
                 <Select
-                  value={{ value: inputData?.stockA, label: inputData?.stockA }}
+                  value={{
+                    value: inputData?.stockA,
+                    label: inputData?.stockA || "--Select stock A--",
+                  }}
                   options={selectOptions}
                   name="stockA"
                   onChange={(e) => {
@@ -467,7 +500,10 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                  value={{ value: inputData?.stockB, label: inputData?.stockB }}
+                  value={{
+                    value: inputData?.stockB,
+                    label: inputData?.stockB || "--Select stock B--",
+                  }}
                   options={selectOptions}
                   name="stockB"
                   onChange={(e) => {
@@ -486,7 +522,10 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                  value={{ value: inputData?.stockC, label: inputData?.stockC }}
+                  value={{
+                    value: inputData?.stockC,
+                    label: inputData?.stockC || "--Select stock C--",
+                  }}
                   options={selectOptions}
                   name="stockC"
                   onChange={(e) => {
@@ -505,7 +544,10 @@ export default function StocksPair() {
               </div>
               <div className="col-md-3">
                 <Select
-                  value={{ value: inputData?.stockD, label: inputData?.stockD }}
+                  value={{
+                    value: inputData?.stockD,
+                    label: inputData?.stockD || "--Select stock D--",
+                  }}
                   options={selectOptions}
                   name="stockD"
                   onChange={(e) => {
@@ -693,7 +735,7 @@ export default function StocksPair() {
                       colspan="1"
                       aria-label="Ratio: activate to sort column ascending"
                     >
-                      Ratio
+                      {inputData?.stockC && inputData?.stockD ? "Ratio" : ""}
                     </th>
                   </tr>
                 </thead>
@@ -738,14 +780,22 @@ export default function StocksPair() {
                         </td>
 
                         <td>
-                          {!isNaN(item?.thirdParamVal)
-                            ? Number.parseFloat(item?.thirdParamVal).toFixed(2)
-                            : ""}
+                          {inputData?.stockC &&
+                            inputData?.stockD &&
+                            (!isNaN(item?.thirdParamVal)
+                              ? Number.parseFloat(item?.thirdParamVal).toFixed(
+                                  2
+                                )
+                              : "")}
                         </td>
                         <td>
-                          {!isNaN(item?.fourthParamVal)
-                            ? Number.parseFloat(item?.fourthParamVal).toFixed(2)
-                            : ""}
+                          {inputData?.stockC &&
+                            inputData?.stockD &&
+                            (!isNaN(item?.fourthParamVal)
+                              ? Number.parseFloat(item?.fourthParamVal).toFixed(
+                                  2
+                                )
+                              : "")}
                         </td>
                         <td
                           style={{
@@ -757,20 +807,24 @@ export default function StocksPair() {
                                 : "",
                           }}
                         >
-                          {!isNaN(item?.ratioThirdFourth)
-                            ? Number.parseFloat(item?.ratioThirdFourth).toFixed(
-                                2
-                              )
-                            : ""}{" "}
-                          {item.trendThirdFourth === "up" ? (
-                            <span>
-                              <ArrowUpward />
-                            </span>
-                          ) : item.trendThirdFourth === "down" ? (
-                            <span>
-                              <ArrowDownward />
-                            </span>
-                          ) : null}
+                          {inputData?.stockC && inputData?.stockD && (
+                            <>
+                              {!isNaN(item?.ratioThirdFourth)
+                                ? Number.parseFloat(
+                                    item?.ratioThirdFourth
+                                  ).toFixed(2)
+                                : ""}{" "}
+                              {item.trendThirdFourth === "up" ? (
+                                <span>
+                                  <ArrowUpward />
+                                </span>
+                              ) : item.trendThirdFourth === "down" ? (
+                                <span>
+                                  <ArrowDownward />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
                         </td>
                       </tr>
                     );
@@ -791,7 +845,11 @@ export default function StocksPair() {
         </div>
         <div
           className="content-wrapper"
-          style={{ padding: "16px", display: !viewChart ? "none" : "",height:"800px" }}
+          style={{
+            padding: "16px",
+            display: !viewChart ? "none" : "",
+            height: "800px",
+          }}
         >
           {/* Tab Buttons */}
           <div style={{ marginBottom: "16px", display: "flex", gap: "10px" }}>
@@ -821,7 +879,11 @@ export default function StocksPair() {
 
           {/* Chart Display */}
           {activeTab === "chart" && (
-            <HighchartsReact highcharts={Highcharts} options={chartOption} style={{height:"800px",width:"100%"}}/>
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={chartOption}
+              style={{ height: "800px", width: "100%" }}
+            />
           )}
           {activeTab === "ratioChart" && (
             <HighchartsReact
