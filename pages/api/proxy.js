@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
-
     const reqBody = req?.body;
     const query = req?.query
     const headers = req?.headers
 
     try {
+       
          // Validate the base URL
          const baseUrlString = `${process.env.NEXT_PUBLIC_BASE_URL}${query.api}`;
         
@@ -22,10 +22,16 @@ export default async function handler(req, res) {
             method: req.method,
             headers: headers,
         };
-
+        // if(query.api.includes("createPortfolio")){
+        //     return res.status(200).json({ message:"Hello" });
+        // }
+        if(req.method === 'POST' && query.bodyType=="form"){
+            fetchOptions.body = reqBody
+        }
         // Include the body only for POST requests
-        if (req.method === 'POST') {
+        if (req.method === 'POST' && query.bodyType!="form") {
             fetchOptions.body = JSON.stringify(reqBody);
+            return res.status(200).json({ message:"Hello" });
         }
 
         const response = await fetch(baseUrl.toString(),fetchOptions);

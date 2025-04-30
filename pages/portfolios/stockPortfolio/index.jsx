@@ -72,9 +72,10 @@ export default function Portfolio() {
   const [formData, setFormData] = useState({
     portfolioName: "",
     allStocks: [
-      { stockName: "", share: "", purchaseDate: "", purchasePrice: "" },
+      // { stockName: "", share: "", purchaseDate: "", purchasePrice: "" },
     ],
   });
+  const [selectedStocks,setSelectedStocks] = useState([])
   const [countApiCall, setCountApiCall] = useState(0);
   //pagination
   const [totalItems, setTotalItems] = useState(0);
@@ -82,6 +83,7 @@ export default function Portfolio() {
   const [totalPages, setTotalPages] = useState(0);
   const [limit, setLimit] = useState(25);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [searchQuery, setSearchQuery] = useState("");
   const tableRef = useRef(null);
   const options = {
     replace: (elememt) => {
@@ -367,6 +369,35 @@ export default function Portfolio() {
       console.log("error", e);
     }
   };
+  const selectStock = (e, stockName) => {
+    const isChecked = e.target.checked;
+
+    setSelectedStocks((prevStocks) => {
+      if (isChecked) {
+        // Add stock if checkbox is checked
+        // console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
+        return [
+          ...prevStocks,
+          { stockName: stockName, share: "", purchaseDate: "", purchasePrice: "" },
+        ];
+      } else {
+        // console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
+        // Remove stock if checkbox is unchecked
+        return prevStocks.filter((stock) => stock.stockName !== stockName);
+      }
+    });
+  };
+  const updateSelectedStock = (e, stockName) => {
+   
+    
+    const { name, value } = e.target;
+    console.log(name,value);
+    setSelectedStocks((prevStocks) =>
+      prevStocks.map((stock) =>
+        stock.stockName === stockName ? { ...stock, [name]: value } : stock
+      )
+    );
+  };
   const portfolioInputs = (e, index) => {
     // setPortfolioPayload({ ...portfolioPayload, [e.target.name]: e.target.value })
     const { name, value } = e.target;
@@ -393,10 +424,92 @@ export default function Portfolio() {
       }));
     }
   };
+  const validateStocks = () => {
+    const newErrors = {};
+    selectedStocks.forEach((stock) => {
+      if (!stock.share)
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
+          share: "Share is required",
+        };
+      if (!stock.purchaseDate)
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
+          purchaseDate: "Purchase Date is required",
+        };
+      if (!stock.purchasePrice)
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
+          purchasePrice: "Purchase Price is required",
+        };
+    });
+    // setErrors(newErrors);
+    // return Object.keys(newErrors).length === 0;
+    return newErrors;
+  };
+  const ShowTarget = (errorLabel) => {
+    setSearchQuery(errorLabel);
+    Swal.close();
+  };
   const createPortfolio = async (e) => {
+    console.log("form-data",formData,selectedStocks);
+    const subscribersOnly = formData?.subscribersOnly  
+    const errors = validateStocks();
+    if (Object.keys(errors).length > 0) {
+      let errorHtml = `Please fill in all required fields for selected symbols.`;
+      for (const error in errors) {
+        // If the error is an object, loop through and handle nested errors
+        if (typeof errors[error] === "object") {
+          errorHtml += `<ul><button class="btn show-target-btn outline" data-error="${error}" title="Go to the field"><u>${error}</u></button>`;
+          for (const err in errors[error]) {
+            errorHtml += `<li style='text-align:left;color:red;text-transform:capitalize'>${err
+              .replace(/([a-z])([A-Z])/g, "$1 $2")
+              .replace("share", "quantity")} field is required</li>`;
+          }
+          errorHtml += "</ul>";
+        } else {
+          errorHtml += `<p>${errors[error]}</p>`;
+        }
+      }
+      await Swal.fire({
+        title: "Validation Errors",
+        html: errorHtml,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "var(--primary)",
+        didOpen: () => {
+          document.querySelectorAll(".show-target-btn").forEach((button) => {
+            button.addEventListener("click", (e) => {
+              ShowTarget(e.target.textContent);
+            });
+          });
+        },
+      });
+      return;
+    }
+    if (!formData?.portfolioName) {
+      Swal.fire({
+        title: "Portfolio Name Required",
+        text: "Please enter a portfolio name.",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "var(--primary)",
+      });
+      return;
+    }
+    if (selectedStocks.length < 1) {
+      Swal.fire({
+        title: "Please select a stock",
+        text: "You have to select atleast one stock",
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "var(--primary)",
+      });
+      return;
+    }
     const stockFormData = new FormData();
     // const stockArray =
-    formData.allStocks.forEach((stock) => {
+    selectedStocks.forEach((stock) => {
       if (
         stock?.stockName &&
         stock?.share &&
@@ -405,7 +518,6 @@ export default function Portfolio() {
       ) {
         // return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
         const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
-        console.log("formattedStock", formattedStock);
         stockFormData.append(`myArray[]`, formattedStock);
       }
       // return null; // Return null for invalid stocks
@@ -417,15 +529,38 @@ export default function Portfolio() {
     //   visiblePortFolio: "yes",
     // };
     try {
-      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes`;
+      const accessToken = localStorage.getItem("access_token");
+      const { userID } = decodeJWT(accessToken)
+      
+      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${formData.portfolioName}&visiblePortFolio=${subscribersOnly ? 'yes' : 'no'}&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
       const options = { body: stockFormData, method: "POST" };
-      const response = await fetchWithInterceptor(
-        apiEndpoint,
-        true,
-        {},
-        options
-      );
+      const defaultHeaders = {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+  
+      options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+      };
+      // const response = await fetchWithInterceptor(
+      //   apiEndpoint,
+      //   true,
+      //   {},
+      //   options
+      // );
+      const apiFetch = await fetch(apiEndpoint, options);
+      const response = await apiFetch.json()
+      console.log("response",response);
+      
+      if(response?.msg){
+        Swal.fire({
+          title: response?.msg,
+          confirmButtonColor: "var(--primary)",
+        });
+        handleClose();
+        getAllStockForPolios();
+      }
       if (response?.statusCode == 0) {
         Swal.fire({
           title: response?.payload?.msg,
@@ -804,12 +939,12 @@ export default function Portfolio() {
                       >
                         MANAGE
                       </button>
-                      <button
+                      {/* <button
                         className="btn btn-primary"
                         onClick={handleStockPortfolioStatus}
                       >
                         PORTFOLIO PROFIT AND LOSS
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>
@@ -1335,6 +1470,9 @@ export default function Portfolio() {
                 <tbody>
                   {filteredAllStockPortfolios.length > 0 &&
                     filteredAllStockPortfolios.map((item, index) => {
+                      const isChecked = selectedStocks.some(
+                        (stock) => stock.stockName === item?.stockName
+                      );
                       return (
                         <tr key={"stock" + index}>
                           <td>
@@ -1343,7 +1481,11 @@ export default function Portfolio() {
                               name="stockName"
                               defaultValue={item?.stockName}
                               defaultChecked={item?.share || item?.purchaseDate}
-                              onChange={(e) => portfolioInputs(e, index)}
+                              //onChange={(e) => portfolioInputs(e, index)}
+                              onChange={(e) => {
+                                selectStock(e, item?.stockName);
+                              }}
+                              checked={isChecked}
                             />
                           </td>
                           <td>{item?.stockName}</td>
@@ -1354,7 +1496,10 @@ export default function Portfolio() {
                               name="share"
                               placeholder="Share"
                               className="form-control"
-                              onChange={(e) => portfolioInputs(e, index)}
+                              //onChange={(e) => portfolioInputs(e, index)}
+                              onChange={(e) =>
+                                updateSelectedStock(e, item?.stockName)
+                              }
                             />
                           </td>
                           <td>
@@ -1363,7 +1508,10 @@ export default function Portfolio() {
                               defaultValue={item?.purchaseDate}
                               name="purchaseDate"
                               className="form-control"
-                              onChange={(e) => portfolioInputs(e, index)}
+                              //onChange={(e) => portfolioInputs(e, index)}
+                              onChange={(e) =>
+                                updateSelectedStock(e, item?.stockName)
+                              }
                             />
                           </td>
                           <td>
@@ -1373,7 +1521,10 @@ export default function Portfolio() {
                               name="purchasePrice"
                               placeholder="Purchase Price"
                               className="form-control"
-                              onChange={(e) => portfolioInputs(e, index)}
+                              //onChange={(e) => portfolioInputs(e, index)}
+                              onChange={(e) =>
+                                updateSelectedStock(e, item?.stockName)
+                              }
                             />
                           </td>
                         </tr>
