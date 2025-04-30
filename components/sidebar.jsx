@@ -421,11 +421,11 @@ export default function Sidebar() {
               <li className="nav-item">
                 <Link
                   className={
-                    router.pathname === "/insights/videoes"
+                    router.pathname === "/insights/videos"
                       ? "nav-link active"
                       : "nav-link"
                   }
-                  href="/insights/videoes"
+                  href="/insights/videos"
                 >
                   Videos
                 </Link>
@@ -1052,11 +1052,11 @@ export default function Sidebar() {
             <li className="nav-item">
               <Link
                 className={
-                  router.pathname === "/insights/videoes"
+                  router.pathname === "/insights/videos"
                     ? "nav-link active"
                     : "nav-link"
                 }
-                href="/insights/videoes"
+                href="/insights/videos"
               >
                 Videos
               </Link>

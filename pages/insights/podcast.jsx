@@ -197,6 +197,7 @@ export default function Podcast() {
           <div className="podcast-area">
             <div className="row">
               {podcastsFiltered.map((item, index) => {
+                const result = item?.podCastsDetails;
                 return (
                   <div className="col-md-4" key={"podcast" + index}>
                     <div className="card p-2">
@@ -213,7 +214,12 @@ export default function Podcast() {
                       >
                         <img src="/icons/play.svg" alt="" />
                       </button>
-                      <p className="text-center mt-2">
+                      <p className="text-center my-2">
+                        {result.startsWith("C:/JarvisPDF/")
+                          ? result.slice("C:/JarvisPDF/".length)
+                          : result}
+                      </p>
+                      <p className="text-center">
                         {formatDate(item.podCastDate)}
                       </p>
                     </div>

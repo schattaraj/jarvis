@@ -579,7 +579,7 @@ export default function BusinessTracking() {
                             </tfoot> */}
                         </table>
                     </div>
-                    {filterData.length > 0 && <Pagination currentPage={currentPage} totalItems={filterData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
+                    {filterData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
                 </div>
             </div>
             <Modal show={openModal} onHide={handleClose}>

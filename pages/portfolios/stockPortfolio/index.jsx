@@ -405,6 +405,7 @@ export default function Portfolio() {
       ) {
         // return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
         const formattedStock = `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+        console.log("formattedStock", formattedStock);
         stockFormData.append(`myArray[]`, formattedStock);
       }
       // return null; // Return null for invalid stocks

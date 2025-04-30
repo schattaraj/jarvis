@@ -28,7 +28,7 @@ export default function InsightsHome() {
           </div>
           <div className="row animate__animated animate__fadeInLeft">
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/insights/videoes" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
+              <Card route="/insights/videos" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
               {/* <div className="card bg-gradient-danger card-img-holder text-white">
                 <Link href="/insights/videoes">
                   <div className="card-body">
