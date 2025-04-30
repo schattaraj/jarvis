@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { Context } from '../../../contexts/Context.js';
-import { amountSeperator, calculateAverage, searchTable } from '../../../utils/utils.js';
+import { amountSeperator, calculateSum, searchTable } from '../../../utils/utils.js';
 import { Autocomplete, TextField } from '@mui/material';
 import { Pagination } from '../../../components/Pagination.jsx';
 import SliceData from '../../../components/SliceData.js';
@@ -51,6 +51,7 @@ export default function SeminarTracking() {
         const value = e.target.value;
         setFilterData(searchTable(tableData, value))
     }
+    
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
@@ -310,6 +311,100 @@ export default function SeminarTracking() {
                                     </tr>
                                 ))}
                             </tbody>
+                            <thead>
+                                <tr>
+                                    {filterData.length
+                                        ? columnNames.map((item, index) => {
+                                            if (item.data === "totalCost") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "totalCost"
+                                                )}{" "}
+                                               
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "registeredForSeminar") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(filterData, "registeredForSeminar")}{" "}
+                                               
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "cameToSeminar") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "cameToSeminar"
+                                                )}
+                                               
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "appointmentsSet") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "appointmentsSet"
+                                                )}
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "appointmentsSetPostSeminar") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "appointmentsSetPostSeminar"
+                                                )}
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "firstMeeting") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "firstMeeting"
+                                                )}
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "secondMeeting") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(
+                                                    filterData,
+                                                    "secondMeeting"
+                                                )}
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "newClient") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(filterData, "newClient")}
+                                                </th>
+                                            );
+                                            }
+                                            if (item.data === "newAUM") {
+                                            return (
+                                                <th key={index}>
+                                                {calculateSum(filterData, "newAUM")}
+                                                </th>
+                                            );
+                                            } else {
+                                            return <th key={index}></th>;
+                                            }
+                                        })
+                                        : null}
+                    </tr>
+                            </thead>
                         </table>
                     </div>
                     {tableData.length > 0 && <Pagination currentPage={currentPage} totalItems={tableData} limit={limit} setCurrentPage={setCurrentPage} handlePage={handlePage} />}
