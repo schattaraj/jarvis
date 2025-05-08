@@ -129,6 +129,7 @@ export default function Portfolio() {
   };
   const fetchPortfolioNames = async () => {
     try {
+      context.setLoaderState(true);
       const baseUrl = `/api/proxy?api=getAllPortFolioTicker`;
       // const {payload} = await fetchWithInterceptor(baseUrl,true)
       const portfolioApiRes = await fetchWithInterceptor(baseUrl, true);
@@ -137,11 +138,13 @@ export default function Portfolio() {
       setCountApiCall(countApiCall + 1);
     } catch (e) {
       console.log("error", e);
+    } finally {
+      context.setLoaderState(false);
     }
   };
   const fetchData = async () => {
-    context.setLoaderState(true);
     try {
+      context.setLoaderState(true);
       if (selectedPortfolioId) {
         // const baseUrl = `/api/proxy?api=portfolio/getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
         const baseUrl = `/api/proxy?api=getPortFolioStockSet?idPortfolio=${selectedPortfolioId}`;
@@ -157,8 +160,9 @@ export default function Portfolio() {
       }
     } catch (e) {
       console.log("error", e);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   const handleChange = (e) => {
     const selectedText = e.target.selectedOptions[0].text;

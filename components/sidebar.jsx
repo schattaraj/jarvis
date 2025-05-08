@@ -418,6 +418,18 @@ export default function Sidebar() {
             ref={context.collapse}
           >
             <ul className="nav flex-column sub-menu">
+            <li className="nav-item">
+                <Link
+                  className={
+                    router.pathname === "/insights/reports"
+                      ? "nav-link active"
+                      : "nav-link"
+                  }
+                  href="/insights/reports"
+                >
+                  Reports
+                </Link>
+              </li>
               <li className="nav-item">
                 <Link
                   className={
@@ -440,18 +452,6 @@ export default function Sidebar() {
                   href="/insights/podcast"
                 >
                   Podcast
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link
-                  className={
-                    router.pathname === "/insights/reports"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                  href="/insights/reports"
-                >
-                  Reports
                 </Link>
               </li>
               <li className="nav-item">

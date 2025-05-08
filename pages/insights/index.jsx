@@ -27,6 +27,17 @@ export default function InsightsHome() {
             </nav>
           </div>
           <div className="row animate__animated animate__fadeInLeft">
+          <div className="col-md-6 col-lg-4 stretch-card grid-margin">
+              <Card route="/insights/reports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Reports" />
+              {/* <div className="card bg-gradient-success card-img-holder text-white">
+                <Link href="/insights/reports">
+                  <div className="card-body">
+                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
+                    <h2 className="mb-5">Reports</h2>
+                  </div>
+                </Link>
+              </div> */}
+            </div>
             <div className="col-md-6 col-lg-4 stretch-card grid-margin">
               <Card route="/insights/videos" bg="bg-blue" img="/icons/Upload Analysts Videos.png" title="Videos" />
               {/* <div className="card bg-gradient-danger card-img-holder text-white">
@@ -49,17 +60,6 @@ export default function InsightsHome() {
 
                     <h2 className="mb-5">Podcast</h2>
 
-                  </div>
-                </Link>
-              </div> */}
-            </div>
-            <div className="col-md-6 col-lg-4 stretch-card grid-margin">
-              <Card route="/insights/reports" bg="bg-yellow" img="/icons/Upload Ticker Reports.png" title="Reports" />
-              {/* <div className="card bg-gradient-success card-img-holder text-white">
-                <Link href="/insights/reports">
-                  <div className="card-body">
-                    <img src="/assets/images/dashboard/circle.svg" className="card-img-absolute" alt="circle-image" />
-                    <h2 className="mb-5">Reports</h2>
                   </div>
                 </Link>
               </div> */}

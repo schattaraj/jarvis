@@ -458,6 +458,8 @@ export default function Bonds() {
     context.setLoaderState(false);
   };
   const handleSearch = async () => {
+    console.log("ytwMin", ytwMin);
+
     const payload = {
       couponMin: "",
       couponMax: "",
@@ -1490,7 +1492,6 @@ export default function Bonds() {
                       </tbody>
                     </table>
                   </div>
-                  
                 </div>
               </div>
               <div className="row">
@@ -1714,7 +1715,15 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       YTM Range(Min):
                     </label>
-                    <select name="ytwMin" id="" className="form-select">
+                    <select
+                      name="ytwMin"
+                      id=""
+                      className="form-select"
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setYtwMin(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="1">1</option>
                       <option value="2">2</option>

@@ -10,6 +10,7 @@ import {
   ValueDisplay,
   calculateAverage,
   exportToExcel,
+  fetchWithInterceptor,
   formatDate,
   formatWithSeparator,
   generatePDF,
@@ -187,16 +188,18 @@ export default function BondPortfolio() {
     context.setLoaderState(true);
     try {
       if (selectedPortfolioId) {
-        const getPortfolio = await fetch(
-          "https://jharvis.com/JarvisV2/getBondPortFolioSet?idPortfolio=" +
+        const getPortfolio = await fetchWithInterceptor(
+          "/api/proxy?api=getBondPortFolioSet?idPortfolio=" +
             selectedPortfolioId
         );
-        const getPortfolioRes = await getPortfolio.json();
-        setTableData(getPortfolioRes);
-        setFilterData(getPortfolioRes);
-        const totalItems = getPortfolioRes.length;
+
+        // const getPortfolioRes = await getPortfolio.json();
+        console.log(getPortfolio);
+        setTableData(getPortfolio);
+        setFilterData(getPortfolio);
+        const totalItems = getPortfolio.length;
         setTotalItems(totalItems);
-        const items = await SliceData(1, limit, getPortfolioRes);
+        const items = await SliceData(1, limit, getPortfolio);
         setFilterData(items);
         setTotalPages(Math.ceil(totalItems / limit));
       }

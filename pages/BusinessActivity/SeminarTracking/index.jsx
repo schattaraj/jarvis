@@ -16,6 +16,7 @@ import Link from 'next/link.js';
 import Breadcrumb from '../../../components/Breadcrumb.js';
 export default function SeminarTracking() {
     const [columnNames, setColumnNames] = useState([
+        { "data": "#", "display_name": "#" },
         { "data": "date", "display_name": "Date" },
         { "data": "totalCost", "display_name": "Opportunity" },
         { "data": "venue", "display_name": "Venue" },
@@ -45,11 +46,14 @@ export default function SeminarTracking() {
     const [errors, setErrors] = useState({})
     const [validated, setValidated] = useState(false);
     const [editData, setEditData] = useState({});
+    const [selectedSeminar, setSelectedSeminar] = useState([])
     const context = useContext(Context)
     const searchRef = useRef()
+
     const filter = (e) => {
         const value = e.target.value;
-        setFilterData(searchTable(tableData, value))
+        setSelectedSeminar([]); // Reset checkboxes on any search
+        setFilterData(searchTable(tableData, value));
     }
     
     const fetchData = async () => {
@@ -242,6 +246,13 @@ export default function SeminarTracking() {
         run();
     }, [currentPage, tableData, sortConfig, limit]);
 
+    // Add new useEffect to handle search reset
+    useEffect(() => {
+        if (searchRef.current && searchRef.current.value === '') {
+            setFilterData(tableData);
+        }
+    }, [tableData]);
+
     const handleEditModal = async (id) => {
         const getSeminarData = await fetch(`https://jharvis.com/JarvisV2/getSeminarTrackingByID?idSeminarTracking=${id}`);
         const getSemeniarRes = await getSeminarData.json();
@@ -283,11 +294,12 @@ export default function SeminarTracking() {
                         <table className="table border display no-footer dataTable" role="grid" aria-describedby="exampleStocksPair_info" id="my-table">
                             <thead>
                                 <tr>
+                                    {/* <th className="text-center"> # </th> */}
                                     {columnNames.map((columnName, index) => (
                                         <th key={index} onClick={() => handleSort(columnName.data)}
-                                            className={columnName.data === "action" ? "sticky-action" : columnName.data == "name" ? "sticky-left" : ""}>
+                                            className={ columnName.data == "#" ? "text-center" : columnName.data === "action" ? "sticky-action" : columnName.data == "name" ? "sticky-left" : ""} style={{ minWidth: columnName.data == "#" ? "4rem" : "auto" }}>
                                             {columnName.display_name}
-                                            {getSortIcon(columnName.data)}
+                                            { columnName.data == "#" ? "" : getSortIcon(columnName.data)}
                                         </th>
                                     ))}
                                 </tr>
@@ -295,6 +307,7 @@ export default function SeminarTracking() {
                             <tbody>
                                 {filterData.map((rowData, rowIndex) => (
                                     <tr key={rowIndex} style={{ overflowWrap: 'break-word' }}>
+                                        
                                         {
                                             columnNames.map((columnName, colIndex) => {
                                                 let content;
@@ -303,6 +316,27 @@ export default function SeminarTracking() {
                                                     return <td key={colIndex} className='sticky-action'>
                                                         <button className='px-4 btn btn-primary' title="Edit" onClick={() => { handleEditModal(rowData?.idSeminarTracking) }}><i className="mdi mdi-pen"></i></button>
                                                         <button className='px-4 ms-2 btn btn-danger' title='Delete' onClick={() => { deleteSeminarTracking(rowData?.idSeminarTracking) }}><i className="mdi mdi-delete"></i></button>
+                                                    </td>;
+                                                }
+                                                if (columnName.data == "#") {
+                                                    return <td className="text-center">
+                                                        <div class="form-check d-flex justify-content-center">
+                                                        <input
+                                                            class="form-check-input"
+                                                            style={{ cursor: "pointer", width:"15px", height:"15px" }}
+                                                            type="checkbox"
+                                                            value={rowData?.idSeminarTracking}
+                                                            id="checkDefault"
+                                                            checked={selectedSeminar.includes(rowData?.idSeminarTracking)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedSeminar([...selectedSeminar, rowData?.idSeminarTracking])
+                                                                } else {
+                                                                    setSelectedSeminar(selectedSeminar.filter((id) => id !== rowData?.idSeminarTracking))
+                                                                }
+                                                            }}
+                                                        />
+                                                        </div>
                                                     </td>;
                                                 }
                                                 return <td key={colIndex}>{content}</td>;
@@ -319,18 +353,23 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "totalCost"
                                                 )}{" "}
-                                               
                                                 </th>
                                             );
                                             }
                                             if (item.data === "registeredForSeminar") {
                                             return (
                                                 <th key={index}>
-                                                {calculateSum(filterData, "registeredForSeminar")}{" "}
-                                               
+                                                {calculateSum(
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
+                                                    "registeredForSeminar"
+                                                )}{" "}
                                                 </th>
                                             );
                                             }
@@ -338,10 +377,11 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "cameToSeminar"
                                                 )}
-                                               
                                                 </th>
                                             );
                                             }
@@ -349,7 +389,9 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "appointmentsSet"
                                                 )}
                                                 </th>
@@ -359,7 +401,9 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "appointmentsSetPostSeminar"
                                                 )}
                                                 </th>
@@ -369,7 +413,9 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "firstMeeting"
                                                 )}
                                                 </th>
@@ -379,7 +425,9 @@ export default function SeminarTracking() {
                                             return (
                                                 <th key={index}>
                                                 {calculateSum(
-                                                    filterData,
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
                                                     "secondMeeting"
                                                 )}
                                                 </th>
@@ -388,14 +436,24 @@ export default function SeminarTracking() {
                                             if (item.data === "newClient") {
                                             return (
                                                 <th key={index}>
-                                                {calculateSum(filterData, "newClient")}
+                                                {calculateSum(
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
+                                                    "newClient"
+                                                )}
                                                 </th>
                                             );
                                             }
                                             if (item.data === "newAUM") {
                                             return (
                                                 <th key={index}>
-                                                {calculateSum(filterData, "newAUM")}
+                                                {calculateSum(
+                                                    selectedSeminar.length > 0 
+                                                        ? filterData.filter((row) => selectedSeminar.includes(row.idSeminarTracking)) 
+                                                        : filterData,
+                                                    "newAUM"
+                                                )}
                                                 </th>
                                             );
                                             } else {

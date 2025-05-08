@@ -172,8 +172,20 @@ export default function Reports() {
 
         const filteredReports =
           filteredData.length > 0
-            ? filteredData.filter((report) => report.tickerName === filterText)
-            : data.filter((report) => report.tickerName === filterText);
+            ? filteredData.filter(
+                (report) =>
+                  report.tickerName.toUpperCase().includes(filterText) ||
+                  report.companyName
+                    .toLowerCase()
+                    .includes(filterText.toLowerCase())
+              )
+            : data.filter(
+                (report) =>
+                  report.tickerName.toUpperCase().includes(filterText) ||
+                  report.companyName
+                    .toLowerCase()
+                    .includes(filterText.toLowerCase())
+              );
 
         setReports(filteredReports.length > 0 ? filteredReports : data);
         setRecentReports(
@@ -351,6 +363,14 @@ export default function Reports() {
                     <span>Filter</span>
                   </button>
                 </div>
+              </div>
+              <div className="mb-3">
+                <a
+                  href="/insights/reportsLibrary"
+                  className="dt-button buttons-html5 btn-primary h-auto justify-content-center"
+                >
+                  <span className="text-white">All Reports</span>
+                </a>
               </div>
             </div>
           </Form>
