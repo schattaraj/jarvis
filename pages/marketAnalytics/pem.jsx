@@ -11,6 +11,7 @@ import {
   amountSeperator,
   calculateAverage,
   exportToExcel,
+  fetchWithInterceptor,
   formatCurrency,
   generatePDF,
   getSortIcon,
@@ -410,10 +411,12 @@ export default function PemDetails() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
-      );
-      const getBondsRes = await getBonds.json();
+      // const getBonds = await fetch(
+      //   "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
+      // );
+      // const getBondsRes = await getBonds.json();
+      const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW`
+      const getBondsRes = await fetchWithInterceptor(getApi,false);
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       // setTimeout(() => {

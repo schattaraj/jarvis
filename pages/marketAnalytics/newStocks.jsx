@@ -153,7 +153,17 @@ export default function Stocks() {
       setCurrentPage(1);
     }
   };
-
+  function transform(node) {
+    if (node.type === 'tag' && node.name === 'img') {
+      const originalSrc = node.attribs.src;
+  
+      if (originalSrc.startsWith('http://')) {
+        node.attribs.src = `/api/image-proxy?path=${encodeURIComponent(originalSrc)}`;
+      }
+    }
+  
+    return node;
+  }
   useEffect(() => {
     switch (tableState) {
       case "companyOverview":
@@ -894,7 +904,7 @@ export default function Stocks() {
                                     colNameLower == "symbol" ? (
                                       <div style={{ width: "100px" }}>
                                         {rowData?.logoFileDetails != null &&
-                                          parse(rowData?.logoFileDetails)}
+                                          parse(rowData?.logoFileDetails || '', { replace: transform })}
                                         <p>{rowDataLowercase[colNameLower]}</p>
                                       </div>
                                     ) : (
