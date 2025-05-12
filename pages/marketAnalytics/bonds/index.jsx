@@ -277,8 +277,7 @@ export default function Bonds() {
       // const getBondsRes = await getBonds.json();
 
       //uncomment for v3
-      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&page=${currentPage - 1}
-      &size=${limit != "all" ? limit : totalElements}&_=1705052752518`;
+      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&page=${currentPage - 1}&size=${limit != "all" ? limit : totalElements}&_=1705052752518`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes?.content);
       setFilterData(getBondsRes?.content);
@@ -677,6 +676,25 @@ export default function Bonds() {
     // If neither pattern is matched, return an empty array
     return inputString;
   }
+  const ParsedHtml = ({ htmlString }) => {
+    const options = {
+      replace: (domNode) => {
+        if (
+          domNode.name === 'img' &&
+          domNode.attribs &&
+          domNode.attribs.src.startsWith('http://')
+        ) {
+          const updatedSrc = `/api/image-proxy?path=${encodeURIComponent(domNode.attribs.src)}`;
+          return (
+            <><img
+             src={updatedSrc}/></>
+          );
+        }
+      },
+    };
+  
+    return <div>{parse(htmlString, options)}</div>;
+  };
   const closeReportModal = () => {
     setReportModal(false);
   };
@@ -1308,9 +1326,10 @@ fetchData()
                           } else if (
                             columnName.elementInternalName === "element1"
                           ) {
-                            content = extractAndConvert(
-                              rowData[columnName.elementInternalName]
-                            );
+                            // content = extractAndConvert(
+                            //   rowData[columnName.elementInternalName]
+                            // );
+                            content = <ParsedHtml htmlString={rowData[columnName.elementInternalName]}/>
                           } else {
                             content = rowData[columnName.elementInternalName];
                           }
