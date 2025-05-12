@@ -37,6 +37,7 @@ import { elements } from "chart.js";
 import ReportTable from "../../../components/ReportTable";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { PaginationNew } from "../../../components/PaginationNew";
 const extraColumns = [
   {
     elementId: null,
@@ -139,6 +140,8 @@ export default function Bonds() {
   const [visibleColumns, setVisibleColumns] = useState(
     columnNames.map((col) => col.elementInternalName)
   );
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const contentRef = useRef(null);
   const router = useRouter();
   const handleChange = (event) => {
@@ -274,11 +277,14 @@ export default function Bonds() {
       // const getBondsRes = await getBonds.json();
 
       //uncomment for v3
-      // const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&_=1705052752518`;
-      // const getBondsRes = await fetchWithInterceptor(getBonds, false);
-      // setTableData(getBondsRes);
-      // setFilterData(getBondsRes);
-      // setStocks(getBondsRes);
+      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&page=${currentPage - 1}
+      &size=${limit != "all" ? limit : totalElements}&_=1705052752518`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      setTableData(getBondsRes?.content);
+      setFilterData(getBondsRes?.content);
+      setStocks(getBondsRes?.content);
+      setTotalPages(getBondsRes.totalPages);
+      setTotalElements(getBondsRes.totalElements);
       console.log("data");
     } catch (e) {
       console.log("error", e);
@@ -815,7 +821,7 @@ export default function Bonds() {
         setFilterData(items);
       }
     }
-    run();
+    // run();
   }, [currentPage, tableData, sortConfig, limit]);
 
   useEffect(() => {
@@ -834,7 +840,9 @@ export default function Bonds() {
   // useEffect(() => {
   //     selectedStock.length && getTickerCartDtata()
   // }, [callChart])
-
+useEffect(()=>{
+fetchData()
+},[currentPage,limit])
   const customStyles = {
     container: (provided) => ({
       ...provided,
@@ -1357,9 +1365,10 @@ export default function Bonds() {
                 </table>
               </div>
               {tableData.length > 0 && (
-                <Pagination
+                <PaginationNew
                   currentPage={currentPage}
-                  totalItems={tableData}
+                  totalItems={totalElements}
+                  totalPage={totalPages}
                   limit={limit}
                   setCurrentPage={setCurrentPage}
                   handlePage={handlePage}
