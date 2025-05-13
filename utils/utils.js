@@ -466,7 +466,6 @@ export const fetchWithInterceptor = async (
     // context.setLoaderState(true);
 
     try {
-      console.log("options", options);
       const response = await fetch(url, options);
       if (response.status === 403) {
         window.open("/login", "_self");

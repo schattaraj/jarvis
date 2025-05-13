@@ -306,7 +306,7 @@ export default function Stocks() {
 
             // const getStocks = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`)
             // const getStocksRes = await getStocks.json()
-            const getStocks =`/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&_=1705403290395`
+            const getStocks =`/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&pageNumber=0&pageSize=25`
             const getStocksRes = await fetchWithInterceptor(getStocks,false)
             setTableData(getStocksRes?.content)
             setFilterData(getStocksRes?.content)
@@ -607,26 +607,27 @@ export default function Stocks() {
     }
     function extractAndConvert(inputString) {
         // Define regex patterns to match both cases
-        const pathAndAnchorRegex = /(.*?\.jpg)\s(<a.*?<\/a>)/;
-        const onlyPathRegex = /(.*?\.jpg)/;
+        const pathAndAnchorRegex = /(.*?\.(jpg|png))\s(<a.*?<\/a>)/;
+        const onlyPathRegex = /(.*?\.(jpg|png))/;
         const onlyAnchorRegex = /(<a.*?<\/a>)/;
 
         // Try to match both path and anchor
         const matchPathAndAnchor = inputString.match(pathAndAnchorRegex);
         if (matchPathAndAnchor) {
+            const childElem = matchPathAndAnchor[matchPathAndAnchor.length - 1];
             const filePath = matchPathAndAnchor[1];
-            const anchorTag = matchPathAndAnchor[2];
+            // const anchorTag = matchPathAndAnchor[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">${anchorTag}`;
+            const imgTag = `<img src="/api/image-proxy?path=${filePath}" alt="Image">${childElem}`;
             return parse(imgTag, options2);
         }
 
         // Try to match only file path
-        const matchOnlyPath = inputString.match(onlyPathRegex);
+        const matchOnlyPath = inputString.match(onlyPathRegex);        
         if (matchOnlyPath) {
             const filePath = matchOnlyPath[1];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            const imgTag = `<img src="/api/image-proxy?path=${filePath}" alt="Image">`;
             return parse(imgTag);
         }
 
@@ -641,7 +642,7 @@ export default function Stocks() {
             const filePath = matchPathAndText[1];
             const additionalText = matchPathAndText[2];
             // Create img tag from file path
-            const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+            const imgTag = `<img src="/api/image-proxy?path=${filePath}" alt="Image">`;
             // Combine img tag with additional text
             const resultHtml = `${imgTag} ${additionalText}`;
             return parse(resultHtml,options4); // Adjust parse function as needed
