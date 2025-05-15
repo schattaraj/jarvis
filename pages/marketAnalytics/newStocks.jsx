@@ -983,6 +983,19 @@ export default function Stocks() {
                                   <td>{rowDataLowercase["exdividenddate"]}</td>
                                 );
                               }
+                              if (colNameLower === "price($)") {
+                                content = <td>{rowDataLowercase["price"]}</td>;
+                              }
+                              console.log(rowDataLowercase);
+                              if (colNameLower === "pricechange(%)") {
+                                content = (
+                                  <td>
+                                    {Number(
+                                      rowDataLowercase["changeprice"]
+                                    ).toFixed(2)}
+                                  </td>
+                                );
+                              }
                               if (
                                 [
                                   "marketcapitalization",
