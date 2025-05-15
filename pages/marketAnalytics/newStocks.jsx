@@ -72,6 +72,9 @@ const companyOverviewColumns = [
   "52 Week Low",
   "50Day Moving Average",
   "200Day Moving Average",
+  "Price Change (%)",
+  "Price ($)",
+  "Date",
 ];
 
 const incomeStatementColumn = [
@@ -154,14 +157,16 @@ export default function Stocks() {
     }
   };
   function transform(node) {
-    if (node.type === 'tag' && node.name === 'img') {
+    if (node.type === "tag" && node.name === "img") {
       const originalSrc = node.attribs.src;
-  
-      if (originalSrc.startsWith('http://')) {
-        node.attribs.src = `/api/image-proxy?path=${encodeURIComponent(originalSrc)}`;
+
+      if (originalSrc.startsWith("http://")) {
+        node.attribs.src = `/api/image-proxy?path=${encodeURIComponent(
+          originalSrc
+        )}`;
       }
     }
-  
+
     return node;
   }
   useEffect(() => {
@@ -904,7 +909,10 @@ export default function Stocks() {
                                     colNameLower == "symbol" ? (
                                       <div style={{ width: "100px" }}>
                                         {rowData?.logoFileDetails != null &&
-                                          parse(rowData?.logoFileDetails || '', { replace: transform })}
+                                          parse(
+                                            rowData?.logoFileDetails || "",
+                                            { replace: transform }
+                                          )}
                                         <p>{rowDataLowercase[colNameLower]}</p>
                                       </div>
                                     ) : (
@@ -968,6 +976,11 @@ export default function Stocks() {
                                       )}
                                     </p>
                                   </td>
+                                );
+                              }
+                              if (colNameLower === "date") {
+                                content = (
+                                  <td>{rowDataLowercase["exdividenddate"]}</td>
                                 );
                               }
                               if (

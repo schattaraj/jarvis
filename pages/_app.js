@@ -6,6 +6,7 @@
 // import "../styles/css/swiper-bundle.css"
 // import "../styles/css/main.css"
 import "../styles/app.scss"
+import "../styles/chatbot.css"
 import { ContextProvider } from '../contexts/Context';
 export default function App({ Component, pageProps }) {
   return   <ContextProvider>

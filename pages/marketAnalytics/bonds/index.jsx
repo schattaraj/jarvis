@@ -277,7 +277,9 @@ export default function Bonds() {
       // const getBondsRes = await getBonds.json();
 
       //uncomment for v3
-      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&pageNumber=${currentPage - 1}&pageSize=${limit != "all" ? limit : totalElements}&_=1705052752518`;
+      const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&pageNumber=${
+        currentPage - 1
+      }&pageSize=${limit != "all" ? limit : totalElements}&_=1705052752518`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes?.content);
       setFilterData(getBondsRes?.content);
@@ -680,19 +682,22 @@ export default function Bonds() {
     const options = {
       replace: (domNode) => {
         if (
-          domNode.name === 'img' &&
+          domNode.name === "img" &&
           domNode.attribs &&
-          domNode.attribs.src.startsWith('http://')
+          domNode.attribs.src.startsWith("http://")
         ) {
-          const updatedSrc = `/api/image-proxy?path=${encodeURIComponent(domNode.attribs.src)}`;
+          const updatedSrc = `/api/image-proxy?path=${encodeURIComponent(
+            domNode.attribs.src
+          )}`;
           return (
-            <><img
-             src={updatedSrc}/></>
+            <>
+              <img src={updatedSrc} />
+            </>
           );
         }
       },
     };
-  
+
     return <div>{parse(htmlString, options)}</div>;
   };
   const closeReportModal = () => {
@@ -858,9 +863,9 @@ export default function Bonds() {
   // useEffect(() => {
   //     selectedStock.length && getTickerCartDtata()
   // }, [callChart])
-useEffect(()=>{
-fetchData()
-},[currentPage,limit])
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, limit]);
   const customStyles = {
     container: (provided) => ({
       ...provided,
@@ -1329,7 +1334,13 @@ fetchData()
                             // content = extractAndConvert(
                             //   rowData[columnName.elementInternalName]
                             // );
-                            content = <ParsedHtml htmlString={rowData[columnName.elementInternalName]}/>
+                            content = (
+                              <ParsedHtml
+                                htmlString={
+                                  rowData[columnName.elementInternalName]
+                                }
+                              />
+                            );
                           } else {
                             content = rowData[columnName.elementInternalName];
                           }

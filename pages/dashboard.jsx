@@ -1,22 +1,22 @@
-import React, { useContext } from 'react'
-import Head from 'next/head';
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Footer from '../components/footer';
-import Link from 'next/link'
-import { Context } from '../contexts/Context';
-import Card from '../components/Card';
-import 'animate.css';
-import Breadcrumb from '../components/Breadcrumb';
-import withRoleProtection from '../hoc/withRoleProtection';
+import React, { useContext } from "react";
+import Head from "next/head";
+import Navigation from "../components/navigation";
+import Sidebar from "../components/sidebar";
+import Footer from "../components/footer";
+import Link from "next/link";
+import { Context } from "../contexts/Context";
+import Card from "../components/Card";
+import "animate.css";
+import Breadcrumb from "../components/Breadcrumb";
+import withRoleProtection from "../hoc/withRoleProtection";
 function Dashboard() {
-    const context = useContext(Context)
-    return (
-        <>
-            <Head>
-                <title>Dashboard</title>
-                <link rel="icon" href="/favicon.ico" />
-                {/* <script src="./vendors/js/vendor.bundle.base.js"></script>
+  const context = useContext(Context);
+  return (
+    <>
+      <Head>
+        <title>Dashboard</title>
+        <link rel="icon" href="/favicon.ico" />
+        {/* <script src="./vendors/js/vendor.bundle.base.js"></script>
                 <script src="./js/misc.js"></script> */}
       </Head>
       <div className="main-panel">
@@ -158,4 +158,4 @@ function Dashboard() {
     </>
   );
 }
-export default withRoleProtection(Dashboard,['internal']);
+export default withRoleProtection(Dashboard, ["internal"]);
