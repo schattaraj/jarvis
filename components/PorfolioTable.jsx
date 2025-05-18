@@ -164,6 +164,11 @@ if(data.length > 0){
             fetchData();
         }
     }, [open]);
+    const sortedData = [...filteredData].sort((a, b) => {
+        const aChecked = selectedStocks.some(stock => stock.issuerName === a.issuerName);
+        const bChecked = selectedStocks.some(stock => stock.issuerName === b.issuerName);
+        return (aChecked === bChecked) ? 0 : aChecked ? -1 : 1; // Checked first
+      });
     return (
         <Modal open={open} onClose={() => { handleCloseModal }} className='portfolio-modal'>
             <Box
@@ -233,9 +238,12 @@ if(data.length > 0){
                                 <TableCell>Purchase Price</TableCell>
                             </TableRow>
                         </TableHead>
+                        {/* filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => { */}
                         <TableBody>
-                            {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => {
+                            {
+                                sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => {
                                 const isChecked = selectedStocks.some(stock => stock.issuerName === item?.issuerName);
+                                
                                return(
                                 <TableRow key={index}>
                                     <TableCell>

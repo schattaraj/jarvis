@@ -415,10 +415,10 @@ export default function PemDetails() {
       //   "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
       // );
       // const getBondsRes = await getBonds.json();
-      const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW`
+      const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW&pageNumber=0&pageSize=1000`
       const getBondsRes = await fetchWithInterceptor(getApi,false);
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
+      setTableData(getBondsRes.content);
+      setFilterData(getBondsRes.content);
       // setTimeout(() => {
       //     setTableData(getImportsData)
       //     setFilterData(getImportsData)
