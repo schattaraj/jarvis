@@ -33,6 +33,8 @@ import { PaginationNew } from "../../components/PaginationNew";
 const companyOverviewColumns = [
   "Symbol",
   "Name",
+  "Price Change (%)",
+  "Price ($)",
   "Description",
   "Sector",
   "Industry",
@@ -72,8 +74,6 @@ const companyOverviewColumns = [
   "52 Week Low",
   "50Day Moving Average",
   "200Day Moving Average",
-  "Price Change (%)",
-  "Price ($)",
   "Date",
 ];
 

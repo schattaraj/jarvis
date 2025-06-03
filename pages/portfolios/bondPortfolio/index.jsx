@@ -1420,9 +1420,7 @@ export default function BondPortfolio() {
                     </Modal.Body>
                 </Modal> */}
         <PortfolioTable
-          url={`${
-            process.env.NEXT_PUBLIC_BASE_URL_V2
-          }getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`}
+          url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`}
           open={editModal}
           heading={"Edit Portfolio"}
           handleCloseModal={closeEditModal}

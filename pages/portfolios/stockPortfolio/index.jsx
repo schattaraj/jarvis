@@ -75,7 +75,7 @@ export default function Portfolio() {
       // { stockName: "", share: "", purchaseDate: "", purchasePrice: "" },
     ],
   });
-  const [selectedStocks,setSelectedStocks] = useState([])
+  const [selectedStocks, setSelectedStocks] = useState([]);
   const [countApiCall, setCountApiCall] = useState(0);
   //pagination
   const [totalItems, setTotalItems] = useState(0);
@@ -382,7 +382,12 @@ export default function Portfolio() {
         // console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
         return [
           ...prevStocks,
-          { stockName: stockName, share: "", purchaseDate: "", purchasePrice: "" },
+          {
+            stockName: stockName,
+            share: "",
+            purchaseDate: "",
+            purchasePrice: "",
+          },
         ];
       } else {
         // console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
@@ -392,10 +397,8 @@ export default function Portfolio() {
     });
   };
   const updateSelectedStock = (e, stockName) => {
-   
-    
     const { name, value } = e.target;
-    console.log(name,value);
+    console.log(name, value);
     setSelectedStocks((prevStocks) =>
       prevStocks.map((stock) =>
         stock.stockName === stockName ? { ...stock, [name]: value } : stock
@@ -456,8 +459,8 @@ export default function Portfolio() {
     Swal.close();
   };
   const createPortfolio = async (e) => {
-    console.log("form-data",formData,selectedStocks);
-    const subscribersOnly = formData?.subscribersOnly  
+    console.log("form-data", formData, selectedStocks);
+    const subscribersOnly = formData?.subscribersOnly;
     const errors = validateStocks();
     if (Object.keys(errors).length > 0) {
       let errorHtml = `Please fill in all required fields for selected symbols.`;
@@ -534,15 +537,19 @@ export default function Portfolio() {
     // };
     try {
       const accessToken = localStorage.getItem("access_token");
-      const { userID } = decodeJWT(accessToken)
-      
-      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${formData.portfolioName}&visiblePortFolio=${subscribersOnly ? 'yes' : 'no'}&userId=${userID}&bodyType=form`;
+      const { userID } = decodeJWT(accessToken);
+
+      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${
+        formData.portfolioName
+      }&visiblePortFolio=${
+        subscribersOnly ? "yes" : "no"
+      }&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
       const options = { body: stockFormData, method: "POST" };
       const defaultHeaders = {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       };
-  
+
       options.headers = {
         ...defaultHeaders,
         ...options.headers,
@@ -554,10 +561,10 @@ export default function Portfolio() {
       //   options
       // );
       const apiFetch = await fetch(apiEndpoint, options);
-      const response = await apiFetch.json()
-      console.log("response",response);
-      
-      if(response?.msg){
+      const response = await apiFetch.json();
+      console.log("response", response);
+
+      if (response?.msg) {
         Swal.fire({
           title: response?.msg,
           confirmButtonColor: "var(--primary)",
@@ -889,6 +896,141 @@ export default function Portfolio() {
     }
   };
 
+  const options1 = {
+    replace: (elememt) => {
+      if (elememt?.name === "a") {
+        return (
+          <a
+            onClick={() => {
+              handleClick(elememt.children[0].data);
+            }}
+          >
+            {typeof elememt?.children[0]?.data == "string"
+              ? parse(elememt?.children[0]?.data)
+              : elememt?.children[0]?.data}
+          </a>
+        );
+      }
+    },
+  };
+  const options2 = {
+    replace(elememt) {
+      if (elememt?.name == "img") {
+        return (
+          <React.Fragment>
+            <img className="img-responsive" src={elememt?.attribs?.src} />
+            {/* <a
+              onClick={() => {
+                handleClick(elememt.children[0].data);
+              }}
+            >
+              {typeof elememt?.children[0]?.data == "string"
+                ? parse(elememt?.children[0]?.data)
+                : elememt?.children[0]?.data}
+            </a> */}
+          </React.Fragment>
+        );
+      }
+    },
+  };
+  const options3 = {
+    replace(elememt) {
+      if (elememt?.name === "a") {
+        return (
+          <a
+            onClick={() => {
+              handleClick(elememt.children[0].data);
+            }}
+          >
+            {typeof elememt?.children[0]?.data == "string"
+              ? parse(elememt?.children[0]?.data)
+              : elememt?.children[0]?.data}
+          </a>
+        );
+      }
+    },
+  };
+  const options4 = {
+    replace(element) {
+      if (element?.name === "img" && element?.next?.type === "text") {
+        return (
+          <React.Fragment>
+            <img className="img-responsive" src={element?.attribs?.src} />
+            <a
+              onClick={() => {
+                handleClick(elememt.children[0].data);
+              }}
+            >
+              {element?.next?.data}
+            </a>
+          </React.Fragment>
+        );
+      }
+    },
+  };
+  function extractAndConvert(inputString) {
+    const fullImgAnchorRegex =
+      /<img[^>]+src=['"]([^'"]+\.(?:jpg|png))['"][^>]*>\s*(<a.*?<\/a>)/i;
+
+    // Match <img ...> followed by <a ...>Text</a>
+    const matchFull = inputString.match(fullImgAnchorRegex);
+    if (matchFull) {
+      const childElem = matchFull[matchFull.length - 1];
+      console.log(childElem);
+
+      const filePath = matchFull[1]; // The actual image URL
+      const anchorText = matchFull[2]; // The text inside the anchor tag
+
+      // console.log(filePath, anchorText);
+      const imgTag = `<img src="/api/image-proxy?path=${encodeURIComponent(
+        filePath
+      )}" alt="Image">${childElem}`;
+      return parse(imgTag, options);
+    }
+
+    // Fallback cases below
+    const onlyPathRegex = /(https?:\/\/[^\s'"]+\.(jpg|png))/i;
+    const onlyAnchorRegex = /<a[^>]*>(.*?)<\/a>/i;
+    const matchOnlyPath = inputString.match(onlyPathRegex);
+    const matchOnlyAnchor = inputString.match(onlyAnchorRegex);
+
+    if (matchOnlyPath && matchOnlyAnchor) {
+      const filePath = matchOnlyPath[1];
+      const anchorText = matchOnlyAnchor[1];
+      return parse(
+        `<img src="/api/image-proxy?path=${encodeURIComponent(
+          filePath
+        )}" alt="Image" />
+         <a>${anchorText}</a>`,
+        options2
+      );
+    }
+
+    if (matchOnlyPath) {
+      const filePath = matchOnlyPath[1];
+      return parse(
+        `<img src="/api/image-proxy?path=${encodeURIComponent(
+          filePath
+        )}" alt="Image" />`,
+        options1
+      );
+    }
+
+    if (matchOnlyAnchor) {
+      const anchorText = matchOnlyAnchor[1];
+      return parse(`<a>${anchorText}</a>`, options1);
+    }
+
+    if (inputString.split(" ").length == 1) {
+      return parse(`<a>${inputString.split(" ")[0]}</a>`, options3);
+    }
+    if (inputString.split(" ").length == 2) {
+      return parse(`<a>${inputString.split(" ")[1]}</a>`, options3);
+    }
+
+    return null;
+  }
+
   return (
     <>
       <div className="main-panel">
@@ -1068,6 +1210,16 @@ export default function Portfolio() {
                                       options
                                     ) * 100
                                   ).toFixed(2)}
+                                </td>
+                              );
+                            } else if (
+                              inner.elementInternalName === "element1"
+                            ) {
+                              return (
+                                <td key={"keyid" + keyid}>
+                                  {extractAndConvert(
+                                    item[inner.elementInternalName]
+                                  )}
                                 </td>
                               );
                             } else {
