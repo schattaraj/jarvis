@@ -20,6 +20,7 @@ export const ContextProvider = ({ children }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [accessToken, setAccessToken] = useState(false);
   const [userName, setUserName] = useState("");
+  const [formattedBotData, setFormattedBotData] = useState(null);
   const router = useRouter();
   const toggleMarketAnalytics = () => {
     if (marketAnalytics) {
@@ -66,12 +67,11 @@ export const ContextProvider = ({ children }) => {
         setAccessToken(token);
         setUserName(name);
         if (router.route == "/login") {
-          if(getRoleFromToken() == "internal"){
+          if (getRoleFromToken() == "internal") {
             router.push("/admin");
-          }
-          else{
+          } else {
             router.push("/User/dashboard");
-          }      
+          }
         }
       } else {
         Swal.fire("Your session has been expired");
@@ -133,6 +133,34 @@ export const ContextProvider = ({ children }) => {
 
   console.log("loaderState", loaderState);
 
+  const transformData = (columnsList, dataList) => {
+    const displayNameMap = {};
+
+    // Create a map of internalName -> displayName (excluding Ticker)
+    for (const col of columnsList) {
+      if (col.elementInternalName !== "element1") {
+        displayNameMap[col.elementInternalName] = col.elementDisplayName;
+      }
+    }
+
+    // Transform each item in the dataList
+    const transformed = dataList.map((item) => {
+      const result = {};
+
+      for (const [key, value] of Object.entries(item)) {
+        if (
+          value != null && // skip null/undefined
+          displayNameMap.hasOwnProperty(key) // only keys that exist in columnsList
+        ) {
+          result[displayNameMap[key]] = value;
+        }
+      }
+
+      return result;
+    });
+
+    setFormattedBotData(transformed);
+  };
   return (
     <Context.Provider
       value={{
@@ -162,6 +190,8 @@ export const ContextProvider = ({ children }) => {
         handleDropdownClick,
         accessToken,
         userName,
+        formattedBotData,
+        transformData,
       }}
     >
       {isNoLayoutRoute ? children : <Layout>{children}</Layout>}

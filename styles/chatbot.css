@@ -239,3 +239,42 @@
     }
   }
 }
+
+/* .bullet-point {
+  margin-left: 20px;
+  position: relative;
+  padding-left: 15px;
+}
+.bullet-point:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #666;
+}
+.numbered-point {
+  margin-left: 20px;
+  position: relative;
+  padding-left: 15px;
+}
+.response-paragraph {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.response-line {
+  margin-bottom: 5px;
+} */
+
+.response-paragraph {
+  margin-bottom: 1em;
+}
+
+.bullet-point {
+  margin-left: 1.5em;
+  list-style: disc inside;
+}
+
+.nested-bullet-point {
+  margin-left: 3em;
+  list-style: circle inside;
+  color: #666;
+}

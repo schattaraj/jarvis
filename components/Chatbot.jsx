@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { Context } from "../contexts/Context";
 
 function ChatBot() {
   const [input, setInput] = useState("");
@@ -7,6 +8,7 @@ function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
+  const context = useContext(Context);
 
   useEffect(() => {
     // Load history from sessionStorage
@@ -37,41 +39,90 @@ function ChatBot() {
     setInput(""); // clear textarea
 
     try {
-      const res =
-        "We're actively working to enhance our chatbot experience. Stay tuned — exciting improvements are on the way!";
-      // await fetch(
-      //   "https://openaiservices-dfamawfaeacmhhax.canadacentral-01.azurewebsites.net/leftbrainchat",
-      //   {
-      //     method: "POST",
-      //     headers: { "Content-Type": "application/json" },
-      //     body: JSON.stringify({ query: thisQuestion }),
-      //   }
-      // );
+      const res = await fetch(
+        "https://openaiservices-dfamawfaeacmhhax.canadacentral-01.azurewebsites.net/portfolio/query-stream",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            table_data: context.formattedBotData,
+            question: thisQuestion,
+          }),
+        }
+      );
 
-      // if (!res.body) throw new Error("No response body");
+      if (!res.body) throw new Error("No response body");
 
-      // const reader = res.body.getReader();
-      // const decoder = new TextDecoder("utf-8");
-      // let fullResponse = "";
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let fullResponse = "";
 
-      // while (true) {
-      //   const { done, value } = await reader.read();
-      //   if (done) break;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      //   const chunk = decoder.decode(value, { stream: true });
-      //   fullResponse += chunk;
-      //   setResponse((prev) => prev + chunk);
-      // }
+        const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
+
+        // Format each chunk as it comes in
+        setResponse((prev) => prev + chunk);
+      }
 
       // Set new currentChat after receiving response
-      setResponse(res); // it will be removed later
-      setCurrentChat({ question: thisQuestion, answer: res });
+      const formattedChunk = formatResponse(fullResponse);
+      setCurrentChat({ question: thisQuestion, answer: formattedChunk });
     } catch (err) {
       console.error(err);
       setResponse("Error: " + err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to format the response
+  const formatResponse = (text) => {
+    const lines = text.split("\n").filter((line) => line.trim() !== "");
+    let formatted = "";
+    let inList = false;
+    let isNested = false;
+
+    lines.forEach((line, index) => {
+      const trimmed = line.trim();
+      const isLast = index === lines.length - 1;
+      const isBullet = /^[-•*]\s+/.test(trimmed);
+      const isNestedBullet = /^\s{2,}[-•*]\s+/.test(line);
+
+      // First paragraph
+      if (index === 0 && !isBullet) {
+        formatted += `<div class="response-paragraph">${trimmed}</div>`;
+        return;
+      }
+
+      // Nested bullet point
+      if (isNestedBullet) {
+        const clean = line.replace(/^\s{2,}[-•*]\s+/, "");
+        formatted += `<div class="nested-bullet-point">${clean}</div>`;
+        return;
+      }
+
+      // Top-level bullet point
+      if (isBullet) {
+        const clean = trimmed.replace(/^[-•*]\s+/, "");
+        formatted += `<div class="bullet-point">${clean}</div>`;
+        return;
+      }
+
+      // Final summary paragraph
+      if (isLast) {
+        formatted += `<div class="response-paragraph">${trimmed}</div>`;
+        return;
+      }
+
+      // If none of the above
+      formatted += `<div class="response-line">${trimmed}</div>`;
+    });
+
+    return formatted;
   };
 
   return (
@@ -98,7 +149,12 @@ function ChatBot() {
         >
           {currentChat && (
             <div className="chatbot-history-entry live">
-              <p className="live-response">{response}</p>
+              <p
+                className="live-response"
+                // dangerouslySetInnerHTML={{ __html: response }}
+              >
+                <pre>{response}</pre>
+              </p>
             </div>
           )}
 
@@ -113,7 +169,7 @@ function ChatBot() {
                 <div className="answer-icon">
                   <img src="/assets/images/bot.jpg" alt="Bot" width={20} />
                 </div>
-                {entry.answer}
+                <div dangerouslySetInnerHTML={{ __html: entry.answer }} />
               </p>
             </div>
           ))}
@@ -133,6 +189,38 @@ function ChatBot() {
           </button>
         </div>
       </div>
+
+      <style jsx>{`
+        .bullet-point {
+          margin-left: 20px;
+          position: relative;
+          padding-left: 15px;
+        }
+        .bullet-point:before {
+          content: "•";
+          position: absolute;
+          left: 0;
+          color: #666;
+        }
+        .nested-bullet-point {
+          margin-left: 40px;
+          position: relative;
+          padding-left: 15px;
+        }
+        .nested-bullet-point:before {
+          content: "◦";
+          position: absolute;
+          left: 0;
+          color: #666;
+        }
+        .response-paragraph {
+          margin-bottom: 10px;
+          line-height: 1.5;
+        }
+        .response-line {
+          margin-bottom: 5px;
+        }
+      `}</style>
     </>
   );
 }

@@ -157,6 +157,8 @@ export default function Portfolio() {
         const items = await SliceData(1, limit, getPortfolioRes);
         setFilterData(items);
         setTotalPages(Math.ceil(totalItems / limit));
+
+        context.transformData(columnNames, getPortfolioRes);
       }
     } catch (e) {
       console.log("error", e);
@@ -976,7 +978,6 @@ export default function Portfolio() {
     const matchFull = inputString.match(fullImgAnchorRegex);
     if (matchFull) {
       const childElem = matchFull[matchFull.length - 1];
-      console.log(childElem);
 
       const filePath = matchFull[1]; // The actual image URL
       const anchorText = matchFull[2]; // The text inside the anchor tag
