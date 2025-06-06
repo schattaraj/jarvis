@@ -21,6 +21,7 @@ import {
   ListItemButton,
   TextField,
 } from "@mui/material";
+import Select from "react-select";
 import BondChart from "../../../components/charts";
 import { Pagination } from "../../../components/Pagination";
 import SliceData from "../../../components/SliceData";
@@ -137,6 +138,8 @@ export default function Bonds() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
   const tableContainerRef = useRef(null);
+  const [companyTicker, setCompanyTicker] = useState([]);
+  const [selectedTicker, setSelectedTicker] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState(
     columnNames.map((col) => col.elementInternalName)
   );
@@ -198,6 +201,36 @@ export default function Bonds() {
   const handleChartView = () => [];
   const handleClick = (data) => {
     console.log("handleClick", data);
+  };
+  const handleSelect = (inputs) => {
+    let arr = inputs.map((item) => item.value);
+    setSelectedTicker(arr.join(","));
+  };
+  const fetchCompanyTickers = async () => {
+    try {
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Bondpricing_Master&ticker=onlyTicker`;
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
+      setCompanyTicker(fetchTickersRes);
+    } catch (e) {}
+  };
+  const getHistoryByTicker = async () => {
+    if (!companyTicker) {
+      Swal.fire({
+        title: "Please Select a ticker",
+        confirmButtonColor: "#719B5F",
+      });
+      return;
+    }
+    context.setLoaderState(true);
+    try {
+      const getBonds = `/api/proxy?api=getBondsByTicker?metadataName=Bondpricing_Master&ticker=${selectedTicker}&_=1722333954367`; //change
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      setTableData(getBondsRes);
+      setFilterData(getBondsRes);
+    } catch (e) {
+      console.log("error", e);
+    }
+    context.setLoaderState(false);
   };
   const handleReportData = (data) => {
     const regex = /\(([^)]+)\)$/;
@@ -849,6 +882,7 @@ export default function Bonds() {
 
   useEffect(() => {
     fetchTickersFunc();
+    fetchCompanyTickers();
     // fetchColumnNames()
     // getTickerCartDtata()
   }, []);
@@ -1015,10 +1049,10 @@ export default function Bonds() {
                     />
                     <div className="d-flex justify-content-between align-items-end flex-wrap mb-3">
                       <div
-                        className="form-group d-flex align-items-center"
+                        className="form-group d-flex align-items-center me-3"
                         style={{ flex: "2" }}
                       >
-                        <div style={{ flex: "4" }}>
+                        <div style={{ width: "100%" }}>
                           <ReactSelect
                             className="mb-0 me-2"
                             isMulti
@@ -1050,6 +1084,42 @@ export default function Bonds() {
                           >
                             GO
                           </button>
+                        </div>
+
+                        <div className="d-flex align-items-center mr-3 w-100">
+                          <Select
+                            className="mb-0 me-2 col-md-3 flex-grow-1"
+                            isMulti
+                            value={
+                              selectedTicker &&
+                              selectedTicker
+                                .split(",")
+                                .map((item) => ({ value: item, label: item }))
+                            }
+                            onChange={handleSelect}
+                            style={{
+                              minWidth: "200px",
+                              maxWidth: "300px",
+                              flex: "2",
+                            }}
+                            options={
+                              companyTicker
+                                ? companyTicker.map((item, index) => ({
+                                    value: item.element1,
+                                    label: item.element1,
+                                  }))
+                                : [{ value: "Loading", label: "Loading..." }]
+                            }
+                          />
+                          <div className="actions">
+                            <button
+                              className="btn btn-primary mb-0"
+                              type="button"
+                              onClick={getHistoryByTicker}
+                            >
+                              GO
+                            </button>
+                          </div>
                         </div>
                       </div>
                       <div className="form-group">
