@@ -232,7 +232,7 @@ export default function Bonds() {
       };
 
       const queryString = new URLSearchParams(payload).toString();
-      const getBonds = `/api/proxy?api=getHistoryByTickerBond?${queryString}`;
+      const getBonds = `/api/proxy?api=getHistoryByTickerName?${queryString}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       // const getBonds = await fetch(
       //   `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
