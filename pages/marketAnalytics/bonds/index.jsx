@@ -185,10 +185,12 @@ export default function Bonds() {
     const queryString = new URLSearchParams(payload).toString();
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
-      );
-      const getBondsRes = await getBonds.json();
+      // const getBonds = await fetch(
+      //   `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
+      // );
+      // const getBondsRes = await getBonds.json();
+      const getBonds = `/api/proxy?api=getHistoryByTickerBond?${queryString}`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setSelectedOption("Bond Home");
@@ -223,8 +225,6 @@ export default function Bonds() {
     }
     context.setLoaderState(true);
     try {
-      // const getBonds = `/api/proxy?api=getBondsByTicker?metadataName=Bondpricing_Master&ticker=${selectedTicker}&_=1722333954367`; //change
-      // const getBondsRes = await fetchWithInterceptor(getBonds, false);
       const payload = {
         ticker: selectedTicker,
         metadataName: "Bondpricing_Master",
@@ -232,10 +232,12 @@ export default function Bonds() {
       };
 
       const queryString = new URLSearchParams(payload).toString();
-      const getBonds = await fetch(
-        `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
-      );
-      const getBondsRes = await getBonds.json();
+      const getBonds = `/api/proxy?api=getHistoryByTickerBond?${queryString}`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      // const getBonds = await fetch(
+      //   `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
+      // );
+      // const getBondsRes = await getBonds.json();
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
     } catch (e) {
