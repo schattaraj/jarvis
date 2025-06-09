@@ -99,6 +99,7 @@ export default function Bonds() {
   const [chartData, setChartData] = useState();
   const [callChart, setCallChart] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageOld, setCurrentPageOld] = useState(1);
   const [limit, setLimit] = useState(25);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [compareData, setCompareData] = useState(false);
@@ -234,12 +235,32 @@ export default function Bonds() {
       const queryString = new URLSearchParams(payload).toString();
       const getBonds = `/api/proxy?api=getHistoryByTickerBondByTickerName?${queryString}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
-      // const getBonds = await fetch(
-      //   `https://www.jharvis.com/JarvisV2/getHistoryByTickerBond?${queryString}`
-      // );
-      // const getBondsRes = await getBonds.json();
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
+
+      // Store the full data set
+      const fullData = getBondsRes;
+
+      // Set total elements for pagination
+      setTotalElements(fullData.length);
+
+      // Calculate total pages
+      const calculatedTotalPages = Math.ceil(
+        fullData.length / (limit !== "all" ? limit : fullData.length)
+      );
+      setTotalPages(calculatedTotalPages);
+
+      // Set the full data
+      setTableData(fullData);
+
+      // Apply pagination by slicing the data
+      const startIndex =
+        (currentPage - 1) * (limit !== "all" ? limit : fullData.length);
+      const endIndex = Math.min(
+        startIndex + (limit !== "all" ? limit : fullData.length),
+        fullData.length
+      );
+
+      // Set the filtered data with pagination applied
+      setFilterData(fullData.slice(startIndex, endIndex));
     } catch (e) {
       console.log("error", e);
     }
@@ -471,6 +492,19 @@ export default function Bonds() {
         break;
       default:
         setCurrentPage(currentPage);
+        break;
+    }
+  };
+  const handlePageOld = async (action) => {
+    switch (action) {
+      case "prev":
+        setCurrentPageOld(currentPageOld - 1);
+        break;
+      case "next":
+        setCurrentPageOld(currentPageOld + 1);
+        break;
+      default:
+        setCurrentPageOld(currentPageOld);
         break;
     }
   };
@@ -910,9 +944,21 @@ export default function Bonds() {
   // useEffect(() => {
   //     selectedStock.length && getTickerCartDtata()
   // }, [callChart])
+  // useEffect(() => {}, [currentPage, limit]);
+
   useEffect(() => {
-    fetchData();
-  }, [currentPage, limit]);
+    if (tableData.length > 0 && selectedTicker) {
+      const startIndex =
+        (currentPage - 1) * (limit !== "all" ? limit : tableData.length);
+      const endIndex = Math.min(
+        startIndex + (limit !== "all" ? limit : tableData.length),
+        tableData.length
+      );
+      setFilterData(tableData.slice(startIndex, endIndex));
+    } else {
+      fetchData();
+    }
+  }, [currentPage, limit, selectedTicker]);
   const customStyles = {
     container: (provided) => ({
       ...provided,
