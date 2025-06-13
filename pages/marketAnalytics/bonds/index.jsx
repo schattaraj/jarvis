@@ -115,6 +115,7 @@ export default function Bonds() {
   const [maturityMin, setMaturityMin] = useState("Any");
   const [maturityMax, setMaturityMax] = useState("Any");
   const [ytwMin, setYtwMin] = useState("Any");
+
   const [ytwMax, setYtwMax] = useState("Any");
   const [callable, setCallable] = useState("Any");
   const [secured, setSecured] = useState("Any");
@@ -216,6 +217,32 @@ export default function Bonds() {
       setCompanyTicker(fetchTickersRes);
     } catch (e) {}
   };
+
+  const sliceTableData = (fullData) => {
+    // Set total elements for pagination
+    setTotalElements(fullData.length);
+
+    // Calculate total pages
+    const calculatedTotalPages = Math.ceil(
+      fullData.length / (limit !== "all" ? limit : fullData.length)
+    );
+    setTotalPages(calculatedTotalPages);
+
+    // Set the full data
+    setTableData(fullData);
+
+    // Apply pagination by slicing the data
+    const startIndex =
+      (currentPage - 1) * (limit !== "all" ? limit : fullData.length);
+    const endIndex = Math.min(
+      startIndex + (limit !== "all" ? limit : fullData.length),
+      fullData.length
+    );
+
+    // Set the filtered data with pagination applied
+    setFilterData(fullData.slice(startIndex, endIndex));
+  };
+
   const getHistoryByTicker = async () => {
     if (!companyTicker) {
       Swal.fire({
@@ -545,8 +572,6 @@ export default function Bonds() {
     context.setLoaderState(false);
   };
   const handleSearch = async () => {
-    console.log("ytwMin", ytwMin);
-
     const payload = {
       couponMin: "",
       couponMax: "",
@@ -570,16 +595,20 @@ export default function Bonds() {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      setTableData(data);
-      setFilterData(data);
+      // setTableData(data);
+      // setFilterData(data);
       setCalculateModal(false);
       setSelectedOption("Calculate");
+
+      sliceTableData(data);
+
       console.log(data); // Handle the response data here
     } catch (error) {
       console.error("Error fetching data:", error);
     }
     context.setLoaderState(false);
   };
+
   const charts = async () => {
     setIsExpanded(false);
     if (!selectedBond || selectedBond.length == 0) {
@@ -878,8 +907,8 @@ export default function Bonds() {
   }, [isExpanded]);
   useEffect(() => {
     async function run() {
-      if (tableData.length > 0) {
-        let items = [...tableData];
+      if (filterData.length > 0) {
+        let items = [...filterData];
         const numericValues = items.filter(
           (value) => !isNaN(parseFloat(value.element3))
         );
@@ -914,18 +943,13 @@ export default function Bonds() {
             });
           }
         }
-        let dataLimit = limit;
-        let page = currentPage;
-        if (dataLimit == "all") {
-          dataLimit = tableData?.length;
-          page = 1;
-        }
-        items = await SliceData(page, dataLimit, items);
+
+        // ⚠️ DO NOT SLICE HERE, LET EXISTING PAGINATION HANDLE IT
         setFilterData(items);
       }
     }
-    // run();
-  }, [currentPage, tableData, sortConfig, limit]);
+    run(); // ✅ enable it
+  }, [sortConfig]);
 
   useEffect(() => {
     fetchTickersFunc();
@@ -955,10 +979,21 @@ export default function Bonds() {
         tableData.length
       );
       setFilterData(tableData.slice(startIndex, endIndex));
+    } else if (tableData.length > 0 && selectedOption === "Calculate") {
+      const startIndex =
+        (currentPage - 1) * (limit !== "all" ? limit : tableData.length);
+      const endIndex = Math.min(
+        startIndex + (limit !== "all" ? limit : tableData.length),
+        tableData.length
+      );
+
+      setTotalPages(Math.ceil(tableData.length / limit));
+      setTotalElements(tableData.length);
+      setFilterData(tableData.slice(startIndex, endIndex));
     } else {
       fetchData();
     }
-  }, [currentPage, limit, selectedTicker]);
+  }, [currentPage, limit, selectedTicker, selectedOption]);
   const customStyles = {
     container: (provided) => ({
       ...provided,
@@ -1787,6 +1822,7 @@ export default function Bonds() {
                       isMulti
                       onChange={setRating}
                       style={{ minWidth: "200px", maxWidth: "300px" }}
+                      value={rating}
                       options={[
                         { value: "Any", label: "Any" },
                         { value: "AAA", label: "AAA" },
@@ -1812,6 +1848,11 @@ export default function Bonds() {
                       name="treasuryYield"
                       id="treasuryYield"
                       className="form-control"
+                      value={treasuryYield}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setTreasuryYield(e.target.value);
+                      }}
                     />
                   </div>
                 </div>
@@ -1820,7 +1861,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       Year
                     </label>
-                    <select name="year" id="" className="form-select">
+                    <select
+                      name="year"
+                      id=""
+                      className="form-select"
+                      value={year}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setYear(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="0-1">0-1</option>
                       <option value="1-3">1-3</option>
@@ -1837,7 +1887,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       Maturity Range(Min):
                     </label>
-                    <select name="maturityMin" id="" className="form-select">
+                    <select
+                      name="maturityMin"
+                      id=""
+                      className="form-select"
+                      value={maturityMin}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setMaturityMin(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
@@ -1860,7 +1919,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       Maturity Range(Max):
                     </label>
-                    <select name="maturityMax" id="" className="form-select">
+                    <select
+                      name="maturityMax"
+                      id=""
+                      className="form-select"
+                      value={maturityMax}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setMaturityMax(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
@@ -1887,6 +1955,7 @@ export default function Bonds() {
                       name="ytwMin"
                       id=""
                       className="form-select"
+                      value={ytwMin}
                       onChange={(e) => {
                         e.preventDefault();
                         setYtwMin(e.target.value);
@@ -1914,7 +1983,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       YTM Range(Max):
                     </label>
-                    <select name="ytwMax" id="" className="form-select">
+                    <select
+                      name="ytwMax"
+                      id=""
+                      className="form-select"
+                      value={ytwMax}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setYtwMax(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="1">1</option>
                       <option value="2">2</option>
@@ -1937,7 +2015,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       Callable:
                     </label>
-                    <select name="callable" id="" className="form-select">
+                    <select
+                      name="callable"
+                      id=""
+                      className="form-select"
+                      value={callable}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setCallable(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
@@ -1949,7 +2036,16 @@ export default function Bonds() {
                     <label htmlFor="" className="form-label">
                       Secured:
                     </label>
-                    <select name="secured" id="" className="form-select">
+                    <select
+                      name="secured"
+                      id=""
+                      className="form-select"
+                      value={secured}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setSecured(e.target.value);
+                      }}
+                    >
                       <option value="Any">Any</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>

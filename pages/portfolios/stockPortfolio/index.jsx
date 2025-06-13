@@ -58,7 +58,7 @@ export default function Portfolio() {
     key: null,
     direction: null,
   });
-  const [limit3, setLimit3] = useState(25);
+  const [limit3, setLimit3] = useState(100);
   const [totalPages3, setTotalPages3] = useState(0);
   const [totalElements3, setTotalElements3] = useState(0);
   const [isLastPage3, setIsLastPage3] = useState(false);
@@ -547,6 +547,8 @@ export default function Portfolio() {
         subscribersOnly ? "yes" : "no"
       }&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
+      console.log(stockFormData);
+      
       const options = { body: stockFormData, method: "POST" };
       const defaultHeaders = {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -746,7 +748,7 @@ export default function Portfolio() {
       if (result.isConfirmed) {
         try {
           context.setLoaderState(true);
-          const baseUrl = `/api/proxy?api=portfolio/deletePortfolioByName?name=${name}`;
+          const baseUrl = `/api/proxy?api=deletePortfolioByName?name=${name}`;
           const response = await fetchWithInterceptor(baseUrl, false);
           Swal.fire({
             title: response?.payload?.msg,

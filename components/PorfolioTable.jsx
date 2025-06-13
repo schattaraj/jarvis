@@ -51,8 +51,9 @@ function PortfolioTable({
       setData(result);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -191,8 +192,9 @@ function PortfolioTable({
       console.log("Portfolio created successfully:", data);
     } catch (error) {
       console.error("Error creating portfolio:", error);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   useEffect(() => {
     if (data.length > 0) {

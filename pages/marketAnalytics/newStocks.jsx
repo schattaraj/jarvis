@@ -133,7 +133,7 @@ export default function Stocks() {
   const [activeView, setActiveView] = useState("Ticker Home");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(100);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [tableState, setTableState] = useState("companyOverview");
@@ -143,6 +143,7 @@ export default function Stocks() {
   const tableContainerRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
+  const [searchText, setSearchText] = useState("");
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -218,25 +219,29 @@ export default function Stocks() {
   ) => {
     try {
       context.setLoaderState(true);
-      // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-      // const getBondsRes = await getBonds.json()
       const getBonds = `/api/proxy?api=${api}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
 
-      tableState == "companyOverview"
-        ? setTableData(getBondsRes?.content)
-        : setTableData(getBondsRes);
-      tableState == "companyOverview"
-        ? setFilterData(getBondsRes?.content)
-        : setFilterData(getBondsRes);
-      setTotalPages(getBondsRes.totalPages);
-      setTotalElements(getBondsRes.totalElements);
+      const newData =
+        tableState == "companyOverview" ? getBondsRes?.content : getBondsRes;
+
+      setTableData(newData);
+      // Apply search filter if searchText exists
+      if (searchText) {
+        setFilterData(searchTable(newData, searchText));
+      } else {
+        setFilterData(newData);
+      }
+
+      if (tableState === "companyOverview") {
+        setTotalPages(getBondsRes.totalPages);
+        setTotalElements(getBondsRes.totalElements);
+      }
       setActiveView("Ticker Home");
       if (api == "getCompanyOverview?symbol=AAL") {
         setTableState("companyOverview");
         setColumnNames(companyOverviewColumns);
       }
-      // setLoaderState(false);
       context.setLoaderState(false);
     } catch (e) {
       console.log("error", e);
@@ -271,7 +276,12 @@ export default function Stocks() {
   };
   const filter = (e) => {
     const value = e.target.value;
-    setFilterData(searchTable(tableData, value));
+    setSearchText(value);
+    if (value) {
+      setFilterData(searchTable(tableData, value));
+    } else {
+      setFilterData(tableData);
+    }
   };
   const exportPdf = () => {
     if (tableContainerRef.current) {
@@ -350,6 +360,14 @@ export default function Stocks() {
   };
 
   useEffect(() => {
+    if (searchText) {
+      setFilterData(searchTable(tableData, searchText));
+    } else {
+      setFilterData(tableData);
+    }
+  }, [tableState, searchText]);
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -380,7 +398,7 @@ export default function Stocks() {
         }
       }
     }
-    run();
+    // run();
   }, [currentPage, tableData, sortConfig, limit]);
 
   const handleColumnToggle = (column) => {
@@ -648,6 +666,7 @@ export default function Stocks() {
                   </label>
                   <input
                     type="search"
+                    id="search"
                     placeholder=""
                     className="form-control"
                     onChange={filter}
@@ -986,7 +1005,9 @@ export default function Stocks() {
                               if (colNameLower === "price($)") {
                                 content = <td>{rowDataLowercase["price"]}</td>;
                               }
-                              console.log(rowDataLowercase);
+                              {
+                                /* console.log(rowDataLowercase); */
+                              }
                               if (colNameLower === "pricechange(%)") {
                                 content = (
                                   <td>
