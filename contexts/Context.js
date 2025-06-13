@@ -128,7 +128,7 @@ export const ContextProvider = ({ children }) => {
   //   elem.classList.toggle("show")
   // }
 
-  const noLayoutRoutes = ["/login", "/register"];
+  const noLayoutRoutes = ["/login", "/register", "/verify-otp"];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
 
   console.log("loaderState", loaderState);
