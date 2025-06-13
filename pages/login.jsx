@@ -64,50 +64,50 @@ export default function Login() {
         localStorage.setItem("sessionId", result.sessionId);
         //dummy 2FA Logic
         // Simulate: If 2FA is enabled, redirect to OTP verification screen
-        const is2FAEnabled = true; // 🔁 Replace with actual flag from backend later
-        if (is2FAEnabled) {
-          localStorage.setItem(
-            "post2faRole",
-            getRoleFromToken(result.accessToken)
-          );
+        // const is2FAEnabled = true; // 🔁 Replace with actual flag from backend later
+        // if (is2FAEnabled) {
+        //   localStorage.setItem(
+        //     "post2faRole",
+        //     getRoleFromToken(result.accessToken)
+        //   );
 
-          const otp = Math.floor(100000 + Math.random() * 900000).toString();
-          localStorage.setItem("otp_token", otp);
+        //   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        //   localStorage.setItem("otp_token", otp);
 
-          const emailParams = {
-            passcode: otp,
-            email: "sayankumar.d2000@gmail.com",
-          };
-          await emailjs.send(
-            "service_uabz61k", // Replace with your EmailJS service ID
-            "template_wzo35q1", // Replace with your EmailJS template ID
-            emailParams,
-            "OVtv1Tj1NW1EmNkM4" // Replace with your EmailJS public key
-          );
-          router.push("/verify-otp");
-        } else {
-          const role = getRoleFromToken(result.accessToken);
-          if (role === "internal") {
-            router.push("/dashboard");
-          } else {
-            router.push("/User/dashboard");
-          }
-        }
-
-        //actual Logic
-        // if (
-        //   localStorage.getItem("route") &&
-        //   localStorage.getItem("route") !== "/login"
-        // ) {
-        //   router.push(localStorage.getItem("route"));
+        //   const emailParams = {
+        //     passcode: otp,
+        //     email: "sayankumar.d2000@gmail.com",
+        //   };
+        //   await emailjs.send(
+        //     "service_uabz61k", // Replace with your EmailJS service ID
+        //     "template_wzo35q1", // Replace with your EmailJS template ID
+        //     emailParams,
+        //     "OVtv1Tj1NW1EmNkM4" // Replace with your EmailJS public key
+        //   );
+        //   router.push("/verify-otp");
         // } else {
         //   const role = getRoleFromToken(result.accessToken);
-        //   if (role == "internal") {
+        //   if (role === "internal") {
         //     router.push("/dashboard");
         //   } else {
         //     router.push("/User/dashboard");
         //   }
         // }
+
+        //actual Logic
+        if (
+          localStorage.getItem("route") &&
+          localStorage.getItem("route") !== "/login"
+        ) {
+          router.push(localStorage.getItem("route"));
+        } else {
+          const role = getRoleFromToken(result.accessToken);
+          if (role == "internal") {
+            router.push("/dashboard");
+          } else {
+            router.push("/User/dashboard");
+          }
+        }
       } else {
         console.error(result.message);
       }
