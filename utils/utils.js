@@ -583,3 +583,32 @@ export const formatDateTime = (dateStr) => {
   // Return the formatted date and time as a string
   return `${formattedDate} ${formattedTime}`;
 };
+
+export const transformData = (columnsList, dataList) => {
+  const displayNameMap = {};
+
+  // Create a map of internalName -> displayName (excluding Ticker)
+  for (const col of columnsList) {
+    if (col.elementInternalName !== "element1") {
+      displayNameMap[col.elementInternalName] = col.elementDisplayName;
+    }
+  }
+
+  // Transform each item in the dataList
+  const transformed = dataList.map((item) => {
+    const result = {};
+
+    for (const [key, value] of Object.entries(item)) {
+      if (
+        value != null && // skip null/undefined
+        displayNameMap.hasOwnProperty(key) // only keys that exist in columnsList
+      ) {
+        result[displayNameMap[key]] = value;
+      }
+    }
+
+    return result;
+  });
+
+  return transformed;
+};

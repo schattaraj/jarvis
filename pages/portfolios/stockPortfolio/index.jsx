@@ -18,6 +18,7 @@ import {
   formatDate,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../../utils/utils";
 import SliceData from "../../../components/SliceData";
 import * as Icon from "react-icons/fa";
@@ -158,7 +159,12 @@ export default function Portfolio() {
         setFilterData(items);
         setTotalPages(Math.ceil(totalItems / limit));
 
-        context.transformData(columnNames, getPortfolioRes);
+        const transformedData = transformData(columnNames, getPortfolioRes);
+        
+        console.log(getPortfolioRes);
+        console.log("transformedData", transformedData);
+        context.setFormattedBotData(transformedData)
+
       }
     } catch (e) {
       console.log("error", e);
@@ -548,7 +554,7 @@ export default function Portfolio() {
       }&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
       console.log(stockFormData);
-      
+
       const options = { body: stockFormData, method: "POST" };
       const defaultHeaders = {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
