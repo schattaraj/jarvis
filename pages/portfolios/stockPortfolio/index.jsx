@@ -85,6 +85,7 @@ export default function Portfolio() {
   const [limit, setLimit] = useState(25);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [searchQuery, setSearchQuery] = useState("");
+  const [stockPrices, setStockPrices] = useState({});
   const tableRef = useRef(null);
   const options = {
     replace: (elememt) => {
@@ -103,6 +104,37 @@ export default function Portfolio() {
       }
     },
   };
+
+  const fetchStockPrice = async (symbol) => {
+    try {
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+      );
+      const data = await response.json();
+      
+      if (data["Time Series (1min)"]) {
+        const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+        const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
+        setStockPrices(prev => ({
+          ...prev,
+          [symbol]: closePrice
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching stock price:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (tableData.length > 0) {
+      tableData.forEach(item => {
+        if (item.element71) {
+          fetchStockPrice(item.element71);
+        }
+      });
+    }
+  }, [tableData]);
+
   const handleClick = async (name) => {
     setReportModal(true);
     try {
@@ -1230,6 +1262,14 @@ export default function Portfolio() {
                                   {extractAndConvert(
                                     item[inner.elementInternalName]
                                   )}
+                                </td>
+                              );
+                            } else if (
+                              inner.elementInternalName === "element10"
+                            ) {
+                              return (
+                                <td key={"keyid" + keyid}>
+                                  {Number(stockPrices[item.element71]).toFixed(2)|| "Loading..."}
                                 </td>
                               );
                             } else {
