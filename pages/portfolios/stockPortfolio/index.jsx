@@ -158,13 +158,6 @@ export default function Portfolio() {
         const items = await SliceData(1, limit, getPortfolioRes);
         setFilterData(items);
         setTotalPages(Math.ceil(totalItems / limit));
-
-        const transformedData = transformData(columnNames, getPortfolioRes);
-        
-        console.log(getPortfolioRes);
-        console.log("transformedData", transformedData);
-        context.setFormattedBotData(transformedData)
-
       }
     } catch (e) {
       console.log("error", e);
@@ -172,6 +165,14 @@ export default function Portfolio() {
       context.setLoaderState(false);
     }
   };
+
+  useEffect(() => {
+    const transformedData = transformData(columnNames, tableData);
+    console.log(tableData);
+    console.log("transformedData", transformedData);
+    context.setFormattedBotData(transformedData);
+  }, [columnNames, tableData]);
+
   const handleChange = (e) => {
     const selectedText = e.target.selectedOptions[0].text;
     setPortfolioId(e.target.value);

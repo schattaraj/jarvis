@@ -586,9 +586,12 @@ export const formatDateTime = (dateStr) => {
 
 export const transformData = (columnsList, dataList) => {
   const displayNameMap = {};
-
+  console.log(columnsList);
+  
   // Create a map of internalName -> displayName (excluding Ticker)
   for (const col of columnsList) {
+    console.log(col.elementDisplayName);
+
     if (col.elementInternalName !== "element1") {
       displayNameMap[col.elementInternalName] = col.elementDisplayName;
     }

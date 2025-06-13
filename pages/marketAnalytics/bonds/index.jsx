@@ -10,6 +10,7 @@ import {
   fetchWithInterceptor,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../../utils/utils";
 import { getImportsData } from "../../../utils/staticData";
 import BondsHistoryModal from "../../../components/BondHstoryModal";
@@ -386,6 +387,13 @@ export default function Bonds() {
     }
     context.setLoaderState(false);
   };
+
+  useEffect(() => {
+    const transformedData = transformData(columnNames, tableData);
+    console.log(tableData);
+    console.log("transformedData", transformedData);
+    context.setFormattedBotData(transformedData);
+  }, [columnNames, tableData]);
 
   const getWeeklyData = async (importDate) => {
     context.setLoaderState(true);

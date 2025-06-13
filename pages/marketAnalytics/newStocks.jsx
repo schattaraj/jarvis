@@ -12,6 +12,7 @@ import {
   generatePDF,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../utils/utils";
 import { Pagination } from "../../components/Pagination";
 import parse from "html-react-parser";
@@ -249,6 +250,14 @@ export default function Stocks() {
       context.setLoaderState(false);
     }
   };
+
+  useEffect(() => {
+    console.log("tableData", tableData);
+
+    // const transformedData = transformData(columnNames, tableData);
+    // console.log("transformedData", transformedData);
+    context.setFormattedBotData(tableData);
+  }, [columnNames, tableData]);
 
   const handleSort = (key) => {
     let direction = "asc";

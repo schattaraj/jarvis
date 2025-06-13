@@ -11,6 +11,7 @@ import {
   generatePDF,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../../utils/utils";
 import { Pagination } from "../../../components/Pagination";
 import parse from "html-react-parser";
@@ -336,12 +337,23 @@ export default function Stocks() {
       setFilterData(getStocksRes?.content);
       setTotalElements(getStocksRes.totalElements);
       setTotalPages(getStocksRes.totalPages);
+
+      // const transformedData = transformData(columnNames, getStocksRes?.content);
+
+      // context.setFormattedBotData(transformedData);
       context.setLoaderState(false);
     } catch (e) {
       console.log("error", e);
       context.setLoaderState(false);
     }
   };
+
+  useEffect(() => {
+    const transformedData = transformData(columnNames, tableData);
+    console.log(tableData);
+    console.log("transformedData", transformedData);
+    context.setFormattedBotData(transformedData);
+  }, [columnNames, tableData]);
 
   useEffect(() => {
     fetchData();
