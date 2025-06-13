@@ -145,6 +145,7 @@ export default function Stocks() {
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
   const [searchText, setSearchText] = useState("");
+  const [stockPrices, setStockPrices] = useState({});
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -171,6 +172,36 @@ export default function Stocks() {
 
     return node;
   }
+
+  const fetchStockPrice = async (symbol) => {
+    try {
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+      );
+      const data = await response.json();
+
+      if (data["Time Series (1min)"]) {
+        const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+        const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
+        setStockPrices((prev) => ({
+          ...prev,
+          [symbol]: closePrice,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching stock price:", error);
+    }
+  };
+  useEffect(() => {
+    if (tableData.length > 0) {
+      tableData.forEach((item) => {
+        if (item.Symbol) {
+          fetchStockPrice(item.Symbol);
+        }
+      });
+    }
+  }, [tableData]);
+
   useEffect(() => {
     switch (tableState) {
       case "companyOverview":
@@ -1006,13 +1037,30 @@ export default function Stocks() {
                                   </td>
                                 );
                               }
+                              {
+                                /* if (colNameLower === "price ($)") {
+                                return (
+                                  <td key={"keyid" + keyid}>
+                                    {Number(
+                                      stockPrices[item.element71]
+                                    ).toFixed(2) || "Loading..."}
+                                  </td>
+                                );
+                              } */
+                              }
                               if (colNameLower === "date") {
                                 content = (
                                   <td>{rowDataLowercase["exdividenddate"]}</td>
                                 );
                               }
                               if (colNameLower === "price($)") {
-                                content = <td>{rowDataLowercase["price"]}</td>;
+                                content = (
+                                  <td>
+                                    {Number(
+                                      stockPrices[rowDataLowercase["symbol"]]
+                                    ).toFixed(2) || "Loading..."}
+                                  </td>
+                                );
                               }
                               {
                                 /* console.log(rowDataLowercase); */
