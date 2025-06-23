@@ -18,6 +18,7 @@ import {
   formatDate,
   getSortIcon,
   searchTable,
+  sortBySelection,
   transformData,
 } from "../../../utils/utils";
 import SliceData from "../../../components/SliceData";
@@ -111,13 +112,13 @@ export default function Portfolio() {
         `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
       );
       const data = await response.json();
-      
+
       if (data["Time Series (1min)"]) {
         const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
         const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
-        setStockPrices(prev => ({
+        setStockPrices((prev) => ({
           ...prev,
-          [symbol]: closePrice
+          [symbol]: closePrice,
         }));
       }
     } catch (error) {
@@ -127,7 +128,7 @@ export default function Portfolio() {
 
   useEffect(() => {
     if (tableData.length > 0) {
-      tableData.forEach(item => {
+      tableData.forEach((item) => {
         if (item.element71) {
           fetchStockPrice(item.element71);
         }
@@ -417,25 +418,26 @@ export default function Portfolio() {
   const selectStock = (e, stockName) => {
     const isChecked = e.target.checked;
 
-    setSelectedStocks((prevStocks) => {
-      if (isChecked) {
-        // Add stock if checkbox is checked
-        // console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
-        return [
-          ...prevStocks,
-          {
-            stockName: stockName,
-            share: "",
-            purchaseDate: "",
-            purchasePrice: "",
-          },
-        ];
-      } else {
-        // console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
-        // Remove stock if checkbox is unchecked
-        return prevStocks.filter((stock) => stock.stockName !== stockName);
-      }
-    });
+    let updatedSelectedStocks;
+    if (isChecked) {
+      const stock = filteredAllStockPortfolios.find(
+        (s) => s.stockName === stockName
+      );
+      //add the stock if it is Checked
+      updatedSelectedStocks = [...selectedStocks, { ...stock }];
+    } else {
+      //remove the stock if it is Unchecked
+      updatedSelectedStocks = selectedStocks.filter(
+        (s) => s.stockName !== stockName
+      );
+    }
+
+    setSelectedStocks(updatedSelectedStocks);
+
+    // Reorder filtered list
+    setfilteredAllStockPortfolios((prev) =>
+      sortBySelection(prev, updatedSelectedStocks)
+    );
   };
   const updateSelectedStock = (e, stockName) => {
     const { name, value } = e.target;
@@ -727,6 +729,16 @@ export default function Portfolio() {
     }
   }, [countApiCall]);
 
+  const sortedData = [...filteredStockPortfolios].sort((a, b) => {
+    const aChecked = selectedStocks.some(
+      (stock) => stock.stockName === a.stockName
+    );
+    const bChecked = selectedStocks.some(
+      (stock) => stock.stockName === b.stockName
+    );
+    return aChecked === bChecked ? 0 : aChecked ? -1 : 1; // Checked first
+  });
+
   const getAllStockForPolios = async () => {
     setManageView(true);
     context.setLoaderState(true);
@@ -787,10 +799,13 @@ export default function Portfolio() {
       if (result.isConfirmed) {
         try {
           context.setLoaderState(true);
-          const baseUrl = `/api/proxy?api=deletePortfolioByName?name=${name}`;
-          const response = await fetchWithInterceptor(baseUrl, false);
+          // const baseUrl = `/api/proxy?api=deletePortfolioByName?name=${name}`;
+          const baseUrl = `https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`;
+          const response = await fetch(baseUrl);
+          const result = await response.json();
+
           Swal.fire({
-            title: response?.payload?.msg,
+            title: result.msg,
             confirmButtonColor: "var(--primary)",
           });
           // const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
@@ -819,38 +834,45 @@ export default function Portfolio() {
   const handleEditModal = async (name) => {
     context.setLoaderState(true);
     try {
-      // const allStocksApi = await fetch(`https://jharvis.com/JarvisV2/getAllPortfolioByName?name=${name}&_=1724917733195`);
-      // const allStocksApiRes = await allStocksApi.json();
       const apiEndpoint = `/api/proxy?api=getAllPortfolioByName?name=${name}&pageNumber=${
         currentPage3 - 1
-      }&pageSize=${limit3 != "all" ? limit3 : totalElements3}`;
+      }&pageSize=${limit3 !== "all" ? limit3 : totalElements3}`;
       const options = { method: "GET" };
+
       const response = await fetchWithInterceptor(
         apiEndpoint,
         false,
         {},
         options
       );
-
       const allStocksApiRes = response?.content;
+
       setTotalPages3(response.totalPages);
       setTotalElements3(response.totalElements);
       setIsLastPage3(response.lastPage);
-      console.log("response", response);
-      // allStocksApiRes.reverse();
+
+      // Set all stocks
       setAllStocks(allStocksApiRes);
-      setfilteredAllStockPortfolios(allStocksApiRes);
+
+      // Extract selected stocks (with share or purchaseDate)
+      const selected = allStocksApiRes
+        .filter((item) => item.share || item.purchaseDate)
+        .map((item) => ({
+          stockName: item.stockName,
+          share: item.share,
+          purchaseDate: item.purchaseDate,
+          purchasePrice: item.purchasePrice,
+        }));
+
+      setSelectedStocks(selected); // Set selected state
+
+      // Sort allStocks with selected ones at top
+      setfilteredAllStockPortfolios(sortBySelection(allStocksApiRes, selected));
+
+      // Prefill formData
       formData.portfolioName = name;
-      allStocksApiRes.map((item, index) => {
-        if (item.share || item.purchaseDate) {
-          formData.allStocks[index] = {
-            stockName: item.stockName,
-            share: item.share,
-            purchaseDate: item.purchaseDate,
-            purchasePrice: item.purchasePrice,
-          };
-        }
-      });
+      formData.allStocks = selected;
+
       setEditStatus(true);
       handleShow();
       context.setLoaderState(false);
@@ -858,7 +880,6 @@ export default function Portfolio() {
       console.log("error", e);
       context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
 
   const handleStockPortfolioStatus = () => {
@@ -905,7 +926,27 @@ export default function Portfolio() {
 
   const allStockFilter = (e) => {
     const value = e.target.value;
-    setfilteredAllStockPortfolios(searchTable(allStocks, value));
+    const filtered = searchTable(allStocks, value);
+
+    // Check which tickers are selected
+    const selectedStockNames = selectedStocks.map((s) => s.stockName);
+
+    // Clean filtered list: reset share/purchaseDate/purchasePrice if not selected already
+    const updatedFiltered = filtered.map((stock) => {
+      if (!selectedStockNames.includes(stock.stockName)) {
+        return {
+          ...stock,
+          share: "",
+          purchaseDate: "",
+          purchasePrice: "",
+        };
+      }
+      return stock;
+    });
+
+    setfilteredAllStockPortfolios(
+      sortBySelection(updatedFiltered, selectedStocks)
+    );
   };
 
   const handleSort3 = (key) => {
@@ -1269,7 +1310,9 @@ export default function Portfolio() {
                             ) {
                               return (
                                 <td key={"keyid" + keyid}>
-                                  {Number(stockPrices[item.element71]).toFixed(2)|| "Loading..."}
+                                  {Number(stockPrices[item.element71]).toFixed(
+                                    2
+                                  ) || "Loading..."}
                                 </td>
                               );
                             } else {
@@ -1679,6 +1722,7 @@ export default function Portfolio() {
                       const isChecked = selectedStocks.some(
                         (stock) => stock.stockName === item?.stockName
                       );
+                      console.log(item);
                       return (
                         <tr key={"stock" + index}>
                           <td>
@@ -1698,7 +1742,12 @@ export default function Portfolio() {
                           <td>
                             <input
                               type="text"
-                              defaultValue={item?.share}
+                              // defaultValue={item?.share}
+                              value={
+                                selectedStocks.find(
+                                  (s) => s.stockName === item?.stockName
+                                )?.share || ""
+                              }
                               name="share"
                               placeholder="Share"
                               className="form-control"
@@ -1711,7 +1760,12 @@ export default function Portfolio() {
                           <td>
                             <input
                               type="date"
-                              defaultValue={item?.purchaseDate}
+                              // defaultValue={item?.purchaseDate}
+                              value={
+                                selectedStocks.find(
+                                  (s) => s.stockName === item?.stockName
+                                )?.purchaseDate || ""
+                              }
                               name="purchaseDate"
                               className="form-control"
                               //onChange={(e) => portfolioInputs(e, index)}
@@ -1723,7 +1777,12 @@ export default function Portfolio() {
                           <td>
                             <input
                               type="text"
-                              defaultValue={item?.purchasePrice}
+                              // defaultValue={item?.purchasePrice}
+                              value={
+                                selectedStocks.find(
+                                  (s) => s.stockName === item?.stockName
+                                )?.purchasePrice || ""
+                              }
                               name="purchasePrice"
                               placeholder="Purchase Price"
                               className="form-control"

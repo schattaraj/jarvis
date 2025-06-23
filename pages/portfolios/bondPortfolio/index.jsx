@@ -69,6 +69,30 @@ export default function BondPortfolio() {
   const [reportModal, setReportModal] = useState(false);
   const [reportTicker, setReportTicker] = useState("");
   const [profitValue, setProfitValue] = useState([]);
+  const [currentPage3, setCurrentPage3] = useState(1);
+  const [totalElements3, setTotalElements3] = useState(0);
+  const [totalPages3, setTotalPages3] = useState(0);
+  const [limit3, setLimit3] = useState(100);
+
+  const handlePage3 = async (action) => {
+    switch (action) {
+      case "prev":
+        setCurrentPage3(currentPage3 - 1);
+        break;
+      case "next":
+        setCurrentPage3(currentPage3 + 1);
+        break;
+      default:
+        setCurrentPage3(currentPage3);
+        break;
+    }
+  };
+
+  const changeLimit3 = (e) => {
+    setLimit3(e.target.value);
+    setCurrentPage3(1); // Reset to first page when limit changes
+  };
+
   const options = {
     replace: (elememt) => {
       if (elememt.name === "a") {
@@ -1420,12 +1444,25 @@ export default function BondPortfolio() {
                     </Modal.Body>
                 </Modal> */}
         <PortfolioTable
-          url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&_=${new Date().getTime()}`}
+          url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&pageNumber=${
+            currentPage3 - 1
+          }&pageSize=${
+            limit3 !== "all" ? limit3 : totalElements3
+          }&_=${new Date().getTime()}`}
           open={editModal}
           heading={"Edit Portfolio"}
           handleCloseModal={closeEditModal}
           editPortfolioName={editPortfolioName}
           getAllBondForPolios={getAllBondForPolios}
+          currentPage3={currentPage3}
+          setCurrentPage3={setCurrentPage3}
+          totalElements3={totalElements3}
+          setTotalElements3={setTotalElements3}
+          totalPages3={totalPages3}
+          setTotalPages3={setTotalPages3}
+          limit3={limit3}
+          changeLimit3={changeLimit3}
+          handlePage3={handlePage3}
         />
         <Modal
           show={bondPortfolioShow}
