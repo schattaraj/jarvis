@@ -270,10 +270,12 @@ export default function Etfs() {
   const fetchTickersFunc = async () => {
     context.setLoaderState(true);
     try {
-      const fetchTickers = await fetch(
-        "https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496"
-      );
-      const fetchTickersRes = await fetchTickers.json();
+      // const fetchTickers = await fetch(
+      //   "https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496"
+      // );
+      // const fetchTickersRes = await fetchTickers.json();
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Everything_List_New&_=1718886601496`
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
       setTickers(fetchTickersRes);
     } catch (e) {}
     context.setLoaderState(false);
