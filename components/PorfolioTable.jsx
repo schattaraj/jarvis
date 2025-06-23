@@ -25,7 +25,8 @@ import parse from "html-react-parser";
 import { Context } from "../contexts/Context";
 import Swal from "sweetalert2";
 import "jspdf-autotable"; // For PDF table auto-generation
-import { fetchWithInterceptor } from "../utils/utils";
+import { fetchWithInterceptor, sortBySelection } from "../utils/utils";
+import { PaginationNew } from "./PaginationNew";
 function PortfolioTable({
   url,
   open,
@@ -33,8 +34,20 @@ function PortfolioTable({
   handleCloseModal,
   editPortfolioName,
   getAllBondForPolios,
+
+  currentPage3,
+  setCurrentPage3,
+  totalElements3,
+  setTotalElements3,
+  totalPages3,
+  setTotalPages3,
+  limit3,
+  changeLimit3,
+  handlePage3,
 }) {
   const [data, setData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [fullMergedData, setFullMergedData] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState(null);
@@ -43,17 +56,64 @@ function PortfolioTable({
   const [dates, setDates] = useState({ date1: null, date2: null });
   const context = useContext(Context);
   const [selectedStocks, setSelectedStocks] = useState([]);
+
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const result = await fetchWithInterceptor(url);
-      // const result = await response.json();
-      setData(result);
+      // Step 1: Fetch paginated data
+      const paginatedResult = await fetchWithInterceptor(url);
+      const paginatedData = paginatedResult?.content || [];
+
+      // Step 2: Fetch all data once (you can cache this to avoid repeated calls)
+      const allDataUrl = `/api/proxy?api=${
+        url.split("?api=")[1].split("&")[0]
+      }&pageNumber=0&pageSize=100000`;
+      const fullResult = await fetchWithInterceptor(allDataUrl);
+      const fullData = fullResult?.content || [];
+
+      // Step 3: Extract checked bonds from full data
+      const checkedData = fullData.filter((item) =>
+        item.checkBoxHtml?.includes("checked")
+      );
+
+      // Step 4: Filter out checked items from paginatedData to avoid duplication
+      const uncheckedPaginated = paginatedData.filter(
+        (paginatedItem) =>
+          !checkedData.some(
+            (checked) => checked.issuerName === paginatedItem.issuerName
+          )
+      );
+
+      // Step 5: Combine checked + unchecked, then trim to pagination limit
+      const mergedData = [...checkedData, ...uncheckedPaginated];
+
+      setFullMergedData(mergedData);
+      const limitedMergedData =
+        limit3 !== "all" ? mergedData.slice(0, parseInt(limit3)) : mergedData;
+
+      // Step 6: Set states
+      setData(limitedMergedData);
+      setFilterData(limitedMergedData); // assuming you use this for search too
+      setTotalPages3(paginatedResult.totalPages);
+      setTotalElements3(paginatedResult.totalElements);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
+
+  useEffect(() => {
+    const filtered = fullMergedData.filter((row) =>
+      row?.issuerName?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const slicedFiltered =
+      limit3 !== "all" ? filtered.slice(0, parseInt(limit3)) : filtered;
+
+    setData(slicedFiltered);
+  }, [searchQuery, fullMergedData, limit3]);
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -95,6 +155,10 @@ function PortfolioTable({
         return prevStocks.filter((stock) => stock.issuerName !== issuerName);
       }
     });
+
+    console.log(selectedStocks);
+
+    setFilterData((prev) => sortBySelection(prev, data));
     console.log("issuerName", issuerName, e.target.checked);
   };
 
@@ -191,8 +255,9 @@ function PortfolioTable({
       console.log("Portfolio created successfully:", data);
     } catch (error) {
       console.error("Error creating portfolio:", error);
+    } finally {
+      context.setLoaderState(false);
     }
-    context.setLoaderState(false);
   };
   useEffect(() => {
     if (data.length > 0) {
@@ -201,11 +266,21 @@ function PortfolioTable({
       );
     }
   }, [data]);
+
+  //fetch when modal opens
   useEffect(() => {
     if (open) {
       fetchData();
     }
   }, [open]);
+
+  //fetch when changing limits or page
+  useEffect(() => {
+    if (open) {
+      fetchData();
+    }
+  }, [limit3, currentPage3]);
+
   const sortedData = [...filteredData].sort((a, b) => {
     const aChecked = selectedStocks.some(
       (stock) => stock.issuerName === a.issuerName
@@ -215,6 +290,7 @@ function PortfolioTable({
     );
     return aChecked === bChecked ? 0 : aChecked ? -1 : 1; // Checked first
   });
+
   return (
     <Modal
       open={open}
@@ -321,76 +397,68 @@ function PortfolioTable({
             </TableHead>
             {/* filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item, index) => { */}
             <TableBody>
-              {sortedData
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((item, index) => {
-                  const isChecked = selectedStocks.some(
-                    (stock) => stock.issuerName === item?.issuerName
-                  );
+              {filterData.map((item, index) => {
+                const isChecked = selectedStocks.some(
+                  (stock) => stock.issuerName === item?.issuerName
+                );
 
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <input
-                          type="checkbox"
-                          name="stockChkBox"
-                          onChange={(e) =>
-                            handleCheckboxChange(e, item?.issuerName)
-                          }
-                          checked={isChecked}
-                        />
-                      </TableCell>
-                      <TableCell>{item?.issuerName || ""}</TableCell>
-                      <TableCell>
-                        <input
-                          type="text"
-                          value={
-                            selectedStocks.find(
-                              (stock) => stock.issuerName === item?.issuerName
-                            )?.share || ""
-                          }
-                          name="share"
-                          placeholder="Share"
-                          className="form-control"
-                          onChange={(e) =>
-                            handleInputChange(e, item?.issuerName)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <input
-                          type="date"
-                          value={
-                            selectedStocks.find(
-                              (stock) => stock.issuerName === item?.issuerName
-                            )?.purchaseDate || ""
-                          }
-                          name="purchaseDate"
-                          className="form-control"
-                          onChange={(e) =>
-                            handleInputChange(e, item?.issuerName)
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <input
-                          type="text"
-                          value={
-                            selectedStocks.find(
-                              (stock) => stock.issuerName === item?.issuerName
-                            )?.purchasePrice || ""
-                          }
-                          name="purchasePrice"
-                          placeholder="Purchase Price"
-                          className="form-control"
-                          onChange={(e) =>
-                            handleInputChange(e, item?.issuerName)
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                return (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        name="stockChkBox"
+                        onChange={(e) =>
+                          handleCheckboxChange(e, item?.issuerName)
+                        }
+                        checked={isChecked}
+                      />
+                    </TableCell>
+                    <TableCell>{item?.issuerName || ""}</TableCell>
+                    <TableCell>
+                      <input
+                        type="text"
+                        value={
+                          selectedStocks.find(
+                            (stock) => stock.issuerName === item?.issuerName
+                          )?.share || ""
+                        }
+                        name="share"
+                        placeholder="Share"
+                        className="form-control"
+                        onChange={(e) => handleInputChange(e, item?.issuerName)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <input
+                        type="date"
+                        value={
+                          selectedStocks.find(
+                            (stock) => stock.issuerName === item?.issuerName
+                          )?.purchaseDate || ""
+                        }
+                        name="purchaseDate"
+                        className="form-control"
+                        onChange={(e) => handleInputChange(e, item?.issuerName)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <input
+                        type="text"
+                        value={
+                          selectedStocks.find(
+                            (stock) => stock.issuerName === item?.issuerName
+                          )?.purchasePrice || ""
+                        }
+                        name="purchasePrice"
+                        placeholder="Purchase Price"
+                        className="form-control"
+                        onChange={(e) => handleInputChange(e, item?.issuerName)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -402,7 +470,35 @@ function PortfolioTable({
             padding: 2,
           }}
         >
-          <TablePagination
+          <div className="form-group d-flex align-items-center mb-0 me-3">
+            <label
+              style={{ textWrap: "nowrap" }}
+              className="text-success ms-2 me-2 mb-0"
+            >
+              Show :{" "}
+            </label>
+            <select
+              name="limit"
+              className="form-select w-auto"
+              onChange={changeLimit3}
+              value={limit3}
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+          <PaginationNew
+            currentPage={currentPage3}
+            totalItems={totalElements3}
+            totalPage={totalPages3}
+            limit={limit3}
+            setCurrentPage={setCurrentPage3}
+            handlePage={handlePage3}
+          />
+          {/* <TablePagination
             rowsPerPageOptions={[20, 50, 100]}
             component="div"
             count={data.length}
@@ -410,7 +506,7 @@ function PortfolioTable({
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          /> */}
         </Box>
       </Box>
     </Modal>

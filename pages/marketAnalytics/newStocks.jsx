@@ -12,6 +12,7 @@ import {
   generatePDF,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../utils/utils";
 import { Pagination } from "../../components/Pagination";
 import parse from "html-react-parser";
@@ -133,7 +134,7 @@ export default function Stocks() {
   const [activeView, setActiveView] = useState("Ticker Home");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(100);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [tableState, setTableState] = useState("companyOverview");
@@ -143,6 +144,8 @@ export default function Stocks() {
   const tableContainerRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const [stockPrices, setStockPrices] = useState({});
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -169,6 +172,36 @@ export default function Stocks() {
 
     return node;
   }
+
+  const fetchStockPrice = async (symbol) => {
+    try {
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+      );
+      const data = await response.json();
+
+      if (data["Time Series (1min)"]) {
+        const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+        const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
+        setStockPrices((prev) => ({
+          ...prev,
+          [symbol]: closePrice,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching stock price:", error);
+    }
+  };
+  useEffect(() => {
+    if (tableData.length > 0) {
+      tableData.forEach((item) => {
+        if (item.Symbol) {
+          fetchStockPrice(item.Symbol);
+        }
+      });
+    }
+  }, [tableData]);
+
   useEffect(() => {
     switch (tableState) {
       case "companyOverview":
@@ -218,25 +251,29 @@ export default function Stocks() {
   ) => {
     try {
       context.setLoaderState(true);
-      // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
-      // const getBondsRes = await getBonds.json()
       const getBonds = `/api/proxy?api=${api}`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
 
-      tableState == "companyOverview"
-        ? setTableData(getBondsRes?.content)
-        : setTableData(getBondsRes);
-      tableState == "companyOverview"
-        ? setFilterData(getBondsRes?.content)
-        : setFilterData(getBondsRes);
-      setTotalPages(getBondsRes.totalPages);
-      setTotalElements(getBondsRes.totalElements);
+      const newData =
+        tableState == "companyOverview" ? getBondsRes?.content : getBondsRes;
+
+      setTableData(newData);
+      // Apply search filter if searchText exists
+      if (searchText) {
+        setFilterData(searchTable(newData, searchText));
+      } else {
+        setFilterData(newData);
+      }
+
+      if (tableState === "companyOverview") {
+        setTotalPages(getBondsRes.totalPages);
+        setTotalElements(getBondsRes.totalElements);
+      }
       setActiveView("Ticker Home");
       if (api == "getCompanyOverview?symbol=AAL") {
         setTableState("companyOverview");
         setColumnNames(companyOverviewColumns);
       }
-      // setLoaderState(false);
       context.setLoaderState(false);
     } catch (e) {
       console.log("error", e);
@@ -244,6 +281,14 @@ export default function Stocks() {
       context.setLoaderState(false);
     }
   };
+
+  useEffect(() => {
+    console.log("tableData", tableData);
+
+    // const transformedData = transformData(columnNames, tableData);
+    // console.log("transformedData", transformedData);
+    context.setFormattedBotData(tableData);
+  }, [columnNames, tableData]);
 
   const handleSort = (key) => {
     let direction = "asc";
@@ -271,7 +316,12 @@ export default function Stocks() {
   };
   const filter = (e) => {
     const value = e.target.value;
-    setFilterData(searchTable(tableData, value));
+    setSearchText(value);
+    if (value) {
+      setFilterData(searchTable(tableData, value));
+    } else {
+      setFilterData(tableData);
+    }
   };
   const exportPdf = () => {
     if (tableContainerRef.current) {
@@ -350,6 +400,14 @@ export default function Stocks() {
   };
 
   useEffect(() => {
+    if (searchText) {
+      setFilterData(searchTable(tableData, searchText));
+    } else {
+      setFilterData(tableData);
+    }
+  }, [tableState, searchText]);
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -380,7 +438,7 @@ export default function Stocks() {
         }
       }
     }
-    run();
+    // run();
   }, [currentPage, tableData, sortConfig, limit]);
 
   const handleColumnToggle = (column) => {
@@ -648,6 +706,7 @@ export default function Stocks() {
                   </label>
                   <input
                     type="search"
+                    id="search"
                     placeholder=""
                     className="form-control"
                     onChange={filter}
@@ -978,15 +1037,34 @@ export default function Stocks() {
                                   </td>
                                 );
                               }
+                              {
+                                /* if (colNameLower === "price ($)") {
+                                return (
+                                  <td key={"keyid" + keyid}>
+                                    {Number(
+                                      stockPrices[item.element71]
+                                    ).toFixed(2) || "Loading..."}
+                                  </td>
+                                );
+                              } */
+                              }
                               if (colNameLower === "date") {
                                 content = (
                                   <td>{rowDataLowercase["exdividenddate"]}</td>
                                 );
                               }
                               if (colNameLower === "price($)") {
-                                content = <td>{rowDataLowercase["price"]}</td>;
+                                content = (
+                                  <td>
+                                    {Number(
+                                      stockPrices[rowDataLowercase["symbol"]]
+                                    ).toFixed(2) || "Loading..."}
+                                  </td>
+                                );
                               }
-                              console.log(rowDataLowercase);
+                              {
+                                /* console.log(rowDataLowercase); */
+                              }
                               if (colNameLower === "pricechange(%)") {
                                 content = (
                                   <td>

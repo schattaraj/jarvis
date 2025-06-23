@@ -7,6 +7,7 @@ import {
   formatDate,
   getSortIcon,
   searchTable,
+  transformData,
 } from "../../utils/utils";
 import EtfHistoryModal from "../../components/EtfHistoryModal";
 import { Pagination } from "../../components/Pagination";
@@ -194,6 +195,14 @@ export default function Etfs() {
     }
     context.setLoaderState(false);
   };
+
+  useEffect(() => {
+    const transformedData = transformData(columnNames, tableData);
+    console.log(tableData);
+    console.log("transformedData", transformedData);
+    context.setFormattedBotData(transformedData);
+  }, [columnNames, tableData]);
+
   const getHistoryByTicker = async () => {
     if (!selectedTicker) {
       Swal.fire({

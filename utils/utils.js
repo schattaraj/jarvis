@@ -195,6 +195,14 @@ export const searchTable = (tableData, searchTerm) => {
   return filteredRows;
 };
 
+export const sortBySelection = (all, selected) => {
+  const selectedSet = new Set(selected.map((s) => s.stockName));
+  return [
+    ...all.filter((s) => selectedSet.has(s.stockName)),
+    ...all.filter((s) => !selectedSet.has(s.stockName)),
+  ];
+};
+
 export const formatDate = (dateStr) => {
   if (dateStr) {
     const date = new Date(dateStr);
@@ -582,4 +590,36 @@ export const formatDateTime = (dateStr) => {
 
   // Return the formatted date and time as a string
   return `${formattedDate} ${formattedTime}`;
+};
+
+export const transformData = (columnsList, dataList) => {
+  const displayNameMap = {};
+  console.log(columnsList);
+
+  // Create a map of internalName -> displayName (excluding Ticker)
+  for (const col of columnsList) {
+    // console.log(col.elementDisplayName);
+
+    if (col.elementInternalName !== "element1") {
+      displayNameMap[col.elementInternalName] = col.elementDisplayName;
+    }
+  }
+
+  // Transform each item in the dataList
+  const transformed = dataList.map((item) => {
+    const result = {};
+
+    for (const [key, value] of Object.entries(item)) {
+      if (
+        value != null && // skip null/undefined
+        displayNameMap.hasOwnProperty(key) // only keys that exist in columnsList
+      ) {
+        result[displayNameMap[key]] = value;
+      }
+    }
+
+    return result;
+  });
+
+  return transformed;
 };

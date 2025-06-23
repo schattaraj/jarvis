@@ -128,39 +128,11 @@ export const ContextProvider = ({ children }) => {
   //   elem.classList.toggle("show")
   // }
 
-  const noLayoutRoutes = ["/login", "/register"];
+  const noLayoutRoutes = ["/login", "/register", "/verify-otp"];
   const isNoLayoutRoute = noLayoutRoutes.includes(router.pathname);
 
   console.log("loaderState", loaderState);
 
-  const transformData = (columnsList, dataList) => {
-    const displayNameMap = {};
-
-    // Create a map of internalName -> displayName (excluding Ticker)
-    for (const col of columnsList) {
-      if (col.elementInternalName !== "element1") {
-        displayNameMap[col.elementInternalName] = col.elementDisplayName;
-      }
-    }
-
-    // Transform each item in the dataList
-    const transformed = dataList.map((item) => {
-      const result = {};
-
-      for (const [key, value] of Object.entries(item)) {
-        if (
-          value != null && // skip null/undefined
-          displayNameMap.hasOwnProperty(key) // only keys that exist in columnsList
-        ) {
-          result[displayNameMap[key]] = value;
-        }
-      }
-
-      return result;
-    });
-
-    setFormattedBotData(transformed);
-  };
   return (
     <Context.Provider
       value={{
@@ -191,7 +163,7 @@ export const ContextProvider = ({ children }) => {
         accessToken,
         userName,
         formattedBotData,
-        transformData,
+        setFormattedBotData,
       }}
     >
       {isNoLayoutRoute ? children : <Layout>{children}</Layout>}
