@@ -203,6 +203,14 @@ export const sortBySelection = (all, selected) => {
   ];
 };
 
+export const sortBySelectionBond = (all, selected) => {
+  const selectedSet = new Set(selected.map((s) => s.name));
+  return [
+    ...all.filter((s) => selectedSet.has(s.issuerName)),
+    ...all.filter((s) => !selectedSet.has(s.issuerName)),
+  ];
+};
+
 export const formatDate = (dateStr) => {
   if (dateStr) {
     const date = new Date(dateStr);

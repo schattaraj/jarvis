@@ -1722,7 +1722,7 @@ export default function Portfolio() {
                       const isChecked = selectedStocks.some(
                         (stock) => stock.stockName === item?.stockName
                       );
-                      console.log(item);
+                      // console.log(item);
                       return (
                         <tr key={"stock" + index}>
                           <td>

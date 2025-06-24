@@ -16,6 +16,7 @@ import {
   generatePDF,
   getSortIcon,
   searchTable,
+  sortBySelectionBond,
 } from "../../../utils/utils";
 import SliceData from "../../../components/SliceData";
 import Swal from "sweetalert2";
@@ -527,10 +528,10 @@ export default function BondPortfolio() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-  const filteredPortfolio = allBondPortfoilo.filter((row) =>
+  }; 
+  const filteredPortfolio = sortBySelectionBond(allBondPortfoilo.filter((row) =>
     row.issuerName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ),selectedStocks);
   const closeEditModal = () => {
     setEditModal(false);
   };
