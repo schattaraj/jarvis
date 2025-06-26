@@ -584,9 +584,7 @@ export default function Portfolio() {
 
       const apiEndpoint = `/api/proxy?api=createPortfolio?name=${
         formData.portfolioName
-      }&visiblePortFolio=${
-        subscribersOnly ? "yes" : "no"
-      }&userId=${userID}&bodyType=form`;
+      }&visiblePortFolio=yes&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
       console.log(stockFormData);
 
