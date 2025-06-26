@@ -145,6 +145,7 @@ export default function Stocks() {
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
   const [searchText, setSearchText] = useState("");
+  const [searchTextC, setSearchTextC] = useState("");
   const [stockPrices, setStockPrices] = useState({});
   const context = useContext(Context);
   const toggleDescription = (index) => {
@@ -183,6 +184,7 @@ export default function Stocks() {
       if (data["Time Series (1min)"]) {
         const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
         const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
+
         setStockPrices((prev) => ({
           ...prev,
           [symbol]: closePrice,
@@ -200,7 +202,7 @@ export default function Stocks() {
         }
       });
     }
-  }, [tableData]);
+  }, [tableData, limit, currentPage]);
 
   useEffect(() => {
     switch (tableState) {
@@ -208,7 +210,7 @@ export default function Stocks() {
         fetchData(
           `getCompanyOverview?symbol=AAL&size=${
             limit != "all" ? limit : 100000
-          }&page=${currentPage - 1}`
+          }&page=${currentPage - 1}&keyword=${searchTextC}`
         );
         break;
       case "incomeStatement":
@@ -232,6 +234,20 @@ export default function Stocks() {
     }
   }, [tableState, currentPage, limit]);
 
+  const filterC = (e) => {
+    console.log("search", e.target.value);
+    const value = e.target.value;
+    setSearchTextC(value);
+  };
+
+  useEffect(() => {
+    if (searchTextC === "")
+      fetchData(
+        `getCompanyOverview?symbol=AAL&size=${
+          limit != "all" ? limit : 100000
+        }&page=${currentPage - 1}&keyword=${searchTextC}`
+      );
+  }, [searchTextC]);
   useEffect(() => {
     setVisibleColumns(columnNames.map((col) => col));
   }, [columnNames, setColumnNames]);
@@ -247,7 +263,7 @@ export default function Stocks() {
   const fetchData = async (
     api = `getCompanyOverview?symbol=AAL&size=${
       limit != "all" ? limit : 100000
-    }&page=${currentPage - 1}`
+    }&page=${currentPage - 1}&keyword=${searchTextC}`
   ) => {
     try {
       context.setLoaderState(true);
@@ -323,12 +339,13 @@ export default function Stocks() {
       setFilterData(tableData);
     }
   };
+
   const exportPdf = () => {
     if (tableContainerRef.current) {
       tableContainerRef.current.scrollLeft = 0; // Reset scroll to the initial position
     }
     if (tableData.length > 0) {
-      context.setLoaderState(true);
+      // context.setLoaderState(true);
       const parentDiv = document.createElement("div");
       parentDiv.id = "loader";
       parentDiv.classList.add("loader-container", "flex-column");
@@ -351,26 +368,54 @@ export default function Stocks() {
                 ? "a3"
                 : "a4",
           });
-          const headers = columnNames.filter((col) =>
-            visibleColumns.includes(col)
-          );
+          const headers = columnNames
+            .filter((col) => visibleColumns.includes(col))
+            .map((col) =>
+              col === "Market Capitalization"
+                ? "Market Capitalization (Million)"
+                : col
+            );
 
           // Table rows
           const rows = filterData.map((rowData) => {
             const rowDataLowercase = Object.fromEntries(
-              Object.entries(rowData).map(([key, value]) => [
-                key.toLowerCase(),
-                value,
-              ])
+              Object.entries(rowData).map(([key, value], index) => {
+                return [
+                  key.toLowerCase() === "marketcapitalization"
+                    ? "marketcapitalization(million)"
+                    : key.toLowerCase() === "price"
+                    ? "price($)"
+                    : key.toLowerCase(),
+                  key.toLowerCase() === "marketcapitalization"
+                    ? `$ ${value / 1000}`
+                    : key.toLowerCase() === "price"
+                    ? stockPrices[rowData["Symbol"]]
+                    : value,
+                ];
+              })
             );
 
-            return headers.map((col) =>
-              rowDataLowercase[col.toLowerCase().replace(/\s+/g, "")]
+            // console.log("rowData", rowDataLowercase, headers);
+
+            return headers.map((col) => {
+              console.log(
+                col.toLowerCase().replace(/\s+/g, ""),
+                col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)",
+                rowDataLowercase["changeprice"]
+              );
+
+              return rowDataLowercase[
+                col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)"
+                  ? "changeprice"
+                  : col.toLowerCase().replace(/\s+/g, "")
+              ]
                 ? rowDataLowercase[
-                    col.toLowerCase().replace(/\s+/g, "")
+                    col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)"
+                      ? "changeprice"
+                      : col.toLowerCase().replace(/\s+/g, "")
                   ].toString()
-                : ""
-            );
+                : "";
+            });
           });
 
           pdf.autoTable({
@@ -385,7 +430,11 @@ export default function Stocks() {
 
           pdf.save("Table_Report.pdf");
           const loaderDiv = document.getElementById("loader");
+          console.log("loderdiv", loaderDiv);
+
           if (loaderDiv) {
+            console.log("loderdiv", loaderDiv);
+
             loaderDiv.remove();
           }
         })
@@ -704,13 +753,35 @@ export default function Stocks() {
                   >
                     Search :{" "}
                   </label>
-                  <input
-                    type="search"
-                    id="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={filter}
-                  />
+                  {tableState === "companyOverview" ? (
+                    <div class="input-group">
+                      <input
+                        type="search"
+                        class="form-control"
+                        placeholder=""
+                        aria-label="search"
+                        aria-describedby="basic-addon2"
+                        value={searchTextC}
+                        onChange={filterC}
+                      />
+                      <button
+                        class="btn-primary"
+                        onClick={() => fetchData()}
+                        id="basic-addon2"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="search"
+                      class="form-control"
+                      placeholder=""
+                      aria-label="search"
+                      aria-describedby="basic-addon2"
+                      onChange={filter}
+                    />
+                  )}
                 </div>
               </div>
               <div className="table-responsive" ref={tableContainerRef}>

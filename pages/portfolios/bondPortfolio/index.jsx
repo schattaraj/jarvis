@@ -302,9 +302,9 @@ export default function BondPortfolio() {
     console.log("search", e.target.value);
     const value = e.target.value;
     setSearchText(value);
-    if (value === "") {
-      fetchData(); // Automatically fetch all data when search is cleared
-    }
+    // if (value === "") {
+    //   fetchData(); // Automatically fetch all data when search is cleared
+    // }
     // const filtered = tableData.filter((elememt) =>
     //   elememt.element4.toLowerCase().includes(value.toLowerCase())
     // );
