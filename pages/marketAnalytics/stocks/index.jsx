@@ -331,7 +331,7 @@ export default function Stocks() {
       // const getStocksRes = await getStocks.json()
       const getStocks = `/api/proxy?api=getImportsData?metaDataName=Tickers_Watchlist&pageNumber=${
         currentPage - 1
-      }&pageSize=${limit != "all" ? limit : totalElements}`;
+      }&pageSize=${limit != "all" ? limit : 20000}`;
       const getStocksRes = await fetchWithInterceptor(getStocks, false);
       setTableData(getStocksRes?.content);
       setFilterData(getStocksRes?.content);

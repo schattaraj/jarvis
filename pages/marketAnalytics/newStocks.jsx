@@ -207,7 +207,7 @@ export default function Stocks() {
       case "companyOverview":
         fetchData(
           `getCompanyOverview?symbol=AAL&size=${
-            limit != "all" ? limit : totalElements
+            limit != "all" ? limit : 100000
           }&page=${currentPage - 1}`
         );
         break;
@@ -246,7 +246,7 @@ export default function Stocks() {
 
   const fetchData = async (
     api = `getCompanyOverview?symbol=AAL&size=${
-      limit != "all" ? limit : totalElements
+      limit != "all" ? limit : 100000
     }&page=${currentPage - 1}`
   ) => {
     try {

@@ -220,7 +220,7 @@ export default function BondPortfolio() {
         const getPortfolio = await fetchWithInterceptor(
           `/api/proxy?api=getBondPortFolioSet?idPortfolio=${selectedPortfolioId}&pageNumber=${
             currentPage - 1
-          }&pageSize=${limit !== "all" ? limit : ""}&keyword=${searchText}`
+          }&pageSize=${limit !== "all" ? limit : 20000}&keyword=${searchText}`
         );
 
         // const getPortfolioRes = await getPortfolio.json();
@@ -1496,7 +1496,7 @@ export default function BondPortfolio() {
           url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&pageNumber=${
             currentPage3 - 1
           }&pageSize=${
-            limit3 !== "all" ? limit3 : totalElements3
+            limit3 !== "all" ? limit3 : 20000
           }&_=${new Date().getTime()}`}
           open={editModal}
           heading={"Edit Portfolio"}

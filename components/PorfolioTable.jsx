@@ -112,6 +112,7 @@ function PortfolioTable({
       limit3 !== "all" ? filtered.slice(0, parseInt(limit3)) : filtered;
 
     setData(slicedFiltered);
+    setFilterData(slicedFiltered)
   }, [searchQuery, fullMergedData, limit3]);
 
   const handleChangePage = (event, newPage) => {

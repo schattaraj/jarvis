@@ -374,7 +374,7 @@ export default function Bonds() {
       //uncomment for v3
       const getBonds = `/api/proxy?api=getImportsData?metaDataName=Bondpricing_Master&pageNumber=${
         currentPage - 1
-      }&pageSize=${limit != "all" ? limit : totalElements}&_=1705052752518`;
+      }&pageSize=${limit != "all" ? limit : 20000}&_=1705052752518`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false);
       setTableData(getBondsRes?.content);
       setFilterData(getBondsRes?.content);
