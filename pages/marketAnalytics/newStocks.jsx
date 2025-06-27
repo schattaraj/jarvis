@@ -134,7 +134,7 @@ export default function Stocks() {
   const [activeView, setActiveView] = useState("Ticker Home");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(100);
+  const [limit, setLimit] = useState(25);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [tableState, setTableState] = useState("companyOverview");
@@ -147,6 +147,7 @@ export default function Stocks() {
   const [searchText, setSearchText] = useState("");
   const [searchTextC, setSearchTextC] = useState("");
   const [stockPrices, setStockPrices] = useState({});
+  const [stockPricesVersion, setStockPricesVersion] = useState(0);
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -174,35 +175,46 @@ export default function Stocks() {
     return node;
   }
 
-  const fetchStockPrice = async (symbol) => {
-    try {
-      const response = await fetch(
-        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
-      );
-      const data = await response.json();
+  // const fetchStockPrice = async () => {
+  //   try {
+  //     const allPrices = {};
 
-      if (data["Time Series (1min)"]) {
-        const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
-        const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
+  //     // Loop through all pages
+  //     for (let page = 0; page < totalPages; page++) {
+  //       const getStocks = `/api/proxy?api=getCompanyOverview?symbol=AAL&size=${100}&page=${page}`;
 
-        setStockPrices((prev) => ({
-          ...prev,
-          [symbol]: closePrice,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching stock price:", error);
-    }
-  };
-  useEffect(() => {
-    if (tableData.length > 0) {
-      tableData.forEach((item) => {
-        if (item.Symbol) {
-          fetchStockPrice(item.Symbol);
-        }
-      });
-    }
-  }, [tableData, limit, currentPage]);
+  //       const getStocksRes = await fetchWithInterceptor(getStocks, false);
+  //       const newData = getStocksRes?.content || [];
+
+  //       console.log("newData", newData);
+
+  //       // Loop through each stock in this page
+  //       for (const element of newData) {
+  //         try {
+  //           const response = await fetch(
+  //             `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${element.Symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+  //           );
+  //           const data = await response.json();
+
+  //           if (data["Time Series (1min)"]) {
+  //             const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+  //             const closePrice =
+  //               data["Time Series (1min)"][firstTimeKey]["4. close"];
+
+  //             allPrices[element.Symbol] = closePrice;
+  //           }
+  //         } catch (error) {
+  //           console.error(`Error fetching price for ${element.Symbol}`, error);
+  //         }
+  //       }
+  //     }
+
+  //     // After all data is fetched, update state once
+  //     setStockPrices((prev) => ({ ...prev, ...allPrices }));
+  //   } catch (error) {
+  //     console.error("Error in fetchStockPrice:", error);
+  //   }
+  // };
 
   useEffect(() => {
     switch (tableState) {
@@ -273,7 +285,37 @@ export default function Stocks() {
       const newData =
         tableState == "companyOverview" ? getBondsRes?.content : getBondsRes;
 
+      if (tableState === "companyOverview") {
+        for (const element of newData) {
+          const symbol = element.Symbol;
+
+          // ✅ Skip API call if price already in cache
+          if (stockPrices[symbol]) continue;
+
+          try {
+            const response = await fetch(
+              `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+            );
+            const data = await response.json();
+
+            if (data["Time Series (1min)"]) {
+              const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+              const closePrice =
+                data["Time Series (1min)"][firstTimeKey]["4. close"];
+
+              setStockPrices((prev) => ({
+                ...prev,
+                [symbol]: closePrice,
+              }));
+            }
+          } catch (error) {
+            console.error(`Error fetching price for ${symbol}`, error);
+          }
+        }
+      }
+
       setTableData(newData);
+
       // Apply search filter if searchText exists
       if (searchText) {
         setFilterData(searchTable(newData, searchText));
@@ -457,6 +499,8 @@ export default function Stocks() {
   }, [tableState, searchText]);
 
   useEffect(() => {
+    // fetchStockPrice();
+
     fetchData();
   }, []);
 
@@ -793,6 +837,7 @@ export default function Stocks() {
                 >
                   <thead>
                     <tr>
+                      {console.log("stickPrice", stockPrices)}
                       {tableState === "companyOverview"
                         ? companyOverviewColumns.map(
                             (columnName, index) =>
@@ -1127,9 +1172,15 @@ export default function Stocks() {
                               if (colNameLower === "price($)") {
                                 content = (
                                   <td>
-                                    {Number(
-                                      stockPrices[rowDataLowercase["symbol"]]
-                                    ).toFixed(2) || "Loading..."}
+                                    {stockPrices?.[
+                                      rowDataLowercase["symbol"]
+                                    ] !== undefined
+                                      ? Number(
+                                          stockPrices[
+                                            rowDataLowercase["symbol"]
+                                          ]
+                                        ).toFixed(2)
+                                      : "Loading..."}
                                   </td>
                                 );
                               }
