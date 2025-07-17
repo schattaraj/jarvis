@@ -345,8 +345,10 @@ export default function Portfolio() {
       // const allStocksApiRes = await allStocksApi.json();
 
       const apiEndpoint = `/api/proxy?api=getAllStocksForPolio?pageSize=${
-        limit3 != "all" ? limit3 : 20000
-      }&pageNumber=${currentPage3 - 1}&keyword=${searchText}`;
+        limit3 != "all" ? limit3 : 0
+      }&pageNumber=${currentPage3 - 1}&keyword=${searchText}&isforAll=${
+        limit3 == "all" ? true : false
+      }`;
       const response = await fetchWithInterceptor(apiEndpoint, false);
       setAllStocks(response?.content);
       setfilteredAllStockPortfolios(response?.content);
@@ -838,7 +840,7 @@ export default function Portfolio() {
   const handleEditModal = async (name) => {
     context.setLoaderState(true);
     try {
-      const apiEndpoint = `/api/proxy?api=getAllPortfolioByName?name=${name}&pageNumber=${
+      const apiEndpoint = `/api/proxy?api=getPortfolioByName?name=${name}&pageNumber=${
         currentPage3 - 1
       }&pageSize=${limit3 !== "all" ? limit3 : 20000}`;
       const options = { method: "GET" };
@@ -849,7 +851,7 @@ export default function Portfolio() {
         {},
         options
       );
-      const allStocksApiRes = response?.content;
+      const allStocksApiRes = response;
 
       setTotalPages3(response.totalPages);
       setTotalElements3(response.totalElements);

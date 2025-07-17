@@ -31,6 +31,7 @@ export default function PemDetails() {
   const [tableData, setTableData] = useState([]);
   const [filterData, setFilterData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [ruleData, setRuleData] = useState([]);
   const [limit, setLimit] = useState(25);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [reportTicker, setReportTicker] = useState("");
@@ -320,8 +321,13 @@ export default function PemDetails() {
         return true;
       });
       // console.log(filteredData);
-      setTableData(filteredData);
-      setFilterData(filteredData);
+      const sortedData = filteredData.sort((a, b) => {
+        const roicA = parseFloat(a.element12);
+        const roicB = parseFloat(b.element12);
+        return roicB - roicA;
+      });
+      setTableData(sortedData);
+      setFilterData(sortedData);
       handleClose();
       context.setLoaderState(false);
     } catch (error) {
@@ -379,6 +385,19 @@ export default function PemDetails() {
         "https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344"
       );
       const columnApiRes = await columnApi.json();
+      columnApiRes.splice(2, 0, {
+        elementId: null,
+        elementName: "Pem Rank Score",
+        elementInternalName: "pemRankScore",
+        elementDisplayName: "Pem Rank Score",
+        elementType: null,
+        metadataName: "Everything_List_New",
+        isAmountField: 0,
+        isUniqueField: 0,
+        isSearchCriteria: 0,
+        isVisibleInDashboard: 0,
+        isCurrencyField: 0,
+      });
       columnApiRes.push(...extraColumns);
       // columnApiRes.splice(0, 0, extraColumns[0])
       // columnApiRes.push(...extraColumns.slice(1))
@@ -415,8 +434,8 @@ export default function PemDetails() {
       //   "https://jharvis.com/JarvisV2/getImportsData?metaDataName=PEM_NEW&_=1725280825673"
       // );
       // const getBondsRes = await getBonds.json();
-      const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW&pageNumber=0&pageSize=1000`
-      const getBondsRes = await fetchWithInterceptor(getApi,false);
+      const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW&pageNumber=0&pageSize=1000`;
+      const getBondsRes = await fetchWithInterceptor(getApi, false);
       setTableData(getBondsRes.content);
       setFilterData(getBondsRes.content);
       // setTimeout(() => {
@@ -551,6 +570,7 @@ export default function PemDetails() {
   useEffect(() => {
     fetchColumnNames();
     fetchData();
+    fetchRuleData();
   }, []);
   useEffect(() => {
     if (screen.width < 576) {
@@ -648,6 +668,102 @@ export default function PemDetails() {
   const closeReportModal = () => {
     setReportModal(false);
   };
+  const fetchRuleData = async () => {
+    context.setLoaderState(true);
+    try {
+      const getRulesUrl = `/api/proxy?api=getAllPemRule`;
+      const getAllRules = await fetchWithInterceptor(getRulesUrl, false);
+
+      setRuleData(getAllRules);
+      context.setLoaderState(false);
+    } catch (e) {
+      console.log("error", e);
+      context.setLoaderState(false);
+    }
+  };
+
+  function calculatePEMScores(content, rules) {
+    const elementMap = {
+      element6: "Organic Sales Growth Rate of Company (TTM)", // percentage → ×100
+      element7: "Organic Growth rate of TAM", // percentage → ×100
+      element11: "Revenue Generation Consistency", // direct compare
+      element12: "Normalized ROIC",
+      element17: "Tailwinds", // direct compare
+      element18: "Pricing Power", // direct compare
+      element22: "Value Proposition Savings/Efficiency", // direct compare
+    };
+
+    const percentBasedFields = [
+      "Organic Sales Growth Rate of Company (TTM)",
+      "Organic Growth rate of TAM",
+    ];
+
+    const getRank = (value, fieldName) => {
+      if (value == null || value === "") return 0;
+
+      let numericValue = parseFloat(value);
+      if (isNaN(numericValue)) return 0;
+
+      // Multiply by 100 only if it's a percentage-type metric
+      if (percentBasedFields.includes(fieldName)) {
+        console.log(
+          percentBasedFields.includes(fieldName),
+          (numericValue *= 100)
+        );
+
+        numericValue *= 100;
+      }
+
+      const relevantRules = rules.filter(
+        (rule) => rule.simpleRule && rule.simpleRule.includes(`{${fieldName}}`)
+      );
+
+      for (const rule of relevantRules) {
+        let expr = rule.simpleRule
+          .replaceAll(`{${fieldName}}`, "val")
+          .replace(/'/g, "")
+          .replace(/\band\b/g, "&&")
+          .replace(/\bor\b/g, "||");
+
+        const rawVal = Number(numericValue);
+        const val = parseFloat(numericValue); // ✅ Convert to percentage
+
+        try {
+          const fn = new Function("val", `return ${expr};`);
+          console.log("Evaluating:", expr, "val:", val, "→", fn(val));
+
+          if (!isNaN(val) && fn(val)) {
+            return parseInt(rule.rank);
+          }
+        } catch (e) {
+          console.warn("Failed to evaluate rule:", expr);
+        }
+      }
+
+      return 0;
+    };
+
+    return content.map((item) => {
+      let totalScore = 0;
+
+      for (const [elementKey, ruleKey] of Object.entries(elementMap)) {
+        const val = item[elementKey];
+        console.log(val, ruleKey, getRank(val, ruleKey));
+
+        totalScore += getRank(val, ruleKey);
+      }
+
+      return {
+        idMarketData: item.idMarketData,
+        name: item.element1,
+        symbol: item.element2,
+        pemScore: totalScore,
+      };
+    });
+  }
+
+  const result = calculatePEMScores(filterData, ruleData);
+  console.log(result);
 
   return (
     <>
@@ -754,7 +870,10 @@ export default function PemDetails() {
                         type="checkbox"
                         id="subscribersOnly"
                       />
-                      <label className="form-check-label" htmlFor="subscribersOnly">
+                      <label
+                        className="form-check-label"
+                        htmlFor="subscribersOnly"
+                      >
                         Subscribers Only
                       </label>
                     </div>
@@ -911,7 +1030,8 @@ export default function PemDetails() {
                   {columnNames.map((columnName, index) => {
                     const columnClass =
                       columnName.elementInternalName === "element1" ||
-                      columnName.elementInternalName === "element2"
+                      columnName.elementInternalName === "element2" ||
+                      columnName.elementInternalName === "pemRankScore"
                         ? "sticky-column"
                         : "";
                     return (
@@ -932,6 +1052,9 @@ export default function PemDetails() {
                                 ? 0
                                 : columnName.elementInternalName === "element2"
                                 ? firstColWidth
+                                : columnName.elementInternalName ===
+                                  "pemRankScore"
+                                ? firstColWidth * 1.5
                                 : "auto",
                           }}
                           onClick={() =>
@@ -1032,9 +1155,8 @@ export default function PemDetails() {
                         columnName.elementInternalName === "lastUpdatedAt"
                       ) {
                         content = new Date(
-                          rowData['lastUpdatedAt']
+                          rowData["lastUpdatedAt"]
                         ).toDateString();
-                        
                       } else if (
                         columnName.elementInternalName === "idMarketData"
                       ) {

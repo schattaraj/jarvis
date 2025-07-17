@@ -1483,15 +1483,24 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={compareData?.bestFiveStocks?.map((item) => [
-                  item["bestMovedStock"],
-                  parseFloat(item["percentageChangeRise"]),
-                ])}
+                data={
+                  compareData
+                    ? compareData?.bestFiveStocks?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
+                    : bestStocksFiltered?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
+                }
                 title={"Ticker Performance"}
                 typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : bestStocksFiltered?.map((item) => item?.bestMovedStock),
                 }}
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
@@ -1590,15 +1599,24 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={compareData?.worstFiveStocks?.map((item) => [
-                  item["worstMovedStock"],
-                  parseFloat(item["percentageChangeDrop"]),
-                ])}
+                data={
+                  compareData
+                    ? compareData?.worstFiveStocks?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                    : worstStocksFiltered?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                }
                 title={"Ticker Performance"}
                 typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : worstStocksFiltered?.map((item) => item?.bestMovedStock),
                 }}
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}

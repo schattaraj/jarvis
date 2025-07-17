@@ -6,12 +6,19 @@ import { useContext, useEffect, useState } from "react";
 import Select from "react-select";
 import { Context } from "../../contexts/Context";
 import {
+  balanceSheetColumn,
+  cashFlowColumn,
+  companyOverviewColumns,
+  earningsColumn,
   exportToExcel,
   fetchWithInterceptor,
   formatCurrency,
   generatePDF,
   getSortIcon,
+  incomeStatementColumn,
+  quarterlyEarningsColumn,
   searchTable,
+  smaColumn,
   transformData,
 } from "../../utils/utils";
 import { Pagination } from "../../components/Pagination";
@@ -31,102 +38,24 @@ import { staticStocks } from "../../utils/staticStock";
 import Loader from "../../components/loader";
 import html2canvas from "html2canvas";
 import { PaginationNew } from "../../components/PaginationNew";
-const companyOverviewColumns = [
-  "Symbol",
-  "Name",
-  "Price Change (%)",
-  "Price ($)",
-  "Description",
-  "Sector",
-  "Industry",
-  "Address",
-  "Official Site",
-  "Market Capitalization",
-  "EBITDA",
-  "PE Ratio",
-  "PEG Ratio",
-  "Book Value",
-  "Dividend Per Share",
-  "Dividend Yield",
-  "EPS",
-  "Revenue Per Share TTM",
-  "Profit Margin",
-  "Operating Margin TTM",
-  "Return On Assets TTM",
-  "Return On Equity TTM",
-  "Revenue TTM",
-  "Gross Profit TTM",
-  "Diluted EPS TTM",
-  "Quarterly Earnings Growth YOY",
-  "Quarterly Revenue Growth YOY",
-  "Analyst Rating Strong Buy",
-  "Analyst Rating Buy",
-  "Analyst Rating Hold",
-  "Analyst Rating Sell",
-  "Analyst Rating Strong Sell",
-  "Trailing PE",
-  "Forward PE",
-  "Price To Sales Ratio TTM",
-  "Price To Book Ratio",
-  "EVTo Revenue",
-  "EVTo EBITDA",
-  "Beta",
-  "52 Week High",
-  "52 Week Low",
-  "50Day Moving Average",
-  "200Day Moving Average",
-  "Date",
-];
+import StockHistoryModalNew from "../../components/StockHistoryModalNew";
 
-const incomeStatementColumn = [
-  "Symbol",
-  "Name",
-  "Gross Profit",
-  "Total Revenue",
-  "Operating Income",
-  "Selling General And Administrative",
-  "Interest Expense",
-  "EBIT",
-  "EBITDA",
-  "Net Income",
-];
-const balanceSheetColumn = [
-  "Symbol",
-  "Name",
-  "Total Liabilities",
-  "Long Term Debt",
-  "Common Stock",
-  "Common Stock Shares Outstanding",
-];
-const cashFlowColumn = [
-  "Symbol",
-  "Name",
-  "Operating Cashflow",
-  "Capital Expenditures",
-  "Profit Loss",
-  "Payments For Repurchase Of Common Stock",
-  "Dividend Payout Common Stock",
-  "Net Income",
-];
-const quarterlyEarningsColumn = [
-  "Symbol",
-  "Name",
-  "Reported Date",
-  "Reported EPS",
-  "Estimated EPS",
-  "Surprise",
-  "Surprise Percentage",
-];
-const earningsColumn = ["Symbol", "Name", "Fiscal Date Ending", "Reported EPS"];
-const smaColumn = [
-  "Symbol",
-  "Name",
-  "Indicator",
-  "Last Refreshed",
-  "Interval",
-  "Time Period",
-];
-
+const bestFiveStockColumn = {
+  company: "Company",
+  bestMovedStock: "Most Risen Stock",
+  bestMovedBy: "Price Risen By",
+  percentageChangeRise: "% In Rise",
+  bestMoveCurrValue: "Current Price",
+  bestMovePrevValue: "Previous Price",
+};
+const worstFiveStockColumn = {
+  company: "Company",
+  worstMovedStock: "Most Dropped Stock",
+  worstMovedBy: "Price Dropped By",
+  percentageChangeRise: "% In Drop",
+  worstMoveCurrValue: "Current Price",
+  worstMovePrevValue: "Previous Price",
+};
 export default function Stocks() {
   const [columnNames, setColumnNames] = useState(companyOverviewColumns);
   const [tableData, setTableData] = useState([]);
@@ -148,7 +77,18 @@ export default function Stocks() {
   const [searchTextC, setSearchTextC] = useState("");
   const [stockPrices, setStockPrices] = useState({});
   const [stockPricesVersion, setStockPricesVersion] = useState(0);
+  const [selectedTicker, setSelectedTicker] = useState(false);
+  const [tickers, setTickers] = useState(false);
   const context = useContext(Context);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [historyModal, setHistoryModal] = useState(false);
+  const [rankingData, setRankingData] = useState(false);
+  const [dates, setRankingDates] = useState({ date1: null, date2: null });
+  const [bestStocksFiltered, setBestStocksFiltered] = useState([]);
+  const [worstStocksFiltered, setWorstStocksFiltered] = useState([]);
+  const [compareData, setCompareData] = useState(false);
+  const [contentWidth, setContentWidth] = useState(0);
+  const contentRef = useRef(null);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -161,6 +101,233 @@ export default function Stocks() {
       setCurrentPage(1);
     }
   };
+
+  const fetchTickersFunc = async () => {
+    // context.setLoaderState(true)
+    try {
+      // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
+      // const fetchTickersRes = await fetchTickers.json()
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
+      setTickers(fetchTickersRes);
+    } catch (e) {}
+    // context.setLoaderState(false)
+  };
+
+  const handleSelect = (inputs) => {
+    let arr = inputs.map((item) => item.value);
+    setSelectedTicker(arr.join(","));
+  };
+
+  const uploadFile = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    context.setLoaderState(true);
+    try {
+      const formData = new FormData();
+      formData.append("metaDataName", "Tickers_Watchlist");
+      formData.append("myfile", file);
+      console.log("formData", formData);
+      const upload = await fetch(
+        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileTickerImport",
+        {
+          method: "POST",
+          // headers: {
+          //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          //     'Cache-Control': 'max-age=0',
+          //     'Content-Type': 'multipart/form-data',
+          //   },
+          body: formData,
+        }
+      );
+      const uploadRes = await upload.json();
+      if (upload.status == 400) {
+        Swal.fire({
+          title: uploadRes?.message,
+          icon: "warning",
+          confirmButtonColor: "var(--primary)",
+        });
+      }
+    } catch (error) {
+      console.log("Error", error);
+    }
+    context.setLoaderState(false);
+  };
+
+  const getHistoryByTicker = async () => {
+    if (!selectedTicker) {
+      Swal.fire({
+        title: "Please Select a ticker",
+        confirmButtonColor: "#719B5F",
+      });
+      return;
+    }
+    context.setLoaderState(true);
+    try {
+      // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
+      // const getBondsRes = await getBonds.json()
+      const getBonds = `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      setTableData(getBondsRes);
+      setFilterData(getBondsRes);
+      setActiveView("Ticker Home");
+    } catch (e) {
+      console.log("error", e);
+    }
+    context.setLoaderState(false);
+  };
+
+  const ranking = async () => {
+    context.setLoaderState(true);
+
+    try {
+      // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
+      // const rankingApiRes = await rankingApi.json()
+      const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${
+        dates?.date1 == null ? "1900-01-01" : dates?.date1
+      }&date2=${
+        dates?.date2 == null ? "1900-01-01" : dates?.date2
+      }&_=1719818279196`;
+      const rankingApiRes = await fetchWithInterceptor(api, false);
+      setRankingData(rankingApiRes);
+      setActiveView("Ranking");
+    } catch (error) {
+      console.log(error);
+    }
+    setIsExpanded(false);
+    context.setLoaderState(false);
+  };
+  const tickerHome = () => {
+    setActiveView("Ticker Home");
+    setIsExpanded(false);
+  };
+  const rankingPDF = async () => {
+    context.setLoaderState(true);
+    try {
+      const getPDF = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BASE_URL_V2
+        }generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`
+      );
+      const getPDFRes = await getPDF.json();
+      window.open(getPDFRes?.responseStr, "_blank");
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+    context.setLoaderState(false);
+  };
+  const reset = () => {
+    setActiveView("Ticker Home");
+    setSelectedTicker(false);
+    fetchData();
+  };
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  useEffect(() => {
+    if (screen.width < 576) {
+      if (isExpanded) {
+        let max = 0;
+        Array.from(contentRef.current.children).map((item) => {
+          if (max < item.getBoundingClientRect().width) {
+            max = item.getBoundingClientRect().width;
+          }
+        });
+        setContentWidth(`${max + 8}px`);
+        return;
+      } else {
+        setContentWidth(`0px`);
+      }
+    }
+    if (isExpanded) {
+      if (contentRef.current) {
+        let count = 0;
+        const totalWidth = Array.from(contentRef.current.children).reduce(
+          (acc, child) => {
+            count = count + 6;
+            return acc + child.getBoundingClientRect().width;
+          },
+          0
+        );
+        // setContentWidth(`${totalWidth+count}px`);
+        setContentWidth(`${totalWidth + count}px`);
+      }
+    } else {
+      if (contentRef.current) {
+        const totalWidth = Array.from(contentRef.current.children).reduce(
+          (acc, child) => {
+            return acc + child.getBoundingClientRect().width;
+          },
+          0
+        );
+        setContentWidth(`${0}px`);
+      }
+    }
+  }, [isExpanded]);
+
+  const searchBestStocks = (e) => {
+    const value = e.target.value;
+    setBestStocksFiltered(searchTable(rankingData?.bestFiveStocks, value));
+  };
+  const searchWorstStocks = (e) => {
+    const value = e.target.value;
+    setWorstStocksFiltered(searchTable(rankingData?.worstFiveStocks, value));
+  };
+
+  useEffect(() => {
+    if (rankingData?.bestFiveStocks?.length > 0) {
+      setBestStocksFiltered(rankingData?.bestFiveStocks);
+    }
+    if (rankingData?.worstFiveStocks?.length > 0) {
+      setWorstStocksFiltered(rankingData?.worstFiveStocks);
+    }
+  }, [rankingData, activeView]);
+
+  const filterBydate = async (date, filterFor) => {
+    context.setLoaderState(true);
+    try {
+      // const getStocks = await fetch(
+      //   `${
+      //     process.env.NEXT_PUBLIC_BASE_URL_V2
+      //   }getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`
+      // );
+      // const getStocksRes = await getStocks.json();
+
+      const getStocksRes = await fetchWithInterceptor(
+        filterFor === "companyOverview"
+          ? `/api/proxy?api=getCompanyOverviewByDate?date=${date}`
+          : filterFor === "incomeStatement"
+          ? `/api/proxy?api=getIncomeStatementByDate?date=${date}`
+          : filterFor === "balanceSheet"
+          ? `/api/proxy?api=getBalanceSheetByDate?date=${date}`
+          : filterFor === "cashFlow"
+          ? `/api/proxy?api=getCashFlowByDate?date=${date}`
+          : filterFor === "quarterlyEarnings"
+          ? `/api/proxy?api=getQuarterlyEarningByDate?date=${date}`
+          : filterFor === "earnings"
+          ? `/api/proxy?api=getEarningByDate?date=${date}`
+          : `/api/proxy?api=getSmaTradingByDate?date=${date}`,
+        false
+      );
+      setTableData(getStocksRes);
+      setFilterData(getStocksRes);
+      setHistoryModal(false);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+    context.setLoaderState(false);
+  };
+
+  const handleCloseModal = () => {
+    setHistoryModal(false);
+  };
+
   function transform(node) {
     if (node.type === "tag" && node.name === "img") {
       const originalSrc = node.attribs.src;
@@ -502,6 +669,7 @@ export default function Stocks() {
     // fetchStockPrice();
 
     fetchData();
+    fetchTickersFunc();
   }, []);
 
   useEffect(() => {
@@ -553,10 +721,96 @@ export default function Stocks() {
 
   return (
     <>
+      <StockHistoryModalNew
+        open={historyModal}
+        handleClose={handleCloseModal}
+        setCompareData={setCompareData}
+        setSelectedOption={setActiveView}
+        filterBydate={filterBydate}
+        tableState={tableState}
+        handleTableStateChange={handleTableStateChange}
+        setColumnNames={setColumnNames}
+      />
       <div className="main-panel">
         <div className="content-wrapper">
           <div className="d-flex flex-wrap align-items-center justify-content-between">
             <Breadcrumb />
+            <div
+              className={`collapsible-container ${
+                isExpanded ? "expanded" : ""
+              }`}
+            >
+              <span>{activeView + " :"}</span>
+              <button
+                className="main-button ms-2 btn-primary"
+                onClick={toggleExpand}
+              >
+                <i
+                  className={
+                    isExpanded
+                      ? "mdi mdi-chevron-right"
+                      : "mdi mdi-chevron-left"
+                  }
+                ></i>
+                +5 Action
+              </button>
+              <div
+                className="collapsible-content"
+                style={{ maxWidth: "max-content", width: contentWidth }}
+                ref={contentRef}
+              >
+                <button
+                  className={`h-100 collapsible-item ${
+                    activeView == "History" ? ` active` : ""
+                  }`}
+                  type="button"
+                  title="History"
+                  onClick={() => {
+                    setHistoryModal(true), setIsExpanded(false);
+                  }}
+                >
+                  <span>History</span>
+                </button>
+                <button
+                  className={`h-100 collapsible-item${
+                    activeView == "Ticker Home" ? ` active` : ""
+                  }`}
+                  type="button"
+                  title="Bond Home"
+                  onClick={tickerHome}
+                >
+                  <span>Ticker Home</span>
+                </button>
+                <button
+                  className={`h-100 collapsible-item${
+                    activeView == "Ranking" ? ` active` : ""
+                  }`}
+                  type="button"
+                  title="Ranking"
+                  onClick={ranking}
+                >
+                  <span>Ranking</span>
+                </button>
+                <button
+                  className={`h-100 collapsible-item${
+                    activeView == "Ranking PDF" ? ` active` : ""
+                  }`}
+                  type="button"
+                  title="Ranking PDF"
+                  onClick={rankingPDF}
+                >
+                  <span>Ranking PDF</span>
+                </button>
+                <button
+                  className="h-100  collapsible-item"
+                  type="button"
+                  title="Reset"
+                  onClick={reset}
+                >
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
           </div>
           <div className="page-header">
             <h3 className="page-title">
@@ -566,7 +820,59 @@ export default function Stocks() {
               Stocks
             </h3>
           </div>
-          <div className="d-flex align-items-center mb-3 selection-area">
+          <div className="d-flex align-items-center mb-3 justify-content-between selection-area">
+            <div className="selection-area d-flex align-items-end w-100">
+              <Form
+                onSubmit={uploadFile}
+                encType="multipart/form-data"
+                className="w-100"
+              >
+                <input
+                  type="hidden"
+                  name="metaDataName"
+                  value="Tickers_Watchlist"
+                />
+                <div className="d-flex align-items-end flex-wrap">
+                  <Select
+                    className="mb-0 me-2 col-md-3"
+                    isMulti
+                    value={
+                      selectedTicker &&
+                      selectedTicker
+                        .split(",")
+                        .map((item) => ({ value: item, label: item }))
+                    }
+                    onChange={handleSelect}
+                    style={{ minWidth: "200px", maxWidth: "300px", flex: "2" }}
+                    options={
+                      tickers
+                        ? tickers.map((item, index) => ({
+                            value: item.element1,
+                            label: item.element1,
+                          }))
+                        : [{ value: "Loading", label: "Loading..." }]
+                    }
+                  />
+                  <div className="actions">
+                    <button
+                      className={"btn btn-primary mb-0"}
+                      type="button"
+                      onClick={getHistoryByTicker}
+                    >
+                      <span>Go</span>
+                    </button>
+                  </div>
+                  {/* <div className="form-group me-2">
+                                <label htmlFor="uploadFile">Upload File</label>
+                                <input id="uploadFile" type="file" name="myfile" className='border-1 form-control' required onChange={handleFileChange} />
+                            </div>
+                            <div className="actions">
+                                <button className='btn btn-primary mb-0' type='submit'>Upload</button>
+                            </div> */}
+                </div>
+              </Form>
+            </div>
+
             <div className="d-flex align-items-center justify-content-center ms-auto mt-1">
               <div className="w-100">
                 <button
@@ -665,7 +971,7 @@ export default function Stocks() {
           {activeView == "Ticker Home" && (
             <>
               <div className="d-flex justify-content-between">
-                <div style={{ width: "100%", overflow: "auto" }}>
+                <div style={{ width: "60%", overflow: "auto" }}>
                   <div className="d-flex dt-buttons mb-3">
                     <div>
                       <button
@@ -1166,7 +1472,13 @@ export default function Stocks() {
                               }
                               if (colNameLower === "date") {
                                 content = (
-                                  <td>{rowDataLowercase["exdividenddate"]}</td>
+                                  <td>
+                                    {
+                                      rowDataLowercase["lastupdatedat"].split(
+                                        "T"
+                                      )[0]
+                                    }
+                                  </td>
                                 );
                               }
                               if (colNameLower === "price($)") {
@@ -1279,6 +1591,224 @@ export default function Stocks() {
                   handlePage={handlePage}
                 />
               )}
+            </>
+          )}
+          {activeView == "Ranking" && (
+            <>
+              <h3 className="mb-3">Best Stocks</h3>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="dt-buttons mb-3">
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="PDF"
+                    onClick={() => {
+                      generatePDF();
+                    }}
+                  >
+                    <span className="mdi mdi-file-pdf-box me-2"></span>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    className="dt-button buttons-excel buttons-html5 btn-primary"
+                    type="button"
+                    onClick={() => {
+                      exportToExcel();
+                    }}
+                  >
+                    <span className="mdi mdi-file-excel me-2"></span>
+                    <span>EXCEL</span>
+                  </button>
+                </div>
+                <div className="form-group d-flex align-items-center">
+                  <label
+                    htmlFor=""
+                    style={{ textWrap: "nowrap" }}
+                    className="text-success me-2 mb-0"
+                  >
+                    Search :{" "}
+                  </label>
+                  <input
+                    type="search"
+                    placeholder=""
+                    className="form-control"
+                    onChange={searchBestStocks}
+                  />
+                  {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                </div>
+              </div>
+              <div className="table-responsive mb-4">
+                <table
+                  className="table border display no-footer dataTable"
+                  role="grid"
+                  aria-describedby="exampleStocksPair_info"
+                  id="my-table"
+                >
+                  <thead>
+                    <tr>
+                      {Object.entries(bestFiveStockColumn).map(
+                        ([columnName, displayName]) => (
+                          <th key={columnName}>{displayName}</th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bestStocksFiltered.map((item, index) => {
+                      return (
+                        <tr key={"best" + index}>
+                          {Object.entries(bestFiveStockColumn).map(
+                            ([columnName, displayName]) => (
+                              <td key={item[columnName] + index}>
+                                {item[columnName]}
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      );
+                    })}
+                    {bestStocksFiltered?.length == 0 && (
+                      <tr>
+                        <td
+                          className="text-center"
+                          colSpan={Object.entries(bestFiveStockColumn)?.length}
+                        >
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <HightChart
+                data={bestStocksFiltered?.map((item) => [
+                  item["bestMovedStock"],
+                  parseFloat(item["percentageChangeRise"]),
+                ])}
+                title={"Ticker Performance"}
+                typeCheck={{
+                  categories: bestStocksFiltered?.map(
+                    (item) => item?.bestMovedStock
+                  ),
+                }}
+                yAxisTitle={"Risn in %"}
+                titleAlign={"center"}
+                subTitle={`Best Twenty`}
+              />
+              <h3 className="mb-3">Worst Stocks</h3>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="dt-buttons mb-3">
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="PDF"
+                    onClick={() => {
+                      generatePDF();
+                    }}
+                  >
+                    <span className="mdi mdi-file-pdf-box me-2"></span>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    className="dt-button buttons-excel buttons-html5 btn-primary"
+                    type="button"
+                    onClick={() => {
+                      exportToExcel();
+                    }}
+                  >
+                    <span className="mdi mdi-file-excel me-2"></span>
+                    <span>EXCEL</span>
+                  </button>
+                </div>
+                <div className="form-group d-flex align-items-center">
+                  <label
+                    htmlFor=""
+                    style={{ textWrap: "nowrap" }}
+                    className="text-success me-2 mb-0"
+                  >
+                    Search :{" "}
+                  </label>
+                  <input
+                    type="search"
+                    placeholder=""
+                    className="form-control"
+                    onChange={searchWorstStocks}
+                  />
+                  {/* <label style={{ textWrap: "nowrap" }} className='text-success ms-2 me-2 mb-0'>Show : </label>
+                                            <select name="limit" className='form-select w-auto' onChange={changeLimit} value={limit}>
+                                                <option value="10">10</option>
+                                                <option value="25">25</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                                <option value="all">All</option>
+                                            </select> */}
+                </div>
+              </div>
+              <div className="table-responsive mb-4">
+                <table
+                  className="table border display no-footer dataTable"
+                  role="grid"
+                  aria-describedby="exampleStocksPair_info"
+                  id="my-table"
+                >
+                  <thead>
+                    <tr>
+                      {Object.entries(worstFiveStockColumn).map(
+                        ([columnName, displayName]) => (
+                          <th key={columnName}>{displayName}</th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {worstStocksFiltered.map((item, index) => {
+                      return (
+                        <tr key={"worst" + index}>
+                          {Object.entries(worstFiveStockColumn).map(
+                            ([columnName, displayName]) => (
+                              <td key={item[columnName] + index}>
+                                {item[columnName]}
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      );
+                    })}
+                    {worstStocksFiltered?.length == 0 && (
+                      <tr>
+                        <td
+                          className="text-center"
+                          colSpan={Object.entries(worstFiveStockColumn)?.length}
+                        >
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <HightChart
+                data={worstStocksFiltered?.map((item) => [
+                  item["worstMovedStock"],
+                  parseFloat(item["percentageChangeDrop"]),
+                ])}
+                title={"Ticker Performance"}
+                typeCheck={{
+                  categories: worstStocksFiltered?.map(
+                    (item) => item?.bestMovedStock
+                  ),
+                }}
+                yAxisTitle={"Risn in %"}
+                titleAlign={"center"}
+                subTitle={"Worst Twenty"}
+              />
             </>
           )}
         </div>
