@@ -1483,21 +1483,37 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={compareData?.bestFiveStocks?.map((item) => [
-                  item["bestMovedStock"],
-                  parseFloat(item["percentageChangeRise"]),
-                ])}
+                data={
+                  compareData ?
+                  compareData?.bestFiveStocks?.map((item) => [
+                    item["bestMovedStock"],
+                    parseFloat(item["percentageChangeRise"]),
+                  ])
+              :
+              rankingData?.bestFiveStocks?.map((item) => [
+                item["bestMovedStock"],
+                parseFloat(item["percentageChangeRise"]),
+              ])
+              }
                 title={"Ticker Performance"}
-                typeCheck={{
-                  categories: compareData?.bestFiveStocks?.map(
+                typeCheck={
+                  compareData ?
+                  compareData?.bestFiveStocks?.map((item) => [
+                    item["bestMovedStock"],
+                    parseFloat(item["percentageChangeRise"]),
+                  ])
+                  :
+                  {
+                  categories: rankingData?.bestFiveStocks?.map(
                     (item) => item?.bestMovedStock
                   ),
-                }}
+                }
+              }
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
               />
-              <h3 className="mb-3">Worst Stocks</h3>
+              <h3 className="mt-4 mb-3">Worst Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="dt-buttons mb-3">
                   <button
@@ -1590,16 +1606,33 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={compareData?.worstFiveStocks?.map((item) => [
+                data={
+                  compareData ?
+                  compareData?.worstFiveStocks?.map((item) => [
                   item["worstMovedStock"],
                   parseFloat(item["percentageChangeDrop"]),
-                ])}
+                ])
+              :
+              rankingData?.worstFiveStocks?.map((item) => [
+                item["worstMovedStock"],
+                parseFloat(item["percentageChangeDrop"]),
+              ])
+              }
                 title={"Ticker Performance"}
-                typeCheck={{
+                typeCheck={
+                  compareData ?
+                  {
                   categories: compareData?.bestFiveStocks?.map(
                     (item) => item?.bestMovedStock
                   ),
-                }}
+                }
+                :
+                {
+                  categories: rankingData?.bestFiveStocks?.map(
+                    (item) => item?.bestMovedStock
+                  ),
+                }
+              }
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
