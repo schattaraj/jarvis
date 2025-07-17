@@ -723,10 +723,15 @@ export default function PemDetails() {
           .replaceAll(`{${fieldName}}`, "val")
           .replace(/'/g, "")
           .replace(/\band\b/g, "&&")
-          .replace(/\bor\b/g, "||");
+          .replace(/\bor\b/g, "||")
+          .replace(/\b=\b/g, "===");
 
         const rawVal = Number(numericValue);
-        const val = parseFloat(numericValue); // ✅ Convert to percentage
+        const val =
+          fieldName === "Organic Sales Growth Rate of Company (TTM)" ||
+          fieldName === "Organic Growth rate of TAM"
+            ? parseFloat(value) * 100
+            : parseFloat(value); // ✅ Convert to percentage
 
         try {
           const fn = new Function("val", `return ${expr};`);
@@ -763,7 +768,6 @@ export default function PemDetails() {
   }
 
   const result = calculatePEMScores(filterData, ruleData);
-  console.log(result);
 
   return (
     <>
@@ -1090,6 +1094,10 @@ export default function PemDetails() {
                         ).toFixed(2);
                         content = formatCurrency(content);
                       } else if (
+                        columnName.elementInternalName === "pemRankScore"
+                      ) {
+                        content = result[rowIndex]["pemScore"];
+                      } else if (
                         columnName.elementInternalName === "element5"
                       ) {
                         content = (
@@ -1182,7 +1190,8 @@ export default function PemDetails() {
                       // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                       const columnClass =
                         columnName.elementInternalName === "element1" ||
-                        columnName.elementInternalName === "element2"
+                        columnName.elementInternalName === "element2" ||
+                        columnName.elementInternalName === "pemRankScore"
                           ? "sticky-column"
                           : "";
                       return (
@@ -1195,6 +1204,9 @@ export default function PemDetails() {
                                 ? 0
                                 : columnName.elementInternalName === "element2"
                                 ? firstColWidth
+                                : columnName.elementInternalName ===
+                                  "pemRankScore"
+                                ? firstColWidth * 1.5
                                 : "auto",
                           }}
                         >
