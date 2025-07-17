@@ -134,7 +134,7 @@ export default function Stocks() {
   const [activeView, setActiveView] = useState("Ticker Home");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(100);
+  const [limit, setLimit] = useState(25);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [tableState, setTableState] = useState("companyOverview");
@@ -145,7 +145,9 @@ export default function Stocks() {
   const [firstColWidth, setFirstColWidth] = useState(0);
   const [expandedRows, setExpandedRows] = useState({});
   const [searchText, setSearchText] = useState("");
+  const [searchTextC, setSearchTextC] = useState("");
   const [stockPrices, setStockPrices] = useState({});
+  const [stockPricesVersion, setStockPricesVersion] = useState(0);
   const context = useContext(Context);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -173,42 +175,54 @@ export default function Stocks() {
     return node;
   }
 
-  const fetchStockPrice = async (symbol) => {
-    try {
-      const response = await fetch(
-        `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
-      );
-      const data = await response.json();
+  // const fetchStockPrice = async () => {
+  //   try {
+  //     const allPrices = {};
 
-      if (data["Time Series (1min)"]) {
-        const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
-        const closePrice = data["Time Series (1min)"][firstTimeKey]["4. close"];
-        setStockPrices((prev) => ({
-          ...prev,
-          [symbol]: closePrice,
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching stock price:", error);
-    }
-  };
-  useEffect(() => {
-    if (tableData.length > 0) {
-      tableData.forEach((item) => {
-        if (item.Symbol) {
-          fetchStockPrice(item.Symbol);
-        }
-      });
-    }
-  }, [tableData]);
+  //     // Loop through all pages
+  //     for (let page = 0; page < totalPages; page++) {
+  //       const getStocks = `/api/proxy?api=getCompanyOverview?symbol=AAL&size=${100}&page=${page}`;
+
+  //       const getStocksRes = await fetchWithInterceptor(getStocks, false);
+  //       const newData = getStocksRes?.content || [];
+
+  //       console.log("newData", newData);
+
+  //       // Loop through each stock in this page
+  //       for (const element of newData) {
+  //         try {
+  //           const response = await fetch(
+  //             `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${element.Symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+  //           );
+  //           const data = await response.json();
+
+  //           if (data["Time Series (1min)"]) {
+  //             const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+  //             const closePrice =
+  //               data["Time Series (1min)"][firstTimeKey]["4. close"];
+
+  //             allPrices[element.Symbol] = closePrice;
+  //           }
+  //         } catch (error) {
+  //           console.error(`Error fetching price for ${element.Symbol}`, error);
+  //         }
+  //       }
+  //     }
+
+  //     // After all data is fetched, update state once
+  //     setStockPrices((prev) => ({ ...prev, ...allPrices }));
+  //   } catch (error) {
+  //     console.error("Error in fetchStockPrice:", error);
+  //   }
+  // };
 
   useEffect(() => {
     switch (tableState) {
       case "companyOverview":
         fetchData(
           `getCompanyOverview?symbol=AAL&size=${
-            limit != "all" ? limit : totalElements
-          }&page=${currentPage - 1}`
+            limit != "all" ? limit : 100000
+          }&page=${currentPage - 1}&keyword=${searchTextC}`
         );
         break;
       case "incomeStatement":
@@ -232,6 +246,20 @@ export default function Stocks() {
     }
   }, [tableState, currentPage, limit]);
 
+  const filterC = (e) => {
+    console.log("search", e.target.value);
+    const value = e.target.value;
+    setSearchTextC(value);
+  };
+
+  useEffect(() => {
+    if (searchTextC === "")
+      fetchData(
+        `getCompanyOverview?symbol=AAL&size=${
+          limit != "all" ? limit : 100000
+        }&page=${currentPage - 1}&keyword=${searchTextC}`
+      );
+  }, [searchTextC]);
   useEffect(() => {
     setVisibleColumns(columnNames.map((col) => col));
   }, [columnNames, setColumnNames]);
@@ -246,8 +274,8 @@ export default function Stocks() {
 
   const fetchData = async (
     api = `getCompanyOverview?symbol=AAL&size=${
-      limit != "all" ? limit : totalElements
-    }&page=${currentPage - 1}`
+      limit != "all" ? limit : 100000
+    }&page=${currentPage - 1}&keyword=${searchTextC}`
   ) => {
     try {
       context.setLoaderState(true);
@@ -257,7 +285,37 @@ export default function Stocks() {
       const newData =
         tableState == "companyOverview" ? getBondsRes?.content : getBondsRes;
 
+      if (tableState === "companyOverview") {
+        for (const element of newData) {
+          const symbol = element.Symbol;
+
+          // ✅ Skip API call if price already in cache
+          if (stockPrices[symbol]) continue;
+
+          try {
+            const response = await fetch(
+              `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+            );
+            const data = await response.json();
+
+            if (data["Time Series (1min)"]) {
+              const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+              const closePrice =
+                data["Time Series (1min)"][firstTimeKey]["4. close"];
+
+              setStockPrices((prev) => ({
+                ...prev,
+                [symbol]: closePrice,
+              }));
+            }
+          } catch (error) {
+            console.error(`Error fetching price for ${symbol}`, error);
+          }
+        }
+      }
+
       setTableData(newData);
+
       // Apply search filter if searchText exists
       if (searchText) {
         setFilterData(searchTable(newData, searchText));
@@ -323,12 +381,13 @@ export default function Stocks() {
       setFilterData(tableData);
     }
   };
+
   const exportPdf = () => {
     if (tableContainerRef.current) {
       tableContainerRef.current.scrollLeft = 0; // Reset scroll to the initial position
     }
     if (tableData.length > 0) {
-      context.setLoaderState(true);
+      // context.setLoaderState(true);
       const parentDiv = document.createElement("div");
       parentDiv.id = "loader";
       parentDiv.classList.add("loader-container", "flex-column");
@@ -351,26 +410,54 @@ export default function Stocks() {
                 ? "a3"
                 : "a4",
           });
-          const headers = columnNames.filter((col) =>
-            visibleColumns.includes(col)
-          );
+          const headers = columnNames
+            .filter((col) => visibleColumns.includes(col))
+            .map((col) =>
+              col === "Market Capitalization"
+                ? "Market Capitalization (Million)"
+                : col
+            );
 
           // Table rows
           const rows = filterData.map((rowData) => {
             const rowDataLowercase = Object.fromEntries(
-              Object.entries(rowData).map(([key, value]) => [
-                key.toLowerCase(),
-                value,
-              ])
+              Object.entries(rowData).map(([key, value], index) => {
+                return [
+                  key.toLowerCase() === "marketcapitalization"
+                    ? "marketcapitalization(million)"
+                    : key.toLowerCase() === "price"
+                    ? "price($)"
+                    : key.toLowerCase(),
+                  key.toLowerCase() === "marketcapitalization"
+                    ? `$ ${value / 1000}`
+                    : key.toLowerCase() === "price"
+                    ? stockPrices[rowData["Symbol"]]
+                    : value,
+                ];
+              })
             );
 
-            return headers.map((col) =>
-              rowDataLowercase[col.toLowerCase().replace(/\s+/g, "")]
+            // console.log("rowData", rowDataLowercase, headers);
+
+            return headers.map((col) => {
+              console.log(
+                col.toLowerCase().replace(/\s+/g, ""),
+                col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)",
+                rowDataLowercase["changeprice"]
+              );
+
+              return rowDataLowercase[
+                col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)"
+                  ? "changeprice"
+                  : col.toLowerCase().replace(/\s+/g, "")
+              ]
                 ? rowDataLowercase[
-                    col.toLowerCase().replace(/\s+/g, "")
+                    col.toLowerCase().replace(/\s+/g, "") === "pricechange(%)"
+                      ? "changeprice"
+                      : col.toLowerCase().replace(/\s+/g, "")
                   ].toString()
-                : ""
-            );
+                : "";
+            });
           });
 
           pdf.autoTable({
@@ -385,7 +472,11 @@ export default function Stocks() {
 
           pdf.save("Table_Report.pdf");
           const loaderDiv = document.getElementById("loader");
+          console.log("loderdiv", loaderDiv);
+
           if (loaderDiv) {
+            console.log("loderdiv", loaderDiv);
+
             loaderDiv.remove();
           }
         })
@@ -408,6 +499,8 @@ export default function Stocks() {
   }, [tableState, searchText]);
 
   useEffect(() => {
+    // fetchStockPrice();
+
     fetchData();
   }, []);
 
@@ -704,13 +797,35 @@ export default function Stocks() {
                   >
                     Search :{" "}
                   </label>
-                  <input
-                    type="search"
-                    id="search"
-                    placeholder=""
-                    className="form-control"
-                    onChange={filter}
-                  />
+                  {tableState === "companyOverview" ? (
+                    <div class="input-group">
+                      <input
+                        type="search"
+                        class="form-control"
+                        placeholder=""
+                        aria-label="search"
+                        aria-describedby="basic-addon2"
+                        value={searchTextC}
+                        onChange={filterC}
+                      />
+                      <button
+                        class="btn-primary"
+                        onClick={() => fetchData()}
+                        id="basic-addon2"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="search"
+                      class="form-control"
+                      placeholder=""
+                      aria-label="search"
+                      aria-describedby="basic-addon2"
+                      onChange={filter}
+                    />
+                  )}
                 </div>
               </div>
               <div className="table-responsive" ref={tableContainerRef}>
@@ -722,6 +837,7 @@ export default function Stocks() {
                 >
                   <thead>
                     <tr>
+                      {console.log("stickPrice", stockPrices)}
                       {tableState === "companyOverview"
                         ? companyOverviewColumns.map(
                             (columnName, index) =>
@@ -1056,9 +1172,15 @@ export default function Stocks() {
                               if (colNameLower === "price($)") {
                                 content = (
                                   <td>
-                                    {Number(
-                                      stockPrices[rowDataLowercase["symbol"]]
-                                    ).toFixed(2) || "Loading..."}
+                                    {stockPrices?.[
+                                      rowDataLowercase["symbol"]
+                                    ] !== undefined
+                                      ? Number(
+                                          stockPrices[
+                                            rowDataLowercase["symbol"]
+                                          ]
+                                        ).toFixed(2)
+                                      : "Loading..."}
                                   </td>
                                 );
                               }

@@ -64,6 +64,7 @@ export default function Portfolio() {
   const [totalPages3, setTotalPages3] = useState(0);
   const [totalElements3, setTotalElements3] = useState(0);
   const [isLastPage3, setIsLastPage3] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const [portfolioPayload, setPortfolioPayload] = useState({
     myArr: [],
     portfolioName: "",
@@ -88,6 +89,13 @@ export default function Portfolio() {
   const [searchQuery, setSearchQuery] = useState("");
   const [stockPrices, setStockPrices] = useState({});
   const tableRef = useRef(null);
+  const firstColRef = useRef(null);
+  const [firstColWidth, setFirstColWidth] = useState(0);
+  useEffect(() => {
+    if (firstColRef.current) {
+      setFirstColWidth(firstColRef.current.offsetWidth);
+    }
+  }, [firstColRef, filterData]);
   const options = {
     replace: (elememt) => {
       if (elememt.name === "a") {
@@ -337,8 +345,8 @@ export default function Portfolio() {
       // const allStocksApiRes = await allStocksApi.json();
 
       const apiEndpoint = `/api/proxy?api=getAllStocksForPolio?pageSize=${
-        limit3 != "all" ? limit3 : totalElements3
-      }&pageNumber=${currentPage3 - 1}`;
+        limit3 != "all" ? limit3 : 20000
+      }&pageNumber=${currentPage3 - 1}&keyword=${searchText}`;
       const response = await fetchWithInterceptor(apiEndpoint, false);
       setAllStocks(response?.content);
       setfilteredAllStockPortfolios(response?.content);
@@ -582,11 +590,7 @@ export default function Portfolio() {
       const accessToken = localStorage.getItem("access_token");
       const { userID } = decodeJWT(accessToken);
 
-      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${
-        formData.portfolioName
-      }&visiblePortFolio=${
-        subscribersOnly ? "yes" : "no"
-      }&userId=${userID}&bodyType=form`;
+      const apiEndpoint = `/api/proxy?api=createPortfolio?name=${formData.portfolioName}&visiblePortFolio=yes&userId=${userID}&bodyType=form`;
       // const options = { body: JSON.stringify(jsonObject), method: "POST" };
       console.log(stockFormData);
 
@@ -836,7 +840,7 @@ export default function Portfolio() {
     try {
       const apiEndpoint = `/api/proxy?api=getAllPortfolioByName?name=${name}&pageNumber=${
         currentPage3 - 1
-      }&pageSize=${limit3 !== "all" ? limit3 : totalElements3}`;
+      }&pageSize=${limit3 !== "all" ? limit3 : 20000}`;
       const options = { method: "GET" };
 
       const response = await fetchWithInterceptor(
@@ -926,28 +930,38 @@ export default function Portfolio() {
 
   const allStockFilter = (e) => {
     const value = e.target.value;
-    const filtered = searchTable(allStocks, value);
+    setSearchText(value);
+    // if (value === "") {
+    //   getAllStock();
+    // }
+    // const filtered = searchTable(allStocks, value);
 
-    // Check which tickers are selected
-    const selectedStockNames = selectedStocks.map((s) => s.stockName);
+    // // Check which tickers are selected
+    // const selectedStockNames = selectedStocks.map((s) => s.stockName);
 
-    // Clean filtered list: reset share/purchaseDate/purchasePrice if not selected already
-    const updatedFiltered = filtered.map((stock) => {
-      if (!selectedStockNames.includes(stock.stockName)) {
-        return {
-          ...stock,
-          share: "",
-          purchaseDate: "",
-          purchasePrice: "",
-        };
-      }
-      return stock;
-    });
+    // // Clean filtered list: reset share/purchaseDate/purchasePrice if not selected already
+    // const updatedFiltered = filtered.map((stock) => {
+    //   if (!selectedStockNames.includes(stock.stockName)) {
+    //     return {
+    //       ...stock,
+    //       share: "",
+    //       purchaseDate: "",
+    //       purchasePrice: "",
+    //     };
+    //   }
+    //   return stock;
+    // });
 
-    setfilteredAllStockPortfolios(
-      sortBySelection(updatedFiltered, selectedStocks)
-    );
+    // setfilteredAllStockPortfolios(
+    //   sortBySelection(updatedFiltered, selectedStocks)
+    // );
   };
+
+  useEffect(() => {
+    if (searchText === "") {
+      getAllStock();
+    }
+  }, [searchText]);
 
   const handleSort3 = (key) => {
     let direction = "asc";
@@ -1114,6 +1128,20 @@ export default function Portfolio() {
     return null;
   }
 
+  const orderedColumnNames = [
+    ...columnNames.filter((col) => col.elementInternalName === "element1"),
+    ...columnNames.filter((col) => col.elementInternalName === "element4"),
+    ...columnNames.filter((col) => col.elementInternalName === "element10"),
+    ...columnNames.filter((col) => col.elementInternalName === "element6"),
+    ...columnNames.filter((col) => col.elementInternalName === "element7"),
+    ...columnNames.filter(
+      (col) =>
+        !["element1", "element4", "element10", "element6", "element7"].includes(
+          col.elementInternalName
+        )
+    ),
+  ];
+
   return (
     <>
       <div className="main-panel">
@@ -1248,27 +1276,46 @@ export default function Portfolio() {
                 >
                   <thead>
                     <tr>
-                      {columnNames.length > 0 &&
-                        columnNames.map((item, index) => {
-                          return (
-                            <th
-                              key={index}
-                              onClick={() =>
-                                handleSort(item.elementInternalName)
-                              }
-                            >
-                              {item?.elementDisplayName}{" "}
-                              {getSortIcon(item, sortConfig)}
-                            </th>
-                          );
-                        })}
+                      {orderedColumnNames.map((item, index) => {
+                        return (
+                          <th
+                            key={index}
+                            onClick={() => handleSort(item.elementInternalName)}
+                            className={
+                              item.elementInternalName === "element1" ||
+                              item.elementInternalName === "element4" ||
+                              item.elementInternalName === "element10"
+                                ? "sticky-column"
+                                : ""
+                            }
+                            style={{
+                              left:
+                                item.elementInternalName === "element1"
+                                  ? 0
+                                  : item.elementInternalName === "element4"
+                                  ? firstColWidth
+                                  : item.elementInternalName === "element10"
+                                  ? firstColWidth * 2
+                                  : "auto",
+                            }}
+                            ref={
+                              item.elementInternalName === "element1"
+                                ? firstColRef
+                                : null
+                            }
+                          >
+                            {item?.elementDisplayName}{" "}
+                            {getSortIcon(item, sortConfig)}
+                          </th>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
                     {filterData.map((item, index) => {
                       return (
                         <tr key={"tr" + index}>
-                          {columnNames.map((inner, keyid) => {
+                          {orderedColumnNames.map((inner, keyid) => {
                             const percentColumns = [
                               "element31",
                               "element34",
@@ -1279,6 +1326,7 @@ export default function Portfolio() {
                               "element11",
                               "element13",
                             ];
+
                             if (
                               percentColumns.includes(
                                 inner["elementInternalName"],
@@ -1299,7 +1347,29 @@ export default function Portfolio() {
                               inner.elementInternalName === "element1"
                             ) {
                               return (
-                                <td key={"keyid" + keyid}>
+                                <td
+                                  key={"keyid" + keyid}
+                                  className="sticky-column"
+                                  style={{
+                                    left: 0,
+                                  }}
+                                >
+                                  {extractAndConvert(
+                                    item[inner.elementInternalName]
+                                  )}
+                                </td>
+                              );
+                            } else if (
+                              inner.elementInternalName === "element4"
+                            ) {
+                              return (
+                                <td
+                                  key={"keyid" + keyid}
+                                  className="sticky-column"
+                                  style={{
+                                    left: firstColWidth,
+                                  }}
+                                >
                                   {extractAndConvert(
                                     item[inner.elementInternalName]
                                   )}
@@ -1309,7 +1379,13 @@ export default function Portfolio() {
                               inner.elementInternalName === "element10"
                             ) {
                               return (
-                                <td key={"keyid" + keyid}>
+                                <td
+                                  key={"keyid" + keyid}
+                                  className="sticky-column"
+                                  style={{
+                                    left: firstColWidth * 2,
+                                  }}
+                                >
                                   {Number(stockPrices[item.element71]).toFixed(
                                     2
                                   ) || "Loading..."}
@@ -1333,7 +1409,7 @@ export default function Portfolio() {
                   <thead>
                     <tr>
                       {filterData.length
-                        ? columnNames.map((item, index) => {
+                        ? orderedColumnNames.map((item, index) => {
                             if (item.elementInternalName === "element31") {
                               return (
                                 <th key={index}>
@@ -1684,12 +1760,23 @@ export default function Portfolio() {
                 >
                   Search :{" "}
                 </label>
-                <input
-                  type="search"
-                  placeholder=""
-                  className="form-control"
-                  onChange={allStockFilter}
-                />
+                <div class="input-group">
+                  <input
+                    type="search"
+                    class="form-control"
+                    placeholder=""
+                    aria-label="search"
+                    aria-describedby="basic-addon2"
+                    onChange={allStockFilter}
+                  />
+                  <button
+                    class="btn-primary"
+                    onClick={getAllStock}
+                    id="basic-addon2"
+                  >
+                    Search
+                  </button>
+                </div>
               </div>
             </div>
 

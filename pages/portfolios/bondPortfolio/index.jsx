@@ -26,6 +26,7 @@ import PortfolioTable from "../../../components/PorfolioTable";
 import ReportTable from "../../../components/ReportTable";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { PaginationNew } from "../../../components/PaginationNew";
 export default function BondPortfolio() {
   const context = useContext(Context);
   const [columnNames, setColumnNames] = useState([]);
@@ -41,6 +42,8 @@ export default function BondPortfolio() {
   const [currentPage2, setCurrentPage2] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [limit, setLimit] = useState(25);
+  const [searchText, setSearchText] = useState("");
+
   const [limit2, setLimit2] = useState(25);
   const [subscriberOnly, setSubscriberOnly] = useState(false);
   const [countApiCall, setCountApiCall] = useState(0);
@@ -212,27 +215,34 @@ export default function BondPortfolio() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
+      // setLimit(25);
       if (selectedPortfolioId) {
         const getPortfolio = await fetchWithInterceptor(
-          "/api/proxy?api=getBondPortFolioSet?idPortfolio=" +
-            selectedPortfolioId
+          `/api/proxy?api=getBondPortFolioSet?idPortfolio=${selectedPortfolioId}&pageNumber=${
+            currentPage - 1
+          }&pageSize=${limit !== "all" ? limit : 20000}&keyword=${searchText}`
         );
 
         // const getPortfolioRes = await getPortfolio.json();
-        console.log(getPortfolio);
-        setTableData(getPortfolio);
-        setFilterData(getPortfolio);
-        const totalItems = getPortfolio.length;
-        setTotalItems(totalItems);
-        const items = await SliceData(1, limit, getPortfolio);
-        setFilterData(items);
-        setTotalPages(Math.ceil(totalItems / limit));
+        // console.log(getPortfolio);
+        setTableData(getPortfolio.content);
+        setFilterData(getPortfolio.content);
+        setTotalItems(getPortfolio.totalElements);
+        setTotalPages(getPortfolio.totalPages);
+        // const items = await SliceData(1, limit, getPortfolio);
+        // setFilterData(items);
+        // setTotalPages(Math.ceil(totalItems / limit));
       }
     } catch (e) {
       console.log("error", e);
     }
     context.setLoaderState(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, limit]);
+
   const getAllStock = async () => {
     context.setLoaderState(true);
     try {
@@ -289,13 +299,23 @@ export default function BondPortfolio() {
     }
   };
   const filter = (e) => {
-    // console.log('search', e.target.value)
+    console.log("search", e.target.value);
     const value = e.target.value;
-    const filtered = tableData.filter((elememt) =>
-      elememt.element4.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilterData(searchTable(tableData, value));
+    setSearchText(value);
+    // if (value === "") {
+    //   fetchData(); // Automatically fetch all data when search is cleared
+    // }
+    // const filtered = tableData.filter((elememt) =>
+    //   elememt.element4.toLowerCase().includes(value.toLowerCase())
+    // );
+    // setFilterData(searchTable(tableData, value));
   };
+  useEffect(() => {
+    if (searchText === "") {
+      fetchData();
+    }
+  }, [searchText]);
+
   const handleClick = (e, name) => {
     e.preventDefault();
     const tickerName = name.slice(name.indexOf("(") + 1, name.indexOf(")"));
@@ -528,10 +548,13 @@ export default function BondPortfolio() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  }; 
-  const filteredPortfolio = sortBySelectionBond(allBondPortfoilo.filter((row) =>
-    row.issuerName.toLowerCase().includes(searchQuery.toLowerCase())
-  ),selectedStocks);
+  };
+  const filteredPortfolio = sortBySelectionBond(
+    allBondPortfoilo.filter((row) =>
+      row.issuerName.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    selectedStocks
+  );
   const closeEditModal = () => {
     setEditModal(false);
   };
@@ -549,7 +572,7 @@ export default function BondPortfolio() {
     }
   }, [countApiCall]);
   useEffect(() => {
-    if (tableData.length > 0) {
+    if (tableData?.length > 0) {
       let items = [...tableData];
       if (sortConfig !== null) {
         items.sort((a, b) => {
@@ -614,7 +637,7 @@ export default function BondPortfolio() {
     const value = parseFloat(item);
     return sum + (isNaN(value) ? 0 : value); // Avoid NaN
   }, 0);
-  const totalYearMatyrity = tableData.reduce(
+  const totalYearMatyrity = (tableData || []).reduce(
     (acc, item) => {
       const purchaseVolume = parseFloat(item.element22);
       const value = purchaseVolume * parseFloat(item.element95);
@@ -625,7 +648,7 @@ export default function BondPortfolio() {
     { totalValue: parseFloat(0), totalPV: parseFloat(0) }
   );
 
-  const totalYTW = tableData.reduce(
+  const totalYTW = (tableData || []).reduce(
     (acc, item) => {
       const purchaseVolume = parseFloat(item.element22);
       const value = purchaseVolume * parseFloat(item.element3);
@@ -636,7 +659,7 @@ export default function BondPortfolio() {
     { totalValue: parseFloat(0), totalPV: parseFloat(0) }
   );
 
-  const totalPurchasePrice = tableData.reduce(
+  const totalPurchasePrice = (tableData || []).reduce(
     (acc, item) => {
       const purchaseVolume = parseFloat(item.element22);
       const value = purchaseVolume * parseFloat(item.element21);
@@ -647,7 +670,7 @@ export default function BondPortfolio() {
     { totalValue: parseFloat(0), totalPV: parseFloat(0) }
   );
 
-  const totalPrice = tableData.reduce(
+  const totalPrice = (tableData || []).reduce(
     (acc, item) => {
       const purchaseVolume = parseFloat(item.element22);
       const value = purchaseVolume * parseFloat(item.element9);
@@ -658,7 +681,7 @@ export default function BondPortfolio() {
     { totalValue: parseFloat(0), totalPV: parseFloat(0) }
   );
 
-  const totalAvgYearsToMaturity = filterData.reduce(
+  const totalAvgYearsToMaturity = (filterData || []).reduce(
     (acc, item) => {
       const purchaseVolume = parseFloat(item.element22);
       const today = new Date();
@@ -685,7 +708,7 @@ export default function BondPortfolio() {
     return Number(value).toFixed(2);
   };
   useEffect(() => {
-    const calculatedProfits = filterData.map((item) =>
+    const calculatedProfits = filterData?.map((item) =>
       getProfitValue(item["element9"], item["element21"], item["element22"])
     );
     setProfitValue(calculatedProfits);
@@ -829,12 +852,29 @@ export default function BondPortfolio() {
                   >
                     Search :{" "}
                   </label>
-                  <input
+                  {/* <input
                     type="search"
                     placeholder=""
                     className="form-control"
                     onChange={filter}
-                  />
+                  /> */}
+                  <div class="input-group">
+                    <input
+                      type="search"
+                      class="form-control"
+                      placeholder=""
+                      aria-label="search"
+                      aria-describedby="basic-addon2"
+                      onChange={filter}
+                    />
+                    <button
+                      class="btn-primary"
+                      onClick={fetchData}
+                      id="basic-addon2"
+                    >
+                      Search
+                    </button>
+                  </div>
                   <label
                     style={{ textWrap: "nowrap" }}
                     className="text-success ms-2 me-2 mb-0"
@@ -902,7 +942,7 @@ export default function BondPortfolio() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filterData.map((item, index) => {
+                    {(filterData || []).map((item, index) => {
                       const profit = getProfitValue(
                         item["element9"],
                         item["element21"],
@@ -1097,13 +1137,21 @@ export default function BondPortfolio() {
                   </tfoot>
                 </table>
               </div>
-              <Pagination
+              <PaginationNew
+                currentPage={currentPage}
+                totalItems={totalItems}
+                totalPage={totalPages}
+                limit={limit}
+                setCurrentPage={setCurrentPage}
+                handlePage={handlePage}
+              />
+              {/* <Pagination
                 currentPage={currentPage}
                 totalItems={tableData}
                 limit={limit}
                 setCurrentPage={setCurrentPage}
                 handlePage={handlePage}
-              />
+              /> */}
             </>
           )}
           {manageView && (
@@ -1448,7 +1496,7 @@ export default function BondPortfolio() {
           url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&pageNumber=${
             currentPage3 - 1
           }&pageSize=${
-            limit3 !== "all" ? limit3 : totalElements3
+            limit3 !== "all" ? limit3 : 20000
           }&_=${new Date().getTime()}`}
           open={editModal}
           heading={"Edit Portfolio"}
