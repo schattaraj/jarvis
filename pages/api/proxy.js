@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         // Include the body only for POST requests
         if (req.method === 'POST' && query.bodyType!="form") {
             fetchOptions.body = JSON.stringify(reqBody);
-            return res.status(200).json({ message:"Hello" });
+            // return res.status(200).json({ message:"Hello"+reqBody });
         }
 
         const response = await fetch(baseUrl.toString(),fetchOptions);

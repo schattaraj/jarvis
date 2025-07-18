@@ -200,7 +200,7 @@ export default function Stocks() {
       const getBonds = `/api/proxy?api=getCompanyOverviewBySymbol`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false, false, {
         method: "POST",
-        body: selectedTicker,
+        body: JSON.stringify(selectedTicker),
       });
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
