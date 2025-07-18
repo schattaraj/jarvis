@@ -749,12 +749,10 @@ export default function Portfolio() {
     setManageView(true);
     context.setLoaderState(true);
     try {
-      const allStockApi = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }getAllPortfolio?userId=2&_=${new Date().getTime()}`
+      const allStockApiRes = await fetchWithInterceptor(
+        `/api/proxy?api=getAllPortfolio?userId=2&_=${new Date().getTime()}`
       );
-      const allStockApiRes = await allStockApi.json();
+      // const allStockApiRes = await allStockApi.json();
       setStockportfolios(allStockApiRes);
     } catch (error) {}
     context.setLoaderState(false);
@@ -853,16 +851,19 @@ export default function Portfolio() {
       );
       const allStocksApiRes = response;
 
-      setTotalPages3(response.totalPages);
-      setTotalElements3(response.totalElements);
-      setIsLastPage3(response.lastPage);
+      // setTotalPages3(response.totalPages);
+      // setTotalElements3(response.totalElements);
+      // setIsLastPage3(response.lastPage);
+      // setTotalPages3(response.totalPages);
+      setTotalElements3(response.length);
 
       // Set all stocks
       setAllStocks(allStocksApiRes);
 
       // Extract selected stocks (with share or purchaseDate)
       const selected = allStocksApiRes
-        .filter((item) => item.share || item.purchaseDate)
+        // .filter((item) => item.share || item.purchaseDate)
+        .filter((item) => item.checkBoxHtml)
         .map((item) => ({
           stockName: item.stockName,
           share: item.share,
@@ -873,7 +874,8 @@ export default function Portfolio() {
       setSelectedStocks(selected); // Set selected state
 
       // Sort allStocks with selected ones at top
-      setfilteredAllStockPortfolios(sortBySelection(allStocksApiRes, selected));
+      // setfilteredAllStockPortfolios(sortBySelection(allStocksApiRes, selected));
+      setfilteredAllStockPortfolios(allStocksApiRes);
 
       // Prefill formData
       formData.portfolioName = name;

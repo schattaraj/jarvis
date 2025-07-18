@@ -61,6 +61,7 @@ export default function Stocks() {
   const [tableData, setTableData] = useState([]);
   const [filterData, setFilterData] = useState([]);
   const [activeView, setActiveView] = useState("Ticker Home");
+  const [isHistoryView, setIsHistoryView] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(25);
@@ -77,7 +78,7 @@ export default function Stocks() {
   const [searchTextC, setSearchTextC] = useState("");
   const [stockPrices, setStockPrices] = useState({});
   const [stockPricesVersion, setStockPricesVersion] = useState(0);
-  const [selectedTicker, setSelectedTicker] = useState(false);
+  const [selectedTicker, setSelectedTicker] = useState([]);
   const [tickers, setTickers] = useState(false);
   const context = useContext(Context);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -88,6 +89,14 @@ export default function Stocks() {
   const [worstStocksFiltered, setWorstStocksFiltered] = useState([]);
   const [compareData, setCompareData] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
+
+  const [reportTicker, setReportTicker] = useState("");
+  const [reportModal, setReportModal] = useState(false);
+  const [activeTab, setActiveTab] = useState({
+    tab: "latest",
+    selectedDate: "All",
+  });
+
   const contentRef = useRef(null);
   const toggleDescription = (index) => {
     setExpandedRows((prev) => ({
@@ -95,11 +104,28 @@ export default function Stocks() {
       [index]: !prev[index],
     }));
   };
+
+  useEffect(() => {
+    if (compareData && activeView == "History") {
+      setRankingData(compareData);
+    }
+  }, [compareData]);
+  console.log(rankingData, activeView);
+
   const handleTableStateChange = (table) => {
     if (table != tableState) {
       setTableState(table);
       setCurrentPage(1);
     }
+  };
+
+  const handleReportData = (data) => {
+    setReportTicker(data);
+    setReportModal(true);
+  };
+  const closeReportModal = () => {
+    setReportModal(false);
+    setActiveTab({ tab: "latest", selectedDate: "All" });
   };
 
   const fetchTickersFunc = async () => {
@@ -116,7 +142,8 @@ export default function Stocks() {
 
   const handleSelect = (inputs) => {
     let arr = inputs.map((item) => item.value);
-    setSelectedTicker(arr.join(","));
+    // setSelectedTicker(arr.join(","));
+    setSelectedTicker(arr);
   };
 
   const uploadFile = async (e) => {
@@ -170,8 +197,11 @@ export default function Stocks() {
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
-      const getBonds = `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`;
-      const getBondsRes = await fetchWithInterceptor(getBonds, false);
+      const getBonds = `/api/proxy?api=getCompanyOverviewBySymbol`;
+      const getBondsRes = await fetchWithInterceptor(getBonds, false, false, {
+        method: "POST",
+        body: selectedTicker,
+      });
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setActiveView("Ticker Home");
@@ -187,11 +217,9 @@ export default function Stocks() {
     try {
       // const rankingApi = await fetch(`https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates?.date1 == null ? '1900-01-01' : dates?.date1}&date2=${dates?.date2 == null ? '1900-01-01' : dates?.date2}&_=1719818279196`)
       // const rankingApiRes = await rankingApi.json()
-      const api = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${
+      const api = `/api/proxy?api=getCompanyOverviewCompareByPrice?metadataName=Tickers_Watchlist&date1=${
         dates?.date1 == null ? "1900-01-01" : dates?.date1
-      }&date2=${
-        dates?.date2 == null ? "1900-01-01" : dates?.date2
-      }&_=1719818279196`;
+      }&date2=${dates?.date2 == null ? "1900-01-01" : dates?.date2}`;
       const rankingApiRes = await fetchWithInterceptor(api, false);
       setRankingData(rankingApiRes);
       setActiveView("Ranking");
@@ -222,7 +250,8 @@ export default function Stocks() {
   };
   const reset = () => {
     setActiveView("Ticker Home");
-    setSelectedTicker(false);
+    setSelectedTicker([]);
+    setIsHistoryView(false);
     fetchData();
   };
 
@@ -315,6 +344,7 @@ export default function Stocks() {
           : `/api/proxy?api=getSmaTradingByDate?date=${date}`,
         false
       );
+      setIsHistoryView(true);
       setTableData(getStocksRes);
       setFilterData(getStocksRes);
       setHistoryModal(false);
@@ -461,14 +491,14 @@ export default function Stocks() {
 
           try {
             const response = await fetch(
-              `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=1min&apikey=TY1WA5LN5KU3SQIV&datatype=json`
+              `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=15min&adjusted=false&extended_hours=false&apikey=TY1WA5LN5KU3SQIV&datatype=json`
             );
             const data = await response.json();
 
-            if (data["Time Series (1min)"]) {
-              const firstTimeKey = Object.keys(data["Time Series (1min)"])[0];
+            if (data["Time Series (15min)"]) {
+              const firstTimeKey = Object.keys(data["Time Series (15min)"])[0];
               const closePrice =
-                data["Time Series (1min)"][firstTimeKey]["4. close"];
+                data["Time Series (15min)"][firstTimeKey]["4. close"];
 
               setStockPrices((prev) => ({
                 ...prev,
@@ -508,8 +538,6 @@ export default function Stocks() {
   };
 
   useEffect(() => {
-    console.log("tableData", tableData);
-
     // const transformedData = transformData(columnNames, tableData);
     // console.log("transformedData", transformedData);
     context.setFormattedBotData(tableData);
@@ -752,7 +780,7 @@ export default function Stocks() {
                       : "mdi mdi-chevron-left"
                   }
                 ></i>
-                +5 Action
+                +4 Action
               </button>
               <div
                 className="collapsible-content"
@@ -791,7 +819,7 @@ export default function Stocks() {
                 >
                   <span>Ranking</span>
                 </button>
-                <button
+                {/* <button
                   className={`h-100 collapsible-item${
                     activeView == "Ranking PDF" ? ` active` : ""
                   }`}
@@ -800,7 +828,7 @@ export default function Stocks() {
                   onClick={rankingPDF}
                 >
                   <span>Ranking PDF</span>
-                </button>
+                </button> */}
                 <button
                   className="h-100  collapsible-item"
                   type="button"
@@ -839,7 +867,7 @@ export default function Stocks() {
                     value={
                       selectedTicker &&
                       selectedTicker
-                        .split(",")
+                        // .split(",")
                         .map((item) => ({ value: item, label: item }))
                     }
                     onChange={handleSelect}
@@ -1143,7 +1171,6 @@ export default function Stocks() {
                 >
                   <thead>
                     <tr>
-                      {console.log("stickPrice", stockPrices)}
                       {tableState === "companyOverview"
                         ? companyOverviewColumns.map(
                             (columnName, index) =>
@@ -1394,7 +1421,16 @@ export default function Stocks() {
                                             rowData?.logoFileDetails || "",
                                             { replace: transform }
                                           )}
-                                        <p>{rowDataLowercase[colNameLower]}</p>
+                                        <a
+                                          data-toggle="modal"
+                                          onClick={() => {
+                                            handleReportData(
+                                              rowDataLowercase[colNameLower]
+                                            );
+                                          }}
+                                        >
+                                          {rowDataLowercase[colNameLower]}
+                                        </a>
                                       </div>
                                     ) : (
                                       <div style={{ width: "fit-content" }}>
@@ -1484,9 +1520,11 @@ export default function Stocks() {
                               if (colNameLower === "price($)") {
                                 content = (
                                   <td>
-                                    {stockPrices?.[
-                                      rowDataLowercase["symbol"]
-                                    ] !== undefined
+                                    {isHistoryView
+                                      ? rowDataLowercase["price"]
+                                      : stockPrices?.[
+                                          rowDataLowercase["symbol"]
+                                        ] !== undefined
                                       ? Number(
                                           stockPrices[
                                             rowDataLowercase["symbol"]
@@ -1666,7 +1704,7 @@ export default function Stocks() {
                         <tr key={"best" + index}>
                           {Object.entries(bestFiveStockColumn).map(
                             ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
+                              <td key={`${columnName}-${index}`}>
                                 {item[columnName]}
                               </td>
                             )
@@ -1688,15 +1726,24 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={bestStocksFiltered?.map((item) => [
-                  item["bestMovedStock"],
-                  parseFloat(item["percentageChangeRise"]),
-                ])}
+                data={
+                  compareData
+                    ? compareData?.bestFiveStocks?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
+                    : bestStocksFiltered?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
+                }
                 title={"Ticker Performance"}
                 typeCheck={{
-                  categories: bestStocksFiltered?.map(
-                    (item) => item?.bestMovedStock
-                  ),
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : bestStocksFiltered?.map((item) => item?.bestMovedStock),
                 }}
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
@@ -1773,7 +1820,7 @@ export default function Stocks() {
                         <tr key={"worst" + index}>
                           {Object.entries(worstFiveStockColumn).map(
                             ([columnName, displayName]) => (
-                              <td key={item[columnName] + index}>
+                              <td key={`${columnName}-${index}`}>
                                 {item[columnName]}
                               </td>
                             )
@@ -1795,13 +1842,224 @@ export default function Stocks() {
                 </table>
               </div>
               <HightChart
-                data={worstStocksFiltered?.map((item) => [
+                data={
+                  compareData
+                    ? compareData?.worstFiveStocks?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                    : worstStocksFiltered?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                }
+                title={"Ticker Performance"}
+                typeCheck={{
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : worstStocksFiltered?.map((item) => item?.bestMovedStock),
+                }}
+                yAxisTitle={"Risn in %"}
+                titleAlign={"center"}
+                subTitle={"Worst Twenty"}
+              />
+            </>
+          )}
+          {activeView == "History" && (
+            <>
+              <h3 className="mb-3">Best Stocks</h3>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="dt-buttons mb-3">
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="PDF"
+                    onClick={() => {
+                      generatePDF();
+                    }}
+                  >
+                    <span className="mdi mdi-file-pdf-box me-2"></span>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    className="dt-button buttons-excel buttons-html5 btn-primary"
+                    type="button"
+                    onClick={() => {
+                      exportToExcel();
+                    }}
+                  >
+                    <span className="mdi mdi-file-excel me-2"></span>
+                    <span>EXCEL</span>
+                  </button>
+                </div>
+                <div className="form-group d-flex align-items-center">
+                  <label
+                    htmlFor=""
+                    style={{ textWrap: "nowrap" }}
+                    className="text-success me-2 mb-0"
+                  >
+                    Search :{" "}
+                  </label>
+                  <input
+                    type="search"
+                    placeholder=""
+                    className="form-control"
+                    onChange={searchBestStocks}
+                  />
+                </div>
+              </div>
+              <div className="table-responsive mb-4">
+                <table
+                  className="table border display no-footer dataTable"
+                  role="grid"
+                  aria-describedby="exampleStocksPair_info"
+                  id="my-table"
+                >
+                  <thead>
+                    <tr>
+                      {Object.entries(bestFiveStockColumn).map(
+                        ([columnName, displayName]) => (
+                          <th key={columnName}>{displayName}</th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bestStocksFiltered.map((item, index) => {
+                      return (
+                        <tr key={"best" + index}>
+                          {Object.entries(bestFiveStockColumn).map(
+                            ([columnName, displayName]) => (
+                              <td key={`${columnName}-${index}`}>
+                                {item[columnName]}
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      );
+                    })}
+                    {bestStocksFiltered?.length == 0 && (
+                      <tr>
+                        <td
+                          className="text-center"
+                          colSpan={Object.entries(bestFiveStockColumn)?.length}
+                        >
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <HightChart
+                data={compareData?.bestFiveStocks?.map((item) => [
+                  item["bestMovedStock"],
+                  parseFloat(item["percentageChangeRise"]),
+                ])}
+                title={"Ticker Performance"}
+                typeCheck={{
+                  categories: compareData?.bestFiveStocks?.map(
+                    (item) => item?.bestMovedStock
+                  ),
+                }}
+                yAxisTitle={"Risn in %"}
+                titleAlign={"center"}
+                subTitle={`Best Twenty`}
+              />
+              <h3 className="my-3">Worst Stocks</h3>
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="dt-buttons mb-3">
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="PDF"
+                    onClick={() => {
+                      generatePDF("worst-stock-table");
+                    }}
+                  >
+                    <span className="mdi mdi-file-pdf-box me-2"></span>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    className="dt-button buttons-excel buttons-html5 btn-primary"
+                    type="button"
+                    onClick={() => {
+                      exportToExcel();
+                    }}
+                  >
+                    <span className="mdi mdi-file-excel me-2"></span>
+                    <span>EXCEL</span>
+                  </button>
+                </div>
+                <div className="form-group d-flex align-items-center">
+                  <label
+                    htmlFor=""
+                    style={{ textWrap: "nowrap" }}
+                    className="text-success me-2 mb-0"
+                  >
+                    Search :{" "}
+                  </label>
+                  <input
+                    type="search"
+                    placeholder=""
+                    className="form-control"
+                    onChange={searchWorstStocks}
+                  />
+                </div>
+              </div>
+              <div className="table-responsive mb-4">
+                <table
+                  className="table border display no-footer dataTable"
+                  role="grid"
+                  aria-describedby="exampleStocksPair_info"
+                  id="worst-stock-table"
+                >
+                  <thead>
+                    <tr>
+                      {Object.entries(worstFiveStockColumn).map(
+                        ([columnName, displayName]) => (
+                          <th key={columnName}>{displayName}</th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {worstStocksFiltered.map((item, index) => {
+                      return (
+                        <tr key={"worst" + index}>
+                          {Object.entries(worstFiveStockColumn).map(
+                            ([columnName, displayName]) => (
+                              <td key={`${columnName}-${index}`}>
+                                {item[columnName]}
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      );
+                    })}
+                    {worstStocksFiltered?.length == 0 && (
+                      <tr>
+                        <td
+                          className="text-center"
+                          colSpan={Object.entries(worstFiveStockColumn)?.length}
+                        >
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <HightChart
+                data={compareData?.worstFiveStocks?.map((item) => [
                   item["worstMovedStock"],
                   parseFloat(item["percentageChangeDrop"]),
                 ])}
                 title={"Ticker Performance"}
                 typeCheck={{
-                  categories: worstStocksFiltered?.map(
+                  categories: compareData?.bestFiveStocks?.map(
                     (item) => item?.bestMovedStock
                   ),
                 }}
@@ -1813,6 +2071,14 @@ export default function Stocks() {
           )}
         </div>
       </div>
+      <ReportTable
+        name={reportTicker}
+        open={reportModal}
+        handleCloseModal={closeReportModal}
+        news={true}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
     </>
   );
 }

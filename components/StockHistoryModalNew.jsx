@@ -87,7 +87,6 @@ const StockHistoryModalNew = ({
           ? "/api/proxy?api=getEarningDates"
           : "/api/proxy?api=getSmaTradingDates";
       const result = await fetchWithInterceptor(api, false);
-      console.log(result);
       const correspondingMonths = result.map((dateStr) => {
         const date = new Date(dateStr);
         return months[date.getMonth()];
@@ -194,7 +193,7 @@ const StockHistoryModalNew = ({
     try {
       // const bondHistoryCompare = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates.date1}&date2=${dates.date2}`)
       // const bondHistoryCompareRes = await bondHistoryCompare.json()
-      const bondHistoryCompare = `/api/proxy?api=getImportHistorySheetCompare?metadataName=Tickers_Watchlist&date1=${dates.date1}&date2=${dates.date2}`;
+      const bondHistoryCompare = `/api/proxy?api=getCompanyOverviewCompareByPrice?date1=${dates.date1}&date2=${dates.date2}`;
       const bondHistoryCompareRes = await fetchWithInterceptor(
         bondHistoryCompare,
         false
