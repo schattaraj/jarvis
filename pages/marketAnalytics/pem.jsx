@@ -22,6 +22,7 @@ import Modal from "react-bootstrap/Modal";
 import Swal from "sweetalert2";
 import Breadcrumb from "../../components/Breadcrumb";
 import ReportTable from "../../components/ReportTable";
+import PemRankScoreModal from "../../components/PemRankScoreModal";
 import { useRouter } from "next/router";
 export default function PemDetails() {
   const context = useContext(Context);
@@ -36,6 +37,8 @@ export default function PemDetails() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const [reportTicker, setReportTicker] = useState("");
   const [reportModal, setReportModal] = useState(false);
+  const [pemRankScore, setPemRankScore] = useState("");
+  const [pemRankScoreModal, setPemRankScoreModal] = useState(false);
   const [show, setShow] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState(
     columnNames.map((col) => col.elementInternalName)
@@ -384,6 +387,8 @@ export default function PemDetails() {
       const columnApiRes = await fetchWithInterceptor(
         "/api/proxy?api=getColumns?metaDataName=PEM_NEW&_=1725280625344"
       );
+
+
       // const columnApiRes = await columnApi.json();
       columnApiRes.splice(2, 0, {
         elementId: null,
@@ -410,6 +415,7 @@ export default function PemDetails() {
       console.log("error", e);
     }
   };
+  console.log("columnNames", columnNames);
 
   const extraColumns = [
     {
@@ -436,6 +442,9 @@ export default function PemDetails() {
       // const getBondsRes = await getBonds.json();
       const getApi = `/api/proxy?api=getImportsData?metaDataName=PEM_NEW&pageNumber=0&pageSize=1000`;
       const getBondsRes = await fetchWithInterceptor(getApi, false);
+
+
+
       setTableData(getBondsRes.content);
       setFilterData(getBondsRes.content);
       // setTimeout(() => {
@@ -447,6 +456,7 @@ export default function PemDetails() {
     }
     context.setLoaderState(false);
   };
+  console.log("tableData", tableData);
 
   const handleClick = (elm) => {
     console.log("element", elm);
@@ -668,6 +678,50 @@ export default function PemDetails() {
   const closeReportModal = () => {
     setReportModal(false);
   };
+
+  // const closePemRankScoreModal = () => {
+  //   setPemRankScoreModal(false);
+  //  
+  //   setPemRankScore("");
+  // };
+  const closePemRankScoreModal = () => {
+    setPemRankScore(null); 
+    setPemRankScoreModal(false);
+  };
+
+  const handlePemRankScore = (score) => {
+    let cleanScore;
+    try {
+      if (typeof score === 'string' || typeof score === 'number') {
+        cleanScore = score;
+      } else if (score && typeof score === 'object') {
+        // If it's an event object, get the text content
+        if (score.target && score.target.textContent) {
+          cleanScore = score.target.textContent.trim();
+        } else if (score.value !== undefined && (typeof score.value === 'string' || typeof score.value === 'number')) {
+          cleanScore = score.value;
+        } else if (score.score !== undefined && (typeof score.score === 'string' || typeof score.score === 'number')) {
+          cleanScore = score.score;
+        } else {
+   
+          console.warn('handlePemRankScore received a non-primitive object:', score);
+          cleanScore = '[object]';
+        }
+      } else {
+        cleanScore = String(score || '');
+      }
+
+    
+      console.log('Setting PemRankScore:', cleanScore, typeof cleanScore);
+
+      setPemRankScore(cleanScore);
+      setPemRankScoreModal(true);
+
+    } catch (error) {
+      setPemRankScore('Error processing score');
+      setPemRankScoreModal(true);
+    }
+  };
   const fetchRuleData = async () => {
     context.setLoaderState(true);
     try {
@@ -729,13 +783,13 @@ export default function PemDetails() {
         const rawVal = Number(numericValue);
         const val =
           fieldName === "Organic Sales Growth Rate of Company (TTM)" ||
-          fieldName === "Organic Growth rate of TAM"
+            fieldName === "Organic Growth rate of TAM"
             ? parseFloat(value) * 100
             : parseFloat(value); // ✅ Convert to percentage
 
         try {
           const fn = new Function("val", `return ${expr};`);
-          console.log("Evaluating:", expr, "val:", val, "→", fn(val));
+          // console.log("Evaluating:", expr, "val:", val, "→", fn(val));
 
           if (!isNaN(val) && fn(val)) {
             return parseInt(rule.rank);
@@ -753,7 +807,7 @@ export default function PemDetails() {
 
       for (const [elementKey, ruleKey] of Object.entries(elementMap)) {
         const val = item[elementKey];
-        console.log(val, ruleKey, getRank(val, ruleKey));
+        // console.log(val, ruleKey, getRank(val, ruleKey));
 
         totalScore += getRank(val, ruleKey);
       }
@@ -768,6 +822,7 @@ export default function PemDetails() {
   }
 
   const result = calculatePEMScores(filterData, ruleData);
+  console.log("result", result);
 
   return (
     <>
@@ -776,9 +831,8 @@ export default function PemDetails() {
           <div className="d-flex justify-content-between align-items-center flex-wrap">
             <Breadcrumb />
             <div
-              className={`collapsible-container ${
-                isExpanded ? "expanded" : ""
-              }`}
+              className={`collapsible-container ${isExpanded ? "expanded" : ""
+                }`}
             >
               <span></span>
               <button
@@ -1034,8 +1088,8 @@ export default function PemDetails() {
                   {columnNames.map((columnName, index) => {
                     const columnClass =
                       columnName.elementInternalName === "element1" ||
-                      columnName.elementInternalName === "element2" ||
-                      columnName.elementInternalName === "pemRankScore"
+                        columnName.elementInternalName === "element2" ||
+                        columnName.elementInternalName === "pemRankScore"
                         ? "sticky-column"
                         : "";
                     return (
@@ -1055,11 +1109,11 @@ export default function PemDetails() {
                               columnName.elementInternalName === "element1"
                                 ? 0
                                 : columnName.elementInternalName === "element2"
-                                ? firstColWidth
-                                : columnName.elementInternalName ===
-                                  "pemRankScore"
-                                ? firstColWidth * 1.5
-                                : "auto",
+                                  ? firstColWidth
+                                  : columnName.elementInternalName ===
+                                    "pemRankScore"
+                                    ? firstColWidth * 1.5
+                                    : "auto",
                           }}
                           onClick={() =>
                             handleSort(columnName.elementInternalName)
@@ -1093,11 +1147,42 @@ export default function PemDetails() {
                           ) / 1000000 || 0
                         ).toFixed(2);
                         content = formatCurrency(content);
-                      } else if (
-                        columnName.elementInternalName === "pemRankScore"
-                      ) {
+                      }
+                      // else if (
+                      //   columnName.elementInternalName === "pemRankScore"
+                      // ) {
+                      //   content = result[rowIndex]["pemScore"];
+                      //   return (
+                      //     <td key={colIndex}>
+                      //       <a
+                      //         onClick={() => handlePemRankScore(content)}
+                      //         href="javascript:void(0)"
+                      //         style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline' }}
+                      //       >
+                      //         {content}
+                      //       </a>
+                      //     </td>
+                      //   );
+                      // } 
+                      else if (columnName.elementInternalName === "pemRankScore") {
                         content = result[rowIndex]["pemScore"];
-                      } else if (
+                        return (
+                          <td key={colIndex}>
+                            <a
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handlePemRankScore(content);
+                              }}
+                              href="javascript:void(0)"
+                             className="ticker-link"
+                            >
+                              {content}
+                            </a>
+                          </td>
+                        );
+                      }
+                      else if (
                         columnName.elementInternalName === "element5"
                       ) {
                         content = (
@@ -1190,8 +1275,8 @@ export default function PemDetails() {
                       // return <td key={colIndex}>{parse(JSON.stringify(content),options)}</td>;
                       const columnClass =
                         columnName.elementInternalName === "element1" ||
-                        columnName.elementInternalName === "element2" ||
-                        columnName.elementInternalName === "pemRankScore"
+                          columnName.elementInternalName === "element2" ||
+                          columnName.elementInternalName === "pemRankScore"
                           ? "sticky-column"
                           : "";
                       return (
@@ -1203,11 +1288,11 @@ export default function PemDetails() {
                               columnName.elementInternalName === "element1"
                                 ? 0
                                 : columnName.elementInternalName === "element2"
-                                ? firstColWidth
-                                : columnName.elementInternalName ===
-                                  "pemRankScore"
-                                ? firstColWidth * 1.5
-                                : "auto",
+                                  ? firstColWidth
+                                  : columnName.elementInternalName ===
+                                    "pemRankScore"
+                                    ? firstColWidth * 1.5
+                                    : "auto",
                           }}
                         >
                           {content}
@@ -1820,6 +1905,11 @@ export default function PemDetails() {
           open={reportModal}
           handleCloseModal={closeReportModal}
           news={true}
+        />
+        <PemRankScoreModal
+          score={pemRankScore}
+          open={pemRankScoreModal}
+          handleCloseModal={closePemRankScoreModal}
         />
       </div>
     </>
