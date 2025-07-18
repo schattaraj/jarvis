@@ -381,10 +381,10 @@ export default function PemDetails() {
   }, [firstColRef, filterData, visibleColumns]);
   const fetchColumnNames = async () => {
     try {
-      const columnApi = await fetch(
-        "https://jharvis.com/JarvisV2/getColumns?metaDataName=PEM_NEW&_=1725280625344"
+      const columnApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getColumns?metaDataName=PEM_NEW&_=1725280625344"
       );
-      const columnApiRes = await columnApi.json();
+      // const columnApiRes = await columnApi.json();
       columnApiRes.splice(2, 0, {
         elementId: null,
         elementName: "Pem Rank Score",
