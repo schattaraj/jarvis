@@ -1484,31 +1484,24 @@ export default function Stocks() {
               </div>
               <HightChart
                 data={
-                  compareData ?
-                  compareData?.bestFiveStocks?.map((item) => [
-                    item["bestMovedStock"],
-                    parseFloat(item["percentageChangeRise"]),
-                  ])
-              :
-              rankingData?.bestFiveStocks?.map((item) => [
-                item["bestMovedStock"],
-                parseFloat(item["percentageChangeRise"]),
-              ])
-              }
-                title={"Ticker Performance"}
-                typeCheck={
-                  compareData ?
-                  compareData?.bestFiveStocks?.map((item) => [
-                    item["bestMovedStock"],
-                    parseFloat(item["percentageChangeRise"]),
-                  ])
-                  :
-                  {
-                  categories: rankingData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
+                  compareData
+                    ? compareData?.bestFiveStocks?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
+                    : bestStocksFiltered?.map((item) => [
+                        item["bestMovedStock"],
+                        parseFloat(item["percentageChangeRise"]),
+                      ])
                 }
-              }
+                title={"Ticker Performance"}
+                typeCheck={{
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : bestStocksFiltered?.map((item) => item?.bestMovedStock),
+                }}
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
@@ -1607,32 +1600,24 @@ export default function Stocks() {
               </div>
               <HightChart
                 data={
-                  compareData ?
-                  compareData?.worstFiveStocks?.map((item) => [
-                  item["worstMovedStock"],
-                  parseFloat(item["percentageChangeDrop"]),
-                ])
-              :
-              rankingData?.worstFiveStocks?.map((item) => [
-                item["worstMovedStock"],
-                parseFloat(item["percentageChangeDrop"]),
-              ])
-              }
+                  compareData
+                    ? compareData?.worstFiveStocks?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                    : worstStocksFiltered?.map((item) => [
+                        item["worstMovedStock"],
+                        parseFloat(item["percentageChangeDrop"]),
+                      ])
+                }
                 title={"Ticker Performance"}
-                typeCheck={
-                  compareData ?
-                  {
-                  categories: compareData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }
-                :
-                {
-                  categories: rankingData?.bestFiveStocks?.map(
-                    (item) => item?.bestMovedStock
-                  ),
-                }
-              }
+                typeCheck={{
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : worstStocksFiltered?.map((item) => item?.bestMovedStock),
+                }}
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
