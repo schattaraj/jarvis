@@ -1088,8 +1088,7 @@ export default function PemDetails() {
                   {columnNames.map((columnName, index) => {
                     const columnClass =
                       columnName.elementInternalName === "element1" ||
-                        columnName.elementInternalName === "element2" ||
-                        columnName.elementInternalName === "pemRankScore"
+                        columnName.elementInternalName === "element2"
                         ? "sticky-column"
                         : "";
                     return (
