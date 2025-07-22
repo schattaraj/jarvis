@@ -17,6 +17,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import { Form } from "react-bootstrap";
 import { Context } from "../../contexts/Context";
 import {
+  fetchWithInterceptor,
   formatDateString,
   getArchiveReports,
   getLatestReport,
@@ -41,10 +42,10 @@ export default function Reports() {
     setLoader(true);
     console.log(categoryType);
     try {
-      const apiCall = await fetch(
-        "https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144"
+      const response = await fetchWithInterceptor(
+        "/api/proxy?api=getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144"
       );
-      const response = await apiCall.json();
+      // const response = await apiCall.json();
       setReports(response);
       setRecentReports(getRecentReports(response));
       setArchiveReports(getArchiveReports(response));
@@ -102,15 +103,11 @@ export default function Reports() {
     params.append("_", new Date().getTime());
 
     // Example GET request URL with payload
-    const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL_V2 +
-      "getAllTickerReports?" +
-      params.toString()
-    }`;
+    const url = `/api/proxy?api=getAllTickerReports?${params.toString()}`;
     context.setLoaderState(true);
     // Make the API request
-    await fetch(url)
-      .then((response) => response.json())
+    fetchWithInterceptor(url)
+      // .then((response) => response.json())
       .then((data) => {
         const filteredReports =
           categoryType.length > 0
@@ -153,15 +150,11 @@ export default function Reports() {
     params.append("_", new Date().getTime());
 
     // Example GET request URL with payload
-    const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL_V2 +
-      "getAllTickerReports?" +
-      params.toString()
-    }`;
+    const url = `/api/proxy?api=getAllTickerReports?${params.toString()}`;
     context.setLoaderState(true);
 
-    await fetch(url)
-      .then((response) => response.json())
+    fetchWithInterceptor(url)
+      // .then((response) => response.json())
       .then((data) => {
         const filteredData =
           categoryType.length > 0
@@ -404,7 +397,9 @@ export default function Reports() {
 
                 {currentPdf?.reportfileDetails && (
                   <PDFViewer
-                    pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}
+                    pdfUrl={`/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${
+                      currentPdf.reportfileDetails.split("C:/")[1]
+                    }`}
                   />
                 )}
                 {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
@@ -530,8 +525,8 @@ export default function Reports() {
             <iframe
               className="embed-responsive-item"
               src={
-                "https://jharvis.com/JarvisV2/playPdf?fileName=" +
-                currentPdf.reportfileDetails
+                "/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/" +
+                currentPdf.reportfileDetails.split("C:/")[1]
               }
               id="video"
               allowscriptaccess="always"

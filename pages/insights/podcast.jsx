@@ -5,7 +5,7 @@ import Sidebar from "../../components/sidebar";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import Breadcrumb from "../../components/Breadcrumb";
-import { formatDate } from "../../utils/utils";
+import { fetchWithInterceptor, formatDate } from "../../utils/utils";
 import ReactPlayer from "react-player";
 
 export default function Podcast() {
@@ -25,10 +25,10 @@ export default function Podcast() {
   const fetchPodcasts = async () => {
     setLoader(true);
     try {
-      const apiCall = await fetch(
-        "https://jharvis.com/JarvisV2/getAllPodCasts?filterText=&_=1707116098092"
+      const response = await fetchWithInterceptor(
+        "/api/proxy?api=getAllPodCasts?filterText=&_=1707116098092"
       );
-      const response = await apiCall.json();
+      // const response = await apiCall.json();
       setPodcasts(response);
       // Apply initial filter based on default year range
       const filteredPodcasts = response.filter(
@@ -245,9 +245,11 @@ export default function Podcast() {
               <AudioPlayer
                 autoPlay={false}
                 src={
+                  "/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/" +
+                  currentPodcast.podCastsDetails.split("C:/")[1]
                   // "/assets/music.mp3"
-                  "https://jharvis.com/JarvisV2/playVideo?fileName=" +
-                  currentPodcast.podCastsDetails
+                  // "/api/proxy?api=playVideo?fileName=" +
+                  // currentPodcast.podCastsDetails
                 }
                 onPlay={(e) => console.log("onPlay", currentPodcast)}
                 // other props here

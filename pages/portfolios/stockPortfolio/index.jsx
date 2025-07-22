@@ -46,6 +46,7 @@ export default function Portfolio() {
   const [stockPortfolios, setStockportfolios] = useState(false);
   const [filteredStockPortfolios, setfilteredStockPortfolios] = useState([]);
   const [currentPage2, setCurrentPage2] = useState(1);
+  const [isFirst, setIsFirst] = useState(true);
   const [sortConfig2, setSortConfig2] = useState({
     key: null,
     direction: null,
@@ -63,6 +64,7 @@ export default function Portfolio() {
   const [limit3, setLimit3] = useState(100);
   const [totalPages3, setTotalPages3] = useState(0);
   const [totalElements3, setTotalElements3] = useState(0);
+  const [modalStep, setModalStep] = useState(1);
   const [isLastPage3, setIsLastPage3] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [portfolioPayload, setPortfolioPayload] = useState({
@@ -147,11 +149,10 @@ export default function Portfolio() {
   const handleClick = async (name) => {
     setReportModal(true);
     try {
-      const fetchReport = await fetch(
-        "https://jharvis.com/JarvisV2/getTickerReportsByTickerName?tickerName=" +
-          name
+      const fetchReportRes = await fetchWithInterceptor(
+        "/api/proxy?api=getTickerReportsByTickerName?tickerName=" + name
       );
-      const fetchReportRes = await fetchReport.json();
+      // const fetchReportRes = await fetchReport.json();
       console.log("fetchReportRes", fetchReportRes);
       setReportData(fetchReportRes);
     } catch (e) {
@@ -160,10 +161,10 @@ export default function Portfolio() {
   };
   const fetchColumnNames = async () => {
     try {
-      const columnApi = await fetch(
-        "https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Tickers_Watchlist&_=170004124669"
+      const columnApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getColumns?metaDataName=Tickers_Watchlist&_=170004124669"
       );
-      const columnApiRes = await columnApi.json();
+      // const columnApiRes = await columnApi.json();
       setColumnNames(columnApiRes);
     } catch (e) {
       console.log("error", e);
@@ -339,11 +340,6 @@ export default function Portfolio() {
   const getAllStock = async () => {
     context.setLoaderState(true);
     try {
-      // const allStocksApi = await fetch(
-      //   "https://jharvis.com/JarvisV2/getAllStocksForPolio"
-      // );
-      // const allStocksApiRes = await allStocksApi.json();
-
       const apiEndpoint = `/api/proxy?api=getAllStocksForPolio?pageSize=${
         limit3 != "all" ? limit3 : 0
       }&pageNumber=${currentPage3 - 1}&keyword=${searchText}&isforAll=${
@@ -361,8 +357,66 @@ export default function Portfolio() {
       context.setLoaderState(false);
     }
   };
+
+  const handleEditModal = async (name) => {
+    context.setLoaderState(true);
+    try {
+      const apiEndpoint = `/api/proxy?api=getPortfolioByName?name=${name}&pageNumber=${
+        currentPage3 - 1
+      }&pageSize=${limit3 !== "all" ? limit3 : 20000}`;
+      const options = { method: "GET" };
+
+      const response = await fetchWithInterceptor(
+        apiEndpoint,
+        false,
+        {},
+        options
+      );
+      const allStocksApiRes = response?.content;
+
+      // setTotalPages3(response.totalPages);
+      // setTotalElements3(response.totalElements);
+      // setIsLastPage3(response.lastPage);
+      // setTotalPages3(response.totalPages);
+      setTotalElements3(response.length);
+
+      // Set all stocks
+      setAllStocks(allStocksApiRes);
+
+      // Extract selected stocks (with share or purchaseDate)
+      const selected = allStocksApiRes
+        // .filter((item) => item.share || item.purchaseDate)
+        .filter((item) => item.checkBoxHtml)
+        .map((item) => ({
+          stockName: item.stockName,
+          share: item.share,
+          purchaseDate: item.purchaseDate,
+          purchasePrice: item.purchasePrice,
+        }));
+
+      setSelectedStocks(selected); // Set selected state
+
+      // Sort allStocks with selected ones at top
+      // setfilteredAllStockPortfolios(sortBySelection(allStocksApiRes, selected));
+      setfilteredAllStockPortfolios(allStocksApiRes);
+
+      // Prefill formData
+      formData.portfolioName = name;
+      formData.allStocks = selected;
+
+      setEditStatus(true);
+      handleShow();
+      context.setLoaderState(false);
+    } catch (e) {
+      console.log("error", e);
+      context.setLoaderState(false);
+    }
+  };
+
   const handleClose = () => {
     setEditStatus(false);
+    setModalStep(1);
+    setSelectedStocks([]);
     formData.portfolioName = "";
     setfilteredAllStockPortfolios([]);
     setCurrentPage3(1);
@@ -404,11 +458,10 @@ export default function Portfolio() {
   };
   const downloadReport = async (reportName) => {
     try {
-      const fetchReport = await fetch(
-        "https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" +
-          reportName
+      const fetchReportRes = await fetchWithInterceptor(
+        "/api/proxy?api=downloadTickerReport?fileName=" + reportName
       );
-      const fetchReportRes = await fetchReport.json();
+      // const fetchReportRes = await fetchReport.json();
       window.open(fetchReportRes.responseStr, "_blank");
     } catch (e) {
       console.log("error", e);
@@ -416,10 +469,13 @@ export default function Portfolio() {
   };
   const deleteReport = async (reportName) => {
     try {
-      const deleteApi = await fetch(
-        "https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName
+      const deleteApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=deletePortfolioByName?name=" + reportName,
+        false,
+        false,
+        { method: "DELETE" }
       );
-      const deleteApiRes = await deleteApi.json();
+      // const deleteApiRes = await deleteApi.json();
       alert(deleteApiRes.msg);
     } catch (e) {
       console.log("error", e);
@@ -804,16 +860,18 @@ export default function Portfolio() {
         try {
           context.setLoaderState(true);
           // const baseUrl = `/api/proxy?api=deletePortfolioByName?name=${name}`;
-          const baseUrl = `https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`;
-          const response = await fetch(baseUrl);
-          const result = await response.json();
+          const baseUrl = `/api/proxy?api=deletePortfolioByName?name=${name}&_=1724828770137`;
+          const result = await fetchWithInterceptor(baseUrl, false, false, {
+            method: "DELETE",
+          });
+          // const result = await response.json();
 
           Swal.fire({
             title: result.msg,
             confirmButtonColor: "var(--primary)",
           });
           // const response = await fetch(`https://jharvis.com/JarvisV2/deletePortfolioByName?name=${name}&_=1724828770137`);
-          console.log("response:", response);
+          // console.log("response:", response);
           context.setLoaderState(false);
           getAllStockForPolios();
           stockFilterData();
@@ -833,61 +891,6 @@ export default function Portfolio() {
         }
       }
     });
-  };
-
-  const handleEditModal = async (name) => {
-    context.setLoaderState(true);
-    try {
-      const apiEndpoint = `/api/proxy?api=getPortfolioByName?name=${name}&pageNumber=${
-        currentPage3 - 1
-      }&pageSize=${limit3 !== "all" ? limit3 : 20000}`;
-      const options = { method: "GET" };
-
-      const response = await fetchWithInterceptor(
-        apiEndpoint,
-        false,
-        {},
-        options
-      );
-      const allStocksApiRes = response;
-
-      // setTotalPages3(response.totalPages);
-      // setTotalElements3(response.totalElements);
-      // setIsLastPage3(response.lastPage);
-      // setTotalPages3(response.totalPages);
-      setTotalElements3(response.length);
-
-      // Set all stocks
-      setAllStocks(allStocksApiRes);
-
-      // Extract selected stocks (with share or purchaseDate)
-      const selected = allStocksApiRes
-        // .filter((item) => item.share || item.purchaseDate)
-        .filter((item) => item.checkBoxHtml)
-        .map((item) => ({
-          stockName: item.stockName,
-          share: item.share,
-          purchaseDate: item.purchaseDate,
-          purchasePrice: item.purchasePrice,
-        }));
-
-      setSelectedStocks(selected); // Set selected state
-
-      // Sort allStocks with selected ones at top
-      // setfilteredAllStockPortfolios(sortBySelection(allStocksApiRes, selected));
-      setfilteredAllStockPortfolios(allStocksApiRes);
-
-      // Prefill formData
-      formData.portfolioName = name;
-      formData.allStocks = selected;
-
-      setEditStatus(true);
-      handleShow();
-      context.setLoaderState(false);
-    } catch (e) {
-      console.log("error", e);
-      context.setLoaderState(false);
-    }
   };
 
   const handleStockPortfolioStatus = () => {
@@ -929,7 +932,11 @@ export default function Portfolio() {
   };
 
   useEffect(() => {
-    getAllStock();
+    // getAllStock();
+    if (!isFirst) {
+      handleEditModal(formData.portfolioName);
+    }
+    setIsFirst(true);
   }, [currentPage3, limit3]);
 
   const allStockFilter = (e) => {
@@ -1374,9 +1381,7 @@ export default function Portfolio() {
                                     left: firstColWidth,
                                   }}
                                 >
-                                  {extractAndConvert(
-                                    item[inner.elementInternalName]
-                                  )}
+                                  {item[inner.elementInternalName]}
                                 </td>
                               );
                             } else if (
@@ -1683,222 +1688,407 @@ export default function Portfolio() {
         </div>
         <Footer />
         <Modal show={show} onHide={handleClose} className="portfolio-modal">
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {!editStatus ? "Create Portfolio" : "Update Portfolio"}
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="row">
-              <div className="col-md-8">
-                <div className="form-group d-flex">
-                  <input
-                    type="text"
-                    className="form-control me-3"
-                    placeholder="Portfolio Name"
-                    name="portfolioName"
-                    value={formData.portfolioName}
-                    onChange={portfolioInputs}
-                    readOnly={editStatus ? true : false}
-                  />
-                  <button
-                    className="btn btn-primary text-nowrap"
-                    onClick={() => {
-                      createPortfolio();
-                    }}
-                  >
-                    {!editStatus ? "Create Portfolio" : "Update Portfolio"}
-                  </button>
-                  <div className="form-check ms-3 d-inline-block">
-                    <input
-                      style={{ marginTop: "0.1rem", cursor: "pointer" }}
-                      className="form-check-input"
-                      type="checkbox"
-                      name="subscribersOnly"
-                      id="subscribersOnly"
-                      checked={formData.subscribersOnly}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          subscribersOnly: e.target.checked,
-                        });
-                      }}
-                    />
-                    <label
-                      className="form-check-label"
-                      htmlFor="subscribersOnly"
-                    >
-                      Subscribers Only
-                    </label>
+          {modalStep == 1 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>
+                  {!editStatus ? "Create Portfolio" : "Update Portfolio"}
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        value={formData.portfolioName}
+                        onChange={portfolioInputs}
+                        readOnly={editStatus ? true : false}
+                      />
+
+                      <button
+                        className="btn btn-primary text-nowrap"
+                        onClick={() => {
+                          setModalStep(2);
+                        }}
+                      >
+                        Continue
+                      </button>
+                      {/* <button
+                        className="btn btn-primary text-nowrap"
+                        onClick={() => {
+                          createPortfolio();
+                        }}
+                      >
+                        {!editStatus ? "Create Portfolio" : "Update Portfolio"}
+                      </button> */}
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={formData.subscribersOnly}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              subscribersOnly: e.target.checked,
+                            });
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="d-flex justify-content-between align-items-center">
-              <div className="dt-buttons mb-3"></div>
-              <div className="form-group d-flex align-items-center">
-                <div className="form-group d-flex align-items-center mb-0 me-3">
-                  <label
-                    style={{ textWrap: "nowrap" }}
-                    className="text-success ms-2 me-2 mb-0"
-                  >
-                    Show :{" "}
-                  </label>
-                  <select
-                    name="limit"
-                    className="form-select w-auto"
-                    onChange={changeLimit3}
-                    value={limit3}
-                  >
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="all">All</option>
-                  </select>
-                </div>
-                <label
-                  htmlFor=""
-                  style={{ textWrap: "nowrap" }}
-                  className="text-success me-2 mb-0"
-                >
-                  Search :{" "}
-                </label>
-                <div class="input-group">
-                  <input
-                    type="search"
-                    class="form-control"
-                    placeholder=""
-                    aria-label="search"
-                    aria-describedby="basic-addon2"
-                    onChange={allStockFilter}
-                  />
-                  <button
-                    class="btn-primary"
-                    onClick={getAllStock}
-                    id="basic-addon2"
-                  >
-                    Search
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th
-                      onClick={() => {
-                        handleSort3("stockName");
-                      }}
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="dt-buttons mb-3"></div>
+                  <div className="form-group d-flex align-items-center">
+                    <div className="form-group d-flex align-items-center mb-0 me-3">
+                      <label
+                        style={{ textWrap: "nowrap" }}
+                        className="text-success ms-2 me-2 mb-0"
+                      >
+                        Show :{" "}
+                      </label>
+                      <select
+                        name="limit"
+                        className="form-select w-auto"
+                        onChange={changeLimit3}
+                        value={limit3}
+                      >
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                      </select>
+                    </div>
+                    <label
+                      htmlFor=""
+                      style={{ textWrap: "nowrap" }}
+                      className="text-success me-2 mb-0"
                     >
-                      Select
-                    </th>
-                    <th
-                      onClick={() => {
-                        handleSort3("stockName");
-                      }}
-                    >
-                      Symbol
-                    </th>
-                    <th>Share</th>
-                    <th>Purchase Date</th>
-                    <th>Purchase Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAllStockPortfolios.length > 0 &&
-                    filteredAllStockPortfolios.map((item, index) => {
-                      const isChecked = selectedStocks.some(
-                        (stock) => stock.stockName === item?.stockName
-                      );
-                      // console.log(item);
-                      return (
-                        <tr key={"stock" + index}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              name="stockName"
-                              defaultValue={item?.stockName}
-                              defaultChecked={item?.share || item?.purchaseDate}
-                              //onChange={(e) => portfolioInputs(e, index)}
-                              onChange={(e) => {
-                                selectStock(e, item?.stockName);
-                              }}
-                              checked={isChecked}
-                            />
-                          </td>
-                          <td>{item?.stockName}</td>
-                          <td>
-                            <input
-                              type="text"
-                              // defaultValue={item?.share}
-                              value={
-                                selectedStocks.find(
-                                  (s) => s.stockName === item?.stockName
-                                )?.share || ""
-                              }
-                              name="share"
-                              placeholder="Share"
-                              className="form-control"
-                              //onChange={(e) => portfolioInputs(e, index)}
-                              onChange={(e) =>
-                                updateSelectedStock(e, item?.stockName)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="date"
-                              // defaultValue={item?.purchaseDate}
-                              value={
-                                selectedStocks.find(
-                                  (s) => s.stockName === item?.stockName
-                                )?.purchaseDate || ""
-                              }
-                              name="purchaseDate"
-                              className="form-control"
-                              //onChange={(e) => portfolioInputs(e, index)}
-                              onChange={(e) =>
-                                updateSelectedStock(e, item?.stockName)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              // defaultValue={item?.purchasePrice}
-                              value={
-                                selectedStocks.find(
-                                  (s) => s.stockName === item?.stockName
-                                )?.purchasePrice || ""
-                              }
-                              name="purchasePrice"
-                              placeholder="Purchase Price"
-                              className="form-control"
-                              //onChange={(e) => portfolioInputs(e, index)}
-                              onChange={(e) =>
-                                updateSelectedStock(e, item?.stockName)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
-              </table>
-            </div>
+                      Search :{" "}
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="search"
+                        class="form-control"
+                        placeholder=""
+                        aria-label="search"
+                        aria-describedby="basic-addon2"
+                        onChange={allStockFilter}
+                      />
+                      <button
+                        class="btn-primary"
+                        onClick={getAllStock}
+                        id="basic-addon2"
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-            <PaginationNew
-              currentPage={currentPage3}
-              totalItems={totalElements3}
-              totalPage={totalPages3}
-              limit={limit3}
-              setCurrentPage={setCurrentPage3}
-              handlePage={handlePage3}
-            />
-          </Modal.Body>
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th
+                          onClick={() => {
+                            handleSort3("stockName");
+                          }}
+                        >
+                          Select
+                        </th>
+                        <th
+                          onClick={() => {
+                            handleSort3("stockName");
+                          }}
+                        >
+                          Symbol
+                        </th>
+                        <th>Share</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAllStockPortfolios.length > 0 &&
+                        filteredAllStockPortfolios.map((item, index) => {
+                          const isChecked = selectedStocks.some(
+                            (stock) => stock.stockName === item?.stockName
+                          );
+                          // console.log(item);
+                          return (
+                            <tr key={"stock" + index}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  name="stockName"
+                                  defaultValue={item?.stockName}
+                                  defaultChecked={
+                                    item?.share || item?.purchaseDate
+                                  }
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) => {
+                                    selectStock(e, item?.stockName);
+                                  }}
+                                  checked={isChecked}
+                                />
+                              </td>
+                              <td>{item?.stockName}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.share}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.share || ""
+                                  }
+                                  name="share"
+                                  placeholder="Share"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  // defaultValue={item?.purchaseDate}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchaseDate || ""
+                                  }
+                                  name="purchaseDate"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.purchasePrice}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchasePrice || ""
+                                  }
+                                  name="purchasePrice"
+                                  placeholder="Purchase Price"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <PaginationNew
+                  currentPage={currentPage3}
+                  totalItems={totalElements3}
+                  totalPage={totalPages3}
+                  limit={limit3}
+                  setCurrentPage={setCurrentPage3}
+                  handlePage={handlePage3}
+                />
+              </Modal.Body>
+            </>
+          )}
+          {modalStep == 2 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>Finalize Stock Inputs</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        value={formData.portfolioName}
+                        onChange={portfolioInputs}
+                        readOnly={editStatus ? true : false}
+                      />
+
+                      <button
+                        className="btn btn-primary text-nowrap me-3"
+                        onClick={() => {
+                          createPortfolio();
+                        }}
+                      >
+                        {!editStatus ? "Create Portfolio" : "Update Portfolio"}
+                      </button>
+                      <button
+                        className="btn btn-secondary text-nowrap"
+                        onClick={() => {
+                          setModalStep(1);
+                        }}
+                      >
+                        Back
+                      </button>
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={formData.subscribersOnly}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              subscribersOnly: e.target.checked,
+                            });
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th
+                          onClick={() => {
+                            handleSort3("stockName");
+                          }}
+                        >
+                          Select
+                        </th>
+                        <th
+                          onClick={() => {
+                            handleSort3("stockName");
+                          }}
+                        >
+                          Symbol
+                        </th>
+                        <th>Share</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedStocks.length > 0 &&
+                        selectedStocks.map((item, index) => {
+                          const isChecked = selectedStocks.some(
+                            (stock) => stock.stockName === item?.stockName
+                          );
+                          // console.log(item);
+                          return (
+                            <tr key={"stock" + index}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  name="stockName"
+                                  defaultValue={item?.stockName}
+                                  defaultChecked={
+                                    item?.share || item?.purchaseDate
+                                  }
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) => {
+                                    selectStock(e, item?.stockName);
+                                  }}
+                                  checked={isChecked}
+                                />
+                              </td>
+                              <td>{item?.stockName}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.share}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.share || ""
+                                  }
+                                  name="share"
+                                  placeholder="Share"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  // defaultValue={item?.purchaseDate}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchaseDate || ""
+                                  }
+                                  name="purchaseDate"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.purchasePrice}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchasePrice || ""
+                                  }
+                                  name="purchasePrice"
+                                  placeholder="Purchase Price"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedStock(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </Modal.Body>
+            </>
+          )}
         </Modal>
         <Modal
           className="report-modal"

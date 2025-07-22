@@ -204,7 +204,9 @@ export const sortBySelection = (all, selected) => {
 };
 
 export const sortBySelectionBond = (all, selected) => {
-  const selectedSet = new Set(selected.map((s) => s.name));
+  const selectedSet = new Set(selected.map((s) => s.stockName));
+
+
   return [
     ...all.filter((s) => selectedSet.has(s.issuerName)),
     ...all.filter((s) => !selectedSet.has(s.issuerName)),

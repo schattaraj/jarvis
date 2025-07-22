@@ -9,6 +9,7 @@ import { Pagination } from "../../../components/Pagination";
 import {
   ValueDisplay,
   calculateAverage,
+  decodeJWT,
   exportToExcel,
   fetchWithInterceptor,
   formatDate,
@@ -48,6 +49,9 @@ export default function BondPortfolio() {
   const [subscriberOnly, setSubscriberOnly] = useState(false);
   const [countApiCall, setCountApiCall] = useState(0);
   const [allBondPortfoilo, setAllBondPortfolio] = useState([]);
+  const [filteredAllBondPortfolios, setfilteredAllBondPortfolios] = useState(
+    []
+  );
   const [portfolioPayload, setPortfolioPayload] = useState({
     myArr: [],
     portfolioName: "",
@@ -66,14 +70,16 @@ export default function BondPortfolio() {
   const [editModal, setEditModal] = useState(false);
   const [editPortfolioName, setEditPortfolioName] = useState("");
   const [portfolioName, setPortfolioName] = useState("");
+  const [isCreate, setIsCreate] = useState(false);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStocks, setSelectedStocks] = useState([]);
   const [reportModal, setReportModal] = useState(false);
   const [reportTicker, setReportTicker] = useState("");
   const [profitValue, setProfitValue] = useState([]);
   const [currentPage3, setCurrentPage3] = useState(1);
+  const [modalStep, setModalStep] = useState(1);
   const [totalElements3, setTotalElements3] = useState(0);
   const [totalPages3, setTotalPages3] = useState(0);
   const [limit3, setLimit3] = useState(100);
@@ -122,10 +128,10 @@ export default function BondPortfolio() {
   };
   const fetchPortfolioNames = async () => {
     try {
-      const portfolioApi = await fetch(
-        "https://jharvis.com/JarvisV2/getAllBondPortFolioTicker?userId=2&_=1716292770931"
+      const portfolioApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getAllBondPortFolioTicker?userId=2&_=1716292770931"
       );
-      const portfolioApiRes = await portfolioApi.json();
+      // const portfolioApiRes = await portfolioApi.json();
       setPortfolioNames(portfolioApiRes);
       setPortfolioId(portfolioApiRes[0]?.idBondPortfolio);
       setCountApiCall(countApiCall + 1);
@@ -136,10 +142,10 @@ export default function BondPortfolio() {
   const fetchColumnNames = async () => {
     try {
       // const columnApi = await fetch("https://jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1716356733282")
-      const columnApi = await fetch(
-        "https://jharvis.com/JarvisV2/getColumnsBondPortfolio?metaDataName=Bondpricing_Master"
+      const columnApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getColumnsBondPortfolio?metaDataName=Bondpricing_Master"
       );
-      const columnApiRes = await columnApi.json();
+      // const columnApiRes = await columnApi.json();
       const extraColumns = [
         {
           elementId: null,
@@ -249,16 +255,18 @@ export default function BondPortfolio() {
   const getAllStock = async () => {
     context.setLoaderState(true);
     try {
-      const allStocksApi = await fetch(
-        "https://jharvis.com/JarvisV2/getAllBondForPolio?_=1716357445057"
+      const allStocksApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getAllBondForPolio?_=1716357445057"
       );
-      const allStocksApiRes = await allStocksApi.json();
+      // const allStocksApiRes = await allStocksApi.json();
       setAllBondPortfolio(allStocksApiRes);
+      setfilteredAllBondPortfolios(allStocksApiRes);
     } catch (e) {
       console.log("error", e);
     }
     context.setLoaderState(false);
   };
+
   const handleShow = () => {
     if (selectedStocks.length > 0) {
       Swal.fire({
@@ -272,16 +280,28 @@ export default function BondPortfolio() {
           setPortfolioName("");
           setSearchQuery("");
           setShow(true);
+          getAllStock();
         } else if (result.isDenied) {
           setShow(true);
+          getAllStock();
         }
       });
       return;
     } else {
+      getAllStock();
     }
     setShow(true);
   };
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setIsCreate(false);
+    setSelectedStocks([]);
+    setPortfolioName("");
+    setModalStep(1);
+    setSearchQuery("");
+    setAllBondPortfolio([]);
+    setfilteredAllBondPortfolios([]);
+  };
   const portfolioInputs = (e) => {
     setPortfolioPayload({
       ...portfolioPayload,
@@ -348,11 +368,10 @@ export default function BondPortfolio() {
     setManageView(true);
     context.setLoaderState(true);
     try {
-      const allBondApi = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 +
-          "getAllBondPortfolio?userId=2&_=1721819897846"
+      const allBondApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getAllBondPortfolio?userId=2&_=1721819897846"
       );
-      const allBondApiRes = await allBondApi.json();
+      // const allBondApiRes = await allBondApi.json();
       setBondportfolios(allBondApiRes);
     } catch (error) {}
     context.setLoaderState(false);
@@ -383,10 +402,64 @@ export default function BondPortfolio() {
     const value = e.target.value;
     setfilteredBondportfolios(searchTable(bondPortfolios, value));
   };
-  const handleEditModal = (name) => {
+  const handleEditModal = async (name) => {
+    context.setLoaderState(true);
     setEditModal(true);
-    setEditPortfolioName(name);
+
+    try {
+      const apiEndpoint = `/api/proxy?api=getAllBondForPolioByName?name=${name}&pageNumber=${
+        currentPage3 - 1
+      }&pageSize=${limit3 !== "all" ? limit3 : 0}&isforAll=${
+        limit3 == "all" ? true : false
+      }&_=${new Date().getTime()}`;
+      const options = { method: "GET" };
+
+      const response = await fetchWithInterceptor(
+        apiEndpoint,
+        false,
+        {},
+        options
+      );
+      const allStocksApiRes = response?.content;
+
+      setTotalElements3(response.totalElements);
+      setTotalPages3(response.totalPages);
+      // Extract selected stocks (with share or purchaseDate)
+      const selected = allStocksApiRes
+        .filter((item) => item.checkBoxHtml?.includes("checked"))
+        .map((item) => ({
+          stockName: item.issuerName,
+          share: item.share,
+          purchaseDate: item.purchaseDate,
+          purchasePrice: item.purchasePrice,
+        }));
+      console.log(
+        "allStoock merged",
+        sortBySelectionBond(allStocksApiRes, selected)
+      );
+
+      setSelectedStocks(selected); // Set selected state
+
+      // Sort allStocks with selected ones at top
+      setfilteredAllBondPortfolios(
+        sortBySelectionBond(allStocksApiRes, selected)
+      );
+
+      // handleShow();
+      context.setLoaderState(false);
+    } catch (e) {
+      console.log("error", e);
+      context.setLoaderState(false);
+    }
   };
+
+  useEffect(() => {
+    const filtered = allBondPortfoilo.filter((row) =>
+      row?.issuerName?.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setfilteredAllBondPortfolios(filtered);
+  }, [searchText]);
+
   const deleteBondPortFolio = (name) => {
     Swal.fire({
       title: "Are you sure ?",
@@ -398,10 +471,13 @@ export default function BondPortfolio() {
       if (result.isConfirmed) {
         context.setLoaderState(true);
         try {
-          const deleteApi = await fetch(
-            `https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`
+          const deleteApiRes = await fetchWithInterceptor(
+            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`,
+            false,
+            false,
+            { method: "DELETE" }
           );
-          const deleteApiRes = deleteApi.json();
+          // const deleteApiRes = deleteApi.json();
           getAllBondForPolios();
         } catch (error) {
           console.log("Error", error);
@@ -414,18 +490,18 @@ export default function BondPortfolio() {
     const newErrors = {};
     selectedStocks.forEach((stock) => {
       if (!stock.share)
-        newErrors[stock.name] = {
-          ...newErrors[stock.name],
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
           share: "Share is required",
         };
       if (!stock.purchaseDate)
-        newErrors[stock.name] = {
-          ...newErrors[stock.name],
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
           purchaseDate: "Purchase Date is required",
         };
       if (!stock.purchasePrice)
-        newErrors[stock.name] = {
-          ...newErrors[stock.name],
+        newErrors[stock.stockName] = {
+          ...newErrors[stock.stockName],
           purchasePrice: "Purchase Price is required",
         };
     });
@@ -472,15 +548,30 @@ export default function BondPortfolio() {
       return;
     }
 
-    if (!portfolioName) {
-      Swal.fire({
-        title: "Portfolio Name Required",
-        text: "Please enter a portfolio name.",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "var(--primary)",
-      });
-      return;
+    console.log(isCreate);
+
+    if (isCreate) {
+      if (!portfolioName) {
+        Swal.fire({
+          title: "Portfolio Name Required",
+          text: "Please enter a portfolio name.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "var(--primary)",
+        });
+        return;
+      }
+    } else {
+      if (!editPortfolioName) {
+        Swal.fire({
+          title: "Portfolio Name Required",
+          text: "Please Select a portfolio to Update.",
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "var(--primary)",
+        });
+        return;
+      }
     }
     if (selectedStocks.length < 1) {
       Swal.fire({
@@ -491,28 +582,53 @@ export default function BondPortfolio() {
       });
       return;
     }
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=2`;
+    const accessToken = localStorage.getItem("access_token");
+    const { userID } = decodeJWT(accessToken);
+    const url = `/api/proxy?api=createBondPortfolio?name=${portfolioName}&visiblePortFolio=yes&userId=${userID}&bodyType=form`;
     const formData = new FormData();
     selectedStocks.forEach((stock) => {
-      const dataString = `${stock?.name.split(" |")[0]}~${stock.share}~${
-        stock.purchaseDate
-      }~${stock.purchasePrice}`;
-      formData.append(`myArray[]`, dataString);
+      if (
+        stock?.stockName &&
+        stock?.share &&
+        stock?.purchaseDate &&
+        stock?.purchasePrice
+      ) {
+        // return `${stock.stockName}~${stock.share}~${stock.purchaseDate}~${stock.purchasePrice}`;
+        const formattedStock = `${stock?.stockName.split(" |")[0]}~${
+          stock.share
+        }~${stock.purchaseDate}~${stock.purchasePrice}`;
+        formData.append(`myArray[]`, formattedStock);
+      }
     });
+    const options = { body: formData, method: "POST" };
+    const defaultHeaders = {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    };
+
+    options.headers = {
+      ...defaultHeaders,
+      ...options.headers,
+    };
     context.setLoaderState(true);
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        body: formData,
-      });
+      const result = await fetch(url, options);
+      const response = await result.json();
 
-      if (!response.ok) {
+      if (!response.msg) {
         throw new Error("Network response was not ok " + response.statusText);
       }
-
-      const data = await response.json();
-      setShow(false);
+      Swal.fire({
+        title: response.msg,
+        icon: "success",
+        confirmButtonText: "OK",
+        confirmButtonColor: "var(--primary)",
+      });
+      // const data = await response.json();
+      closeEditModal();
+      handleClose();
       getAllBondForPolios();
+      // setShow(false);
+      // setEditModal(false);
     } catch (error) {
       console.error("Error creating portfolio:", error);
     }
@@ -527,12 +643,17 @@ export default function BondPortfolio() {
         // console.log("Output", { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" });
         return [
           ...prevStocks,
-          { name: issuerName, share: "", purchaseDate: "", purchasePrice: "" },
+          {
+            stockName: issuerName,
+            share: "",
+            purchaseDate: "",
+            purchasePrice: "",
+          },
         ];
       } else {
         // console.log("Output", prevStocks.filter(stock => stock.name !== issuerName));
         // Remove stock if checkbox is unchecked
-        return prevStocks.filter((stock) => stock.name !== issuerName);
+        return prevStocks.filter((stock) => stock.stockName !== issuerName);
       }
     });
   };
@@ -541,7 +662,7 @@ export default function BondPortfolio() {
 
     setSelectedStocks((prevStocks) =>
       prevStocks.map((stock) =>
-        stock.name === issuerName ? { ...stock, [name]: value } : stock
+        stock.stockName === issuerName ? { ...stock, [name]: value } : stock
       )
     );
   };
@@ -558,8 +679,23 @@ export default function BondPortfolio() {
     ),
     selectedStocks
   );
+
+  useEffect(() => {
+    setfilteredAllBondPortfolios(
+      sortBySelectionBond(allBondPortfoilo, selectedStocks)
+    );
+  }, [selectedStocks, allBondPortfoilo]);
+
   const closeEditModal = () => {
     setEditModal(false);
+    setEditPortfolioName("");
+    setPortfolioName("");
+    setModalStep(1);
+    setSelectedStocks([]);
+    setfilteredAllBondPortfolios([]);
+    setCurrentPage3(1);
+    setLimit3(25);
+    setShow(false);
   };
   const closeReportModal = () => {
     setReportModal(false);
@@ -1259,6 +1395,8 @@ export default function BondPortfolio() {
                             <button
                               className="px-4 btn btn-primary"
                               onClick={() => {
+                                setEditPortfolioName(item?.name);
+                                setPortfolioName(item.name);
                                 handleEditModal(item?.name);
                               }}
                               title="Edit"
@@ -1292,210 +1430,718 @@ export default function BondPortfolio() {
           )}
         </div>
         <Modal show={show} onHide={handleClose} className="portfolio-modal">
-          <Modal.Header closeButton>
-            <Modal.Title>Create Portfolio</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="row">
-              <div className="col-md-8">
-                <div className="form-group d-flex">
-                  <input
-                    type="text"
-                    className="form-control me-3"
-                    value={portfolioName || ""}
-                    placeholder="Portfolio Name"
-                    name="portfolioName"
-                    onChange={(e) => setPortfolioName(e.target.value)}
-                  />
-                  <button
-                    className="btn btn-primary text-nowrap"
-                    onClick={() => {
-                      createPortfolio();
-                    }}
-                  >
-                    Create Portfolio
-                  </button>
-                  <div className="form-check ms-3 d-inline-block">
-                    <input
-                      style={{ marginTop: "0.1rem", cursor: "pointer" }}
-                      className="form-check-input"
-                      type="checkbox"
-                      name="subscribersOnly"
-                      id="subscribersOnly"
-                      checked={subscriberOnly}
-                      onChange={(e) => {
-                        setSubscriberOnly(e.target.checked);
-                      }}
+          {modalStep == 1 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>Create Portfolio</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        value={portfolioName || ""}
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        onChange={(e) => setPortfolioName(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-primary text-nowrap"
+                        onClick={() => {
+                          if (!portfolioName) {
+                            Swal.fire({
+                              title: "Portfolio Name Required",
+                              text: "Please enter a portfolio name.",
+                              icon: "error",
+                              confirmButtonText: "OK",
+                              confirmButtonColor: "var(--primary)",
+                            });
+                            return;
+                          }
+                          setModalStep(2);
+                        }}
+                      >
+                        Continue
+                      </button>
+
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={subscriberOnly}
+                          onChange={(e) => {
+                            setSubscriberOnly(e.target.checked);
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <TextField
+                      label="Search"
+                      variant="outlined"
+                      fullWidth
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      sx={{ marginBottom: 2 }}
                     />
-                    <label
-                      className="form-check-label"
-                      htmlFor="subscribersOnly"
-                    >
-                      Subscribers Only
-                    </label>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-4">
-                <TextField
-                  label="Search"
-                  variant="outlined"
-                  fullWidth
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  sx={{ marginBottom: 2 }}
-                />
-              </div>
-            </div>
 
-            <div className="table-responsive">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Select</th>
-                    <th>Symbol</th>
-                    <th>Quantity</th>
-                    <th>Purchase Date</th>
-                    <th>Purchase Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allBondPortfoilo.length > 0 &&
-                    filteredPortfolio
-                      .slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                      .map((item, index) => {
-                        const isChecked = selectedStocks.some(
-                          (stock) => stock.name === item?.issuerName
-                        );
-                        return (
-                          <tr key={"stock" + index}>
-                            <td>
-                              <input
-                                type="checkbox"
-                                name="stockChkBox"
-                                value={item?.idBond || ""}
-                                onChange={(e) => {
-                                  selectStock(e, item?.issuerName);
-                                }}
-                                checked={isChecked}
-                              />
-                            </td>
-                            <td>{item?.issuerName}</td>
-                            <td>
-                              <input
-                                type="text"
-                                value={
-                                  selectedStocks.find(
-                                    (stock) => stock.name === item?.issuerName
-                                  )?.share || ""
-                                }
-                                name="share"
-                                placeholder="Quantity"
-                                className="form-control"
-                                onChange={(e) =>
-                                  updateSelectedBond(e, item?.issuerName)
-                                }
-                                style={{ minWidth: "150px" }}
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="date"
-                                value={
-                                  selectedStocks.find(
-                                    (stock) => stock.name === item?.issuerName
-                                  )?.purchaseDate || ""
-                                }
-                                name="purchaseDate"
-                                className="form-control"
-                                onChange={(e) =>
-                                  updateSelectedBond(e, item?.issuerName)
-                                }
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="text"
-                                value={
-                                  selectedStocks.find(
-                                    (stock) => stock.name === item?.issuerName
-                                  )?.purchasePrice || ""
-                                }
-                                name="purchasePrice"
-                                placeholder="Purchase Price"
-                                className="form-control"
-                                onChange={(e) =>
-                                  updateSelectedBond(e, item?.issuerName)
-                                }
-                                style={{ minWidth: "150px" }}
-                              />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                </tbody>
-              </table>
-            </div>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 2,
-              }}
-            >
-              <TablePagination
-                rowsPerPageOptions={[20, 50, 100]}
-                component="div"
-                count={allBondPortfoilo.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Box>
-          </Modal.Body>
-        </Modal>
-        {/* <Modal show={editModal} onHide={()=>{setEditModal(false)}} className='portfolio-modal'>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Portfolio</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="form-group d-flex">
-                                    <input type="text" className="form-control me-3" placeholder='Portfolio Name' name="portfolioName" value={editPortfolioName} readOnly />
-                                    <button className='btn btn-primary text-nowrap' onClick={() => { }}>Edit Portfolio</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="table-responsive">
-                            <table className='table'>
-                                <thead>
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Symbol</th>
-                                        <th>Share</th>
-                                        <th>Purchase Date</th>
-                                        <th>Purchase Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        allBondPortfoilo.length > 0 && allBondPortfoilo.map((item, index) => {
-                                            return <tr key={"stock" + index}><td><input type="checkbox" name='stockChkBox' value={item?.stockName} /></td><td>{item?.issuerName}</td><td><input type="text" value={item?.share} name="share" placeholder="Share" className='form-control' onChange={portfolioInputs} /></td><td><input type="date" value={item?.purchaseDate} name="purchaseDate" className='form-control' onChange={portfolioInputs} /></td><td><input type="text" value={item?.purchasePrice} name="purchasePrice" placeholder='Purchase Price' className='form-control' onChange={portfolioInputs} /></td></tr>
-                                        })
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Symbol</th>
+                        <th>Quantity</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allBondPortfoilo.length > 0 &&
+                        filteredPortfolio
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((item, index) => {
+                            const isChecked = selectedStocks.some(
+                              (stock) => stock.stockName === item?.issuerName
+                            );
+                            return (
+                              <tr key={"stock" + index}>
+                                <td>
+                                  <input
+                                    type="checkbox"
+                                    name="stockChkBox"
+                                    value={item?.idBond || ""}
+                                    onChange={(e) => {
+                                      selectStock(e, item?.issuerName);
+                                    }}
+                                    checked={isChecked}
+                                  />
+                                </td>
+                                <td>{item?.issuerName}</td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={
+                                      selectedStocks.find(
+                                        (stock) =>
+                                          stock.stockName === item?.issuerName
+                                      )?.share || ""
                                     }
-                                </tbody>
-                            </table>
-                        </div>
-                    </Modal.Body>
-                </Modal> */}
-        <PortfolioTable
+                                    name="share"
+                                    placeholder="Quantity"
+                                    className="form-control"
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                    style={{ minWidth: "150px" }}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="date"
+                                    value={
+                                      selectedStocks.find(
+                                        (stock) =>
+                                          stock.stockName === item?.issuerName
+                                      )?.purchaseDate || ""
+                                    }
+                                    name="purchaseDate"
+                                    className="form-control"
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={
+                                      selectedStocks.find(
+                                        (stock) =>
+                                          stock.stockName === item?.issuerName
+                                      )?.purchasePrice || ""
+                                    }
+                                    name="purchasePrice"
+                                    placeholder="Purchase Price"
+                                    className="form-control"
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                    style={{ minWidth: "150px" }}
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          })}
+                    </tbody>
+                  </table>
+                </div>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: 2,
+                  }}
+                >
+                  <TablePagination
+                    rowsPerPageOptions={[25, 50, 100]}
+                    component="div"
+                    count={allBondPortfoilo.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </Box>
+              </Modal.Body>
+            </>
+          )}
+          {modalStep == 2 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>Finalize Stock Inputs</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        value={portfolioName || ""}
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        // onChange={(e) => setPortfolioName(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-primary text-nowrap me-3"
+                        onClick={() => {
+                          setIsCreate(true);
+                          createPortfolio();
+                        }}
+                      >
+                        Create Portfolio
+                      </button>
+                      <button
+                        className="btn btn-secondary text-nowrap"
+                        onClick={() => {
+                          setModalStep(1);
+                        }}
+                      >
+                        Back
+                      </button>
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={subscriberOnly}
+                          onChange={(e) => {
+                            setSubscriberOnly(e.target.checked);
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <TextField
+                      label="Search"
+                      variant="outlined"
+                      fullWidth
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      sx={{ marginBottom: 2 }}
+                    />
+                  </div>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Symbol</th>
+                        <th>Quantity</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedStocks.length > 0 &&
+                        selectedStocks.map((item, index) => {
+                          const isChecked = selectedStocks.some(
+                            (stock) => stock.stockName === item?.stockName
+                          );
+                          return (
+                            <tr key={"stock" + index}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  name="stockChkBox"
+                                  value={item?.idBond || ""}
+                                  onChange={(e) => {
+                                    selectStock(e, item?.stockName);
+                                  }}
+                                  checked={isChecked}
+                                />
+                              </td>
+                              <td>{item?.stockName}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  value={
+                                    selectedStocks.find(
+                                      (stock) =>
+                                        stock.stockName === item?.stockName
+                                    )?.share || ""
+                                  }
+                                  name="share"
+                                  placeholder="Quantity"
+                                  className="form-control"
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                  style={{ minWidth: "150px" }}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  value={
+                                    selectedStocks.find(
+                                      (stock) =>
+                                        stock.stockName === item?.stockName
+                                    )?.purchaseDate || ""
+                                  }
+                                  name="purchaseDate"
+                                  className="form-control"
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  value={
+                                    selectedStocks.find(
+                                      (stock) =>
+                                        stock.stockName === item?.stockName
+                                    )?.purchasePrice || ""
+                                  }
+                                  name="purchasePrice"
+                                  placeholder="Purchase Price"
+                                  className="form-control"
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                  style={{ minWidth: "150px" }}
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </Modal.Body>
+            </>
+          )}
+        </Modal>
+        {/* edit Modal */}
+        <Modal
+          show={editModal}
+          onHide={closeEditModal}
+          className="portfolio-modal"
+        >
+          {modalStep == 1 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>{"Update Portfolio"}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        value={editPortfolioName}
+                        readOnly
+                      />
+
+                      <button
+                        className="btn btn-primary text-nowrap"
+                        onClick={() => {
+                          setModalStep(2);
+                        }}
+                      >
+                        Continue
+                      </button>
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={subscriberOnly}
+                          onChange={(e) => {
+                            setSubscriberOnly(e.target.checked);
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="dt-buttons mb-3"></div>
+                  <div className="form-group d-flex align-items-center">
+                    <label
+                      htmlFor=""
+                      style={{ textWrap: "nowrap" }}
+                      className="text-success me-2 mb-0"
+                    >
+                      Search :{" "}
+                    </label>
+                    <div class="input-group">
+                      <input
+                        type="search"
+                        class="form-control"
+                        placeholder=""
+                        aria-label="search"
+                        aria-describedby="basic-addon2"
+                        onChange={(e) => setSearchText(e.target.value)}
+                      />
+                      {/* <button
+                        class="btn-primary"
+                        onClick={getAllStock}
+                        id="basic-addon2"
+                      >
+                        Search
+                      </button> */}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Symbol</th>
+                        <th>Share</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAllBondPortfolios.length > 0 &&
+                        filteredAllBondPortfolios
+                          .slice(
+                            page * rowsPerPage,
+                            page * rowsPerPage + rowsPerPage
+                          )
+                          .map((item, index) => {
+                            const isChecked = selectedStocks.some(
+                              (stock) => stock.stockName === item.issuerName
+                            );
+                            return (
+                              <tr key={"stock" + index}>
+                                <td>
+                                  <input
+                                    type="checkbox"
+                                    name="stockName"
+                                    // defaultValue={item?.issuerName}
+                                    defaultChecked={
+                                      item?.share || item?.purchaseDate
+                                    }
+                                    onChange={(e) => {
+                                      selectStock(e, item?.issuerName);
+                                    }}
+                                    checked={isChecked}
+                                  />
+                                </td>
+                                <td>{item?.issuerName}</td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    // defaultValue={item?.share}
+                                    value={
+                                      selectedStocks.find(
+                                        (s) => s.stockName === item?.issuerName
+                                      )?.share || ""
+                                    }
+                                    name="share"
+                                    placeholder="Share"
+                                    className="form-control"
+                                    //onChange={(e) => portfolioInputs(e, index)}
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="date"
+                                    // defaultValue={item?.purchaseDate}
+                                    value={
+                                      selectedStocks.find(
+                                        (s) => s.stockName === item?.issuerName
+                                      )?.purchaseDate || ""
+                                    }
+                                    name="purchaseDate"
+                                    className="form-control"
+                                    //onChange={(e) => portfolioInputs(e, index)}
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    // defaultValue={item?.purchasePrice}
+                                    value={
+                                      selectedStocks.find(
+                                        (s) => s.stockName === item?.issuerName
+                                      )?.purchasePrice || ""
+                                    }
+                                    name="purchasePrice"
+                                    placeholder="Purchase Price"
+                                    className="form-control"
+                                    //onChange={(e) => portfolioInputs(e, index)}
+                                    onChange={(e) =>
+                                      updateSelectedBond(e, item?.issuerName)
+                                    }
+                                  />
+                                </td>
+                              </tr>
+                            );
+                          })}
+                    </tbody>
+                  </table>
+                </div>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: 2,
+                  }}
+                >
+                  <TablePagination
+                    rowsPerPageOptions={[25, 50, 100]}
+                    component="div"
+                    count={filteredAllBondPortfolios.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </Box>
+                {/* <PaginationNew
+                  currentPage={currentPage3}
+                  totalItems={totalElements3}
+                  totalPage={totalPages3}
+                  limit={limit3}
+                  setCurrentPage={setCurrentPage3}
+                  handlePage={handlePage3}
+                /> */}
+              </Modal.Body>
+            </>
+          )}
+          {modalStep == 2 && (
+            <>
+              <Modal.Header closeButton>
+                <Modal.Title>Finalize Bond Inputs</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <div className="row">
+                  <div className="col-md-8">
+                    <div className="form-group d-flex">
+                      <input
+                        type="text"
+                        className="form-control me-3"
+                        placeholder="Portfolio Name"
+                        name="portfolioName"
+                        value={editPortfolioName}
+                        readOnly
+                      />
+
+                      <button
+                        className="btn btn-primary text-nowrap me-3"
+                        onClick={() => {
+                          createPortfolio();
+                        }}
+                      >
+                        {"Update Portfolio"}
+                      </button>
+                      <button
+                        className="btn btn-secondary text-nowrap"
+                        onClick={() => {
+                          setModalStep(1);
+                        }}
+                      >
+                        Back
+                      </button>
+                      <div className="form-check ms-3 d-inline-block">
+                        <input
+                          style={{ marginTop: "0.1rem", cursor: "pointer" }}
+                          className="form-check-input"
+                          type="checkbox"
+                          name="subscribersOnly"
+                          id="subscribersOnly"
+                          checked={subscriberOnly}
+                          onChange={(e) => {
+                            setSubscriberOnly(e.target.checked);
+                          }}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="subscribersOnly"
+                        >
+                          Subscribers Only
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="table-responsive">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Select</th>
+                        <th>Symbol</th>
+                        <th>Share</th>
+                        <th>Purchase Date</th>
+                        <th>Purchase Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedStocks.length > 0 &&
+                        selectedStocks.map((item, index) => {
+                          const isChecked = selectedStocks.some(
+                            (stock) => stock.stockName === item?.stockName
+                          );
+                          // console.log(item);
+                          return (
+                            <tr key={"stock" + index}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  name="stockName"
+                                  // defaultValue={item?.issuerName}
+                                  defaultChecked={
+                                    item?.share || item?.purchaseDate
+                                  }
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) => {
+                                    selectStock(e, item?.stockName);
+                                  }}
+                                  checked={isChecked}
+                                />
+                              </td>
+                              <td>{item?.stockName}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.share}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.share || ""
+                                  }
+                                  name="share"
+                                  placeholder="Share"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="date"
+                                  // defaultValue={item?.purchaseDate}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchaseDate || ""
+                                  }
+                                  name="purchaseDate"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  // defaultValue={item?.purchasePrice}
+                                  value={
+                                    selectedStocks.find(
+                                      (s) => s.stockName === item?.stockName
+                                    )?.purchasePrice || ""
+                                  }
+                                  name="purchasePrice"
+                                  placeholder="Purchase Price"
+                                  className="form-control"
+                                  //onChange={(e) => portfolioInputs(e, index)}
+                                  onChange={(e) =>
+                                    updateSelectedBond(e, item?.stockName)
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </Modal.Body>
+            </>
+          )}
+        </Modal>
+        {/* edit modal ends */}
+        {/* <PortfolioTable
           url={`/api/proxy?api=getAllBondForPolioByName?name=${editPortfolioName}&pageNumber=${
             currentPage3 - 1
           }&pageSize=${limit3 !== "all" ? limit3 : 0}&isforAll=${
@@ -1515,7 +2161,7 @@ export default function BondPortfolio() {
           limit3={limit3}
           changeLimit3={changeLimit3}
           handlePage3={handlePage3}
-        />
+        /> */}
         <Modal
           show={bondPortfolioShow}
           onHide={bondPortfoliohandleClose}

@@ -7,6 +7,7 @@ import SliceData from "../../components/SliceData";
 import {
   calculateAverage,
   exportToExcel,
+  fetchWithInterceptor,
   getSortIcon,
   mmddyy,
   searchTable,
@@ -98,10 +99,10 @@ export default function MyStocks() {
 
   const fecthStocks = async () => {
     try {
-      const stocksApi = await fetch(
-        "https://jharvis.com/JarvisV2/getAllFavStocks"
+      const stocksRes = await fetchWithInterceptor(
+        "/api/proxy?api=getAllFavStocks"
       );
-      const stocksRes = await stocksApi.json();
+      // const stocksRes = await stocksApi.json();
       setFavStocks(stocksRes);
     } catch (e) {
       console.log("error", e);
@@ -163,7 +164,7 @@ export default function MyStocks() {
 
     // Construct URL with query parameters
     const url = new URL(
-      `https://jharvis.com/JarvisV2/findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}`
+      `/api/proxy?api=findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}&_=${Date.now()}`
     );
     // url.searchParams.append("startDate", formattedStartDate);
     // url.searchParams.append("endDate", formattedEndDate);
@@ -174,14 +175,14 @@ export default function MyStocks() {
     // });
     console.log("stockSymbols", url);
     // Optionally, append a timestamp or other query parameters if needed
-    url.searchParams.append("_", Date.now());
+    // url.searchParams.append("_", Date.now());
     context.setLoaderState(true);
     try {
-      const response = await fetch(url.toString());
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const stockByDateRes = await fetchWithInterceptor(url.toString());
+      if (!stockByDateRes.msg) {
+        throw new Error(`HTTP error! Status: ${stockByDateRes.status}`);
       }
-      const stockByDateRes = await response.json();
+      // const stockByDateRes = await response.json();
       console.log("Data", stockByDateRes);
       setTableData(stockByDateRes);
     } catch (error) {

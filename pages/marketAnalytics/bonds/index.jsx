@@ -398,10 +398,10 @@ export default function Bonds() {
   const getWeeklyData = async (importDate) => {
     context.setLoaderState(true);
     try {
-      const response = await fetch(
-        `https://jharvis.com/JarvisV2/getDataByWeek?metadataName=Bondpricing_Master&date=${importDate}&_=1744265661813`
+      const result = await fetchWithInterceptor(
+        `/api/proxy?api=getDataByWeek?metadataName=Bondpricing_Master&date=${importDate}&_=1744265661813`
       );
-      const result = await response.json();
+      // const result = await response.json();
       setTableData(result);
       setFilterData(result);
       setStocks(result);
@@ -484,20 +484,22 @@ export default function Bonds() {
   };
   const downloadReport = async (reportName) => {
     try {
-      const fetchReport = await fetch(
-        "https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" +
-          reportName
+      const fetchReportRes = await fetchWithInterceptor(
+        "/api/proxy?api=downloadTickerReport?fileName=" + reportName
       );
-      const fetchReportRes = await fetchReport.json();
+      // const fetchReportRes = await fetchReport.json();
       window.open(fetchReportRes.responseStr, "_blank");
     } catch (e) {}
   };
   const deleteReport = async (reportName) => {
     try {
-      const deleteApi = await fetch(
-        "https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName
+      const deleteApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=deletePortfolioByName?name=" + reportName,
+        false,
+        false,
+        { method: "DELETE" }
       );
-      const deleteApiRes = await deleteApi.json();
+      // const deleteApiRes = await deleteApi.json();
       alert(deleteApiRes.msg);
     } catch (e) {}
   };
@@ -505,12 +507,12 @@ export default function Bonds() {
   const getTickerCartDtata = async () => {
     try {
       const tickerName = selectedBond.map((item) => item.element1);
-      const apiUrl = `https://www.jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(
+      const apiUrl = `/api/proxy?api=getChartForHistoryByTicker?metadataName=Bondpricing_Master&ticker=${encodeURIComponent(
         tickerName
       )}&year=2023&year2=2023`;
 
-      const response = await fetch(apiUrl);
-      const data = await response.json();
+      const data = await fetchWithInterceptor(apiUrl);
+      // const data = await response.json();
       setChartData(data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -566,10 +568,10 @@ export default function Bonds() {
   const ranking = async () => {
     context.setLoaderState(true);
     try {
-      const rankingApi = await fetch(
-        `https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`
+      const rankingApiRes = await fetchWithInterceptor(
+        `/api/proxy?api=getImportHistorySheetCompare?metadataName=Bondpricing_Master&date1=1900-01-01&date2=1900-01-01&_=1719818279196`
       );
-      const rankingApiRes = await rankingApi.json();
+      // const rankingApiRes = await rankingApi.json();
       setRankingData(rankingApiRes);
       setCompareData(rankingApiRes);
       setSelectedOption("Ranking");
@@ -598,11 +600,11 @@ export default function Bonds() {
 
     const queryString = new URLSearchParams(payload).toString();
     console.log("queryString", queryString);
-    const url = `https://jharvis.com/JarvisV2/getCalculateBond?${queryString}`;
+    const url = `/api/proxy?api=getCalculateBond?${queryString}`;
     context.setLoaderState(true);
     try {
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await fetchWithInterceptor(url);
+      // const data = await response.json();
       // setTableData(data);
       // setFilterData(data);
       setCalculateModal(false);
@@ -633,10 +635,10 @@ export default function Bonds() {
         _: new Date().getTime(), // This will generate a unique timestamp
       };
       const queryString = new URLSearchParams(payload).toString();
-      const getChartHistrory = await fetch(
-        `https://jharvis.com/JarvisV2/getChartForHistoryByTicker?${queryString}`
+      const getChartHistroryRes = await fetchWithInterceptor(
+        `/api/proxy?api=getChartForHistoryByTicker?${queryString}`
       );
-      const getChartHistroryRes = await getChartHistrory.json();
+      // const getChartHistroryRes = await getChartHistrory.json();
       console.log("getChartHistroryRes", getChartHistroryRes);
       setChartHistory(getChartHistroryRes);
       setSelectedOption("Chart View");
@@ -692,20 +694,31 @@ export default function Bonds() {
       formData.append("fileDate", fileDate);
       formData.append("myfile", file);
       console.log("formData", formData);
+      const accessToken = localStorage.getItem("access_token");
+      const options = { body: formData, method: "POST" };
+      const defaultHeaders = {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+      options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+      };
       const upload = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileBondImport",
-        {
-          method: "POST",
-          // headers: {
-          //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          //     'Cache-Control': 'max-age=0',
-          //     'Content-Type': 'multipart/form-data',
-          //   },
-          body: formData,
-        }
+        "/api/proxy?api=uploadFileBondImport",
+        options
+        //   {
+        //   method: "POST",
+        //   // headers: {
+        //   //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        //   //     'Cache-Control': 'max-age=0',
+        //   //     'Content-Type': 'multipart/form-data',
+        //   //   },
+        //   body: formData,
+        // }
       );
-      // const uploadRes = await upload.json();
-      if (upload.status == 200) {
+      const uploadRes = await upload.json();
+      // if (upload.status == 200) {
+      if (uploadRes.msg) {
         setFile(null);
         setFileDate("");
         // Reset file input field
@@ -756,7 +769,7 @@ export default function Bonds() {
       const filePath = matchPathAndAnchor[1];
       const anchorTag = matchPathAndAnchor[2];
       // Create img tag from file path
-      const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${encodeURIComponent(
+      const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${encodeURIComponent(
         filePath
       )}" alt="Image"  loading="lazy">`;
       return (
@@ -772,7 +785,7 @@ export default function Bonds() {
     if (matchOnlyPath) {
       const filePath = matchOnlyPath[1];
       // Create img tag from file path
-      const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image">`;
+      const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image">`;
       return parse(imgTag);
     }
 
@@ -787,7 +800,7 @@ export default function Bonds() {
       const filePath = matchPathAndText[1];
       const additionalText = matchPathAndText[2];
       // Create img tag from file path
-      const imgTag = `<img src="https://jharvis.com/JarvisV2/downloadPDF?fileName=${filePath}" alt="Image"></br>`;
+      const imgTag = `<img src="/api/proxy?api=downloadPDF?fileName=${filePath}" alt="Image"></br>`;
       // Combine img tag with additional text
       const resultHtml = `${imgTag} ${additionalText}`;
       return parse(resultHtml); // Adjust parse function as needed

@@ -16,8 +16,10 @@ import {
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import { Context } from "../contexts/Context";
+import { fetchWithInterceptor } from "../utils/utils";
 
-const baseVidURL = `https://jharvis.com/JarvisV2/playVideo?fileName=`;
+// const baseVidURL = `/api/proxy?api=playVideo?fileName=`;
+const baseVidURL = `/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/JarvisVideo/`;
 
 const VideoComponent = () => {
   const [videoes, setVideoes] = useState([]);
@@ -26,10 +28,10 @@ const VideoComponent = () => {
   const fetchVideoes = async () => {
     context.setLoaderState(true);
     try {
-      const apiCall = await fetch(
-        "https://jharvis.com/JarvisV2/getAllAnalystVideo?filterText=&_=1699861659729"
+      const response = await fetchWithInterceptor(
+        "/api/proxy?api=getAllAnalystVideo?filterText=&_=1699861659729"
       );
-      const response = await apiCall.json();
+      // const response = await apiCall.json();
       setVideoes(response);
       // setCurrentVideo(
       //   `https://jharvis.com/JarvisV2/playVideo?fileName=${response[0].anaylstVideoDetails}`
@@ -71,9 +73,22 @@ const VideoComponent = () => {
 
   return (
     <Grid container>
-      <Grid container item xs={12} sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)', marginBottom: '4px' }}>
-
-        <Grid container item xs={6} justifyContent="flex-start" alignItems="center">
+      <Grid
+        container
+        item
+        xs={12}
+        sx={{
+          borderBottom: "1px solid rgba(0, 0, 0, 0.2)",
+          marginBottom: "4px",
+        }}
+      >
+        <Grid
+          container
+          item
+          xs={6}
+          justifyContent="flex-start"
+          alignItems="center"
+        >
           {/* <Grid item>
             <img
               id="dimg_1"
@@ -87,12 +102,18 @@ const VideoComponent = () => {
             />
           </Grid> */}
           <Grid iten>
-          {videoes.length > 0 ? (
-            <>
-            <Typography sx={{ fontSize: "28px" }}>{videoes[currentVideoIndex].companyName}</Typography>
-            <Typography sx={{ fontSize: "14px" }}>{videoes[currentVideoIndex].tickerName}</Typography>
-            </>
-          ) : ""}
+            {videoes.length > 0 ? (
+              <>
+                <Typography sx={{ fontSize: "28px" }}>
+                  {videoes[currentVideoIndex].companyName}
+                </Typography>
+                <Typography sx={{ fontSize: "14px" }}>
+                  {videoes[currentVideoIndex].tickerName}
+                </Typography>
+              </>
+            ) : (
+              ""
+            )}
           </Grid>
         </Grid>
 
@@ -119,7 +140,6 @@ const VideoComponent = () => {
             </Typography>
           </Grid>
         </Grid> */}
-
       </Grid>
 
       <Grid container item xs={12}>
@@ -127,10 +147,16 @@ const VideoComponent = () => {
           {videoes.length > 0 ? (
             <>
               {" "}
-              <div className="player-wrapper" style={{ border: '1px solid rgba(0, 0, 0, 0.3)', borderRadius: '4px' }}>
+              <div
+                className="player-wrapper"
+                style={{
+                  border: "1px solid rgba(0, 0, 0, 0.3)",
+                  borderRadius: "4px",
+                }}
+              >
                 <ReactPlayer
                   className="react-player"
-                  style={{ borderRadius: '10px' }}
+                  style={{ borderRadius: "10px" }}
                   url={`${baseVidURL}${videoes[currentVideoIndex]?.anaylstVideoDetails}`}
                   controls
                   playing={true}
@@ -169,46 +195,55 @@ const VideoComponent = () => {
           )}
         </Grid>
         <Grid item xs={12} md={4}>
-          <ScrollPanel style={{
-            width: "100%", height: "460px"
-          }}>
+          <ScrollPanel
+            style={{
+              width: "100%",
+              height: "460px",
+            }}
+          >
             {videoes.map((item, index) => {
-
               return (
                 <Card
                   sx={{
                     m: 2,
                     maxWidth: 240,
                     opacity: index === currentVideoIndex ? 0.7 : 1,
-                    "&:hover": { opacity: index === currentVideoIndex ? 0.7 : 1 },
-                    border: index === currentVideoIndex ? '1px solid rgba(0, 0, 0, 0.4' : '1px solid rgba(0, 0, 0, 0.2',
+                    "&:hover": {
+                      opacity: index === currentVideoIndex ? 0.7 : 1,
+                    },
+                    border:
+                      index === currentVideoIndex
+                        ? "1px solid rgba(0, 0, 0, 0.4"
+                        : "1px solid rgba(0, 0, 0, 0.2",
                     boxShadow:
                       "rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset",
                   }}
-                  key={index} style={{ border: '1px solid rgba(0, 0, 0, 0.2' }}>
+                  key={index}
+                  style={{ border: "1px solid rgba(0, 0, 0, 0.2" }}
+                >
                   <CardMedia
                     component="img"
                     alt="green iguana"
-                    sx={{ height: "140px", cursor: 'pointer' }}
+                    sx={{ height: "140px", cursor: "pointer" }}
                     image="/images/VideoTN.png"
-                    style={{ border: '1px solid rgba(0, 0, 0, 0.2', objectFit: 'cover' }}
+                    style={{
+                      border: "1px solid rgba(0, 0, 0, 0.2",
+                      objectFit: "cover",
+                    }}
                     onClick={() => setCurrentVideoIndex(index)}
                   />
                   <CardContent>
-                    <Typography sx={{ fontSize: '14px' }}>
+                    <Typography sx={{ fontSize: "14px" }}>
                       {item.companyName}
                     </Typography>
                   </CardContent>
                 </Card>
-              )
-            })
-            }
+              );
+            })}
           </ScrollPanel>
         </Grid>
-
       </Grid>
-
-    </Grid >
+    </Grid>
   );
 };
 

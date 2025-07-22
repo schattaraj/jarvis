@@ -8,7 +8,11 @@ import Loader from "../../components/loader";
 import { Context } from "../../contexts/Context";
 import { Pagination } from "../../components/Pagination";
 import SliceData from "../../components/SliceData";
-import { calculateAverage, searchTable } from "../../utils/utils";
+import {
+  calculateAverage,
+  fetchWithInterceptor,
+  searchTable,
+} from "../../utils/utils";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Select from "react-select";
@@ -46,10 +50,10 @@ export default function StocksPair() {
   const fecthStocks = async () => {
     context.setLoaderState(true);
     try {
-      const stocksApi = await fetch(
-        `https://jharvis.com/JarvisV2/getAllStocks?_=${new Date().getTime()}`
+      const stocksRes = await fetchWithInterceptor(
+        `/api/proxy?api=getAllStocks?_=${new Date().getTime()}`
       );
-      const stocksRes = await stocksApi.json();
+      // const stocksRes = await stocksApi.json();
       setStocks(stocksRes);
       setFilterData(stocksRes);
     } catch (e) {
@@ -88,8 +92,8 @@ export default function StocksPair() {
 
     context.setLoaderState(true);
     try {
-      const dataApi = await fetch(
-        "https://jharvis.com/JarvisV2/getHistoricalDataByStockAndDate?stockA=" +
+      const dataRes = await fetchWithInterceptor(
+        "/api/proxy?api=getHistoricalDataByStockAndDate?stockA=" +
           inputData?.stockA +
           "&stockB=" +
           inputData?.stockB +
@@ -103,7 +107,7 @@ export default function StocksPair() {
           inputData?.endDate +
           "&_=1699957833253"
       );
-      const dataRes = await dataApi.json();
+      // const dataRes = await dataApi.json();
 
       const formattedData = [];
 

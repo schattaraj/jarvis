@@ -122,14 +122,16 @@ const StockHistoryModalNew = ({
     // console.log(`Delete action triggered for ID ${deleteItemId}`);
     setDeleteConfirmationOpen(false);
     try {
-      const response = await fetch(
-        `https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`,
+      const result = await fetchWithInterceptor(
+        `/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`,
+        false,
+        false,
         {
           method: "DELETE",
         }
       );
 
-      const result = await response.json();
+      // const result = await response.json();
 
       if (response.ok) {
         alert(result.msg);
