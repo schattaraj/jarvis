@@ -48,6 +48,7 @@ export default function PemDetails() {
   const contentRef = useRef(null);
   const firstColRef = useRef(null);
   const [firstColWidth, setFirstColWidth] = useState(0);
+  const [pemRowData, setPemRowData] = useState(null);
   const [formData, setFormData] = useState({
     revenueTAMSign: "",
     revenueTAM: "",
@@ -92,10 +93,8 @@ export default function PemDetails() {
   });
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
-    console.log("e.target", type, name);
     if (type === "text") {
       // const numericValue = parseFloat(value) / 100;
-      console.log("numericValue", parseFloat(value));
 
       const numericValue = parseFloat(value);
       setFormData((prevData) => ({
@@ -415,7 +414,6 @@ export default function PemDetails() {
       console.log("error", e);
     }
   };
-  console.log("columnNames", columnNames);
 
   const extraColumns = [
     {
@@ -456,7 +454,7 @@ export default function PemDetails() {
     }
     context.setLoaderState(false);
   };
-  console.log("tableData", tableData);
+
 
   const handleClick = (elm) => {
     console.log("element", elm);
@@ -540,7 +538,6 @@ export default function PemDetails() {
           confirmButtonColor: "var(--primary)",
         });
       }
-      console.log("form", form, upload);
     } catch (error) {
       console.log("Error", error);
     }
@@ -689,7 +686,8 @@ export default function PemDetails() {
     setPemRankScoreModal(false);
   };
 
-  const handlePemRankScore = (score) => {
+  const handlePemRankScore = (score,rowData) => {
+    setPemRowData(rowData);
     let cleanScore;
     try {
       if (typeof score === 'string' || typeof score === 'number') {
@@ -710,10 +708,6 @@ export default function PemDetails() {
       } else {
         cleanScore = String(score || '');
       }
-
-    
-      console.log('Setting PemRankScore:', cleanScore, typeof cleanScore);
-
       setPemRankScore(cleanScore);
       setPemRankScoreModal(true);
 
@@ -731,7 +725,6 @@ export default function PemDetails() {
       setRuleData(getAllRules);
       context.setLoaderState(false);
     } catch (e) {
-      console.log("error", e);
       context.setLoaderState(false);
     }
   };
@@ -760,11 +753,6 @@ export default function PemDetails() {
 
       // Multiply by 100 only if it's a percentage-type metric
       if (percentBasedFields.includes(fieldName)) {
-        console.log(
-          percentBasedFields.includes(fieldName),
-          (numericValue *= 100)
-        );
-
         numericValue *= 100;
       }
 
@@ -822,7 +810,6 @@ export default function PemDetails() {
   }
 
   const result = calculatePEMScores(filterData, ruleData);
-  console.log("result", result);
 
   return (
     <>
@@ -1172,7 +1159,7 @@ export default function PemDetails() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                handlePemRankScore(content);
+                                handlePemRankScore(content,rowData);
                               }}
                               href="javascript:void(0)"
                              className="ticker-link"
@@ -1910,6 +1897,8 @@ export default function PemDetails() {
           score={pemRankScore}
           open={pemRankScoreModal}
           handleCloseModal={closePemRankScoreModal}
+          pemRowData={pemRowData}
+          ruleData={ruleData}
         />
       </div>
     </>
