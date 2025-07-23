@@ -187,8 +187,10 @@ export default function BusinessTracking() {
       jsonObject.reviewMeetingWhom = reviewMeetingWhom.join(", ");
       jsonObject.newClientName = newClientName.join(", ");
 
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "addBusinessTracking",
+      const result = await fetchWithInterceptor(
+        "/api/proxy?api=addBusinessTracking",
+        false,
+        false,
         {
           method: "POST",
           headers: {
@@ -198,8 +200,8 @@ export default function BusinessTracking() {
         }
       );
 
-      if (response.ok) {
-        const result = await response.json();
+      if (result.msg) {
+        // const result = await response.json();
         Swal.fire({
           title: result?.msg,
           icon: "success",
@@ -336,14 +338,14 @@ export default function BusinessTracking() {
         jsonObject[key] = value;
       });
       const { advisorName, timeFrame, startdate, enddate } = jsonObject;
-      let url = `${process.env.NEXT_PUBLIC_BASE_URL_V2}getDetailsByAdvisor?advisorName=${advisorName}`;
+      let url = `/api/proxy?api=getDetailsByAdvisor?advisorName=${advisorName}`;
       if (timeFrame) {
         url += `&timeFrame=${timeFrame}`;
       } else {
         url += `&startdate=${startdate}&enddate=${enddate}`;
       }
-      const fetchAdvisor = await fetch(url + "&_=1720608071572=");
-      const fetchAdvisorRes = await fetchAdvisor.json();
+      const fetchAdvisorRes = await fetchWithInterceptor(url);
+      // const fetchAdvisorRes = await fetchAdvisor.json();
       setAdvisorData(fetchAdvisorRes?.msg);
     } catch (error) {}
     context.setLoaderState(false);

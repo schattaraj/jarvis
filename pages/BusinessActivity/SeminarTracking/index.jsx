@@ -159,11 +159,13 @@ export default function SeminarTracking() {
       });
       setErrors(errors);
 
-      let addPipeline = null;
+      let addPipelineRes = null;
 
       if (!jsonObject.idSeminarTracking) {
-        addPipeline = await fetch(
-          process.env.NEXT_PUBLIC_BASE_URL_V2 + "addSeminarTracking",
+        addPipelineRes = await fetchWithInterceptor(
+          "/api/proxy?api=addSeminarTracking",
+          false,
+          false,
           {
             method: "POST",
             headers: {
@@ -173,8 +175,10 @@ export default function SeminarTracking() {
           }
         );
       } else {
-        addPipeline = await fetch(
-          process.env.NEXT_PUBLIC_BASE_URL_V2 + "editSeminarTracking",
+        addPipelineRes = await fetchWithInterceptor(
+          "/api/proxy?api=editSeminarTracking",
+          false,
+          false,
           {
             method: "POST",
             headers: {
@@ -184,7 +188,7 @@ export default function SeminarTracking() {
           }
         );
       }
-      const addPipelineRes = await addPipeline.json();
+      // const addPipelineRes = await addPipeline.json();
       Swal.fire({
         title: addPipelineRes?.msg,
         // text: "You clicked the button!",
@@ -214,15 +218,16 @@ export default function SeminarTracking() {
         try {
           const formData = new FormData();
           formData.append("idSeminarTracking", id);
-          const rowDelete = await fetch(
-            process.env.NEXT_PUBLIC_BASE_URL_V2 + "deleteSeminarTracking",
+          const rowDeleteRes = await fetchWithInterceptor(
+            "/api/proxy?api=deleteSeminarTracking?idSeminarTracking=" + id,
+            false,
+            false,
             {
               method: "DELETE",
-              body: formData,
             }
           );
-          if (rowDelete.ok) {
-            const rowDeleteRes = await rowDelete.json();
+          if (rowDeleteRes.msg) {
+            // const rowDeleteRes = await rowDelete.json();
             Swal.fire("Deleted!", "", "success");
             alert(rowDeleteRes.msg);
             fetchData();
