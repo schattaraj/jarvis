@@ -8,6 +8,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import SliceData from "../../components/SliceData";
 import {
   convertToReadableString,
+  fetchWithInterceptor,
   formatDate,
   getSortIcon,
   jsonToFormData,
@@ -113,17 +114,19 @@ export default function PUTS() {
   const [viewBy, setViewBy] = useState("putPrice");
   const [chartData, setChartData] = useState(false);
   const context = useContext(Context);
-  const [reportTicker, setReportTicker] = useState("")
-  const [reportModal, setReportModal] = useState(false)
-  const regex = /[A-Za-z]:[\\/][A-Za-z0-9_\\-]+(?:[\\/][A-Za-z0-9_\\-]+)*\.(jpg|jpeg|png|gif|bmp|tiff|webp|svg)/;
-  const anchorRegex = /<a\s+href=['"]#['"][^>]*\s+data-toggle=['"][^'"]*['"][^>]*\s+onclick=['"][^'"]*['"][^>]*>[^<]*<\/a>/
+  const [reportTicker, setReportTicker] = useState("");
+  const [reportModal, setReportModal] = useState(false);
+  const regex =
+    /[A-Za-z]:[\\/][A-Za-z0-9_\\-]+(?:[\\/][A-Za-z0-9_\\-]+)*\.(jpg|jpeg|png|gif|bmp|tiff|webp|svg)/;
+  const anchorRegex =
+    /<a\s+href=['"]#['"][^>]*\s+data-toggle=['"][^'"]*['"][^>]*\s+onclick=['"][^'"]*['"][^>]*>[^<]*<\/a>/;
   const fetchTickersFunc = async () => {
     context.setLoaderState(true);
     try {
-      const fetchTickers = await fetch(
-        "https://jharvis.com/JarvisV2/getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724"
+      const fetchTickersRes = await fetchWithInterceptor(
+        "/api/proxy?api=getAllTickerBigList?metadataName=Tickers_Watchlist&_=1706798577724"
       );
-      const fetchTickersRes = await fetchTickers.json();
+      // const fetchTickersRes = await fetchTickers.json();
       setTickers(fetchTickersRes);
       setSelectedTicker(fetchTickersRes[0]?.element1);
       setInputData({ ...inputData, tickername: fetchTickersRes[0]?.element1 });
@@ -132,10 +135,10 @@ export default function PUTS() {
   };
   const fetchDates = async () => {
     try {
-      const fetchDates = await fetch(
-        "https://jharvis.com/JarvisV2/findAllDatesPut?_=1706850539768"
+      const fetchDateRes = await fetchWithInterceptor(
+        "/api/proxy?api=findAllDatesPut?_=1706850539768"
       );
-      const fetchDateRes = await fetchDates.json();
+      // const fetchDateRes = await fetchDates.json();
       setDates(fetchDateRes);
       setSelectedDate(fetchDateRes[0]);
     } catch (e) {}
@@ -150,10 +153,10 @@ export default function PUTS() {
     }
     context.setLoaderState(true);
     try {
-      const apiCall = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}findAllPutsByTickerName?tickername=${selectedTicker}`
+      const apiCallRes = await fetchWithInterceptor(
+        `/api/proxy?api=findAllPutsByTickerName?tickername=${selectedTicker}`
       );
-      const apiCallRes = await apiCall.json();
+      // const apiCallRes = await apiCall.json();
       setTableData(apiCallRes);
       findMeanPutByTickerName();
     } catch (error) {
@@ -192,10 +195,10 @@ export default function PUTS() {
     }
     context.setLoaderState(true);
     try {
-      const apiCall = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`
+      const apiCallRes = await fetchWithInterceptor(
+        `/api/proxy?api=findMeanPutByTickerName?tickername=${selectedTicker}&selectColumn=${meanColumn}`
       );
-      const apiCallRes = await apiCall.json();
+      // const apiCallRes = await apiCall.json();
       setMeanData(apiCallRes);
     } catch (error) {
       console.log("Error: ", error);
@@ -350,19 +353,22 @@ export default function PUTS() {
       if (result.isConfirmed) {
         context.setLoaderState(true);
         try {
-          const rowDelete = await fetch(
-            `https://jharvis.com/JarvisV2/deletePutBy?tickerid=${id}`
+          const rowDeleteRes = await fetchWithInterceptor(
+            `/api/proxy?api=deletePutBy?tickerid=${id}`,
+            false,
+            false,
+            { method: "DELETE" }
           );
-          if (rowDelete.ok) {
-            const rowDeleteRes = await rowDelete.json();
-            Swal.fire({
-              title: rowDeleteRes?.msg,
-              icon: "success",
-              confirmButtonColor: "#719B5F",
-            });
-            findAllPutsByTickerName();
-            fetchByDateFunc();
-          }
+          // if (rowDelete.ok) {
+          // const rowDeleteRes = await rowDelete.json();
+          Swal.fire({
+            title: rowDeleteRes?.msg,
+            icon: "success",
+            confirmButtonColor: "#719B5F",
+          });
+          findAllPutsByTickerName();
+          fetchByDateFunc();
+          // }
         } catch (error) {
           console.log(error);
         }
@@ -371,8 +377,8 @@ export default function PUTS() {
     });
   };
   const handleClick = (data) => {
-        setReportTicker(data)
-        setReportModal(true)
+    setReportTicker(data);
+    setReportModal(true);
   };
   const options = {
     replace: (elememt) => {
@@ -425,23 +431,27 @@ export default function PUTS() {
     setViewBy(e.target.value);
   };
   const closeReportModal = () => {
-    setReportModal(false)
-}
+    setReportModal(false);
+  };
   useEffect(() => {
     async function run() {
       if (tableData.length > 0) {
         let items = [...tableData];
         if (sortConfig !== null) {
           items.sort((a, b) => {
-            const first = isNaN(a[sortConfig.key]) ? a[sortConfig.key] : parseFloat(a[sortConfig.key])
-            const second = isNaN(b[sortConfig.key]) ? b[sortConfig.key] : parseFloat(b[sortConfig.key])
-                    if (first < second) {
-                        return sortConfig.direction === 'asc' ? -1 : 1;
-                    }
-                    if (first > second) {
-                        return sortConfig.direction === 'asc' ? 1 : -1;
-                    }
-                    return 0;
+            const first = isNaN(a[sortConfig.key])
+              ? a[sortConfig.key]
+              : parseFloat(a[sortConfig.key]);
+            const second = isNaN(b[sortConfig.key])
+              ? b[sortConfig.key]
+              : parseFloat(b[sortConfig.key]);
+            if (first < second) {
+              return sortConfig.direction === "asc" ? -1 : 1;
+            }
+            if (first > second) {
+              return sortConfig.direction === "asc" ? 1 : -1;
+            }
+            return 0;
           });
         }
         let dataLimit = limit;
@@ -783,12 +793,20 @@ export default function PUTS() {
                               </td>
                             );
                           }
-                          if(elementName == "stockNameTicker"){
-                            const match  = item[elementName].match(regex)
-                            const matchAnchor = item[elementName].match(anchorRegex)
-                           return <td key={"td-" + index}>
-                            <img src={`https://jharvis.com/JarvisV2/downloadPDF?fileName=${match && match[0]}`}/>
-                            {parse(matchAnchor[0],options)}</td>
+                          if (elementName == "stockNameTicker") {
+                            const match = item[elementName].match(regex);
+                            const matchAnchor =
+                              item[elementName].match(anchorRegex);
+                            return (
+                              <td key={"td-" + index}>
+                                <img
+                                  src={`/api/proxy?api=downloadPDF?fileName=${
+                                    match && match[0]
+                                  }`}
+                                />
+                                {parse(matchAnchor[0], options)}
+                              </td>
+                            );
                           }
                           return (
                             <td key={"td-" + index}>
@@ -847,7 +865,12 @@ export default function PUTS() {
           )}
         </div>
       </div>
-      <ReportTable name={reportTicker} open={reportModal} handleCloseModal={closeReportModal} news={true}/>
+      <ReportTable
+        name={reportTicker}
+        open={reportModal}
+        handleCloseModal={closeReportModal}
+        news={true}
+      />
     </>
   );
 }

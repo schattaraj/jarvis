@@ -1,59 +1,61 @@
-import React, { useEffect, useState } from 'react'
-import Footer from '../components/footer';
-import Navigation from '../components/navigation';
-import Sidebar from '../components/sidebar';
-import Link from 'next/link'
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css'
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import { Navigation as Nav2, Autoplay } from 'swiper/modules';
-import Breadcrumb from '../components/Breadcrumb';
-import PDFViewer from '../components/PDFViewer';
+import React, { useEffect, useState } from "react";
+import Footer from "../components/footer";
+import Navigation from "../components/navigation";
+import Sidebar from "../components/sidebar";
+import Link from "next/link";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import { Navigation as Nav2, Autoplay } from "swiper/modules";
+import Breadcrumb from "../components/Breadcrumb";
+import PDFViewer from "../components/PDFViewer";
+import { fetchWithInterceptor } from "../utils/utils";
 export default function Newsletter() {
-  const [reports, setReports] = useState([])
+  const [reports, setReports] = useState([]);
   const [show, setShow] = useState(false);
   const [currentPdf, setCurrentPdf] = useState(false);
-  const [loader, setLoader] = useState(false)
+  const [loader, setLoader] = useState(false);
   const fetchVideoes = async () => {
-    setLoader(true)
+    setLoader(true);
     try {
-      const apiCall = await fetch("https://jharvis.com/JarvisV2/getAllTickerReportsBYWeekly?_=1706881081108")
-      const response = await apiCall.json()
-      setReports(response)
-      setCurrentPdf(response[0])
-      console.log(response)
+      const response = await fetchWithInterceptor(
+        "/api/proxy?api=getAllTickerReportsBYWeekly?_=1706881081108"
+      );
+      // const response = await apiCall.json()
+      setReports(response);
+      setCurrentPdf(response[0]);
+      console.log(response);
+    } catch (e) {
+      console.log("error", e);
     }
-    catch (e) {
-      console.log("error", e)
-    }
-    setLoader(false)
-  }
-
+    setLoader(false);
+  };
 
   const handleClose = () => setShow(false);
   const handleShow = (path) => {
     // setShow(true);
-    setCurrentPdf(path)
-    console.log("path", path)
-  }
+    setCurrentPdf(path);
+    console.log("path", path);
+  };
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   useEffect(() => {
-    fetchVideoes()
-  }, [])
+    fetchVideoes();
+  }, []);
   return (
     <>
       <div className="main-panel">
         <div className="content-wrapper">
-        <Breadcrumb />
+          <Breadcrumb />
           <div className="page-header">
             <h3 className="page-title">
               <span className="page-title-icon bg-gradient-primary text-white me-2">
                 <i className="mdi mdi-home"></i>
-              </span>Newsletter
+              </span>
+              Newsletter
             </h3>
             {/* <nav aria-label="breadcrumb">
               <ul className="breadcrumb">
@@ -64,88 +66,117 @@ export default function Newsletter() {
             </nav> */}
           </div>
           {/* <h3 className='mb-3'>FIRST FOCUS, FRESH LOOK, READ & REACT & THE FUNDAMENTALS OF INVESTING - REPORTS</h3> */}
-          <p className='mb-4'>Complete and accurate information that has been gathered, evaluated, and merged into well integrated and consise reports that provide todays investors with sound analytics helping them make the best possible decisions for the future.</p>
+          <p className="mb-4">
+            Complete and accurate information that has been gathered, evaluated,
+            and merged into well integrated and consise reports that provide
+            todays investors with sound analytics helping them make the best
+            possible decisions for the future.
+          </p>
           <div className="row">
             <div className="col-md-7">
               <div className="left">
                 <h3>Latest Post</h3>
-                {!currentPdf &&
+                {!currentPdf && (
                   <SkeletonTheme>
-                    <div className='w-100'>
+                    <div className="w-100">
                       <Skeleton width={"100%"} height={"500px"} />
                     </div>
                   </SkeletonTheme>
-                }
-                <h5 className='card-title'>{currentPdf?.tickerName}</h5>
+                )}
+                <h5 className="card-title">{currentPdf?.tickerName}</h5>
                 <p className="card-text">{currentPdf?.description}</p>
                 {/* <iframe className="embed-responsive-item report-iframe" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe> */}
-                {currentPdf?.reportfileDetails && <PDFViewer pdfUrl={`https://jharvis.com/JarvisV2/playPdf?fileName=${currentPdf.reportfileDetails}`}/>} 
+                {currentPdf?.reportfileDetails && (
+                  <PDFViewer
+                    // pdfUrl={`/api/proxy?api=playPdf?fileName=${currentPdf.reportfileDetails}`}
+                    pdfUrl={`/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${
+                      currentPdf.reportfileDetails.split("C:/")[1]
+                    }`}
+                  />
+                )}
               </div>
             </div>
             <div className="col-md-5">
               <div className="horizontal">
-                <h3 className='mb-3'>Recent Posts</h3>
-                {
-                  reports.length == 0 &&
+                <h3 className="mb-3">Recent Posts</h3>
+                {reports.length == 0 && (
                   <SkeletonTheme>
-                    <div className='w-100'>
+                    <div className="w-100">
                       <Skeleton width={"100%"} height={"300px"} />
                     </div>
                   </SkeletonTheme>
-                }
+                )}
 
                 <Swiper
                   spaceBetween={30}
                   slidesPerView={1}
-                  onSlideChange={() => console.log('slide change')}
-                  navigation={true} modules={[Nav2, Autoplay]}
+                  onSlideChange={() => console.log("slide change")}
+                  navigation={true}
+                  modules={[Nav2, Autoplay]}
                   autoplay={{
                     delay: 2500,
                     disableOnInteraction: false,
                   }}
                 >
-                  {
-                    reports.length > 0 && reports.map((item, index) => {
+                  {reports.length > 0 &&
+                    reports.map((item, index) => {
                       return (
                         <SwiperSlide key={index}>
                           <div className="report me-0">
-                            <img src="/images/ReportsTN.png" alt="" className='image' />
-                            <h5 className='card-title'>{item.tickerName}</h5>
+                            <img
+                              src="/images/ReportsTN.png"
+                              alt=""
+                              className="image"
+                            />
+                            <h5 className="card-title">{item.tickerName}</h5>
                             <p className="card-text">{item.description}</p>
-                            <button className='btn btn-success' onClick={() => { handleShow(item) }}>View</button>
+                            <button
+                              className="btn btn-success"
+                              onClick={() => {
+                                handleShow(item);
+                              }}
+                            >
+                              View
+                            </button>
                           </div>
                         </SwiperSlide>
-                      )
-                    })
-                  }
-
-
+                      );
+                    })}
                 </Swiper>
               </div>
               <div className="vertical">
-                <h3 className='mb-3'>Archive</h3>
-                {
-                  reports.length == 0 &&
+                <h3 className="mb-3">Archive</h3>
+                {reports.length == 0 && (
                   <>
                     <SkeletonTheme className="mb-3">
-                      <div className='w-100'>
+                      <div className="w-100">
                         <Skeleton width={"100%"} height={"300px"} />
                       </div>
                     </SkeletonTheme>
                   </>
-
-                }
-                {
-                  reports.length > 0 && reports.map((item, index) => {
+                )}
+                {reports.length > 0 &&
+                  reports.map((item, index) => {
                     return (
                       <div className="report" key={index}>
-                        <img src="/images/ReportsTN.png" alt="" className='image' />
-                        <h5 className='card-title'>{item.tickerName}</h5>
+                        <img
+                          src="/images/ReportsTN.png"
+                          alt=""
+                          className="image"
+                        />
+                        <h5 className="card-title">{item.tickerName}</h5>
                         <p className="card-text">{item.description}</p>
-                        <button className='btn btn-success' onClick={() => { handleShow(item) }}>View</button>
-                      </div>)
-                  })
-                }
+                        <button
+                          className="btn btn-success"
+                          onClick={() => {
+                            handleShow(item);
+                          }}
+                        >
+                          View
+                        </button>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -208,18 +239,27 @@ export default function Newsletter() {
         })
 }
 </div> */}
-
         </div>
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Report</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <iframe className="embed-responsive-item" src={"https://jharvis.com/JarvisV2/playPdf?fileName=" + currentPdf.reportfileDetails} id="video" allowscriptaccess="always" allow="autoplay" style={{ width: "100%" }}></iframe>
+            <iframe
+              className="embed-responsive-item"
+              src={
+                "/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/" +
+                currentPdf.reportfileDetails
+              }
+              id="video"
+              allowscriptaccess="always"
+              allow="autoplay"
+              style={{ width: "100%" }}
+            ></iframe>
           </Modal.Body>
         </Modal>
         <Footer />
       </div>
     </>
-  )
+  );
 }

@@ -145,7 +145,7 @@ export default function PemDetails() {
       valueProSign: formData?.valueProSign,
     });
 
-    const apiUrl = `https://jharvis.com/JarvisV2/getCalculatePemNew?${params.toString()}`;
+    const apiUrl = `/api/proxy?api=getCalculatePemNew?${params.toString()}`;
     try {
       context.setLoaderState(true);
       // const apiCall = await fetch("https://jharvis.com/JarvisV2/getCalculatePemNew?metadataName=PEM_NEW&rate12=0&revenueTAM=1&organicCompany=0.6&organicTAM=0&fwdEV=&priceEarnings=&priceFree=&revConsistency=&roic=0&fcfMargin=0&fwdEbitda=0&ebitdaMargin=&fcfMarginExpand=&competitiveEnvironment=&valuePro=&rate12Sign=0&revenueTAMSign=%3C&organicCompanySign=%3C&organicTAMSign=0&fwdEVSign=0&priceEarningsSign=0&priceFreeSign=0&revConsistencySign=0&roicSign=0&fcfMarginSign=0&fwdEbitdaSign=0&ebitdaMarginSign=0&fcfMarginExpandSign=0&competitiveEnvironmentSign=0&valueProSign=0&_=1741256270172")

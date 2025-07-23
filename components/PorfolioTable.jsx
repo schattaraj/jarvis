@@ -64,36 +64,36 @@ function PortfolioTable({
       const paginatedResult = await fetchWithInterceptor(url);
       const paginatedData = paginatedResult?.content || [];
 
-      // Step 2: Fetch all data once (you can cache this to avoid repeated calls)
-      const allDataUrl = `/api/proxy?api=${
-        url.split("?api=")[1].split("&")[0]
-      }&pageNumber=0&pageSize=100000`;
-      const fullResult = await fetchWithInterceptor(allDataUrl);
-      const fullData = fullResult?.content || [];
+      // // Step 2: Fetch all data once (you can cache this to avoid repeated calls)
+      // const allDataUrl = `/api/proxy?api=${
+      //   url.split("?api=")[1].split("&")[0]
+      // }&pageNumber=0&pageSize=100000`;
+      // const fullResult = await fetchWithInterceptor(allDataUrl);
+      // const fullData = fullResult?.content || [];
 
-      // Step 3: Extract checked bonds from full data
-      const checkedData = fullData.filter((item) =>
-        item.checkBoxHtml?.includes("checked")
-      );
+      // // Step 3: Extract checked bonds from full data
+      // const checkedData = fullData.filter((item) =>
+      //   item.checkBoxHtml?.includes("checked")
+      // );
 
-      // Step 4: Filter out checked items from paginatedData to avoid duplication
-      const uncheckedPaginated = paginatedData.filter(
-        (paginatedItem) =>
-          !checkedData.some(
-            (checked) => checked.issuerName === paginatedItem.issuerName
-          )
-      );
+      // // Step 4: Filter out checked items from paginatedData to avoid duplication
+      // const uncheckedPaginated = paginatedData.filter(
+      //   (paginatedItem) =>
+      //     !checkedData.some(
+      //       (checked) => checked.issuerName === paginatedItem.issuerName
+      //     )
+      // );
 
-      // Step 5: Combine checked + unchecked, then trim to pagination limit
-      const mergedData = [...checkedData, ...uncheckedPaginated];
+      // // Step 5: Combine checked + unchecked, then trim to pagination limit
+      // const mergedData = [...checkedData, ...uncheckedPaginated];
 
-      setFullMergedData(mergedData);
-      const limitedMergedData =
-        limit3 !== "all" ? mergedData.slice(0, parseInt(limit3)) : mergedData;
+      // setFullMergedData(mergedData);
+      // const limitedMergedData =
+      //   limit3 !== "all" ? mergedData.slice(0, parseInt(limit3)) : mergedData;
 
       // Step 6: Set states
-      setData(limitedMergedData);
-      setFilterData(limitedMergedData); // assuming you use this for search too
+      setData(paginatedData);
+      setFilterData(paginatedData); // assuming you use this for search too
       setTotalPages3(paginatedResult.totalPages);
       setTotalElements3(paginatedResult.totalElements);
     } catch (error) {
@@ -104,7 +104,7 @@ function PortfolioTable({
   };
 
   useEffect(() => {
-    const filtered = fullMergedData.filter((row) =>
+    const filtered = data.filter((row) =>
       row?.issuerName?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -112,8 +112,8 @@ function PortfolioTable({
       limit3 !== "all" ? filtered.slice(0, parseInt(limit3)) : filtered;
 
     setData(slicedFiltered);
-    setFilterData(slicedFiltered)
-  }, [searchQuery, fullMergedData, limit3]);
+    setFilterData(slicedFiltered);
+  }, [searchQuery, data, limit3]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -217,7 +217,7 @@ function PortfolioTable({
       return;
     }
     const url = new URL(
-      `https://jharvis.com/JarvisV2/createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2`
+      `/api/proxy?api=createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2`
     );
     // const params = {
     //     name: editPortfolioName,
@@ -372,6 +372,7 @@ function PortfolioTable({
             </div>
             <div className="col-md-6 text-right">
               <TextField
+                type="search"
                 label="Search"
                 variant="outlined"
                 fullWidth

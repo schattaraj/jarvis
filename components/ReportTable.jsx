@@ -44,8 +44,8 @@ function ReportTable({
   open,
   handleCloseModal,
   news,
-//   activeTab={tab : "latest", selectedDate : "All"},
-//   setActiveTab=null,
+  //   activeTab={tab : "latest", selectedDate : "All"},
+  //   setActiveTab=null,
 }) {
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
@@ -76,7 +76,10 @@ function ReportTable({
   });
   //   const [selectedMonth, setSelectedMonth] = useState("All");
   //   const [activeTab, setActiveTab] = useState("latest");
-  const [activeTab, setActiveTab] = useState({tab : "latest", selectedDate : "All"});
+  const [activeTab, setActiveTab] = useState({
+    tab: "latest",
+    selectedDate: "All",
+  });
   const context = useContext(Context);
   const months = [
     "All",
@@ -118,9 +121,9 @@ function ReportTable({
       if (result?.Information) {
         Swal.fire({ icon: "warning", text: result.Information });
         setNewsSentiment([]);
-      setArchivedNewsSentiment([]);
+        setArchivedNewsSentiment([]);
       }
-      setActiveTab((prev) => ({ ...prev, tab: "latest", selectedDate: "All" }))
+      setActiveTab((prev) => ({ ...prev, tab: "latest", selectedDate: "All" }));
       result?.feed?.forEach((news) => {
         const newsYear = parseInt(news.time_published.substring(0, 4), 10);
 
@@ -140,14 +143,16 @@ function ReportTable({
     console.log(`Delete action triggered for ID ${deleteItemId}`);
     setDeleteConfirmationOpen(false);
     try {
-      const response = await fetch(
-        `https://www.jharvis.com/JarvisV2/deleteHistoryData?idMarketDataFile=${deleteItemId}`,
+      const result = await fetchWithInterceptor(
+        `/api/proxy?api=deleteHistoryData?idMarketDataFile=${deleteItemId}`,
+        false,
+        false,
         {
           method: "DELETE",
         }
       );
 
-      const result = await response.json();
+      // const result = await response.json();
 
       if (response.ok) {
         console.log(result.msg);
@@ -187,10 +192,13 @@ function ReportTable({
       if (result.isConfirmed) {
         context.setLoaderState(true);
         try {
-          const deleteApi = await fetch(
-            `https://jharvis.com/JarvisV2/deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`
+          const deleteApiRes = await fetchWithInterceptor(
+            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`,
+            false,
+            false,
+            { method: "DELETE" }
           );
-          const deleteApiRes = deleteApi.json();
+          // const deleteApiRes = deleteApi.json();
           console.log("Success", deleteApiRes);
         } catch (error) {
           console.log("Error", error);
@@ -242,25 +250,24 @@ function ReportTable({
 
   const getChartHistory = async () => {
     try {
-      if(open){
-        context.setLoaderState(true)
+      if (open) {
+        context.setLoaderState(true);
         const payload = {
-            ticker: name,
-            year: "2017",
-            year2: "2025",
-            metadataName: "Tickers_Watchlist",
-            _: new Date().getTime(), // This will generate a unique timestamp
-          };
-          const queryString = new URLSearchParams(payload).toString();
-          const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
-          const getChartHistroryRes = await fetchWithInterceptor(api, false);
-          setChartHistory(getChartHistroryRes);
-          context.setLoaderState(false)
+          ticker: name,
+          year: "2017",
+          year2: "2025",
+          metadataName: "Tickers_Watchlist",
+          _: new Date().getTime(), // This will generate a unique timestamp
+        };
+        const queryString = new URLSearchParams(payload).toString();
+        const api = `/api/proxy?api=getChartForHistoryByTicker?${queryString}`;
+        const getChartHistroryRes = await fetchWithInterceptor(api, false);
+        setChartHistory(getChartHistroryRes);
+        context.setLoaderState(false);
       }
     } catch (error) {
-        context.setLoaderState(false)
+      context.setLoaderState(false);
     }
-  
   };
 
   useEffect(() => {
@@ -285,21 +292,24 @@ function ReportTable({
           p: 3,
         }}
       >
-       
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingBottom: 2,
-              }}
-            >
-              {data.length > 0 ? <Typography variant="h6">Report Table</Typography> : <div></div>}
-              <IconButton onClick={handleCloseModal}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            {data.length > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: 2,
+          }}
+        >
+          {data.length > 0 ? (
+            <Typography variant="h6">Report Table</Typography>
+          ) : (
+            <div></div>
+          )}
+          <IconButton onClick={handleCloseModal}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        {data.length > 0 && (
           <>
             <TextField
               label="Search"
@@ -413,21 +423,20 @@ function ReportTable({
             </Dialog>
           </>
         )}
-       {
-        chartHistory && chartHistory.length > 0 &&
-        <HightChart
-        data={chartHistory?.map((item) => [
-          new Date(item["lastUpdatedAt"]).getTime(),
-          Number(item["element10"]),
-        ])}
-        title={
-          "element10" &&
-          `Chart View For ${ViewOptions["element10"].displayName}`
-        }
-        yAxisTitle={"Price"}
-      />
-}
-      
+        {chartHistory && chartHistory.length > 0 && (
+          <HightChart
+            data={chartHistory?.map((item) => [
+              new Date(item["lastUpdatedAt"]).getTime(),
+              Number(item["element10"]),
+            ])}
+            title={
+              "element10" &&
+              `Chart View For ${ViewOptions["element10"].displayName}`
+            }
+            yAxisTitle={"Price"}
+          />
+        )}
+
         {news && displayedNews && (
           <>
             <div className="news-area">

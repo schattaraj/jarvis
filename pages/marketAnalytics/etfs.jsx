@@ -165,10 +165,10 @@ export default function Etfs() {
   // https://www.jharvis.com/JarvisV2/getColumns?metaDataName=Bondpricing_Master&_=1705052752517
   const fetchColumnNames = async () => {
     try {
-      const columnApi = await fetch(
-        "https://jharvis.com/JarvisV2/getColumns?metaDataName=Everything_List_New"
+      const columnApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=getColumns?metaDataName=Everything_List_New"
       );
-      const columnApiRes = await columnApi.json();
+      // const columnApiRes = await columnApi.json();
       columnApiRes.push(...extraColumns);
       setColumnNames(columnApiRes);
       const defaultCheckedColumns = columnApiRes.map(
@@ -184,10 +184,10 @@ export default function Etfs() {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        "https://jharvis.com/JarvisV2/getImportsData?metaDataName=Everything_List_New&_=1705403290395"
+      const getBondsRes = await fetchWithInterceptor(
+        "/api/proxy?api=getImportsData?metaDataName=Everything_List_New&_=1705403290395"
       );
-      const getBondsRes = await getBonds.json();
+      // const getBondsRes = await getBonds.json();
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
     } catch (e) {
@@ -213,10 +213,10 @@ export default function Etfs() {
     }
     context.setLoaderState(true);
     try {
-      const getBonds = await fetch(
-        `https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`
+      const getBondsRes = await fetchWithInterceptor(
+        `/api/proxy?api=getHistoryByTickerWatchList?metadataName=Everything_List_New&ticker=${selectedTicker}&_=1722333954367`
       );
-      const getBondsRes = await getBonds.json();
+      // const getBondsRes = await getBonds.json();
       setTableData(getBondsRes);
       setFilterData(getBondsRes);
       setChartView(false);
@@ -242,20 +242,22 @@ export default function Etfs() {
   };
   const downloadReport = async (reportName) => {
     try {
-      const fetchReport = await fetch(
-        "https://jharvis.com/JarvisV2/downloadTickerReport?fileName=" +
-          reportName
+      const fetchReportRes = await fetchWithInterceptor(
+        "/api/proxy?api=downloadTickerReport?fileName=" + reportName
       );
-      const fetchReportRes = await fetchReport.json();
+      // const fetchReportRes = await fetchReport.json();
       window.open(fetchReportRes.responseStr, "_blank");
     } catch (e) {}
   };
   const deleteReport = async (reportName) => {
     try {
-      const deleteApi = await fetch(
-        "https://jharvis.com/JarvisV2/deletePortfolioByName?name=" + reportName
+      const deleteApiRes = await fetchWithInterceptor(
+        "/api/proxy?api=deletePortfolioByName?name=" + reportName,
+        false,
+        false,
+        { method: "DELETE" }
       );
-      const deleteApiRes = await deleteApi.json();
+      // const deleteApiRes = await deleteApi.json();
       alert(deleteApiRes.msg);
     } catch (e) {}
   };
@@ -283,8 +285,8 @@ export default function Etfs() {
       //   "https://jharvis.com/JarvisV2/getAllTicker?metadataName=Everything_List_New&_=1718886601496"
       // );
       // const fetchTickersRes = await fetchTickers.json();
-      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Everything_List_New&_=1718886601496`
-      const fetchTickersRes = await fetchWithInterceptor(fetchTickers,false)
+      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Everything_List_New&_=1718886601496`;
+      const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
       setTickers(fetchTickersRes);
     } catch (e) {}
     context.setLoaderState(false);
@@ -301,12 +303,12 @@ export default function Etfs() {
     setDateModal(false);
     context.setLoaderState(true);
     try {
-      const getChartHistrory = await fetch(
-        "https://jharvis.com/JarvisV2/getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" +
+      const getChartHistroryRes = await fetchWithInterceptor(
+        "/api/proxy?api=getChartForHistoryByTicker?metadataName=Everything_List_New&ticker=" +
           selectedTicker +
           `&year=${dateRange?.startDate}&year2=${dateRange?.endDate}&_=1718886601497`
       );
-      const getChartHistroryRes = await getChartHistrory.json();
+      // const getChartHistroryRes = await getChartHistrory.json();
       setChartHistory(getChartHistroryRes);
       setChartView(true);
       setActiveView("Chart View");
@@ -352,14 +354,14 @@ export default function Etfs() {
     setIsExpanded(false);
     context.setLoaderState(true);
     try {
-      const rankingApi = await fetch(
-        `https://jharvis.com/JarvisV2/getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${
+      const rankingApiRes = await fetchWithInterceptor(
+        `/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${
           dates?.date1 == null ? "1900-01-01" : dates?.date1
         }&date2=${
           dates?.date2 == null ? "1900-01-01" : dates?.date2
         }&_=1719818279196`
       );
-      const rankingApiRes = await rankingApi.json();
+      // const rankingApiRes = await rankingApi.json();
       setChartView(false);
       setRankingData(rankingApiRes);
       setActiveView("Ranking");

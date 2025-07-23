@@ -7,7 +7,11 @@ import Loader from "../../components/loader";
 import { Context } from "../../contexts/Context";
 import { Pagination } from "../../components/Pagination";
 import Select from "react-select";
-import { formatDateString, getRecentReports } from "../../utils/utils";
+import {
+  fetchWithInterceptor,
+  formatDateString,
+  getRecentReports,
+} from "../../utils/utils";
 import Breadcrumb from "../../components/Breadcrumb";
 import { Form } from "react-bootstrap";
 import PDFViewer from "../../components/PDFViewer";
@@ -105,10 +109,10 @@ export default function ReportsLibrary() {
     context.setLoaderState(true);
     console.log(categoryType);
     try {
-      const apiCall = await fetch(
-        "https://jharvis.com/JarvisV2/getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144"
+      const response = await fetchWithInterceptor(
+        "/api/proxy?api=getAllTickerReports?filterText=&catagoryType=&orderType=tickerName&_=1716192130144"
       );
-      const response = await apiCall.json();
+      // const response = await apiCall.json();
       setReports(response);
       setFilterReports(getRecentReports(response, sortOrder, orderType, true));
     } catch (e) {
@@ -147,14 +151,10 @@ export default function ReportsLibrary() {
     params.append("filterText", filterText);
     params.append("_", new Date().getTime());
 
-    const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL_V2 +
-      "getAllTickerReports?" +
-      params.toString()
-    }`;
+    const url = `/api/proxy?api=getAllTickerReports?${params.toString()}`;
     context.setLoaderState(true);
-    await fetch(url)
-      .then((response) => response.json())
+    fetchWithInterceptor(url)
+      // .then((response) => response.json())
       .then((data) => {
         const filteredReports =
           categoryType.length > 0
@@ -212,15 +212,11 @@ export default function ReportsLibrary() {
     params.append("_", new Date().getTime());
 
     // Example GET request URL with payload
-    const url = `${
-      process.env.NEXT_PUBLIC_BASE_URL_V2 +
-      "getAllTickerReports?" +
-      params.toString()
-    }`;
+    const url = `/api/proxy?api=getAllTickerReports?${params.toString()}`;
     context.setLoaderState(true);
 
-    await fetch(url)
-      .then((response) => response.json())
+    fetchWithInterceptor(url)
+      // .then((response) => response.json())
       .then((data) => {
         const filteredData =
           categoryType.length > 0
@@ -460,7 +456,9 @@ export default function ReportsLibrary() {
                                   className="px-4 btn btn-primary"
                                   onClick={() => {
                                     handleShow(
-                                      `https://jharvis.com/JarvisV2/playPdf?fileName=${item.reportfileDetails}`
+                                      `/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${
+                                        item.reportfileDetails.split("C:/")[1]
+                                      }`
                                     );
                                   }}
                                   title="View Fullscreen"

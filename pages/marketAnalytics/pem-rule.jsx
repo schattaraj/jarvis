@@ -142,12 +142,12 @@ export default function PemRule() {
           //   const baseUrl = `/api/proxy?api=deletePemRule`;
           const formData = new FormData();
           formData.append("idPemRule", id);
-          const baseUrl = `https://jharvis.com/JarvisV2/deletePemRule`;
-          const response = await fetch(baseUrl, {
+          const baseUrl = `/api/proxy?api=deletePemRule`;
+          const result = await fetchWithInterceptor(baseUrl, false, false, {
             method: "DELETE",
             body: formData,
           });
-          const result = await response.json();
+          // const result = await response.json();
 
           Swal.fire({
             title: result.msg,

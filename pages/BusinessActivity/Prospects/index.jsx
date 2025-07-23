@@ -4,7 +4,7 @@ import Sidebar from '../../../components/sidebar';
 import Loader from '../../../components/loader';
 import { Context } from '../../../contexts/Context';
 import parse from 'html-react-parser';
-import { calculateAverage, searchTable } from '../../../utils/utils';
+import { calculateAverage, fetchWithInterceptor, searchTable } from '../../../utils/utils';
 import { getImportsData } from '../../../utils/staticData';
 import BondsHistoryModal from '../../../components/BondHstoryModal';
 import { Autocomplete, TextField } from '@mui/material';
@@ -53,8 +53,8 @@ export default function Prospects() {
     const fetchData = async () => {
         context.setLoaderState(true)
         try {
-            const getBonds = await fetch("https://jharvis.com/JarvisV2/getAllProspect?_=1711707171694")
-            const getBondsRes = await getBonds.json()
+            const getBondsRes = await fetchWithInterceptor("/api/proxy?api=getAllProspect?_=1711707171694")
+            // const getBondsRes = await getBonds.json()
             setTableData(getBondsRes)
             setFilterData(getBondsRes)
         }
