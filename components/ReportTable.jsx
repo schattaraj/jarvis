@@ -339,14 +339,16 @@ function ReportTable({
                         <TableCell>{row?.catagoryType}</TableCell>
                         <TableCell>{formatDate(row?.reportDate)}</TableCell>
                         <TableCell className="text-center">
+                          <Link href={`${process.env.NEXT_PUBLIC_BASE_URL+row?.reportfileDetails?.split("C:/")[1]}`} target="_blank">
                           <IconButton
-                            onClick={() =>
-                              handleDownload(row.reportfileDetails)
-                            }
+                            // onClick={() =>
+                            //   handleDownload(row.reportfileDetails)
+                            // }
                             className="text-primary"
                           >
                             <Download />
                           </IconButton>
+                          </Link>
                           <IconButton
                             onClick={() => handleDelete(row.idTickerReports)}
                             className="text-danger"
