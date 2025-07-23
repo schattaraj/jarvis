@@ -480,6 +480,13 @@ export const fetchWithInterceptor = async (
       options.body = JSON.stringify(body); // Convert back to string
     }
 
+    if (options.body instanceof FormData) {
+      // Remove Content-Type header so browser sets it correctly
+      if (options.headers && options.headers["Content-Type"]) {
+        delete options.headers["Content-Type"];
+      }
+    }
+
     // Show loader or any other pre-request logic
     // context.setLoaderState(true);
 

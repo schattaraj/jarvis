@@ -144,7 +144,7 @@ export default function MutualFund() {
         false,
         {
           method: "POST",
-          body: JSON.stringify(formData),
+          body: formData,
         }
       );
 
