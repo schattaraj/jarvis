@@ -205,7 +205,7 @@ function ReportTable({
     });
   };
   const handleDownload = async (reportfileDetails) => {
-    const url = "/api/proxy?api=downloadPDF?fileName=" + reportfileDetails;
+    const url = process.env.NEXT_PUBLIC_BASE_URL + reportfileDetails?.split('C:/')[1];
     window.open(url, "_blank");
   };
   // Filter the data based on the search query
