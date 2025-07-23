@@ -106,12 +106,12 @@ export default function MutualFund() {
     const formData = new FormData(form);
     try {
       const result = await fetchWithInterceptor(
-        `/api/proxy?api=createNav?nameFund=${"Left Brain Compound Growth Fund"}&nav=${navValue}`,
+        `/api/proxy?api=createNav&bodyType=form`,
         false,
         false,
         {
           method: "POST",
-          // body: formData,
+          body: formData,
         }
       );
 

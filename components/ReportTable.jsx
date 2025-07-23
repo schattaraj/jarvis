@@ -208,10 +208,7 @@ function ReportTable({
     });
   };
   const handleDownload = async (reportfileDetails) => {
-    const url =
-      process.env.NEXT_PUBLIC_BASE_URL_V2 +
-      "downloadPDF?fileName=" +
-      reportfileDetails;
+    const url = "/api/proxy?api=downloadPDF?fileName=" + reportfileDetails;
     window.open(url, "_blank");
   };
   // Filter the data based on the search query

@@ -33,11 +33,10 @@ function BondReportHistoryModal({ open, handleClose }) {
   const fetchData = async () => {
     context.setLoaderState(true);
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 +
-          "findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567"
+      const result = await fetchWithInterceptor(
+        "/api/proxy?api=findImportDatesByMonth?metaDataName=Debt_Report_Matrices&_=1721624677567"
       );
-      const result = await response.json();
+      // const result = await response.json();
       setData(result);
     } catch (error) {
       console.error("Error fetching data:", error);

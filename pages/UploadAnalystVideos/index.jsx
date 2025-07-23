@@ -427,7 +427,7 @@ export default function UploadAnalystVideos() {
             <source
               id="videoSource"
               src={
-                "https://jharvis.com/JarvisV2/playVideo?fileName=" +
+                "api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/JarvisVideo/" +
                 analystVideo
               }
               type="video/mp4"

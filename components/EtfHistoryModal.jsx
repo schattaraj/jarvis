@@ -168,10 +168,10 @@ function EtfHistoryModal({
     //   return
     context.setLoaderState(true);
     try {
-      const historyCompare = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`
+      const historyCompareRes = await fetchWithInterceptor(
+        `/api/proxy?api=getImportHistorySheetCompare?metadataName=Everything_List_New&date1=${dates.date1}&date2=${dates.date2}`
       );
-      const historyCompareRes = await historyCompare.json();
+      // const historyCompareRes = await historyCompare.json();
       setCompareData(historyCompareRes);
       setActiveView("History");
       handleCloseModal();

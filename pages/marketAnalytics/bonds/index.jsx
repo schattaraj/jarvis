@@ -703,20 +703,21 @@ export default function Bonds() {
         ...defaultHeaders,
         ...options.headers,
       };
-      const upload = await fetch(
-        "/api/proxy?api=uploadFileBondImport",
-        options
-        //   {
-        //   method: "POST",
-        //   // headers: {
-        //   //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        //   //     'Cache-Control': 'max-age=0',
-        //   //     'Content-Type': 'multipart/form-data',
-        //   //   },
-        //   body: formData,
-        // }
+      const uploadRes = await fetchWithInterceptor(
+        "/api/proxy?api=uploadFileBondImport&bodyType=form",
+        false,
+        false,
+        {
+          method: "POST",
+          // headers: {
+          //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+          //     'Cache-Control': 'max-age=0',
+          //     'Content-Type': 'multipart/form-data',
+          //   },
+          body: formData,
+        }
       );
-      const uploadRes = await upload.json();
+      // const uploadRes = await upload.json();
       // if (upload.status == 200) {
       if (uploadRes.msg) {
         setFile(null);
