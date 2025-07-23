@@ -97,16 +97,18 @@ export default function UploadAnalystVideos() {
       return;
     }
     try {
-      const response = await fetch(
-        "https://jharvis.com/JarvisV2/uploadAnalystVideo",
+      const result = await fetchWithInterceptor(
+        "/api/proxy?api=uploadAnalystVideo&bodyType=form",
+        false,
+        false,
         {
           method: "POST",
           body: formData,
         }
       );
 
-      if (response.ok) {
-        const result = await response.json();
+      if (result) {
+        // const result = await response.json();
         Swal.fire({
           title: result.msg,
           icon: "success",
@@ -132,25 +134,29 @@ export default function UploadAnalystVideos() {
       if (result.isConfirmed) {
         context.setLoaderState(true);
         try {
-          const accessToken = localStorage.getItem("access_token");
+          //   const accessToken = localStorage.getItem("access_token");
 
           const formData = new FormData();
           formData.append("idAnaylstVideo", id);
-          const options = { body: formData, method: "DELETE" };
-          const defaultHeaders = {
-            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-          };
+          //   const options = { body: formData, method: "DELETE" };
+          //   const defaultHeaders = {
+          //     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          //   };
 
-          options.headers = {
-            ...defaultHeaders,
-            ...options.headers,
-          };
-          const analystDelete = await fetch(
-            "/api/proxy?api=deleteAnalystVideo",
-            options
+          //   options.headers = {
+          //     ...defaultHeaders,
+          //     ...options.headers,
+          //   };
+          const analystDeleteRes = await fetchWithInterceptor(
+            "/api/proxy?api=deleteAnalystVideo?idAnaylstVideo=" + id,
+            false,
+            false,
+            {
+              method: "DELETE",
+            }
           );
-          if (analystDelete.ok) {
-            const analystDeleteRes = await analystDelete.json();
+          if (analystDeleteRes) {
+            // const analystDeleteRes = await analystDelete.json();
             Swal.fire({
               title: analystDeleteRes.msg,
               icon: "success",

@@ -472,10 +472,7 @@ export default function BondPortfolio() {
         context.setLoaderState(true);
         try {
           const deleteApiRes = await fetchWithInterceptor(
-            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`,
-            false,
-            false,
-            { method: "DELETE" }
+            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`
           );
           // const deleteApiRes = deleteApi.json();
           getAllBondForPolios();
@@ -513,7 +510,7 @@ export default function BondPortfolio() {
     setSearchQuery(errorLabel);
     Swal.close();
   };
-  const createPortfolio = async () => {
+  const createPortfolio = async (isCreating = false) => {
     const errors = validateStocks();
     if (Object.keys(errors).length > 0) {
       let errorHtml = `Please fill in all required fields for selected symbols.`;
@@ -550,7 +547,7 @@ export default function BondPortfolio() {
 
     console.log(isCreate);
 
-    if (isCreate) {
+    if (isCreating) {
       if (!portfolioName) {
         Swal.fire({
           title: "Portfolio Name Required",
@@ -1635,7 +1632,7 @@ export default function BondPortfolio() {
                         className="btn btn-primary text-nowrap me-3"
                         onClick={() => {
                           setIsCreate(true);
-                          createPortfolio();
+                          createPortfolio(true);
                         }}
                       >
                         Create Portfolio

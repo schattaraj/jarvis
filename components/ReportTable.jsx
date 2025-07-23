@@ -193,10 +193,7 @@ function ReportTable({
         context.setLoaderState(true);
         try {
           const deleteApiRes = await fetchWithInterceptor(
-            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`,
-            false,
-            false,
-            { method: "DELETE" }
+            `/api/proxy?api=deleteBondPortfolioByName?name=${name}&_=${new Date().getTime()}`
           );
           // const deleteApiRes = deleteApi.json();
           console.log("Success", deleteApiRes);

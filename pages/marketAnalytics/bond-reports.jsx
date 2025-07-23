@@ -258,25 +258,25 @@ const BondReports = () => {
     try {
       const formData = new FormData(form);
       const uploadRes = await fetchWithInterceptor(
-        "/api/proxy?api=uploadFile",
+        "/api/proxy?api=uploadFile&bodyType=form",
         false,
         false,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          // headers: {
+          //   "Content-Type": "application/json",
+          // },
           body: formData,
         }
       );
       //   const uploadRes = await upload.json();
-      if (uploadRes.status == 400) {
-        Swal.fire({
-          title: uploadRes?.message,
-          icon: "warning",
-          confirmButtonColor: "var(--primary)",
-        });
-      }
+      // if (uploadRes.status == 400) {
+      Swal.fire({
+        title: uploadRes?.message,
+        icon: "warning",
+        confirmButtonColor: "var(--primary)",
+      });
+      // }
       console.log("form", form, upload);
     } catch (error) {
       console.log("Error", error);

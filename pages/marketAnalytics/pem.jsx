@@ -516,19 +516,24 @@ export default function PemDetails() {
     context.setLoaderState(true);
     try {
       const formData = new FormData(form);
-      const accessToken = localStorage.getItem("access_token");
-      const options = { body: formData, method: "POST" };
-      const defaultHeaders = {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      };
+      // const accessToken = localStorage.getItem("access_token");
+      // const options = { body: formData, method: "POST" };
+      // const defaultHeaders = {
+      //   ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // };
 
-      options.headers = {
-        ...defaultHeaders,
-        ...options.headers,
-      };
-      const upload = await fetch("/api/proxy?api=uploadFilePEM", options);
-      const uploadRes = await upload.json();
-      if (upload.status == 400) {
+      // options.headers = {
+      //   ...defaultHeaders,
+      //   ...options.headers,
+      // };
+      const uploadRes = await fetchWithInterceptor(
+        "/api/proxy?api=uploadFilePEM&bodyType=form",
+        false,
+        false,
+        { body: formData, method: "POST" }
+      );
+      // const uploadRes = await upload.json();
+      if (uploadRes) {
         Swal.fire({
           title: uploadRes?.message,
           icon: "warning",

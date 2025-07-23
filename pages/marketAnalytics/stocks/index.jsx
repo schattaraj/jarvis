@@ -478,27 +478,32 @@ export default function Stocks() {
       const formData = new FormData();
       formData.append("metaDataName", "Tickers_Watchlist");
       formData.append("myfile", file);
-      console.log("formData", formData);
-      const options = { body: formData, method: "POST" };
-      const defaultHeaders = {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      };
-      options.headers = {
-        ...defaultHeaders,
-        ...options.headers,
-      };
-      const upload = await fetch(
-        "/api/proxy?api=uploadFileTickerImport",
-        options
+      // console.log("formData", formData);
+      // const options = { body: formData, method: "POST" };
+      // const defaultHeaders = {
+      //   ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // };
+      // options.headers = {
+      //   ...defaultHeaders,
+      //   ...options.headers,
+      // };
+      const uploadRes = await fetchWithInterceptor(
+        "/api/proxy?api=uploadFileTickerImport&bodyType=form",
+        false,
+        false,
+        {
+          method: "POST",
+          body: formData,
+        }
       );
-      const uploadRes = await upload.json();
-      if (upload.status == 400) {
-        Swal.fire({
-          title: uploadRes?.message,
-          icon: "warning",
-          confirmButtonColor: "var(--primary)",
-        });
-      }
+      // const uploadRes = await upload.json();
+      // if (uploadRes.msg) {
+      Swal.fire({
+        title: uploadRes?.msg,
+        icon: "warning",
+        confirmButtonColor: "var(--primary)",
+      });
+      // }
     } catch (error) {
       console.log("Error", error);
     }

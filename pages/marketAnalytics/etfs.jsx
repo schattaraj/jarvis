@@ -400,19 +400,18 @@ export default function Etfs() {
       formData.append("metaDataName", "Everything_List_New");
       formData.append("myfile", file);
       const uploadRes = await fetchWithInterceptor(
-        "/api/proxy?api=uploadFileEveryThing",
+        "/api/proxy?api=uploadFileEveryThing&bodyType=form",
+        false,
+        false,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
           body: formData,
         }
       );
       console.log("uploadRes", uploadRes);
 
       // const uploadRes = await upload.json()
-      if (uploadRes.statusCode == 2000) {
+      if (uploadRes) {
         Swal.fire({
           title: uploadRes?.message,
           icon: "warning",

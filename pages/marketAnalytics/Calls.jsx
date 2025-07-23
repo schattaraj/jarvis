@@ -349,26 +349,31 @@ export default function Calls() {
     inputObj.expdate = mmddyy(inputObj.expdate);
     const formData = jsonToFormData(inputObj);
     try {
-      const accessToken = localStorage.getItem("access_token");
-      const options = { body: formData, method: "POST" };
-      const defaultHeaders = {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      };
+      // const accessToken = localStorage.getItem("access_token");
+      // const options = { body: formData, method: "POST" };
+      // const defaultHeaders = {
+      //   ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // };
 
-      options.headers = {
-        ...defaultHeaders,
-        ...options.headers,
-      };
+      // options.headers = {
+      //   ...defaultHeaders,
+      //   ...options.headers,
+      // };
       context.setLoaderState(true);
 
       // Send the FormData to your API
-      const response = await fetch(`/api/proxy?api=getCalculatedData`, options);
+      const result = await fetchWithInterceptor(
+        `/api/proxy?api=getCalculatedData&bodyType=form`,
+        false,
+        false,
+        { method: "POST", body: formData }
+      );
 
       // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!result) {
+        throw new Error(`HTTP error! Status: ${result}`);
       }
-      const result = await response.json();
+      // const result = await response.json();
       console.log("API Response", result);
       // Update the state based on whether it's the first submission
       if (isFirstSubmission) {
@@ -422,8 +427,8 @@ export default function Calls() {
       );
 
       // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response) {
+        throw new Error(`HTTP error! Status: ${response}`);
       }
 
       // const result = await response.json();
@@ -459,10 +464,7 @@ export default function Calls() {
         context.setLoaderState(true);
         try {
           const rowDeleteRes = await fetchWithInterceptor(
-            `/api/proxy?api=deleteCallBy?tickerid=${id}`,
-            false,
-            false,
-            { method: "DELETE" }
+            `/api/proxy?api=deleteCallBy?tickerid=${id}`
           );
           if (rowDeleteRes.msg) {
             // const rowDeleteRes = await rowDelete.json();

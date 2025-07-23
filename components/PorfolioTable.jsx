@@ -217,7 +217,7 @@ function PortfolioTable({
       return;
     }
     const url = new URL(
-      `/api/proxy?api=createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2`
+      `/api/proxy?api=createBondPortfolio?name=${editPortfolioName}&visiblePortFolio=yes&userId=2&bodyType=form`
     );
     // const params = {
     //     name: editPortfolioName,
@@ -234,15 +234,12 @@ function PortfolioTable({
     });
     // Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
     context.setLoaderState(true);
-    console.log("url", url, selectedStocks);
+    // console.log("url", url, selectedStocks);
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithInterceptor(url, false, false, {
         method: "POST",
         body: formData,
         // Note: Fetch does not support query parameters directly; add them manually to the URL if needed
-        headers: {
-          // 'Content-Type': 'multipart/form-data' is not needed for FormData; fetch will set the correct headers
-        },
         // params: params // fetch does not support params directly; append them to URL if needed
       });
 
