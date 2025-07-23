@@ -338,7 +338,7 @@ export default function OnePageReport() {
               className="embed-responsive-item"
               src={
                 "/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/" +
-                currentPdf.reportfileDetails.split("C:/")[1]
+                currentPdf.reportfileDetails
               }
               id="video"
               allowscriptaccess="always"
