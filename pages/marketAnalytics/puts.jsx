@@ -352,10 +352,7 @@ export default function PUTS() {
         context.setLoaderState(true);
         try {
           const rowDeleteRes = await fetchWithInterceptor(
-            `/api/proxy?api=deletePutBy?tickerid=${id}`,
-            false,
-            false,
-            { method: "DELETE" }
+            `/api/proxy?api=deletePutBy?tickerid=${id}`
           );
           // if (rowDelete.ok) {
           // const rowDeleteRes = await rowDelete.json();

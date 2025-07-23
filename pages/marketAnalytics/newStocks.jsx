@@ -159,8 +159,10 @@ export default function Stocks() {
       formData.append("metaDataName", "Tickers_Watchlist");
       formData.append("myfile", file);
       console.log("formData", formData);
-      const upload = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileTickerImport",
+      const uploadRes = await fetchWithInterceptor(
+        "/api/proxy?api=uploadFileTickerImport&bodyType=form",
+        false,
+        false,
         {
           method: "POST",
           // headers: {
@@ -171,8 +173,8 @@ export default function Stocks() {
           body: formData,
         }
       );
-      const uploadRes = await upload.json();
-      if (upload.status == 400) {
+      // const uploadRes = await upload.json();
+      if (uploadRes) {
         Swal.fire({
           title: uploadRes?.message,
           icon: "warning",

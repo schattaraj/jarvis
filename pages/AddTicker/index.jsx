@@ -14,7 +14,7 @@ export default function AddTicker() {
       const form = e.target;
       const formData = new FormData(form);
       const result = await fetchWithInterceptor(
-        "/api/proxy?api=addTicker",
+        "/api/proxy?api=addTicker&bodyType=form",
         false,
         false,
         {

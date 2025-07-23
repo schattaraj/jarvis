@@ -51,24 +51,29 @@ export default function UploadTickerReports() {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
-      const accessToken = localStorage.getItem("access_token");
-      const options = { body: formData, method: "POST" };
-      const defaultHeaders = {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      };
+      // const accessToken = localStorage.getItem("access_token");
+      // const options = { body: formData, method: "POST" };
+      // const defaultHeaders = {
+      //   ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // };
 
-      options.headers = {
-        ...defaultHeaders,
-        ...options.headers,
-      };
-      const response = await fetch(
-        "/api/proxy?api=uploadReportTicker",
-        options
+      // options.headers = {
+      //   ...defaultHeaders,
+      //   ...options.headers,
+      // };
+      const result = await fetchWithInterceptor(
+        "/api/proxy?api=uploadReportTicker&bodyType=form",
+        false,
+        false,
+        {
+          body: formData,
+          method: "POST",
+        }
       );
 
-      if (response.ok) {
+      if (result.msg) {
         alert("Successfully uploaded");
-        const result = await response.json();
+        // const result = await response.json();
         alert(result.msg);
         form.reset();
         fetchTickerReports();
