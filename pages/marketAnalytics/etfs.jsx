@@ -445,12 +445,10 @@ export default function Etfs() {
   const filterBydate = async (date) => {
     context.setLoaderState(true);
     try {
-      const getStocks = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }getDataByWeek?metadataName=Everything_List_New&date=${date}&_=${new Date().getTime()}`
+      const getStocksRes = await fetchWithInterceptor(
+        `/api/proxy?api=getDataByWeek?metadataName=Everything_List_New&date=${date}&_=${new Date().getTime()}`
       );
-      const getStocksRes = await getStocks.json();
+      // const getStocksRes = await getStocks.json();
       setTableData(getStocksRes);
       setFilterData(getStocksRes);
       setOpenModal(false);

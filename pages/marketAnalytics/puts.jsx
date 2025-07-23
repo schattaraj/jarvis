@@ -174,10 +174,10 @@ export default function PUTS() {
     }
     context.setLoaderState(true);
     try {
-      const apiCall = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}findPutDataByDate?date=${selectedDate}`
+      const apiCallRes = await fetchWithInterceptor(
+        `/api/proxy?api=findPutDataByDate?date=${selectedDate}`
       );
-      const apiCallRes = await apiCall.json();
+      // const apiCallRes = await apiCall.json();
       setTableData(apiCallRes);
       setMeanData(false);
     } catch (error) {
@@ -260,19 +260,20 @@ export default function PUTS() {
     try {
       context.setLoaderState(true);
       // Send the FormData to your API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedPutData`,
+      const result = await fetchWithInterceptor(
+        `/api/proxy?api=getCalculatedPutData?addToDate=${inputObj.addToDate}&expdate=${inputObj.expdate}&putprice=${inputData.putprice}&strikeprice=${inputData.strikeprice}&tickername=${inputData.tickername}`,
+        false,
+        false,
         {
           method: "POST",
-          body: formData,
         }
       );
 
       // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!result.ok) {
+        throw new Error(`HTTP error! Status: ${result.status}`);
       }
-      const result = await response.json();
+      // const result = await response.json();
       console.log("API Response", result);
       if (isFirstSubmission) {
         setTableData([result]); // Clear and set new data on first submission
@@ -314,23 +315,20 @@ export default function PUTS() {
     try {
       context.setLoaderState(true);
       // Send the FormData to your API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}savePuts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json", // Add this line
-          },
-          body: JSON.stringify(calculateData),
-        }
-      );
+      const response = await fetchWithInterceptor(`/api/proxy?api=savePuts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Add this line
+        },
+        body: JSON.stringify(calculateData),
+      });
 
       // Check if the response is successful
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const result = await response.json();
+      // const result = await response.json();
       context.setLoaderState(true);
     } catch (error) {
       context.setLoaderState(false);

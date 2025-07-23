@@ -474,21 +474,22 @@ export default function Stocks() {
     }
     context.setLoaderState(true);
     try {
+      const accessToken = localStorage.getItem("access_token");
       const formData = new FormData();
       formData.append("metaDataName", "Tickers_Watchlist");
       formData.append("myfile", file);
       console.log("formData", formData);
+      const options = { body: formData, method: "POST" };
+      const defaultHeaders = {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+      options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+      };
       const upload = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFileTickerImport",
-        {
-          method: "POST",
-          // headers: {
-          //     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          //     'Cache-Control': 'max-age=0',
-          //     'Content-Type': 'multipart/form-data',
-          //   },
-          body: formData,
-        }
+        "/api/proxy?api=uploadFileTickerImport",
+        options
       );
       const uploadRes = await upload.json();
       if (upload.status == 400) {
@@ -506,12 +507,10 @@ export default function Stocks() {
   const filterBydate = async (date) => {
     context.setLoaderState(true);
     try {
-      const getStocks = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`
+      const getStocksRes = await fetchWithInterceptor(
+        `/api/proxy?api=getDataByWeek?metadataName=Tickers_Watchlist&date=${date}&_=${new Date().getTime()}`
       );
-      const getStocksRes = await getStocks.json();
+      // const getStocksRes = await getStocks.json();
       setTableData(getStocksRes);
       setFilterData(getStocksRes);
       setHistoryModal(false);
@@ -523,12 +522,10 @@ export default function Stocks() {
   const rankingPDF = async () => {
     context.setLoaderState(true);
     try {
-      const getPDF = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`
+      const getPDFRes = await fetchWithInterceptor(
+        `/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`
       );
-      const getPDFRes = await getPDF.json();
+      // const getPDFRes = await getPDF.json();
       window.open(getPDFRes?.responseStr, "_blank");
     } catch (error) {
       console.log("Error: ", error);
@@ -538,12 +535,10 @@ export default function Stocks() {
   const pdfDownload = async () => {
     context.setLoaderState(true);
     try {
-      const getPDF = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`
+      const getPDFRes = await fetchWithInterceptor(
+        `/api/proxy?api=generateTickerPDF?metadataName=Tickers_Watchlist&_=${new Date().getTime()}`
       );
-      const getPDFRes = await getPDF.json();
+      // const getPDFRes = await getPDF.json();
       window.open(getPDFRes?.responseStr, "_blank");
     } catch (error) {
       console.log("Error: ", error);
@@ -574,7 +569,7 @@ export default function Stocks() {
       priceFreeW,
     } = formValues;
 
-    const url = new URL("https://jharvis.com/JarvisV2/getCalculateTicker");
+    const url = new URL("/api/proxy?api=getCalculateTicker");
     url.searchParams.append("metadataName", "Tickers_Watchlist");
     url.searchParams.append("date", "");
     url.searchParams.append("rankWithinTable", rankWithinTableW || "10");

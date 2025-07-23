@@ -236,12 +236,10 @@ export default function Stocks() {
   const rankingPDF = async () => {
     context.setLoaderState(true);
     try {
-      const getPDF = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BASE_URL_V2
-        }generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`
+      const getPDFRes = await fetchWithInterceptor(
+        `/api/proxy?api=generateTickerRankPDF?metadataName=Tickers_Watchlist&date1=1900-01-01&date2=1900-01-01&_=${new Date().getTime()}`
       );
-      const getPDFRes = await getPDF.json();
+      // const getPDFRes = await getPDF.json();
       window.open(getPDFRes?.responseStr, "_blank");
     } catch (error) {
       console.log("Error: ", error);

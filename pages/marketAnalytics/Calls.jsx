@@ -349,15 +349,20 @@ export default function Calls() {
     inputObj.expdate = mmddyy(inputObj.expdate);
     const formData = jsonToFormData(inputObj);
     try {
+      const accessToken = localStorage.getItem("access_token");
+      const options = { body: formData, method: "POST" };
+      const defaultHeaders = {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+
+      options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+      };
       context.setLoaderState(true);
+
       // Send the FormData to your API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}getCalculatedData`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`/api/proxy?api=getCalculatedData`, options);
 
       // Check if the response is successful
       if (!response.ok) {
@@ -406,8 +411,10 @@ export default function Calls() {
     try {
       context.setLoaderState(true);
       // Send the FormData to your API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_V2}saveCalls`,
+      const response = await fetchWithInterceptor(
+        `/api/proxy?api=saveCalls`,
+        false,
+        false,
         {
           method: "POST",
           body: JSON.stringify(calculateData),
@@ -419,7 +426,7 @@ export default function Calls() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const result = await response.json();
+      // const result = await response.json();
       context.setLoaderState(true);
     } catch (error) {
       context.setLoaderState(false);

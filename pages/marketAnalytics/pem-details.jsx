@@ -133,16 +133,17 @@ export default function PemDetails() {
     context.setLoaderState(true);
     try {
       const formData = new FormData(form);
-      const upload = await fetch(
-        process.env.NEXT_PUBLIC_BASE_URL_V2 + "uploadFilePEM",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: formData,
-        }
-      );
+      const accessToken = localStorage.getItem("access_token");
+      const options = { body: formData, method: "POST" };
+      const defaultHeaders = {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+
+      options.headers = {
+        ...defaultHeaders,
+        ...options.headers,
+      };
+      const upload = await fetch("/api/proxy?api=uploadFilePEM", options);
       const uploadRes = await upload.json();
       if (upload.status == 400) {
         Swal.fire({

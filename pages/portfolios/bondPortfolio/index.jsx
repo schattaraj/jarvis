@@ -411,7 +411,7 @@ export default function BondPortfolio() {
         currentPage3 - 1
       }&pageSize=${limit3 !== "all" ? limit3 : 0}&isforAll=${
         limit3 == "all" ? true : false
-      }&_=${new Date().getTime()}`;
+      }&keyword=""&_=${new Date().getTime()}`;
       const options = { method: "GET" };
 
       const response = await fetchWithInterceptor(
