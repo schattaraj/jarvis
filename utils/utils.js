@@ -473,13 +473,6 @@ export const fetchWithInterceptor = async (
       ...defaultHeaders,
       ...options.headers,
     };
-    // If the method is POST, include userId in the body
-    if (options.method === "POST" && userId) {
-      const body = JSON.parse(options.body || "{}");
-      body.userId = userID; // Add userId to the body
-      options.body = JSON.stringify(body); // Convert back to string
-    }
-
     if (options.body instanceof FormData) {
       // Remove Content-Type header so browser sets it correctly
       if (options.headers && options.headers["Content-Type"]) {
@@ -487,6 +480,14 @@ export const fetchWithInterceptor = async (
       }
     }
 
+    // If the method is POST, include userId in the body
+    if (options.method === "POST" && userId) {
+      const body = JSON.parse(options.body || "{}");
+      body.userId = userID; // Add userId to the body
+      options.body = JSON.stringify(body); // Convert back to string
+    }
+
+   
     // Show loader or any other pre-request logic
     // context.setLoaderState(true);
 

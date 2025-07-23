@@ -1,8 +1,20 @@
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+
+const pipelineAsync = promisify(pipeline);
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req, res) {
     const reqBody = req?.body;
     const query = req?.query
     const headers = req?.headers
-
+// Remove host header to avoid issues
+delete headers['host'];
     try {
        
          // Validate the base URL
@@ -26,7 +38,23 @@ export default async function handler(req, res) {
         //     return res.status(200).json({ message:"Hello" });
         // }
         if(req.method === 'POST' && query.bodyType=="form"){
-            fetchOptions.body = reqBody
+            // fetchOptions.body = reqBody
+            delete headers['content-length'];
+
+            const response = await fetch(baseUrl.toString(), {
+              method: 'POST',
+              headers,
+              body: req, // Pass the stream directly
+              duplex: 'half', 
+            });
+      
+            // Forward the response
+            res.status(response.status);
+            response.headers.forEach((value, key) => {
+              res.setHeader(key, value);
+            });
+            await pipelineAsync(response.body, res);
+            return;
         }
         // Include the body only for POST requests
         if (req.method === 'POST' && query.bodyType!="form") {
