@@ -280,11 +280,36 @@ function ReportTable({
     setCurrentPdf(path);
     setShow(true);
   };
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+  };
   // console.log("currentPDF", currentPdf);
 
   return (
     <>
+      <BootstrapModal
+        show={show}
+        onHide={handleClose}
+        size="xl"
+        centered
+        fullscreen="true"
+        id="pdf-modal"
+        dialogClassName="custom-bootstrap-modal-z"
+      >
+        <BootstrapModal.Header className="mb-2" closeButton>
+          <BootstrapModal.Title>
+            {currentPdf && currentPdf.split("/").pop()}
+          </BootstrapModal.Title>
+        </BootstrapModal.Header>
+        <BootstrapModal.Body
+          id="pdf-modal-container"
+          className="p-2"
+          style={{ height: "90vh" }}
+          // ref={pdfContainerRef}
+        >
+          {currentPdf && <PDFViewer pdfUrl={currentPdf} />}
+        </BootstrapModal.Body>
+      </BootstrapModal>
       <Modal open={open} onClose={handleCloseModal}>
         <Box
           sx={{
@@ -301,6 +326,7 @@ function ReportTable({
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 3,
+            zIndex: 1300,
           }}
         >
           <Box
@@ -375,7 +401,7 @@ function ReportTable({
                           >
                             <DeleteIcon />
                           </IconButton> */}
-                            {/* <IconButton
+                            <IconButton
                               className="px-4 btn btn-primary"
                               onClick={() => {
                                 handleShow(
@@ -385,7 +411,7 @@ function ReportTable({
                               title="View Fullscreen"
                             >
                               <i className="mdi mdi-eye-outline"></i>
-                            </IconButton> */}
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -618,26 +644,6 @@ function ReportTable({
           )}
         </Box>
       </Modal>
-      <BootstrapModal
-        show={show}
-        onHide={handleClose}
-        size="xl"
-        centered
-        fullscreen="true"
-        id="pdf-modal"
-      >
-        <Modal.Header className="mb-2" closeButton>
-          <Modal.Title>{currentPdf && currentPdf.split("/").pop()}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          id="pdf-modal-container"
-          className="p-2"
-          style={{ height: "90vh" }}
-          // ref={pdfContainerRef}
-        >
-          {currentPdf && <PDFViewer pdfUrl={currentPdf} />}
-        </Modal.Body>
-      </BootstrapModal>
     </>
   );
 }

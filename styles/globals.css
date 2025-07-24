@@ -32,3 +32,11 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+.custom-bootstrap-modal-z {
+  z-index: 1400 !important; /* Higher than MUI Modal's default (1300) */
+}
+
+.custom-bootstrap-modal-z .modal-dialog {
+  z-index: 1400 !important;
+}

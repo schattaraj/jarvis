@@ -261,7 +261,7 @@ function EtfHistoryModal({
         <Box className="mb-3">
           <Button
             variant="contained"
-            color="primary"
+            color="secondary"
             onClick={() => {
               exportToExcel();
             }}
@@ -269,14 +269,14 @@ function EtfHistoryModal({
           >
             Export to Excel
           </Button>
-          <Button
+          {/* <Button
             variant="contained"
             color="secondary"
             onClick={exportToCSV}
             sx={{ marginRight: 1 }}
           >
             Export to CSV
-          </Button>
+          </Button> */}
           <Button variant="contained" color="error" onClick={exportToPDF}>
             Export to PDF
           </Button>
