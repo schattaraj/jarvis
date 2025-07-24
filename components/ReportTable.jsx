@@ -205,8 +205,11 @@ function ReportTable({
     });
   };
   const handleDownload = async (reportfileDetails) => {
-    const url = process.env.NEXT_PUBLIC_BASE_URL + reportfileDetails?.split('C:/')[1];
+    // const url = process.env.NEXT_PUBLIC_BASE_URL + reportfileDetails?.split('C:/')[1];
+    const filePath = reportfileDetails?.split('C:/')[1]; // Adjust if needed
+  const url = `/api/download?file=${encodeURIComponent(filePath)}`;
     window.open(url, "_blank");
+
   };
   // Filter the data based on the search query
   const filteredData = data.filter((row) =>
@@ -339,16 +342,16 @@ function ReportTable({
                         <TableCell>{row?.catagoryType}</TableCell>
                         <TableCell>{formatDate(row?.reportDate)}</TableCell>
                         <TableCell className="text-center">
-                          <Link href={`${process.env.NEXT_PUBLIC_BASE_URL+row?.reportfileDetails?.split("C:/")[1]}`} target="_blank">
+                          {/* <Link href={`${process.env.NEXT_PUBLIC_BASE_URL+row?.reportfileDetails?.split("C:/")[1]}`} target="_blank"> */}
                           <IconButton
-                            // onClick={() =>
-                            //   handleDownload(row.reportfileDetails)
-                            // }
+                            onClick={() =>
+                              handleDownload(row.reportfileDetails)
+                            }
                             className="text-primary"
                           >
                             <Download />
                           </IconButton>
-                          </Link>
+                          {/* </Link> */}
                           <IconButton
                             onClick={() => handleDelete(row.idTickerReports)}
                             className="text-danger"
