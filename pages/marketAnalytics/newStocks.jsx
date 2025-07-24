@@ -133,7 +133,8 @@ export default function Stocks() {
     try {
       // const fetchTickers = await fetch("https://jharvis.com/JarvisV2/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496")
       // const fetchTickersRes = await fetchTickers.json()
-      const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
+      // const fetchTickers = `/api/proxy?api=getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
+      const fetchTickers = `http://localhost:9092/JarvisV3/getAllTicker?metadataName=Tickers_Watchlist&_=1718886601496`;
       const fetchTickersRes = await fetchWithInterceptor(fetchTickers, false);
       setTickers(fetchTickersRes);
     } catch (e) {}

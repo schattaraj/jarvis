@@ -5,6 +5,7 @@ import {
   fetchWithInterceptor,
   formatDate,
   getSortIcon,
+  mmddyy,
   searchTable,
 } from "../../utils/utils";
 import { Pagination } from "../../components/Pagination";
@@ -134,7 +135,13 @@ export default function MutualFund() {
     const form = e.target;
     // console.log(type, security, noShares, priceShares, fundDate);
     // return;
-    const formData = new FormData(form);
+    const formData = new FormData();
+    formData.append("type", type);
+    formData.append("tickerName", security);
+    formData.append("numberShare", noShares);
+    formData.append("priceShare", priceShares);
+    formData.append("mutualDate", mmddyy(fundDate));
+
     context.setLoaderState(true);
     try {
       // "https://jharvis.com/JarvisV2/createMutualFund"
