@@ -199,7 +199,7 @@ export default function Stocks() {
     try {
       // const getBonds = await fetch(`https://jharvis.com/JarvisV2/getHistoryByTickerWatchList?metadataName=Tickers_Watchlist&ticker=${selectedTicker}&_=1722333954367`)
       // const getBondsRes = await getBonds.json()
-      const getBonds = `/api/proxy?api=getCompanyOverviewBySymbol`;
+      const getBonds = `/api/proxy?api=getCompanyOverviewBySymbol&bodyType=form`;
       const getBondsRes = await fetchWithInterceptor(getBonds, false, false, {
         method: "POST",
         body: JSON.stringify(selectedTicker),

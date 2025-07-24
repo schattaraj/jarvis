@@ -409,9 +409,9 @@ export default function BondPortfolio() {
     try {
       const apiEndpoint = `/api/proxy?api=getAllBondForPolioByName?name=${name}&pageNumber=${
         currentPage3 - 1
-      }&pageSize=${limit3 !== "all" ? limit3 : 0}&isforAll=${
-        limit3 == "all" ? true : false
-      }&keyword=""&_=${new Date().getTime()}`;
+      }&pageSize=${
+        limit3 !== "all" ? limit3 : 0
+      }&isforAll=${true}&keyword=${""}&_=${new Date().getTime()}`;
       const options = { method: "GET" };
 
       const response = await fetchWithInterceptor(
