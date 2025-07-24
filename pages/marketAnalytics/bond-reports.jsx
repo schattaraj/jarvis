@@ -66,8 +66,8 @@ const BondReports = () => {
         "/api/proxy?api=getImportsData?metaDataName=Debt_Report_Matrices&_=1705582308871"
       );
       // const getBondsRes = await getBonds.json()
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
+      setTableData(getBondsRes.content);
+      setFilterData(getBondsRes.content);
       // setTimeout(() => {
       //     setTableData(getImportsData)
       //     setFilterData(getImportsData)

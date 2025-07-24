@@ -122,8 +122,8 @@ export default function Bonds() {
   const [secured, setSecured] = useState("Any");
   const [tickers, setTickers] = useState([]);
   const [dateRange, setDateRange] = useState({
-    startDate: 2023,
-    endDate: 2023,
+    startDate: 2020,
+    endDate: 2025,
   });
   const [chartHistory, setChartHistory] = useState([]);
   const [ViewOptions, setViewOptions] = useState({
@@ -719,7 +719,7 @@ export default function Bonds() {
       );
       // const uploadRes = await upload.json();
       // if (upload.status == 200) {
-      if (uploadRes.msg) {
+      if (uploadRes.status === "success") {
         setFile(null);
         setFileDate("");
         // Reset file input field
@@ -733,16 +733,15 @@ export default function Bonds() {
           dateInput.value = "";
         }
         Swal.fire({
-          title: "Bond Uploaded Successfully",
+          title: uploadRes.message,
           icon: "success",
           confirmButtonColor: "var(--secondary)",
           timer: 2000,
         });
-      }
-      if (upload.status == 400) {
+      } else {
         Swal.fire({
-          title: "Something Went Wrong While Uploading Bond!",
-          icon: "warning",
+          title: uploadRes.message,
+          icon: "error",
           confirmButtonColor: "var(--primary)",
         });
       }
@@ -1735,6 +1734,7 @@ export default function Bonds() {
                     yAxisTitle={"Risn in %"}
                     titleAlign={"center"}
                     subTitle={"Best Fifty"}
+                    chartType="column"
                   />
                 </div>
               </div>
@@ -1754,6 +1754,7 @@ export default function Bonds() {
                     yAxisTitle={"Drop in %"}
                     titleAlign={"center"}
                     subTitle={"Worst Fifty"}
+                    chartType="column"
                   />
                 </div>
               </div>

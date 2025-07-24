@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   Modal,
   Table,
@@ -19,6 +19,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import { Modal as BootstrapModal } from "react-bootstrap";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import parse from "html-react-parser";
@@ -39,6 +40,7 @@ import { ListGroup, Nav } from "react-bootstrap";
 import { IoMdArrowBack } from "react-icons/io";
 import "animate.css";
 import HightChart from "./HighChart";
+import PDFViewer from "./PDFViewer";
 function ReportTable({
   name,
   open,
@@ -74,6 +76,10 @@ function ReportTable({
     element22: { name: "priceEarning", displayName: "Price/Earnings" },
     element26: { name: "evEbitda", displayName: "EV / EBITDA" },
   });
+
+  const [show, setShow] = useState(false);
+  const [currentPdf, setCurrentPdf] = useState("");
+  const pdfContainerRef = useRef(null);
   //   const [selectedMonth, setSelectedMonth] = useState("All");
   //   const [activeTab, setActiveTab] = useState("latest");
   const [activeTab, setActiveTab] = useState({
@@ -206,10 +212,9 @@ function ReportTable({
   };
   const handleDownload = async (reportfileDetails) => {
     // const url = process.env.NEXT_PUBLIC_BASE_URL + reportfileDetails?.split('C:/')[1];
-    const filePath = reportfileDetails?.split('C:/')[1]; // Adjust if needed
-  const url = `/api/download?file=${encodeURIComponent(filePath)}`;
+    const filePath = reportfileDetails?.split("C:/")[1]; // Adjust if needed
+    const url = `/api/download?file=${encodeURIComponent(filePath)}`;
     window.open(url, "_blank");
-
   };
   // Filter the data based on the search query
   const filteredData = data.filter((row) =>
@@ -270,319 +275,370 @@ function ReportTable({
   useEffect(() => {
     getChartHistory();
   }, [name]);
+
+  const handleShow = (path) => {
+    setCurrentPdf(path);
+    setShow(true);
+  };
+  const handleClose = () => setShow(false);
+  // console.log("currentPDF", currentPdf);
+
   return (
-    <Modal open={open} onClose={handleCloseModal}>
-      <Box
-        sx={{
-          // position: 'absolute',
-          // top: '50%',
-          // left: '50%',
-          // transform: 'translate(-50%, -50%)',
-          marginLeft: "auto",
-          marginRight: "auto",
-          width: "80%",
-          overflowY: "auto",
-          height: "auto",
-          maxHeight: "100vh",
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          p: 3,
-        }}
-      >
+    <>
+      <Modal open={open} onClose={handleCloseModal}>
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: 2,
+            // position: 'absolute',
+            // top: '50%',
+            // left: '50%',
+            // transform: 'translate(-50%, -50%)',
+            marginLeft: "auto",
+            marginRight: "auto",
+            width: "80%",
+            overflowY: "auto",
+            height: "auto",
+            maxHeight: "100vh",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 3,
           }}
         >
-          {data.length > 0 ? (
-            <Typography variant="h6">Report Table</Typography>
-          ) : (
-            <div></div>
-          )}
-          <IconButton onClick={handleCloseModal}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        {data.length > 0 && (
-          <>
-            <TextField
-              label="Search"
-              variant="outlined"
-              fullWidth
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ marginBottom: 2 }}
-            />
-            <TableContainer
-              component={Paper}
-              sx={{ maxHeight: "60vh", overflowY: "auto" }}
-            >
-              <Table className="table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Ticker</TableCell>
-                    <TableCell>Company</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Report Type</TableCell>
-                    <TableCell>Report Date</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredData
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => (
-                      <TableRow key={row?.idTickerReports}>
-                        <TableCell>{row?.tickerName}</TableCell>
-                        <TableCell>{row?.companyName}</TableCell>
-                        <TableCell>{row?.description}</TableCell>
-                        <TableCell>{row?.catagoryType}</TableCell>
-                        <TableCell>{formatDate(row?.reportDate)}</TableCell>
-                        <TableCell className="text-center">
-                          {/* <Link href={`${process.env.NEXT_PUBLIC_BASE_URL+row?.reportfileDetails?.split("C:/")[1]}`} target="_blank"> */}
-                          <IconButton
-                            onClick={() =>
-                              handleDownload(row.reportfileDetails)
-                            }
-                            className="text-primary"
-                          >
-                            <Download />
-                          </IconButton>
-                          {/* </Link> */}
-                          <IconButton
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingBottom: 2,
+            }}
+          >
+            {data.length > 0 ? (
+              <Typography variant="h6">Report Table</Typography>
+            ) : (
+              <div></div>
+            )}
+            <IconButton onClick={handleCloseModal}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          {data.length > 0 && (
+            <>
+              <TextField
+                label="Search"
+                variant="outlined"
+                fullWidth
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+              <TableContainer
+                component={Paper}
+                sx={{ maxHeight: "60vh", overflowY: "auto" }}
+              >
+                <Table className="table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Ticker</TableCell>
+                      <TableCell>Company</TableCell>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Report Type</TableCell>
+                      <TableCell>Report Date</TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredData
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row) => (
+                        <TableRow key={row?.idTickerReports}>
+                          <TableCell>{row?.tickerName}</TableCell>
+                          <TableCell>{row?.companyName}</TableCell>
+                          <TableCell>{row?.description}</TableCell>
+                          <TableCell>{row?.catagoryType}</TableCell>
+                          <TableCell>{formatDate(row?.reportDate)}</TableCell>
+                          <TableCell className="text-center">
+                            {/* <Link href={`${process.env.NEXT_PUBLIC_BASE_URL+row?.reportfileDetails?.split("C:/")[1]}`} target="_blank"> */}
+                            <IconButton
+                              onClick={() =>
+                                handleDownload(row.reportfileDetails)
+                              }
+                              className="text-primary"
+                            >
+                              <Download />
+                            </IconButton>
+                            {/* </Link> */}
+                            {/* <IconButton
                             onClick={() => handleDelete(row.idTickerReports)}
                             className="text-danger"
                           >
                             <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 2,
-              }}
-            >
-              <TablePagination
-                rowsPerPageOptions={[20, 50, 100]}
-                component="div"
-                count={data.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-              <DialogActions>
-                <button
-                  className="btn btn-secondary"
-                  type="button"
-                  title="Cancel"
-                  onClick={cancelDelete}
-                >
-                  <span>Cancel</span>
-                </button>
-                <div className="dt-buttons mb-3"></div>
-              </DialogActions>
-            </Box>
-            <Dialog open={deleteConfirmationOpen} onClose={cancelDelete}>
-              <DialogTitle>Confirm Delete</DialogTitle>
-              <DialogContent>
-                Are you sure you want to delete the item with ID{" "}
-                <b>{deleteItemId}</b>?
-              </DialogContent>
-              <DialogActions style={{ padding: 4 }}>
-                <button
-                  className="dt-button buttons-pdf buttons-html5 btn-primary"
-                  type="button"
-                  title="Cancel"
-                  onClick={cancelDelete}
-                >
-                  <span>Cancel</span>
-                </button>
-                <div className="dt-buttons mb-3"></div>
-                <button
-                  className="dt-button buttons-pdf buttons-html5 btn-primary"
-                  type="button"
-                  title="delete"
-                  onClick={confirmedDelete}
-                >
-                  <span>Delete</span>
-                </button>
-                <div className="dt-buttons mb-3"></div>
-              </DialogActions>
-            </Dialog>
-          </>
-        )}
-        {chartHistory && chartHistory.length > 0 && (
-          <HightChart
-            data={chartHistory?.map((item) => [
-              new Date(item["lastUpdatedAt"]).getTime(),
-              Number(item["element10"]),
-            ])}
-            title={
-              "element10" &&
-              `Chart View For ${ViewOptions["element10"].displayName}`
-            }
-            yAxisTitle={"Price"}
-          />
-        )}
-
-        {news && displayedNews && (
-          <>
-            <div className="news-area">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="mb-0">News Sentiment</h3>
-                <div className="d-flex gap-2">
-                  <select
-                    className="form-select w-auto"
-                    value={activeTab.selectedDate}
-                    onChange={(e) =>
-                      setActiveTab((prev) => ({
-                        ...prev,
-                        selectedDate: e.target.value,
-                      }))
-                    }
+                          </IconButton> */}
+                            {/* <IconButton
+                              className="px-4 btn btn-primary"
+                              onClick={() => {
+                                handleShow(
+                                  `/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${row.reportfileDetails}`
+                                );
+                              }}
+                              title="View Fullscreen"
+                            >
+                              <i className="mdi mdi-eye-outline"></i>
+                            </IconButton> */}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: 2,
+                }}
+              >
+                <TablePagination
+                  rowsPerPageOptions={[20, 50, 100]}
+                  component="div"
+                  count={data.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+                <DialogActions>
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    title="Cancel"
+                    onClick={cancelDelete}
                   >
-                    {months.map((month, index) => (
-                      <option key={index} value={month}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  {!showDetails && (
-                    <Nav fill variant="tabs">
-                      <Nav.Item>
-                        <Nav.Link
-                          className={`nav-link ${
-                            activeTab.tab === "latest" ? "active" : ""
-                          }`}
-                          onClick={() =>
-                            setActiveTab((prev) => ({ ...prev, tab: "latest" }))
-                          }
-                        >
-                          Latest
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link
-                          className={`nav-link ${
-                            activeTab.tab === "archived" ? "active" : ""
-                          }`}
-                          onClick={() =>
-                            setActiveTab((prev) => ({
-                              ...prev,
-                              tab: "archived",
-                            }))
-                          }
-                        >
-                          Archived
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav>
+                    <span>Cancel</span>
+                  </button>
+                  <div className="dt-buttons mb-3"></div>
+                </DialogActions>
+              </Box>
+              <Dialog open={deleteConfirmationOpen} onClose={cancelDelete}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                  Are you sure you want to delete the item with ID{" "}
+                  <b>{deleteItemId}</b>?
+                </DialogContent>
+                <DialogActions style={{ padding: 4 }}>
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="Cancel"
+                    onClick={cancelDelete}
+                  >
+                    <span>Cancel</span>
+                  </button>
+                  <div className="dt-buttons mb-3"></div>
+                  <button
+                    className="dt-button buttons-pdf buttons-html5 btn-primary"
+                    type="button"
+                    title="delete"
+                    onClick={confirmedDelete}
+                  >
+                    <span>Delete</span>
+                  </button>
+                  <div className="dt-buttons mb-3"></div>
+                </DialogActions>
+              </Dialog>
+            </>
+          )}
+          {chartHistory && chartHistory.length > 0 && (
+            <HightChart
+              data={chartHistory?.map((item) => [
+                new Date(item["lastUpdatedAt"]).getTime(),
+                Number(item["element10"]),
+              ])}
+              title={
+                "element10" &&
+                `Chart View For ${ViewOptions["element10"].displayName}`
+              }
+              yAxisTitle={"Price"}
+            />
+          )}
+
+          {news && displayedNews && (
+            <>
+              <div className="news-area">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h3 className="mb-0">News Sentiment</h3>
+                  <div className="d-flex gap-2">
+                    <select
+                      className="form-select w-auto"
+                      value={activeTab.selectedDate}
+                      onChange={(e) =>
+                        setActiveTab((prev) => ({
+                          ...prev,
+                          selectedDate: e.target.value,
+                        }))
+                      }
+                    >
+                      {months.map((month, index) => (
+                        <option key={index} value={month}>
+                          {month}
+                        </option>
+                      ))}
+                    </select>
+                    {!showDetails && (
+                      <Nav fill variant="tabs">
+                        <Nav.Item>
+                          <Nav.Link
+                            className={`nav-link ${
+                              activeTab.tab === "latest" ? "active" : ""
+                            }`}
+                            onClick={() =>
+                              setActiveTab((prev) => ({
+                                ...prev,
+                                tab: "latest",
+                              }))
+                            }
+                          >
+                            Latest
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                          <Nav.Link
+                            className={`nav-link ${
+                              activeTab.tab === "archived" ? "active" : ""
+                            }`}
+                            onClick={() =>
+                              setActiveTab((prev) => ({
+                                ...prev,
+                                tab: "archived",
+                              }))
+                            }
+                          >
+                            Archived
+                          </Nav.Link>
+                        </Nav.Item>
+                      </Nav>
+                    )}
+                  </div>
+
+                  {showDetails && (
+                    <button
+                      className="btn btn-primary px-3 py-2 ps-2"
+                      onClick={() => {
+                        setShowDetails(false);
+                      }}
+                    >
+                      <IoMdArrowBack style={{ fontSize: "20px" }} />{" "}
+                      <span className="ms-1">Back</span>
+                    </button>
                   )}
                 </div>
-
-                {showDetails && (
-                  <button
-                    className="btn btn-primary px-3 py-2 ps-2"
-                    onClick={() => {
-                      setShowDetails(false);
-                    }}
+                {!showDetails && (
+                  <ListGroup
+                    as="ul"
+                    className="animate__animated animate__fadeInRight"
                   >
-                    <IoMdArrowBack style={{ fontSize: "20px" }} />{" "}
-                    <span className="ms-1">Back</span>
-                  </button>
+                    {displayedNews?.length > 0 ? (
+                      displayedNews?.map((item, index) => {
+                        return (
+                          <ListGroup.Item
+                            as="li"
+                            key={index}
+                            onClick={() => {
+                              showNewsDetails(index);
+                            }}
+                          >
+                            <img
+                              src={item?.banner_image}
+                              alt=""
+                              loading="lazy"
+                            />
+                            <div className="text">
+                              <h5 className="mb-1">{item.title}</h5>
+                              <div>
+                                {formatDateTime(item?.time_published)} by{" "}
+                                {item?.authors.map((name) => name + ",")}
+                              </div>
+                            </div>
+                          </ListGroup.Item>
+                        );
+                      })
+                    ) : (
+                      <ListGroup.Item as="line" disabled>
+                        No Data Available
+                      </ListGroup.Item>
+                    )}
+                  </ListGroup>
+                )}
+                {showDetails && (
+                  <div className="animate__animated animate__fadeInLeft">
+                    <h4>
+                      <Link href={displayedNews[0]?.url}>
+                        {displayedNews[selectedIndex]?.title}
+                      </Link>
+                    </h4>
+                    {displayedNews[selectedIndex]?.banner_image && (
+                      <img
+                        src={displayedNews[selectedIndex]?.banner_image}
+                        alt=""
+                        className="image"
+                        loading="lazy"
+                      />
+                    )}
+                    <p>
+                      By{" "}
+                      <span className="name">
+                        {displayedNews[selectedIndex]?.authors[0]}
+                      </span>{" "}
+                      -{" "}
+                      {formatPublishedDate(
+                        displayedNews[selectedIndex]?.time_published
+                      )}
+                    </p>
+                    <p>Summary : {displayedNews[selectedIndex]?.summary}</p>
+                    <h6>Topics :</h6>
+                    <ul>
+                      {displayedNews[selectedIndex]?.topics?.map((item) => {
+                        return (
+                          <li>
+                            {item?.topic} - {item?.relevance_score}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <h6>
+                      Overall Sentiment Score :{" "}
+                      {displayedNews[selectedIndex]?.overall_sentiment_score}
+                    </h6>
+                  </div>
                 )}
               </div>
-              {!showDetails && (
-                <ListGroup
-                  as="ul"
-                  className="animate__animated animate__fadeInRight"
-                >
-                  {displayedNews?.length > 0 ? (
-                    displayedNews?.map((item, index) => {
-                      return (
-                        <ListGroup.Item
-                          as="li"
-                          key={index}
-                          onClick={() => {
-                            showNewsDetails(index);
-                          }}
-                        >
-                          <img src={item?.banner_image} alt="" loading="lazy" />
-                          <div className="text">
-                            <h5 className="mb-1">{item.title}</h5>
-                            <div>
-                              {formatDateTime(item?.time_published)} by{" "}
-                              {item?.authors.map((name) => name + ",")}
-                            </div>
-                          </div>
-                        </ListGroup.Item>
-                      );
-                    })
-                  ) : (
-                    <ListGroup.Item as="line" disabled>
-                      No Data Available
-                    </ListGroup.Item>
-                  )}
-                </ListGroup>
-              )}
-              {showDetails && (
-                <div className="animate__animated animate__fadeInLeft">
-                  <h4>
-                    <Link href={displayedNews[0]?.url}>
-                      {displayedNews[selectedIndex]?.title}
-                    </Link>
-                  </h4>
-                  {displayedNews[selectedIndex]?.banner_image && (
-                    <img
-                      src={displayedNews[selectedIndex]?.banner_image}
-                      alt=""
-                      className="image"
-                      loading="lazy"
-                    />
-                  )}
-                  <p>
-                    By{" "}
-                    <span className="name">
-                      {displayedNews[selectedIndex]?.authors[0]}
-                    </span>{" "}
-                    -{" "}
-                    {formatPublishedDate(
-                      displayedNews[selectedIndex]?.time_published
-                    )}
-                  </p>
-                  <p>Summary : {displayedNews[selectedIndex]?.summary}</p>
-                  <h6>Topics :</h6>
-                  <ul>
-                    {displayedNews[selectedIndex]?.topics?.map((item) => {
-                      return (
-                        <li>
-                          {item?.topic} - {item?.relevance_score}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <h6>
-                    Overall Sentiment Score :{" "}
-                    {displayedNews[selectedIndex]?.overall_sentiment_score}
-                  </h6>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </Box>
-    </Modal>
+            </>
+          )}
+        </Box>
+      </Modal>
+      <BootstrapModal
+        show={show}
+        onHide={handleClose}
+        size="xl"
+        centered
+        fullscreen="true"
+        id="pdf-modal"
+      >
+        <Modal.Header className="mb-2" closeButton>
+          <Modal.Title>{currentPdf && currentPdf.split("/").pop()}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          id="pdf-modal-container"
+          className="p-2"
+          style={{ height: "90vh" }}
+          // ref={pdfContainerRef}
+        >
+          {currentPdf && <PDFViewer pdfUrl={currentPdf} />}
+        </Modal.Body>
+      </BootstrapModal>
+    </>
   );
 }
 

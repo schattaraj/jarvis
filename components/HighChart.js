@@ -12,6 +12,7 @@ const HightChart = ({
   titleAlign,
   subTitle,
   xAxisTitle,
+  chartType = "column",
 }) => {
   const [chartOptions, setChartOptions] = useState(null);
   Exporting(Highcharts);
@@ -62,7 +63,7 @@ const HightChart = ({
           enabled: false,
         },
         plotOptions: {
-          area: {
+          column: {
             marker: {
               radius: 2,
             },
@@ -77,7 +78,7 @@ const HightChart = ({
               stops: [
                 [0, "rgb(113, 155, 95)"],
                 [0.4, "rgb(91, 167, 43)"],
-                [1, "rgb(255, 255, 254)"],
+                [1, "rgb(255, 255, 224)"],
               ],
             },
             states: {
@@ -90,7 +91,7 @@ const HightChart = ({
         },
         series: [
           {
-            type: "area",
+            type: chartType,
             name: title,
             //   data:  data.map((item)=>[new Date(item['lastUpdatedAt']).getTime(),parseFloat(item['element7'])])// Assuming data is in the correct format
             data: data,

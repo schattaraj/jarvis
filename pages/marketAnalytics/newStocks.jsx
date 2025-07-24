@@ -1162,6 +1162,9 @@ export default function Stocks() {
                   )}
                 </div>
               </div>
+              {!filterData.length > 0
+                ? context.setLoaderState(true)
+                : context.setLoaderState(false)}
               <div className="table-responsive" ref={tableContainerRef}>
                 <table
                   className="table border dataTable display no-footer stock-table"
@@ -1705,7 +1708,9 @@ export default function Stocks() {
                           {Object.entries(bestFiveStockColumn).map(
                             ([columnName, displayName]) => (
                               <td key={`${columnName}-${index}`}>
-                                {item[columnName]}
+                                {item[columnName] === "Infinity"
+                                  ? "-"
+                                  : item[columnName]}
                               </td>
                             )
                           )}
@@ -1748,6 +1753,7 @@ export default function Stocks() {
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
+                chartType="column"
               />
               <h3 className="mb-3">Worst Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
@@ -1821,7 +1827,9 @@ export default function Stocks() {
                           {Object.entries(worstFiveStockColumn).map(
                             ([columnName, displayName]) => (
                               <td key={`${columnName}-${index}`}>
-                                {item[columnName]}
+                                {item[columnName] == "Infinity"
+                                  ? "-"
+                                  : item[columnName]}
                               </td>
                             )
                           )}
@@ -1864,6 +1872,7 @@ export default function Stocks() {
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
+                chartType="column"
               />
             </>
           )}
@@ -1933,7 +1942,9 @@ export default function Stocks() {
                           {Object.entries(bestFiveStockColumn).map(
                             ([columnName, displayName]) => (
                               <td key={`${columnName}-${index}`}>
-                                {item[columnName]}
+                                {item[columnName] == "Infinity"
+                                  ? "-"
+                                  : item[columnName]}
                               </td>
                             )
                           )}
@@ -1967,6 +1978,7 @@ export default function Stocks() {
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
+                chartType="column"
               />
               <h3 className="my-3">Worst Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
@@ -2032,7 +2044,9 @@ export default function Stocks() {
                           {Object.entries(worstFiveStockColumn).map(
                             ([columnName, displayName]) => (
                               <td key={`${columnName}-${index}`}>
-                                {item[columnName]}
+                                {item[columnName] == "Infinity"
+                                  ? "-"
+                                  : item[columnName]}
                               </td>
                             )
                           )}
@@ -2066,6 +2080,7 @@ export default function Stocks() {
                 yAxisTitle={"Risn in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
+                chartType="column"
               />
             </>
           )}

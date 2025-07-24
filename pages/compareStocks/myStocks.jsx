@@ -163,9 +163,8 @@ export default function MyStocks() {
     const formattedEndDate = mmddyy(inputData?.endDate);
 
     // Construct URL with query parameters
-    const url = new URL(
-      `/api/proxy?api=findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}&_=${Date.now()}`
-    );
+    const url = `/api/proxy?api=findHistoricalStockDataByDateWithPercentageChange?startDate=${formattedStartDate}&endDate=${formattedEndDate}${selectedStocks}&_=${Date.now()}`;
+
     // url.searchParams.append("startDate", formattedStartDate);
     // url.searchParams.append("endDate", formattedEndDate);
 
@@ -173,18 +172,19 @@ export default function MyStocks() {
     // stockSymbols.split(',').forEach(symbol => {
     //     url.searchParams.append("myArray[]", symbol);
     // });
-    console.log("stockSymbols", url);
+    // console.log("stockSymbols", url);
     // Optionally, append a timestamp or other query parameters if needed
     // url.searchParams.append("_", Date.now());
     context.setLoaderState(true);
     try {
-      const stockByDateRes = await fetchWithInterceptor(url.toString());
-      if (!stockByDateRes.msg) {
-        throw new Error(`HTTP error! Status: ${stockByDateRes.status}`);
+      const stockByDateRes = await fetchWithInterceptor(url);
+      if (!stockByDateRes) {
+        throw new Error(`HTTP error! Status: ${stockByDateRes}`);
       }
       // const stockByDateRes = await response.json();
       console.log("Data", stockByDateRes);
       setTableData(stockByDateRes);
+      setFilterData(stockByDateRes)
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }

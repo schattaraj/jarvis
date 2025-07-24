@@ -121,7 +121,7 @@ export default function Etfs() {
   const [chartData, setChartData] = useState([]);
   const [dateRange, setDateRange] = useState({
     startDate: 2023,
-    endDate: 2023,
+    endDate: 2025,
   });
   const [selectedView, setSelectedView] = useState("element7");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
@@ -188,8 +188,8 @@ export default function Etfs() {
         "/api/proxy?api=getImportsData?metaDataName=Everything_List_New&_=1705403290395"
       );
       // const getBondsRes = await getBonds.json();
-      setTableData(getBondsRes);
-      setFilterData(getBondsRes);
+      setTableData(getBondsRes.content);
+      setFilterData(getBondsRes.content);
     } catch (e) {
       console.log("error", e);
     }
@@ -683,6 +683,9 @@ export default function Etfs() {
             />
             <div className="selection-area mb-3 d-flex align-items-end flex-wrap">
               <div className="form-group" style={{ flex: "1" }}>
+                {!tickers.length > 0
+                  ? context.setLoaderState(true)
+                  : context.setLoaderState(false)}
                 <Select
                   className="mb-0 me-2"
                   isMulti
@@ -1135,7 +1138,7 @@ export default function Etfs() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filterData.map((rowData, rowIndex) => (
+                    {filterData?.map((rowData, rowIndex) => (
                       <tr key={rowIndex} style={{ overflowWrap: "break-word" }}>
                         {columnNames.map((columnName, colIndex) => {
                           if (
