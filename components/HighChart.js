@@ -63,7 +63,7 @@ const HightChart = ({
           enabled: false,
         },
         plotOptions: {
-          column: {
+          [chartType]: {
             marker: {
               radius: 2,
             },

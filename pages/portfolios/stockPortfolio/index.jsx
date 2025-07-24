@@ -1277,6 +1277,9 @@ export default function Portfolio() {
                   />
                 </div>
               </div>
+              {!filterData.length > 0
+                ? context.setLoaderState(true)
+                : context.setLoaderState(false)}
               <div className="table-responsive">
                 <table
                   ref={tableRef}

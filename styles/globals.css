@@ -4,19 +4,8 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    Segoe UI,
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    Fira Sans,
-    Droid Sans,
-    Helvetica Neue,
-    sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 a {
@@ -31,12 +20,4 @@ a {
 img {
   max-width: 100%;
   height: auto;
-}
-
-.custom-bootstrap-modal-z {
-  z-index: 1400 !important; /* Higher than MUI Modal's default (1300) */
-}
-
-.custom-bootstrap-modal-z .modal-dialog {
-  z-index: 1400 !important;
 }

@@ -310,7 +310,7 @@ function ReportTable({
           {currentPdf && <PDFViewer pdfUrl={currentPdf} />}
         </BootstrapModal.Body>
       </BootstrapModal>
-      <Modal open={open} onClose={handleCloseModal}>
+      <Modal open={open} onClose={handleCloseModal} sx={{ zIndex: 1200 }}>
         <Box
           sx={{
             // position: 'absolute',
@@ -326,7 +326,6 @@ function ReportTable({
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 3,
-            zIndex: 1300,
           }}
         >
           <Box
@@ -405,7 +404,9 @@ function ReportTable({
                               className="px-4 btn btn-primary"
                               onClick={() => {
                                 handleShow(
-                                  `/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${row.reportfileDetails}`
+                                  `/api/image-proxy?path=http://35.226.245.206:9092/JarvisV3/${
+                                    row.reportfileDetails.split("C:/")[1]
+                                  }`
                                 );
                               }}
                               title="View Fullscreen"
@@ -487,6 +488,7 @@ function ReportTable({
                 `Chart View For ${ViewOptions["element10"].displayName}`
               }
               yAxisTitle={"Price"}
+              chartType="area"
             />
           )}
 
