@@ -500,9 +500,10 @@ export const fetchWithInterceptor = async (
       // Handle non-200 responses
       if (!response.ok) {
         const errorText = await response.json(); // Parse error response as JSON
-        throw new Error(
-          `Error: ${response.status} - ${JSON.stringify(errorText)}`
-        );
+        return errorText;
+        // throw new Error(
+        //   `Error: ${response.status} - ${JSON.stringify(errorText)}`
+        // );
       }
 
       // Parse the response as JSON
