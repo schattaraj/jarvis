@@ -107,16 +107,21 @@ export default function UploadAnalystVideos() {
         }
       );
 
-      if (result) {
+      if (result.status === "success") {
         // const result = await response.json();
         Swal.fire({
-          title: result.msg,
+          title: result.message,
           icon: "success",
           confirmButtonColor: "#719B5F",
         });
         form.reset();
         fetchAllAnalystVideos();
       } else {
+        Swal.fire({
+          title: result.message,
+          icon: "error",
+          confirmButtonColor: "var(--secondary)",
+        });
         console.error("Error:", response.statusText);
       }
     } catch (error) {}

@@ -1031,9 +1031,9 @@ export default function BondPortfolio() {
                   </select>
                 </div>
               </div>
-              {!filterData?.length > 0
+              {/* {!filterData?.length > 0
                 ? context.setLoaderState(true)
-                : context.setLoaderState(false)}
+                : context.setLoaderState(false)} */}
               <div className="table-responsive">
                 <table
                   className="table border display no-footer dataTable"

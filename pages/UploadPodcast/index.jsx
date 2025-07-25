@@ -92,19 +92,31 @@ export default function UploadPodcast() {
         }
       );
 
-      if (result.msg) {
+      if (result.status === "success") {
         // const result = await response.json();
         Swal.fire({
-          title: result.msg,
+          title: result.message,
           icon: "success",
           confirmButtonColor: "#719B5F",
         });
         form.reset();
         fetchAllPodcastVideos();
       } else {
+        Swal.fire({
+          title: result.message,
+          icon: "error",
+          confirmButtonColor: "var(--secondary)",
+        });
         console.error("Error:", response.statusText);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error:", error);
+      Swal.fire({
+        title: error.message,
+        icon: "error",
+        confirmButtonColor: "var(--secondary)",
+      });
+    }
     context.setLoaderState(false);
   };
   const deletePodcast = async (id) => {

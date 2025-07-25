@@ -71,13 +71,20 @@ export default function UploadTickerReports() {
         }
       );
 
-      if (result.msg) {
-        alert("Successfully uploaded");
-        // const result = await response.json();
-        alert(result.msg);
+      if (result.status === "success") {
+        Swal.fire({
+          title: result.message,
+          icon: "success",
+          confirmButtonColor: "#719B5F",
+        });
         form.reset();
         fetchTickerReports();
       } else {
+        Swal.fire({
+          title: result.message,
+          icon: "error",
+          confirmButtonColor: "var(--secondary)",
+        });
         console.error("Error:", response.statusText);
       }
     } catch (error) {}

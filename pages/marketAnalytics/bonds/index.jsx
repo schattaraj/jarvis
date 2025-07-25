@@ -40,6 +40,7 @@ import ReportTable from "../../../components/ReportTable";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { PaginationNew } from "../../../components/PaginationNew";
+import HightChartOZero from "../../../components/HighChartOzero";
 const extraColumns = [
   {
     elementId: null,
@@ -1720,7 +1721,22 @@ export default function Bonds() {
               </div>
               <div className="row">
                 <div className="col-md-12">
-                  <HightChart
+                  <HightChartOZero
+                    data={compareData?.bestFiveStocks?.map((item) => ({
+                      name: item["bestMovedStock"],
+                      y: parseFloat(item["percentageChangeRise"]),
+                    }))}
+                    typeCheck={{
+                      categories: compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      ),
+                    }}
+                    title={"Bond Performance"}
+                    yAxisTitle={"Rise in %"}
+                    titleAlign={"center"}
+                    subTitle={"Best Twenty"}
+                  />
+                  {/* <HightChart
                     data={compareData?.bestFiveStocks?.map((item) => [
                       item["bestMovedStock"],
                       parseFloat(item["percentageChangeRise"]),
@@ -1735,12 +1751,27 @@ export default function Bonds() {
                     titleAlign={"center"}
                     subTitle={"Best Fifty"}
                     chartType="column"
-                  />
+                  /> */}
                 </div>
               </div>
               <div className="row my-3">
                 <div className="col-md-12">
-                  <HightChart
+                  <HightChartOZero
+                    data={compareData?.worstFiveStocks?.map((item) => ({
+                      name: item["worstMovedStock"],
+                      y: parseFloat(item["percentageChangeDrop"]),
+                    }))}
+                    typeCheck={{
+                      categories: compareData?.worstFiveStocks?.map(
+                        (item) => item?.worstMovedStock
+                      ),
+                    }}
+                    title={"Bond Performance"}
+                    yAxisTitle={"Drop in %"}
+                    titleAlign={"center"}
+                    subTitle={"Best Twenty"}
+                  />
+                  {/* <HightChart
                     data={compareData?.worstFiveStocks?.map((item) => [
                       item["worstMovedStock"],
                       parseFloat(item["percentageChangeDrop"]),
@@ -1755,7 +1786,7 @@ export default function Bonds() {
                     titleAlign={"center"}
                     subTitle={"Worst Fifty"}
                     chartType="column"
-                  />
+                  /> */}
                 </div>
               </div>
             </>

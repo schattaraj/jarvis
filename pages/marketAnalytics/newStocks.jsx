@@ -39,6 +39,7 @@ import Loader from "../../components/loader";
 import html2canvas from "html2canvas";
 import { PaginationNew } from "../../components/PaginationNew";
 import StockHistoryModalNew from "../../components/StockHistoryModalNew";
+import HightChartOZero from "../../components/HighChartOzero";
 
 const bestFiveStockColumn = {
   company: "Company",
@@ -1706,13 +1707,29 @@ export default function Stocks() {
                       return (
                         <tr key={"best" + index}>
                           {Object.entries(bestFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={`${columnName}-${index}`}>
-                                {item[columnName] === "Infinity"
-                                  ? "-"
-                                  : item[columnName]}
-                              </td>
-                            )
+                            ([columnName, displayName]) => {
+                              if (columnName === "bestMovedStock") {
+                                return (
+                                  <td>
+                                    <a
+                                      data-toggle="modal"
+                                      onClick={() => {
+                                        handleReportData(item[columnName]);
+                                      }}
+                                    >
+                                      {item[columnName]}
+                                    </a>
+                                  </td>
+                                );
+                              }
+                              return (
+                                <td key={`${columnName}-${index}`}>
+                                  {item[columnName] === "Infinity"
+                                    ? "-"
+                                    : item[columnName]}
+                                </td>
+                              );
+                            }
                           )}
                         </tr>
                       );
@@ -1730,7 +1747,31 @@ export default function Stocks() {
                   </tbody>
                 </table>
               </div>
-              <HightChart
+              <HightChartOZero
+                data={
+                  compareData
+                    ? compareData?.bestFiveStocks?.map((item) => ({
+                        name: item["bestMovedStock"],
+                        y: parseFloat(item["percentageChangeRise"]),
+                      }))
+                    : bestStocksFiltered.map((stock) => ({
+                        name: stock["bestMovedStock"],
+                        y: parseFloat(stock["percentageChangeRise"]),
+                      }))
+                }
+                typeCheck={{
+                  categories: compareData
+                    ? compareData?.bestFiveStocks?.map(
+                        (item) => item?.bestMovedStock
+                      )
+                    : bestStocksFiltered?.map((item) => item?.bestMovedStock),
+                }}
+                title={"Ticker Performance"}
+                yAxisTitle={"Rise in %"}
+                titleAlign={"center"}
+                subTitle={`Best Twenty`}
+              />
+              {/* <HightChart
                 data={
                   compareData
                     ? compareData?.bestFiveStocks?.map((item) => [
@@ -1750,11 +1791,11 @@ export default function Stocks() {
                       )
                     : bestStocksFiltered?.map((item) => item?.bestMovedStock),
                 }}
-                yAxisTitle={"Risn in %"}
+                yAxisTitle={"Rise in %"}
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
                 chartType="column"
-              />
+              /> */}
               <h3 className="mb-3">Worst Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="dt-buttons mb-3">
@@ -1825,13 +1866,29 @@ export default function Stocks() {
                       return (
                         <tr key={"worst" + index}>
                           {Object.entries(worstFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={`${columnName}-${index}`}>
-                                {item[columnName] == "Infinity"
-                                  ? "-"
-                                  : item[columnName]}
-                              </td>
-                            )
+                            ([columnName, displayName]) => {
+                              if (columnName === "worstMovedStock") {
+                                return (
+                                  <td>
+                                    <a
+                                      data-toggle="modal"
+                                      onClick={() => {
+                                        handleReportData(item[columnName]);
+                                      }}
+                                    >
+                                      {item[columnName]}
+                                    </a>
+                                  </td>
+                                );
+                              }
+                              return (
+                                <td key={`${columnName}-${index}`}>
+                                  {item[columnName] == "Infinity"
+                                    ? "-"
+                                    : item[columnName]}
+                                </td>
+                              );
+                            }
                           )}
                         </tr>
                       );
@@ -1849,7 +1906,31 @@ export default function Stocks() {
                   </tbody>
                 </table>
               </div>
-              <HightChart
+              <HightChartOZero
+                data={
+                  compareData
+                    ? compareData?.worstFiveStocks?.map((item) => ({
+                        name: item["worstMovedStock"],
+                        y: parseFloat(item["percentageChangeDrop"]),
+                      }))
+                    : worstStocksFiltered.map((stock) => ({
+                        name: stock["worstMovedStock"],
+                        y: parseFloat(stock["percentageChangeDrop"]),
+                      }))
+                }
+                typeCheck={{
+                  categories: compareData
+                    ? compareData?.worstFiveStocks?.map(
+                        (item) => item?.worstMovedStock
+                      )
+                    : worstStocksFiltered?.map((item) => item?.worstMovedStock),
+                }}
+                title={"Ticker Performance"}
+                yAxisTitle={"Drop in %"}
+                titleAlign={"center"}
+                subTitle={"Worst Twenty"}
+              />
+              {/* <HightChart
                 data={
                   compareData
                     ? compareData?.worstFiveStocks?.map((item) => [
@@ -1869,11 +1950,11 @@ export default function Stocks() {
                       )
                     : worstStocksFiltered?.map((item) => item?.bestMovedStock),
                 }}
-                yAxisTitle={"Risn in %"}
+                yAxisTitle={"Drop in %"}
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
                 chartType="column"
-              />
+              /> */}
             </>
           )}
           {activeView == "History" && (
@@ -1940,13 +2021,29 @@ export default function Stocks() {
                       return (
                         <tr key={"best" + index}>
                           {Object.entries(bestFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={`${columnName}-${index}`}>
-                                {item[columnName] == "Infinity"
-                                  ? "-"
-                                  : item[columnName]}
-                              </td>
-                            )
+                            ([columnName, displayName]) => {
+                              if (columnName === "bestMovedStock") {
+                                return (
+                                  <td>
+                                    <a
+                                      data-toggle="modal"
+                                      onClick={() => {
+                                        handleReportData(item[columnName]);
+                                      }}
+                                    >
+                                      {item[columnName]}
+                                    </a>
+                                  </td>
+                                );
+                              }
+                              return (
+                                <td key={`${columnName}-${index}`}>
+                                  {item[columnName] == "Infinity"
+                                    ? "-"
+                                    : item[columnName]}
+                                </td>
+                              );
+                            }
                           )}
                         </tr>
                       );
@@ -1964,7 +2061,22 @@ export default function Stocks() {
                   </tbody>
                 </table>
               </div>
-              <HightChart
+              <HightChartOZero
+                data={compareData?.bestFiveStocks?.map((item) => ({
+                  name: item["bestMovedStock"],
+                  y: parseFloat(item["percentageChangeRise"]),
+                }))}
+                typeCheck={{
+                  categories: compareData?.bestFiveStocks?.map(
+                    (item) => item?.bestMovedStock
+                  ),
+                }}
+                title={"Ticker Performance"}
+                yAxisTitle={"Rise in %"}
+                titleAlign={"center"}
+                subTitle={"Best Twenty"}
+              />
+              {/* <HightChart
                 data={compareData?.bestFiveStocks?.map((item) => [
                   item["bestMovedStock"],
                   parseFloat(item["percentageChangeRise"]),
@@ -1979,7 +2091,7 @@ export default function Stocks() {
                 titleAlign={"center"}
                 subTitle={`Best Twenty`}
                 chartType="column"
-              />
+              /> */}
               <h3 className="my-3">Worst Stocks</h3>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="dt-buttons mb-3">
@@ -2042,13 +2154,29 @@ export default function Stocks() {
                       return (
                         <tr key={"worst" + index}>
                           {Object.entries(worstFiveStockColumn).map(
-                            ([columnName, displayName]) => (
-                              <td key={`${columnName}-${index}`}>
-                                {item[columnName] == "Infinity"
-                                  ? "-"
-                                  : item[columnName]}
-                              </td>
-                            )
+                            ([columnName, displayName]) => {
+                              if (columnName === "worstMovedStock") {
+                                return (
+                                  <td>
+                                    <a
+                                      data-toggle="modal"
+                                      onClick={() => {
+                                        handleReportData(item[columnName]);
+                                      }}
+                                    >
+                                      {item[columnName]}
+                                    </a>
+                                  </td>
+                                );
+                              }
+                              return (
+                                <td key={`${columnName}-${index}`}>
+                                  {item[columnName] == "Infinity"
+                                    ? "-"
+                                    : item[columnName]}
+                                </td>
+                              );
+                            }
                           )}
                         </tr>
                       );
@@ -2066,7 +2194,22 @@ export default function Stocks() {
                   </tbody>
                 </table>
               </div>
-              <HightChart
+              <HightChartOZero
+                data={compareData?.worstFiveStocks?.map((item) => ({
+                  name: item["worstMovedStock"],
+                  y: parseFloat(item["percentageChangeDrop"]),
+                }))}
+                typeCheck={{
+                  categories: compareData?.worstFiveStocks?.map(
+                    (item) => item?.worstMovedStock
+                  ),
+                }}
+                title={"Ticker Performance"}
+                yAxisTitle={"Drop in %"}
+                titleAlign={"center"}
+                subTitle={"Worst Twenty"}
+              />
+              {/* <HightChart
                 data={compareData?.worstFiveStocks?.map((item) => [
                   item["worstMovedStock"],
                   parseFloat(item["percentageChangeDrop"]),
@@ -2081,7 +2224,7 @@ export default function Stocks() {
                 titleAlign={"center"}
                 subTitle={"Worst Twenty"}
                 chartType="column"
-              />
+              /> */}
             </>
           )}
         </div>
